@@ -1,6 +1,6 @@
 # Plan · Planilla de mediciones del productor (CSV: lluvia y temperatura)
 
-**Estado:** propuesta de Back 2 (Luca), 14/11. **Antes de implementar hace falta el OK de la persona 3**, porque cambia el alcance: el MVP 4.2 dice "carga a mano, sin subir archivo" (RF15) y deja "subir planillas" fuera de alcance. Si no se aprueba, o no entra antes del congelamiento, sigue andando la carga a mano que ya está en `dev`.
+**Estado:** aprobado por la persona 3 (14/11). Propuesta de Back 2 (Luca). Cambia el alcance del MVP 4.2, que decía "carga a mano, sin subir archivo" (RF15). Si no entra antes del congelamiento, sigue andando la carga a mano que ya está en `dev`.
 
 **Prioridades:** la **lluvia** es **Must** dentro de esta propuesta. Las **temperaturas** (mínima y máxima) son **Should**: columnas opcionales que se suman si hay tiempo. Si no entran, la planilla funciona solo con lluvia.
 

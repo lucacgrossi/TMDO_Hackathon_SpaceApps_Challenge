@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Fronteras entre dominios del back.
 
-Ningún archivo de `backend/app/{clima,satelite,motor}/` puede importar de otro de esos dominios.
+Ningún archivo de `backend/app/{clima,satelite,motor,mediciones}/` puede importar de otro de esos dominios.
 Solo puede importar de su propio dominio y de `app.api.contrato` (los tipos compartidos).
 Solo `app/servicio.py` y `app/api/` conectan dominios (por eso no se revisan acá).
 
@@ -16,7 +16,7 @@ import sys
 from pathlib import Path
 
 RAIZ = "backend"
-DOMINIOS = ("clima", "satelite", "motor")
+DOMINIOS = ("clima", "satelite", "motor", "mediciones")
 PERMITIDO_COMUN = "app.api.contrato"
 
 
