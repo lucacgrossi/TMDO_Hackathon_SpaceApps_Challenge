@@ -11,6 +11,7 @@ Objetivo: un MVP que funcione de punta a punta y se pueda demostrar. Si algo se 
 - [docs/plan-planilla-lluvia.md](docs/plan-planilla-lluvia.md): planilla CSV del productor (aprobada).
 - [docs/plan-armonizacion-capas.md](docs/plan-armonizacion-capas.md): capas del mapa sobre una grilla común (el back calcula, el front dibuja).
 - [frontend/CLAUDE.md](frontend/CLAUDE.md) y [frontend/DESIGN.md](frontend/DESIGN.md): front. [backend/DEPLOY.md](backend/DEPLOY.md): deploy. [.github/README.md](.github/README.md): CI. [backend/app/motor/README.md](backend/app/motor/README.md): motor de reglas.
+- [docs/api-frontend.md](docs/api-frontend.md): guía de la API para el front (rutas, parámetros, respuestas y errores).
 - **El contrato vigente de la API es el código:** `backend/app/api/contrato.py` (lo mantiene Back 1). El del MVP es solo un resumen.
 
 ## Qué es
