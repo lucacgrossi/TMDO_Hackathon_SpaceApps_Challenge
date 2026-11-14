@@ -1,0 +1,1363 @@
+{
+ "lote": {
+  "localidad_aprox": "a 17 km de Río Cuarto, Córdoba",
+  "area_ha": 95.0,
+  "pendiente_pct": {
+   "valor": 0.6,
+   "unidad": "%",
+   "fuente": "NASADEM · NASA, vía Planetary Computer",
+   "anios": "2000 (misión SRTM, reprocesada en NASADEM)",
+   "resolucion": "30 m",
+   "confianza": "alta",
+   "motivo": null,
+   "nota": "Plano ajustado sobre 1050 píxeles del lote"
+  },
+  "pendiente_maxima_pct": {
+   "valor": 1.8,
+   "unidad": "%",
+   "fuente": "NASADEM · NASA, vía Planetary Computer",
+   "anios": "2000 (misión SRTM, reprocesada en NASADEM)",
+   "resolucion": "30 m",
+   "confianza": "media",
+   "motivo": null,
+   "nota": "Percentil 95 de la pendiente por píxel (1050 píxeles); valor por píxel, ruidoso"
+  },
+  "cobertura_agricola_pct": {
+   "valor": 98.0,
+   "unidad": "%",
+   "fuente": "ESA WorldCover 2021 v200, vía Planetary Computer",
+   "anios": "2021",
+   "resolucion": "10 m",
+   "confianza": "alta",
+   "motivo": null,
+   "nota": "9310 de 9500 píxeles de 10 m dentro del lote son cultivo"
+  }
+ },
+ "visto_por_satelite": {
+  "campana": "2024/25",
+  "fuente": "NASA HLS 30 m + MODIS 250 m (respaldo en 1 de 12 meses)",
+  "meses": [
+   {
+    "mes": "2025-01",
+    "fecha": "2025-01-18",
+    "ndvi_medio": 0.71,
+    "nubes_escena": 4.0,
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2025-01-18",
+    "pixeles": 1050,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2025-02",
+    "fecha": "2025-02-12",
+    "ndvi_medio": 0.78,
+    "nubes_escena": 4.0,
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2025-02-12",
+    "pixeles": 1050,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2025-03",
+    "fecha": "2025-03-09",
+    "ndvi_medio": 0.69,
+    "nubes_escena": null,
+    "coleccion": "modis-13Q1-061",
+    "item": "MOCK-MOD13Q1-2025-03-09",
+    "pixeles": 15,
+    "fuente": "NASA MODIS MOD13Q1 · 250 m, compuesto de 16 días · respaldo: sin escena HLS con < 30 % de nubes. Mezcla el lote con los vecinos: con el umbral 0,3 marca menos meses que HLS"
+   },
+   {
+    "mes": "2025-04",
+    "fecha": "2025-04-15",
+    "ndvi_medio": 0.42,
+    "nubes_escena": 4.0,
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2025-04-15",
+    "pixeles": 1050,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2025-05",
+    "fecha": "2025-05-20",
+    "ndvi_medio": 0.24,
+    "nubes_escena": 4.0,
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2025-05-20",
+    "pixeles": 1050,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2025-06",
+    "fecha": "2025-06-14",
+    "ndvi_medio": 0.22,
+    "nubes_escena": 4.0,
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2025-06-14",
+    "pixeles": 1050,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2024-07",
+    "fecha": "2024-07-22",
+    "ndvi_medio": 0.26,
+    "nubes_escena": 4.0,
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2024-07-22",
+    "pixeles": 1050,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2024-08",
+    "fecha": "2024-08-16",
+    "ndvi_medio": 0.21,
+    "nubes_escena": 4.0,
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2024-08-16",
+    "pixeles": 1050,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2024-09",
+    "fecha": "2024-09-10",
+    "ndvi_medio": 0.19,
+    "nubes_escena": 4.0,
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2024-09-10",
+    "pixeles": 1050,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2024-10",
+    "fecha": "2024-10-28",
+    "ndvi_medio": 0.18,
+    "nubes_escena": 4.0,
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2024-10-28",
+    "pixeles": 1050,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   null,
+   {
+    "mes": "2024-12",
+    "fecha": "2024-12-17",
+    "ndvi_medio": 0.38,
+    "nubes_escena": 4.0,
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2024-12-17",
+    "pixeles": 1050,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   }
+  ],
+  "meses_ndvi_bajo": 6,
+  "meses_con_dato": 11,
+  "umbral": 0.3,
+  "confianza": "baja",
+  "motivo": "NDVI medio del lote < 0,3 en 6 de 11 meses con dato; faltan 1 meses (ver Información que falta); en los meses con MODIS el píxel de 250 m mezcla el lote con los vecinos",
+  "faltantes": [
+   {
+    "mes": "2024-11",
+    "motivo": "noviembre de 2024: sin escena HLS con < 30 % de nubes; MODIS de respaldo: sin compuesto con píxeles buenos"
+   }
+  ],
+  "orden_meses": "índice 0 = enero … 11 = diciembre; julio a diciembre del primer año de la campaña, enero a junio del segundo"
+ },
+ "indicadores": {
+  "lluvia_anual": {
+   "valor": 769,
+   "unidad": "mm/año",
+   "fuente": "NASA POWER mensual (comunidad AG)",
+   "anios": "1995/96–2024/25",
+   "resolucion": "~50 km (0,5° × 0,625°)",
+   "confianza": "media",
+   "motivo": null,
+   "nota": null
+  },
+  "et0_anual": {
+   "valor": 1235,
+   "unidad": "mm/año",
+   "fuente": "Hargreaves (FAO-56) con temperaturas de NASA POWER",
+   "anios": "1995/96–2024/25",
+   "resolucion": "~50 km (0,5° × 0,625°)",
+   "confianza": "media",
+   "motivo": null,
+   "nota": null
+  },
+  "balance_anual": {
+   "valor": -466,
+   "unidad": "mm/año",
+   "fuente": "NASA POWER − ET0 Hargreaves",
+   "anios": "1995/96–2024/25",
+   "resolucion": "~50 km (0,5° × 0,625°)",
+   "confianza": "media",
+   "motivo": null,
+   "nota": null
+  },
+  "et_real_anual": {
+   "valor": 690,
+   "unidad": "mm/año",
+   "fuente": "MODIS MOD16A3GF/MYD16A3GF v061 (Terra y Aqua) · NASA, vía Planetary Computer",
+   "anios": "2025",
+   "resolucion": "500 m",
+   "confianza": "media",
+   "motivo": null,
+   "nota": null
+  },
+  "meses_cobertura_baja": {
+   "valor": 6,
+   "unidad": "meses",
+   "fuente": "NASA HLS 30 m (Landsat + Sentinel-2) y MODIS MOD13Q1 250 m de respaldo en 1 mes, vía Planetary Computer",
+   "anios": "2024/25",
+   "resolucion": "30 m (250 m en 1 de 12 meses)",
+   "confianza": "baja",
+   "motivo": null,
+   "nota": "NDVI medio del lote < 0,3 en 6 de 11 meses con dato"
+  }
+ },
+ "contraste_mediciones": [],
+ "clima_celda": {
+  "bbox": [
+   -64.6875,
+   -33.25,
+   -64.0625,
+   -32.75
+  ],
+  "posicion_lote": "cerca del borde sur",
+  "resolucion": "~50 km (0,5° × 0,625°)"
+ },
+ "clima_mensual": {
+  "lluvia_mm": [
+   110.0,
+   100.0,
+   105.0,
+   60.0,
+   30.0,
+   12.0,
+   10.0,
+   12.0,
+   35.0,
+   80.0,
+   100.0,
+   115.0
+  ],
+  "minima_media_c": [
+   17.0,
+   16.0,
+   14.0,
+   10.0,
+   6.0,
+   3.0,
+   2.0,
+   4.0,
+   7.0,
+   10.0,
+   13.0,
+   16.0
+  ],
+  "maxima_media_c": [
+   31.0,
+   29.0,
+   27.0,
+   23.0,
+   19.0,
+   16.0,
+   16.0,
+   19.0,
+   21.0,
+   24.0,
+   27.0,
+   30.0
+  ],
+  "et0_mm": [
+   170.0,
+   135.0,
+   115.0,
+   80.0,
+   55.0,
+   40.0,
+   45.0,
+   65.0,
+   90.0,
+   120.0,
+   150.0,
+   170.0
+  ],
+  "balance_mm": [
+   -60.0,
+   -35.0,
+   -10.0,
+   -20.0,
+   -25.0,
+   -28.0,
+   -35.0,
+   -53.0,
+   -55.0,
+   -40.0,
+   -50.0,
+   -55.0
+  ],
+  "anios_con_helada": [
+   0,
+   0,
+   0,
+   2,
+   12,
+   25,
+   27,
+   22,
+   9,
+   1,
+   0,
+   0
+  ],
+  "anios_con_35c": [
+   20,
+   9,
+   2,
+   0,
+   0,
+   0,
+   0,
+   0,
+   0,
+   1,
+   6,
+   18
+  ],
+  "helada_frecuente": [
+   false,
+   false,
+   false,
+   false,
+   true,
+   true,
+   true,
+   true,
+   false,
+   false,
+   false,
+   false
+  ],
+  "n_anios": 30,
+  "periodo": "1995/96–2024/25",
+  "fuente": "NASA POWER mensual (comunidad AG)",
+  "resolucion": "~50 km (0,5° × 0,625°)"
+ },
+ "tipos_de_anio": {
+  "metodo": "terciles_balance",
+  "seco": [
+   "1995/96",
+   "1998/99",
+   "2001/02",
+   "2004/05",
+   "2007/08",
+   "2010/11",
+   "2013/14",
+   "2016/17",
+   "2019/20",
+   "2022/23"
+  ],
+  "normal": [
+   "1996/97",
+   "1999/00",
+   "2002/03",
+   "2005/06",
+   "2008/09",
+   "2011/12",
+   "2014/15",
+   "2017/18",
+   "2020/21",
+   "2023/24"
+  ],
+  "humedo": [
+   "1997/98",
+   "2000/01",
+   "2003/04",
+   "2006/07",
+   "2009/10",
+   "2012/13",
+   "2015/16",
+   "2018/19",
+   "2021/22",
+   "2024/25"
+  ],
+  "umbral_seco_mm": -420.0,
+  "umbral_humedo_mm": -240.0
+ },
+ "serie_anual": null,
+ "capas": {
+  "erosion": null,
+  "ndvi_mensual": [
+   {
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2025-01-18",
+    "fecha": "2025-01-18"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2025-02-12",
+    "fecha": "2025-02-12"
+   },
+   {
+    "coleccion": "modis-13Q1-061",
+    "item": "MOCK-MOD13Q1-2025-03-09",
+    "fecha": "2025-03-09"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2025-04-15",
+    "fecha": "2025-04-15"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2025-05-20",
+    "fecha": "2025-05-20"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2025-06-14",
+    "fecha": "2025-06-14"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2024-07-22",
+    "fecha": "2024-07-22"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2024-08-16",
+    "fecha": "2024-08-16"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2024-09-10",
+    "fecha": "2024-09-10"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2024-10-28",
+    "fecha": "2024-10-28"
+   },
+   null,
+   {
+    "coleccion": "hls2-s30",
+    "item": "MOCK-HLS-2024-12-17",
+    "fecha": "2024-12-17"
+   }
+  ],
+  "agua_regional_mensual": null,
+  "heladas_regional_mensual": null,
+  "no_disponibles": [
+   "erosion",
+   "agua_regional_mensual",
+   "heladas_regional_mensual"
+  ]
+ },
+ "estrategias": [
+  {
+   "id": "actual",
+   "nombre": "Lo que hacés hoy",
+   "especies": "Soja + barbecho",
+   "disponible": true,
+   "motivo_descarte": null,
+   "calendario": [
+    "soja",
+    "soja",
+    "soja",
+    "soja",
+    "barbecho",
+    "barbecho",
+    "barbecho",
+    "barbecho",
+    "barbecho",
+    "barbecho",
+    "soja",
+    "soja"
+   ],
+   "resumen": "Línea de base: 6 meses con el lote pelado.",
+   "valores": {
+    "agua_mm": -224,
+    "meses_cobertura_baja": 6,
+    "aporte_n": 5,
+    "rastrojo": 5,
+    "erosion": 48,
+    "ingreso": 50,
+    "conflictos_helada_calor": {
+     "meses_helada_frecuente": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "meses_conflicto_helada": [],
+     "meses_calor": [
+      0,
+      11
+     ]
+    }
+   },
+   "puntos": {
+    "agua": {
+     "seco": 21,
+     "normal": 53,
+     "humedo": 72
+    },
+    "suelo": 32,
+    "erosion": 48,
+    "ingreso": 50
+   },
+   "valores_por_tipo_anio": {
+    "seco": {
+     "agua_mm": -413,
+     "lluvia_mm": 569,
+     "uso_mm": 840,
+     "cercania": 38
+    },
+    "normal": {
+     "agua_mm": -224,
+     "lluvia_mm": 769,
+     "uso_mm": 800,
+     "cercania": 46
+    },
+    "humedo": {
+     "agua_mm": -34,
+     "lluvia_mm": 969,
+     "uso_mm": 760,
+     "cercania": 50
+    }
+   },
+   "diferencia_vs_actual": {
+    "agua": 0,
+    "suelo": 0,
+    "erosion": 0,
+    "ingreso": 0
+   },
+   "cercania": 46,
+   "cercania_objetivos": {
+    "agua": 53,
+    "suelo": 32,
+    "erosion": 48,
+    "ingreso": 50
+   },
+   "que_le_falta": [],
+   "sensible_clima": false,
+   "reglas_aplicadas": [
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 20.506515130214723
+     },
+     "dato": "Años secos: lluvia 569 mm, uso estimado 840 mm (kc × ET0), balance -413 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 53.202210663198954
+     },
+     "dato": "Años normals: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance -224 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 72.40444454765002
+     },
+     "dato": "Años humedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance -34 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "suelo_base",
+     "efecto": {
+      "suelo": 20.0
+     },
+     "dato": "Base de la regla"
+    },
+    {
+     "regla": "nitrogeno",
+     "efecto": {
+      "suelo": 5.0
+     },
+     "dato": "Soja fija nitrógeno · tabla de cultivos"
+    },
+    {
+     "regla": "rastrojo",
+     "efecto": {
+      "suelo": 5.0
+     },
+     "dato": "Soja deja rastrojo (5) · tabla de cultivos"
+    },
+    {
+     "regla": "meses_cubiertos",
+     "efecto": {
+      "suelo": 12.0
+     },
+     "dato": "6 meses con cultivo vivo · calendario"
+    },
+    {
+     "regla": "repite_cultivo",
+     "efecto": {
+      "suelo": -10.0
+     },
+     "dato": "Repite soja de la campaña pasada"
+    },
+    {
+     "regla": "erosion_base",
+     "efecto": {
+      "erosion": 100.0
+     },
+     "dato": "Base de la regla"
+    },
+    {
+     "regla": "meses_pelados",
+     "efecto": {
+      "erosion": -51.839999999999996
+     },
+     "dato": "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM"
+    },
+    {
+     "regla": "ingreso",
+     "efecto": {
+      "ingreso": 50.0
+     },
+     "dato": "Cultivos que se venden: Soja · sin precios"
+    }
+   ],
+   "probabilidades": [
+    {
+     "evento": "helada",
+     "mes": 10,
+     "cultivo": "soja",
+     "anios": 1,
+     "de": 30,
+     "pct": 3,
+     "texto": "Helada en noviembre con soja en el lote: 1 de 30 años (3 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    },
+    {
+     "evento": "siembra_seca",
+     "mes": 10,
+     "cultivo": "soja",
+     "anios": 4,
+     "de": 30,
+     "pct": 13,
+     "texto": "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    },
+    {
+     "evento": "calor",
+     "mes": 0,
+     "cultivo": "soja",
+     "anios": 20,
+     "de": 30,
+     "pct": 67,
+     "texto": "Máxima de 35 °C o más en enero con soja: 20 de 30 años (67 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    }
+   ],
+   "por_que": [
+    "6 meses con el lote pelado"
+   ],
+   "evidencia": [
+    "Años humedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance -34 mm · NASA POWER, 10 campañas",
+    "Años normals: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance -224 mm · NASA POWER, 10 campañas",
+    "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM",
+    "Cultivos que se venden: Soja · sin precios"
+   ],
+   "beneficios": [],
+   "vacios": [
+    "Precios",
+    "Materia orgánica"
+   ],
+   "riesgos": [
+    "Poca reserva de agua en años secos",
+    "Repite el cultivo de la campaña pasada",
+    "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)"
+   ]
+  },
+  {
+   "id": "A",
+   "nombre": "Cobertura de invierno",
+   "especies": "Soja + vicia",
+   "disponible": true,
+   "motivo_descarte": null,
+   "calendario": [
+    "soja",
+    "soja",
+    "soja",
+    "soja",
+    "vicia",
+    "vicia",
+    "vicia",
+    "vicia",
+    "vicia",
+    "barbecho",
+    "soja",
+    "soja"
+   ],
+   "resumen": "Gana en suelo y erosión; pierde en agua; cuesta ~124 mm en años secos.",
+   "valores": {
+    "agua_mm": -342,
+    "meses_cobertura_baja": 1,
+    "aporte_n": 35,
+    "rastrojo": 20,
+    "erosion": 91,
+    "ingreso": 45,
+    "conflictos_helada_calor": {
+     "meses_helada_frecuente": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "meses_conflicto_helada": [],
+     "meses_calor": [
+      0,
+      11
+     ]
+    }
+   },
+   "puntos": {
+    "agua": {
+     "seco": 4,
+     "normal": 42,
+     "humedo": 64
+    },
+    "suelo": 87,
+    "erosion": 91,
+    "ingreso": 45
+   },
+   "valores_por_tipo_anio": {
+    "seco": {
+     "agua_mm": -537,
+     "lluvia_mm": 569,
+     "uso_mm": 964,
+     "cercania": 57
+    },
+    "normal": {
+     "agua_mm": -342,
+     "lluvia_mm": 769,
+     "uso_mm": 918,
+     "cercania": 66
+    },
+    "humedo": {
+     "agua_mm": -146,
+     "lluvia_mm": 969,
+     "uso_mm": 872,
+     "cercania": 72
+    }
+   },
+   "diferencia_vs_actual": {
+    "agua": -11,
+    "suelo": 55,
+    "erosion": 43,
+    "ingreso": -5
+   },
+   "cercania": 66,
+   "cercania_objetivos": {
+    "agua": 42,
+    "suelo": 87,
+    "erosion": 91,
+    "ingreso": 45
+   },
+   "que_le_falta": [],
+   "sensible_clima": true,
+   "reglas_aplicadas": [
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 4.176954099743412
+     },
+     "dato": "Años secos: lluvia 569 mm, uso estimado 964 mm (kc × ET0), balance -537 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 41.69375812743823
+     },
+     "dato": "Años normals: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance -342 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 63.727436683385974
+     },
+     "dato": "Años humedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance -146 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "suelo_base",
+     "efecto": {
+      "suelo": 20.0
+     },
+     "dato": "Base de la regla"
+    },
+    {
+     "regla": "nitrogeno",
+     "efecto": {
+      "suelo": 5.0
+     },
+     "dato": "Soja fija nitrógeno · tabla de cultivos"
+    },
+    {
+     "regla": "rastrojo",
+     "efecto": {
+      "suelo": 5.0
+     },
+     "dato": "Soja deja rastrojo (5) · tabla de cultivos"
+    },
+    {
+     "regla": "nitrogeno",
+     "efecto": {
+      "suelo": 30.0
+     },
+     "dato": "Vicia fija nitrógeno · tabla de cultivos"
+    },
+    {
+     "regla": "rastrojo",
+     "efecto": {
+      "suelo": 15.0
+     },
+     "dato": "Vicia deja rastrojo (15) · tabla de cultivos"
+    },
+    {
+     "regla": "meses_cubiertos",
+     "efecto": {
+      "suelo": 22.0
+     },
+     "dato": "11 meses con cultivo vivo · calendario"
+    },
+    {
+     "regla": "repite_cultivo",
+     "efecto": {
+      "suelo": -10.0
+     },
+     "dato": "Repite soja de la campaña pasada"
+    },
+    {
+     "regla": "erosion_base",
+     "efecto": {
+      "erosion": 100.0
+     },
+     "dato": "Base de la regla"
+    },
+    {
+     "regla": "meses_pelados",
+     "efecto": {
+      "erosion": -8.64
+     },
+     "dato": "1 meses pelados (oct) con pendiente 0.6 % · SRTM"
+    },
+    {
+     "regla": "ingreso",
+     "efecto": {
+      "ingreso": 45.0
+     },
+     "dato": "Cultivos que se venden: Soja · sin precios"
+    }
+   ],
+   "probabilidades": [
+    {
+     "evento": "siembra_seca",
+     "mes": 4,
+     "cultivo": "vicia",
+     "anios": 14,
+     "de": 30,
+     "pct": 47,
+     "texto": "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    },
+    {
+     "evento": "siembra_seca",
+     "mes": 10,
+     "cultivo": "soja",
+     "anios": 4,
+     "de": 30,
+     "pct": 13,
+     "texto": "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    },
+    {
+     "evento": "calor",
+     "mes": 0,
+     "cultivo": "soja",
+     "anios": 20,
+     "de": 30,
+     "pct": 67,
+     "texto": "Máxima de 35 °C o más en enero con soja: 20 de 30 años (67 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    }
+   ],
+   "por_que": [
+    "Cubre el suelo 11 meses",
+    "La vicia fija nitrógeno"
+   ],
+   "evidencia": [
+    "Años humedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance -146 mm · NASA POWER, 10 campañas",
+    "Cultivos que se venden: Soja · sin precios",
+    "Años normals: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance -342 mm · NASA POWER, 10 campañas",
+    "Vicia fija nitrógeno · tabla de cultivos"
+   ],
+   "beneficios": [
+    "5 meses más de cobertura que hoy",
+    "Suelo: +55 puntos frente a hoy",
+    "Erosión: +43 puntos frente a hoy"
+   ],
+   "vacios": [
+    "Precios",
+    "Materia orgánica"
+   ],
+   "riesgos": [
+    "Poca reserva de agua en años secos",
+    "Repite el cultivo de la campaña pasada",
+    "Secado ~30 días antes de la siembra",
+    "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)",
+    "El resultado cambia mucho entre años secos y húmedos: sensible al clima"
+   ]
+  },
+  {
+   "id": "B",
+   "nombre": "Cultivo de invierno",
+   "especies": "Trigo + soja 2ª",
+   "disponible": true,
+   "motivo_descarte": null,
+   "calendario": [
+    "soja2",
+    "soja2",
+    "soja2",
+    "soja2",
+    "barbecho",
+    "trigo",
+    "trigo",
+    "trigo",
+    "trigo",
+    "trigo",
+    "trigo",
+    "soja2"
+   ],
+   "resumen": "Gana en suelo, erosión y ingreso; cuesta ~53 mm en años secos.",
+   "valores": {
+    "agua_mm": -274,
+    "meses_cobertura_baja": 1,
+    "aporte_n": 5,
+    "rastrojo": 25,
+    "erosion": 91,
+    "ingreso": 85,
+    "conflictos_helada_calor": {
+     "meses_helada_frecuente": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "meses_conflicto_helada": [],
+     "meses_calor": [
+      0,
+      11
+     ]
+    }
+   },
+   "puntos": {
+    "agua": {
+     "seco": 14,
+     "normal": 48,
+     "humedo": 69
+    },
+    "suelo": 62,
+    "erosion": 91,
+    "ingreso": 85
+   },
+   "valores_por_tipo_anio": {
+    "seco": {
+     "agua_mm": -466,
+     "lluvia_mm": 569,
+     "uso_mm": 893,
+     "cercania": 63
+    },
+    "normal": {
+     "agua_mm": -274,
+     "lluvia_mm": 769,
+     "uso_mm": 850,
+     "cercania": 72
+    },
+    "humedo": {
+     "agua_mm": -81,
+     "lluvia_mm": 969,
+     "uso_mm": 808,
+     "cercania": 77
+    }
+   },
+   "diferencia_vs_actual": {
+    "agua": -5,
+    "suelo": 30,
+    "erosion": 43,
+    "ingreso": 35
+   },
+   "cercania": 72,
+   "cercania_objetivos": {
+    "agua": 48,
+    "suelo": 62,
+    "erosion": 91,
+    "ingreso": 85
+   },
+   "que_le_falta": [],
+   "sensible_clima": false,
+   "reglas_aplicadas": [
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 13.587209608828573
+     },
+     "dato": "Años secos: lluvia 569 mm, uso estimado 893 mm (kc × ET0), balance -466 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 48.325747724317296
+     },
+     "dato": "Años normals: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance -274 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 68.7277463000805
+     },
+     "dato": "Años humedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance -81 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "suelo_base",
+     "efecto": {
+      "suelo": 20.0
+     },
+     "dato": "Base de la regla"
+    },
+    {
+     "regla": "nitrogeno",
+     "efecto": {
+      "suelo": 5.0
+     },
+     "dato": "Soja 2ª fija nitrógeno · tabla de cultivos"
+    },
+    {
+     "regla": "rastrojo",
+     "efecto": {
+      "suelo": 5.0
+     },
+     "dato": "Soja 2ª deja rastrojo (5) · tabla de cultivos"
+    },
+    {
+     "regla": "rastrojo",
+     "efecto": {
+      "suelo": 20.0
+     },
+     "dato": "Trigo deja rastrojo (20) · tabla de cultivos"
+    },
+    {
+     "regla": "meses_cubiertos",
+     "efecto": {
+      "suelo": 22.0
+     },
+     "dato": "11 meses con cultivo vivo · calendario"
+    },
+    {
+     "regla": "repite_cultivo",
+     "efecto": {
+      "suelo": -10.0
+     },
+     "dato": "Repite soja de la campaña pasada"
+    },
+    {
+     "regla": "erosion_base",
+     "efecto": {
+      "erosion": 100.0
+     },
+     "dato": "Base de la regla"
+    },
+    {
+     "regla": "meses_pelados",
+     "efecto": {
+      "erosion": -8.64
+     },
+     "dato": "1 meses pelados (may) con pendiente 0.6 % · SRTM"
+    },
+    {
+     "regla": "ingreso",
+     "efecto": {
+      "ingreso": 85.0
+     },
+     "dato": "Cultivos que se venden: Soja 2ª, Trigo · sin precios"
+    }
+   ],
+   "probabilidades": [
+    {
+     "evento": "siembra_seca",
+     "mes": 5,
+     "cultivo": "trigo",
+     "anios": 13,
+     "de": 30,
+     "pct": 43,
+     "texto": "Siembra de trigo (junio) con menos de la mitad de la lluvia normal: 13 de 30 años (43 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    },
+    {
+     "evento": "siembra_seca",
+     "mes": 11,
+     "cultivo": "soja2",
+     "anios": 3,
+     "de": 30,
+     "pct": 10,
+     "texto": "Siembra de soja 2ª (diciembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    },
+    {
+     "evento": "calor",
+     "mes": 0,
+     "cultivo": "soja2",
+     "anios": 20,
+     "de": 30,
+     "pct": 67,
+     "texto": "Máxima de 35 °C o más en enero con soja 2ª: 20 de 30 años (67 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    }
+   ],
+   "por_que": [
+    "Suma un cultivo que se vende en invierno"
+   ],
+   "evidencia": [
+    "Cultivos que se venden: Soja 2ª, Trigo · sin precios",
+    "Años humedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance -81 mm · NASA POWER, 10 campañas",
+    "Años normals: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance -274 mm · NASA POWER, 10 campañas",
+    "11 meses con cultivo vivo · calendario"
+   ],
+   "beneficios": [
+    "5 meses más de cobertura que hoy",
+    "Suelo: +30 puntos frente a hoy",
+    "Erosión: +43 puntos frente a hoy",
+    "Ingreso: +35 puntos frente a hoy"
+   ],
+   "vacios": [
+    "Precios",
+    "Materia orgánica"
+   ],
+   "riesgos": [
+    "Poca reserva de agua en años secos",
+    "Repite el cultivo de la campaña pasada",
+    "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)"
+   ]
+  },
+  {
+   "id": "C",
+   "nombre": "Diversificar el verano",
+   "especies": "Sorgo, rota con soja",
+   "disponible": true,
+   "motivo_descarte": null,
+   "calendario": [
+    "sorgo",
+    "sorgo",
+    "sorgo",
+    "sorgo",
+    "barbecho",
+    "barbecho",
+    "barbecho",
+    "barbecho",
+    "barbecho",
+    "barbecho",
+    "sorgo",
+    "sorgo"
+   ],
+   "resumen": "Gana en agua, suelo y erosión.",
+   "valores": {
+    "agua_mm": -18,
+    "meses_cobertura_baja": 6,
+    "aporte_n": 0,
+    "rastrojo": 30,
+    "erosion": 68,
+    "ingreso": 50,
+    "conflictos_helada_calor": {
+     "meses_helada_frecuente": [
+      4,
+      5,
+      6,
+      7
+     ],
+     "meses_conflicto_helada": [],
+     "meses_calor": [
+      0,
+      11
+     ]
+    }
+   },
+   "puntos": {
+    "agua": {
+     "seco": 49,
+     "normal": 73,
+     "humedo": 87
+    },
+    "suelo": 62,
+    "erosion": 68,
+    "ingreso": 50
+   },
+   "valores_por_tipo_anio": {
+    "seco": {
+     "agua_mm": -198,
+     "lluvia_mm": 569,
+     "uso_mm": 625,
+     "cercania": 57
+    },
+    "normal": {
+     "agua_mm": -18,
+     "lluvia_mm": 769,
+     "uso_mm": 595,
+     "cercania": 63
+    },
+    "humedo": {
+     "agua_mm": 161,
+     "lluvia_mm": 969,
+     "uso_mm": 565,
+     "cercania": 67
+    }
+   },
+   "diferencia_vs_actual": {
+    "agua": 20,
+    "suelo": 30,
+    "erosion": 20,
+    "ingreso": 0
+   },
+   "cercania": 63,
+   "cercania_objetivos": {
+    "agua": 73,
+    "suelo": 62,
+    "erosion": 68,
+    "ingreso": 50
+   },
+   "que_le_falta": [],
+   "sensible_clima": false,
+   "reglas_aplicadas": [
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 48.87566776789792
+     },
+     "dato": "Años secos: lluvia 569 mm, uso estimado 625 mm (kc × ET0), balance -198 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 73.19570871261378
+     },
+     "dato": "Años normals: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance -18 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "agua",
+     "efecto": {
+      "agua": 87.478907362685
+     },
+     "dato": "Años humedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas"
+    },
+    {
+     "regla": "suelo_base",
+     "efecto": {
+      "suelo": 20.0
+     },
+     "dato": "Base de la regla"
+    },
+    {
+     "regla": "rastrojo",
+     "efecto": {
+      "suelo": 30.0
+     },
+     "dato": "Sorgo deja rastrojo (30) · tabla de cultivos"
+    },
+    {
+     "regla": "meses_cubiertos",
+     "efecto": {
+      "suelo": 12.0
+     },
+     "dato": "6 meses con cultivo vivo · calendario"
+    },
+    {
+     "regla": "erosion_base",
+     "efecto": {
+      "erosion": 100.0
+     },
+     "dato": "Base de la regla"
+    },
+    {
+     "regla": "meses_pelados",
+     "efecto": {
+      "erosion": -51.839999999999996
+     },
+     "dato": "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM"
+    },
+    {
+     "regla": "rastrojo_protege",
+     "efecto": {
+      "erosion": 20.0
+     },
+     "dato": "Rastrojo total 30 (≥ 30) · tabla de cultivos"
+    },
+    {
+     "regla": "ingreso",
+     "efecto": {
+      "ingreso": 50.0
+     },
+     "dato": "Cultivos que se venden: Sorgo · sin precios"
+    }
+   ],
+   "probabilidades": [
+    {
+     "evento": "siembra_seca",
+     "mes": 10,
+     "cultivo": "sorgo",
+     "anios": 4,
+     "de": 30,
+     "pct": 13,
+     "texto": "Siembra de sorgo (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    },
+    {
+     "evento": "calor",
+     "mes": 0,
+     "cultivo": "sorgo",
+     "anios": 20,
+     "de": 30,
+     "pct": 67,
+     "texto": "Máxima de 35 °C o más en enero con sorgo: 20 de 30 años (67 %)",
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25"
+    }
+   ],
+   "por_que": [
+    "Sorgo corta el ciclo de plagas y tolera la sequía"
+   ],
+   "evidencia": [
+    "Años humedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas",
+    "Años normals: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance -18 mm · NASA POWER, 10 campañas",
+    "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM",
+    "Cultivos que se venden: Sorgo · sin precios"
+   ],
+   "beneficios": [
+    "+215 mm de balance de agua en años secos",
+    "Agua: +20 puntos frente a hoy",
+    "Suelo: +30 puntos frente a hoy",
+    "Erosión: +20 puntos frente a hoy"
+   ],
+   "vacios": [
+    "Precios",
+    "Materia orgánica"
+   ],
+   "riesgos": [
+    "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)"
+   ]
+  }
+ ],
+ "choque": {
+  "hay": false,
+  "objetivos": [],
+  "texto": ""
+ },
+ "periodo_clima": "1995/96–2024/25",
+ "informacion_falta": [
+  "Respuesta de prueba (mock): valores ilustrativos, no son datos de NASA",
+  "NDVI de noviembre de 2024: sin escena HLS limpia ni compuesto MODIS",
+  "Capa de erosión",
+  "Serie por campaña"
+ ],
+ "aviso": "Herramienta de apoyo: no reemplaza el criterio del productor ni del agrónomo.",
+ "es_mock": true
+}

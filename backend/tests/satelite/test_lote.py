@@ -30,6 +30,15 @@ def test_lote_en_l_es_valido_y_mas_chico():
     assert r["ok"] and r["area_ha"] < lote.validar(LOTE_EJEMPLO)["area_ha"]
 
 
+def test_mascara_en_l():
+    import numpy as np
+    l = _poligono([[0, 0], [2, 0], [2, 1], [1, 1], [1, 2], [0, 2]])
+    lons = np.array([0.5, 1.5])
+    lats = np.array([1.5, 0.5])                 # filas de norte a sur
+    m = lote.mascara(l, lons, lats)
+    assert m.tolist() == [[True, False], [True, True]]
+
+
 def test_lineas_cruzadas():
     mono = _poligono([[-64.2381, -33.2436], [-64.2268, -33.2517], [-64.2268, -33.2436], [-64.2381, -33.2517]])
     r = lote.validar(mono)
