@@ -1,0 +1,5 @@
+-r requirements.txt
+pytest
+# CI: lint y tests sin red (.github/workflows/backend.yml)
+ruff>=0.6
+pytest-socket>=0.7
