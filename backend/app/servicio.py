@@ -14,6 +14,8 @@
 4. Motor de reglas (persona 3): `reglas.analizar` + `plantillas.armar`, traducido a los nombres
    del contrato. Si `app.motor` todavía no está en el código, un stub devuelve las 4 columnas
    fijas sin puntajes y lo dice en "Información que falta".
+5. Probabilidad climatológica (RF25): `clima.probabilidad` con el calendario de cada columna
+   disponible y el catálogo de `app.motor.cultivos` (clima no puede importar motor).
 
 No usa FastAPI: lo llaman la ruta y `scripts/precalcular_demo.py` (Back 2), así el JSON de la
 demo sale del mismo código que la API.
@@ -41,11 +43,13 @@ from app.api.contrato import (
     Indicador,
     LoteSalida,
     MesSatelite,
+    Probabilidad,
     Salida,
     VistoPorSatelite,
 )
 from app.clima import indicadores as clima_indicadores
 from app.clima import power
+from app.clima import probabilidad as clima_probabilidad
 from app.satelite import cobertura, elevacion, et, lote, ndvi
 
 log = logging.getLogger("fieldshift.servicio")
@@ -55,6 +59,7 @@ TIPOS = ("seco", "normal", "humedo")
 OBJETIVOS = ("agua", "suelo", "erosion", "ingreso")
 MENSAJE_POWER_CAIDO = "NASA POWER no responde, probá de nuevo en unos segundos."
 MOTOR_PENDIENTE = "Motor de reglas pendiente: las columnas todavía no tienen puntajes"
+PROBABILIDAD_SIN_CULTIVOS = "Probabilidad climatológica: falta el catálogo de cultivos del motor"
 
 
 class ErrorServicio(Exception):
@@ -181,6 +186,35 @@ def _cargar_motor() -> tuple[ModuleType, ModuleType] | None:
         return None
 
 
+def _cargar_cultivos() -> dict[str, dict] | None:
+    """Catálogo de cultivos de `app.motor.cultivos` con lo que pide `clima.probabilidad`.
+
+    Lo arma el servicio porque `clima/` no puede importar `motor/`. None si el motor no está.
+    """
+    try:
+        c = importlib.import_module("app.motor.cultivos").C
+        return {
+            clave: {"nombre": d["nombre"], "grupo": d["grupo"], "tolera_helada": bool(d["tolera_helada"])}
+            for clave, d in c.items()
+        }
+    except Exception:  # noqa: BLE001 — sin catálogo: columnas sin probabilidades + motivo
+        return None
+
+
+def _probabilidades(
+    lista: list[dict], clima: clima_indicadores.ResultadoClima, cultivos: dict[str, dict] | None
+) -> dict[str, list[Probabilidad]]:
+    """RF25 por columna disponible, según su calendario y el de la rotación actual."""
+    if not cultivos:
+        return {}
+    cal_actual = lista[0].get("calendario") or []
+    return {
+        s["id"]: clima_probabilidad.probabilidades(s["calendario"], cultivos, clima, cal_actual)
+        for s in lista
+        if s.get("on") and s.get("calendario")
+    }
+
+
 def _entradas_motor(entrada: Entrada) -> dict:
     return {
         "verano": entrada.cultivo_verano,
@@ -259,7 +293,9 @@ def _puntos_normal(s: dict) -> dict[str, int]:
     return {"agua": s["agua_por_tipo"]["normal"], "suelo": s["suelo"], "erosion": s["erosion"], "ingreso": s["ingreso"]}
 
 
-def _estrategia(s: dict, actual: dict, vacios_back: list[str]) -> Estrategia:
+def _estrategia(
+    s: dict, actual: dict, vacios_back: list[str], probabilidades: list[Probabilidad] | None = None
+) -> Estrategia:
     """Traduce una columna del motor a `Estrategia` del contrato."""
     vacios = list(dict.fromkeys([*s.get("falta", []), *vacios_back]))
     base = {
@@ -271,6 +307,7 @@ def _estrategia(s: dict, actual: dict, vacios_back: list[str]) -> Estrategia:
         "calendario": s.get("calendario"),
         "resumen": s.get("resumen", ""),
         "vacios": vacios,
+        "probabilidades": probabilidades or [],
     }
     if not s["on"] or "agua_por_tipo" not in s:
         return Estrategia(**base)
@@ -444,16 +481,19 @@ def _armar_salida(
         faltan.append("Calendario cargado a mano: las columnas usan el calendario de la rotación elegida")
 
     resultado = _correr_motor(entrada, _indicadores_motor(clima, pendiente.valor, visto))
+    lista = resultado["estrategias"]
     if resultado.get("stub"):
-        faltan.append(resultado["estrategias"][0]["falta"][0])
+        faltan.append(lista[0]["falta"][0])
+    cultivos = _cargar_cultivos()
+    if cultivos is None and not resultado.get("stub"):
+        faltan.append(PROBABILIDAD_SIN_CULTIVOS)
+    probs = _probabilidades(lista, clima, cultivos)
     vacios_back = list(dict.fromkeys(faltan))
 
-    lista = resultado["estrategias"]
-    estrategias = [_estrategia(s, lista[0], vacios_back) for s in lista]
+    estrategias = [_estrategia(s, lista[0], vacios_back, probs.get(s["id"])) for s in lista]
     ch = resultado.get("choque") or {}
 
     faltan += [
-        "Probabilidad climatológica por estrategia: en preparación",
         "Serie por campaña",
         "Capa de erosión",
     ]

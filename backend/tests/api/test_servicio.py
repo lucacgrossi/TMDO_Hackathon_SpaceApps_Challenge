@@ -304,6 +304,65 @@ def test_traduce_el_motor_al_contrato(monkeypatch):
     assert servicio.MOTOR_PENDIENTE not in s.informacion_falta
 
 
+# --- Probabilidad climatológica por columna (RF25) ---------------------------
+
+CULTIVOS = {
+    "soja": {"nombre": "Soja", "grupo": "verano", "tolera_helada": False, "kc": 0.9},
+    "barbecho": {"nombre": "Barbecho", "grupo": "barbecho", "tolera_helada": True, "kc": 0.15},
+}
+CULTIVOS_CLIMA = {k: {c: d[c] for c in ("nombre", "grupo", "tolera_helada")} for k, d in CULTIVOS.items()}
+
+
+def test_probabilidades_por_columna(monkeypatch):
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado({}))
+    monkeypatch.setattr(servicio, "_cargar_cultivos", lambda: CULTIVOS_CLIMA)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    actual, a, c = s.estrategias[0], s.estrategias[1], s.estrategias[3]
+    m = s.clima_mensual
+
+    # Actual: soja de septiembre a marzo → helada en septiembre (el único mes con soja y helada).
+    assert [p.evento for p in actual.probabilidades] == ["helada", "siembra_seca", "calor"]
+    h = actual.probabilidades[0]
+    k = m.anios_con_helada[8]
+    assert (h.mes, h.cultivo, h.anios, h.de) == (8, "soja", k, 30)
+    assert h.texto == f"Helada en septiembre con soja en el lote: {k} de 30 años ({round(k / 30 * 100)} %)"
+    assert h.fuente.endswith(s.periodo_clima)
+    assert actual.probabilidades[2].texto.startswith("Máxima de 35 °C o más en enero con soja: ")
+
+    # A: soja de mayo a marzo (1 mes de barbecho) → la siembra cae en mayo.
+    assert [(p.evento, p.mes) for p in a.probabilidades if p.evento == "siembra_seca"] == [("siembra_seca", 4)]
+    assert c.probabilidades == []  # descartada: sin calendario
+    assert not any("Probabilidad climatológica" in f for f in s.informacion_falta)
+
+
+def test_cargar_cultivos_sin_motor_da_none(monkeypatch):
+    def falta(nombre):
+        raise ImportError(nombre)
+
+    monkeypatch.setattr(servicio.importlib, "import_module", falta)
+    assert servicio._cargar_cultivos() is None
+
+
+def test_cargar_cultivos_toma_solo_lo_que_pide_clima(monkeypatch):
+    monkeypatch.setattr(servicio.importlib, "import_module", lambda nombre: SimpleNamespace(C=CULTIVOS))
+    assert servicio._cargar_cultivos() == CULTIVOS_CLIMA
+
+
+def test_motor_sin_catalogo_de_cultivos_lo_dice(monkeypatch):
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado({}))
+    monkeypatch.setattr(servicio, "_cargar_cultivos", lambda: None)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert all(e.probabilidades == [] for e in s.estrategias)
+    assert servicio.PROBABILIDAD_SIN_CULTIVOS in s.informacion_falta
+
+
+def test_stub_sin_probabilidades_y_sin_aviso_extra(monkeypatch):
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: None)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert all(e.probabilidades == [] for e in s.estrategias)
+    assert servicio.PROBABILIDAD_SIN_CULTIVOS not in s.informacion_falta
+
+
 # --- Campaña del NDVI = última campaña de POWER -----------------------------
 
 
