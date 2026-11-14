@@ -30,6 +30,7 @@ Correr desde backend/:  py -m app.clima.correccion
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass, field
 from typing import Literal
 
@@ -274,7 +275,16 @@ def _lluvia_planilla(meses: list[MedicionMes], pisa_manual: bool, clima: Resulta
 
 MESES = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
          "septiembre", "octubre", "noviembre", "diciembre")
-DIFERENCIA_CAMPANAS = 2  # 2 campañas o más de diferencia en un mes (con n ≥ 5) → confianza baja
+FRACCION_DIFERENCIA = 1 / 3  # diferencia de 1 de cada 3 campañas en común (mínimo 1) → confianza baja
+
+
+def umbral_diferencia(n: int) -> int:
+    """Campañas de diferencia, en un mes, a partir de las que estación y NASA "difieren".
+
+    Decidido 14/11: el mismo criterio que la helada frecuente de `indicadores.py` (1 de cada 3 años),
+    para que funcione desde 1 campaña en común como el motor. Con 6 campañas da 2 (lo del plan).
+    """
+    return max(1, math.ceil(n * FRACCION_DIFERENCIA))
 
 
 @dataclass(frozen=True)
@@ -311,7 +321,7 @@ def _temperatura(ev: _Evento, meses: list[MedicionMes], clima: ResultadoClima, s
         return
 
     n = len(comunes)
-    pocos = n < MIN_ANIOS_REGISTRO
+    umbral = umbral_diferencia(n)
     peor: tuple[int, int, int] | None = None  # (mes, productor, nasa) con la mayor diferencia
     for m in range(12):
         p = [bool(ev.ocurre(prod[c][m])) for c in comunes]
@@ -319,13 +329,12 @@ def _temperatura(ev: _Evento, meses: list[MedicionMes], clima: ResultadoClima, s
         pk, nk = sum(p), sum(q)
         if pk == 0 and nk == 0:
             continue
-        difieren = abs(pk - nk) >= DIFERENCIA_CAMPANAS
-        nota = f" · pocos años en común con NASA ({n}, menos de {MIN_ANIOS_REGISTRO})" if pocos else ""
+        difieren = abs(pk - nk) >= umbral
         salida.contraste.append(ContrasteMedicion(
             indicador=ev.clave, valor_productor=pk, valor_nasa=nk, unidad=ev.unidad, diferencia_pct=None,
-            confianza_resultante="baja" if pocos or difieren else "alta", corregido_al_lado=None, mes=m,
+            confianza_resultante="baja" if difieren else "alta", corregido_al_lado=None, mes=m,
             texto=(f"{ev.nombre} en {MESES[m]}: tu estación, {pk} de {n} campañas · NASA en las mismas campañas, "
-                   f"{nk} de {n}{nota}"),
+                   f"{nk} de {n}"),
             campanas_comparadas=comunes,
             detalle_campanas=[DetalleCampana(campana=c, productor=int(a), nasa=int(b), diferencia=int(a) - int(b))
                               for c, a, b in zip(comunes, p, q)],
@@ -333,14 +342,9 @@ def _temperatura(ev: _Evento, meses: list[MedicionMes], clima: ResultadoClima, s
         salida.lineas_probabilidad[(ev.clave, m)] = (
             f"Tu estación: {'helada' if ev.clave == 'helada' else 'máxima de 35 °C o más'} en {MESES[m]} en "
             f"{pk} de {n} campañas (NASA en las mismas: {nk} de {n})")
-        if not pocos and difieren and (peor is None or abs(pk - nk) > abs(peor[1] - peor[2])):
+        if difieren and (peor is None or abs(pk - nk) > abs(peor[1] - peor[2])):
             peor = (m, pk, nk)
 
-    if pocos:
-        salida.riesgos.append(f"Tu planilla tiene {n} {'campaña' if n == 1 else 'campañas'} de temperatura en común "
-                              f"con NASA (menos de {MIN_ANIOS_REGISTRO}): el contraste de {ev.clave} tiene confianza "
-                              "baja")
-        return
     if peor is None:
         return
     m, pk, nk = peor
@@ -349,8 +353,8 @@ def _temperatura(ev: _Evento, meses: list[MedicionMes], clima: ResultadoClima, s
         quien = "Tu estación registra heladas que NASA POWER no ve" if pk > nk else \
             "NASA POWER registra heladas que tu estación no"
         salida.confianza_helada = "baja"
-        salida.motivo_helada = (f"{quien} ({detalle}): confianza baja en heladas. No cambia ningún puntaje ni "
-                                "probabilidad")
+        salida.motivo_helada = (f"{quien} ({detalle}): confianza baja en heladas. No cambia la "
+                                "probabilidad, que sale de las 30 campañas de NASA")
         salida.riesgos.append(f"{quien} ({detalle}): revisar fechas de siembra con datos locales")
     else:
         quien = "Tu estación registra más días de 35 °C o más que NASA POWER" if pk > nk else \

@@ -64,14 +64,29 @@ def test_heladas_que_nasa_no_ve_bajan_la_confianza_y_suman_un_riesgo(clima):
     assert r.lineas_probabilidad[("helada", MAYO)].startswith("Tu estación: helada en mayo en ")
 
 
-def test_menos_de_5_campanas_fila_baja_sin_tocar_nasa(clima):
-    libres = _sin_helada_nasa_en_mayo(clima)
-    tres = SEIS[:3]
-    cambios = {(c, MAYO): -3.0 for c in libres if c in tres}
-    r = corr.contrastar(MedicionesPropias(serie_mensual=_estacion(clima, tres, cambios)), clima)
-    assert all(c.confianza_resultante == "baja" for c in r.contraste if c.indicador == "helada")
-    assert r.confianza_helada is None
-    assert any("de temperatura en común con NASA" in x for x in r.riesgos)
+@pytest.mark.parametrize("n,umbral", [(1, 1), (2, 1), (3, 1), (4, 2), (6, 2), (9, 3), (10, 4), (30, 10)])
+def test_umbral_de_diferencia_es_1_de_cada_3_campanas(n, umbral):
+    """Decidido 14/11: mismo criterio que la helada frecuente, desde 1 campaña. Con 6 da 2 (lo del plan)."""
+    assert corr.umbral_diferencia(n) == umbral
+
+
+def test_con_una_campana_en_comun_ya_compara(clima):
+    """Como el motor, alcanza 1 año: con 1 campaña, 1 helada de diferencia ya baja la confianza."""
+    libre = _sin_helada_nasa_en_mayo(clima)[0]
+    r = corr.contrastar(MedicionesPropias(serie_mensual=_estacion(clima, [libre], {(libre, MAYO): -3.0})), clima)
+    mayo = next(c for c in r.contraste if c.indicador == "helada" and c.mes == MAYO)
+    assert (mayo.valor_productor, mayo.valor_nasa) == (1, 0)
+    assert mayo.texto.endswith("1 de 1 campañas · NASA en las mismas campañas, 0 de 1")
+    assert mayo.confianza_resultante == "baja" and r.confianza_helada == "baja"
+    assert not any("pocos años" in x for x in r.riesgos)
+
+
+def test_una_helada_de_diferencia_en_6_campanas_no_alcanza(clima):
+    libre = _sin_helada_nasa_en_mayo(clima)[0]
+    r = corr.contrastar(MedicionesPropias(serie_mensual=_estacion(clima, SEIS, {(libre, MAYO): -3.0})), clima)
+    mayo = next(c for c in r.contraste if c.indicador == "helada" and c.mes == MAYO)
+    assert mayo.valor_productor - mayo.valor_nasa == 1
+    assert mayo.confianza_resultante == "alta" and r.confianza_helada is None
 
 
 def test_calor_compara_maximas_de_35(clima):

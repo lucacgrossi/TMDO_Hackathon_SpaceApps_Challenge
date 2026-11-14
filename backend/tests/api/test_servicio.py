@@ -482,8 +482,9 @@ def test_planilla_compara_en_las_mismas_campanas_y_llega_al_motor(monkeypatch):
 
 
 def test_planilla_con_heladas_baja_la_confianza_y_suma_la_linea_sin_cambiar_probabilidades(monkeypatch):
-    """Planilla con temperaturas (5.4): confianza de heladas, línea del productor y nada más cambia."""
-    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado({}))
+    """Planilla con temperaturas (5.4): confianza de heladas, línea del productor y la serie llega al motor."""
+    recibido = {}
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado(recibido))
     monkeypatch.setattr(servicio, "_cargar_cultivos", lambda: CULTIVOS_CLIMA)
     sin = servicio.analizar(Entrada.model_validate(ENTRADA))
 
@@ -505,8 +506,8 @@ def test_planilla_con_heladas_baja_la_confianza_y_suma_la_linea_sin_cambiar_prob
     assert s.indicadores["meses_helada_frecuente"].valor == sin.indicadores["meses_helada_frecuente"].valor
     assert s.indicadores["lluvia_anual"].confianza == sin.indicadores["lluvia_anual"].confianza
     assert any(c.indicador == "helada" and c.mes == 10 for c in s.contraste_mediciones)
+    assert len(recibido["entradas"]["mediciones"]["serie_mensual"]) == 72  # el motor la mezcla (mezcla.py)
     for e_sin, e_con in zip(sin.estrategias, s.estrategias):
-        assert e_con.puntos == e_sin.puntos and e_con.cercania == e_sin.cercania
         for p_sin, p_con in zip(e_sin.probabilidades, e_con.probabilidades):
             assert (p_con.anios, p_con.de, p_con.pct, p_con.texto) == (p_sin.anios, p_sin.de, p_sin.pct, p_sin.texto)
             if p_con.evento in ("helada", "calor") and p_con.contraste:
