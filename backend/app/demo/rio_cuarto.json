@@ -1,0 +1,828 @@
+{
+ "lote": {
+  "localidad_aprox": null,
+  "area_ha": 94.86,
+  "pendiente_pct": {
+   "valor": 0.6,
+   "unidad": "%",
+   "fuente": "NASADEM · NASA, vía Planetary Computer",
+   "anios": "2000 (misión SRTM, reprocesada en NASADEM)",
+   "resolucion": "30 m",
+   "confianza": "alta",
+   "motivo": null,
+   "nota": "Plano ajustado sobre 1189 píxeles del lote"
+  },
+  "pendiente_maxima_pct": {
+   "valor": 2.4,
+   "unidad": "%",
+   "fuente": "NASADEM · NASA, vía Planetary Computer",
+   "anios": "2000 (misión SRTM, reprocesada en NASADEM)",
+   "resolucion": "30 m",
+   "confianza": "media",
+   "motivo": null,
+   "nota": "Percentil 95 de la pendiente por píxel (589 píxeles); valor por píxel, ruidoso"
+  },
+  "cobertura_agricola_pct": {
+   "valor": 93.8,
+   "unidad": "%",
+   "fuente": "ESA WorldCover 2021 v200, vía Planetary Computer",
+   "anios": "2021",
+   "resolucion": "10 m",
+   "confianza": "alta",
+   "motivo": null,
+   "nota": "12592 de 13426 píxeles de 10 m dentro del lote son cultivo"
+  }
+ },
+ "visto_por_satelite": {
+  "campana": "2025/26",
+  "fuente": "NASA HLS 30 m + MODIS 250 m (respaldo en 1 de 12 meses)",
+  "meses": [
+   {
+    "mes": "2026-01",
+    "fecha": "2026-01-22",
+    "ndvi_medio": 0.618,
+    "nubes_escena": 0.0,
+    "coleccion": "hls2-l30",
+    "item": "HLS.L30.T20HLJ.2026022T140852.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m"
+   },
+   {
+    "mes": "2026-02",
+    "fecha": "2026-02-07",
+    "ndvi_medio": 0.51,
+    "nubes_escena": 0.0,
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2026038T140659.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2026-03",
+    "fecha": "2026-03-06",
+    "ndvi_medio": 0.691,
+    "nubes_escena": null,
+    "coleccion": "modis-13Q1-061",
+    "item": "MOD13Q1.A2026065.h12v12.061.2026083115612",
+    "pixeles": 48,
+    "fuente": "NASA MODIS MOD13Q1 · 250 m, compuesto de 16 días · respaldo: sin escena HLS con < 30 % de nubes. Mezcla el lote con los vecinos: con el umbral 0,3 marca menos meses que HLS"
+   },
+   {
+    "mes": "2026-04",
+    "fecha": "2026-04-12",
+    "ndvi_medio": 0.481,
+    "nubes_escena": 2.0,
+    "coleccion": "hls2-l30",
+    "item": "HLS.L30.T20HLJ.2026102T140820.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m"
+   },
+   {
+    "mes": "2026-05",
+    "fecha": "2026-05-23",
+    "ndvi_medio": 0.507,
+    "nubes_escena": 0.0,
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2026143T140701.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2026-06",
+    "fecha": "2026-06-23",
+    "ndvi_medio": 0.631,
+    "nubes_escena": 2.0,
+    "coleccion": "hls2-l30",
+    "item": "HLS.L30.T20HLJ.2026174T140751.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m"
+   },
+   {
+    "mes": "2025-07",
+    "fecha": "2025-07-19",
+    "ndvi_medio": 0.266,
+    "nubes_escena": 0.0,
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2025200T141111.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2025-08",
+    "fecha": "2025-08-28",
+    "ndvi_medio": 0.314,
+    "nubes_escena": 0.0,
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2025240T141101.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2025-09",
+    "fecha": "2025-09-25",
+    "ndvi_medio": 0.202,
+    "nubes_escena": 0.0,
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2025268T140721.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   },
+   {
+    "mes": "2025-10",
+    "fecha": "2025-10-26",
+    "ndvi_medio": 0.297,
+    "nubes_escena": 0.0,
+    "coleccion": "hls2-l30",
+    "item": "HLS.L30.T20HLJ.2025299T140848.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m"
+   },
+   {
+    "mes": "2025-11",
+    "fecha": "2025-11-19",
+    "ndvi_medio": 0.429,
+    "nubes_escena": 0.0,
+    "coleccion": "hls2-l30",
+    "item": "HLS.L30.T20HLJ.2025323T140852.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m"
+   },
+   {
+    "mes": "2025-12",
+    "fecha": "2025-12-19",
+    "ndvi_medio": 0.543,
+    "nubes_escena": 0.0,
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2025353T140709.v2.0",
+    "pixeles": 1092,
+    "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+   }
+  ],
+  "meses_ndvi_bajo": 3,
+  "meses_con_dato": 12,
+  "umbral": 0.3,
+  "confianza": "baja",
+  "motivo": "NDVI medio del lote < 0,3 en 3 de 12 meses con dato; en los meses con MODIS el píxel de 250 m mezcla el lote con los vecinos",
+  "faltantes": [],
+  "orden_meses": "índice 0 = enero … 11 = diciembre; julio a diciembre del primer año de la campaña, enero a junio del segundo"
+ },
+ "indicadores": {
+  "lluvia_anual": {
+   "valor": 819,
+   "unidad": "mm/campaña",
+   "fuente": "NASA POWER mensual (comunidad AG)",
+   "anios": "1996/97 a 2025/26",
+   "resolucion": "~50 km (0,5° × 0,625°)",
+   "confianza": "media",
+   "motivo": null,
+   "nota": "Media de 30 campañas julio–junio; celda de ~50 km: contexto regional"
+  },
+  "meses_helada_frecuente": {
+   "valor": 4,
+   "unidad": "meses",
+   "fuente": "NASA POWER mensual (comunidad AG)",
+   "anios": "1996/97 a 2025/26",
+   "resolucion": "~50 km (0,5° × 0,625°)",
+   "confianza": "media",
+   "motivo": null,
+   "nota": "Meses con mínima < 0 °C en al menos 1 de cada 3 años: junio, julio, agosto, septiembre"
+  },
+  "et0_anual": {
+   "valor": 1447,
+   "unidad": "mm/campaña",
+   "fuente": "Hargreaves (FAO-56) con T2M y T2M_RANGE de NASA POWER",
+   "anios": "1996/97 a 2025/26",
+   "resolucion": "~50 km (0,5° × 0,625°)",
+   "confianza": "media",
+   "motivo": null,
+   "nota": "ET de referencia (cultivo de referencia), no la ET real del lote"
+  },
+  "balance_anual": {
+   "valor": -628,
+   "unidad": "mm/campaña",
+   "fuente": "NASA POWER (lluvia) − ET0 de Hargreaves (FAO-56)",
+   "anios": "1996/97 a 2025/26",
+   "resolucion": "~50 km (0,5° × 0,625°)",
+   "confianza": "media",
+   "motivo": null,
+   "nota": "Lluvia − ET0, media de las campañas"
+  },
+  "et_real_anual": {
+   "valor": 607,
+   "unidad": "mm/año",
+   "fuente": "MODIS MOD16A3GF/MYD16A3GF v061 (Terra y Aqua) · NASA, vía Planetary Computer",
+   "anios": "2025",
+   "resolucion": "500 m",
+   "confianza": "media",
+   "motivo": null,
+   "nota": "ET real de 2025: promedio de Terra 600 mm y Aqua 614 mm. A 500 m el píxel mezcla el lote con los vecinos."
+  },
+  "meses_cobertura_baja": {
+   "valor": 3,
+   "unidad": "meses",
+   "fuente": "NASA HLS 30 m (Landsat + Sentinel-2) y MODIS MOD13Q1 250 m de respaldo en 1 mes, vía Planetary Computer",
+   "anios": "2025/26",
+   "resolucion": "30 m (250 m en 1 de 12 meses)",
+   "confianza": "baja",
+   "motivo": null,
+   "nota": "NDVI medio del lote < 0,3 en 3 de 12 meses con dato; en los meses con MODIS el píxel de 250 m mezcla el lote con los vecinos"
+  },
+  "riesgo_erosion": {
+   "valor": 1.8,
+   "unidad": "% × meses",
+   "fuente": "Pendiente: NASADEM · NASA, vía Planetary Computer · Cobertura: NASA HLS 30 m (Landsat + Sentinel-2) y MODIS MOD13Q1 250 m de respaldo en 1 mes, vía Planetary Computer",
+   "anios": "2025/26",
+   "resolucion": "valor del lote (pendiente 30 m, NDVI 30 m)",
+   "confianza": "baja",
+   "motivo": null,
+   "nota": "Pendiente general 0,6 % × 3 meses con NDVI medio < 0,3 en la campaña 2025/26. Índice relativo para comparar lotes y meses: no es pérdida de suelo (t/ha)"
+  }
+ },
+ "contraste_mediciones": [],
+ "clima_celda": {
+  "bbox": [
+   -64.6875,
+   -33.25,
+   -64.0625,
+   -32.75
+  ],
+  "posicion_lote": "cerca del borde sur",
+  "resolucion": "~50 km (0,5° × 0,625°)"
+ },
+ "clima_mensual": {
+  "lluvia_mm": [
+   130.8,
+   105.2,
+   103.2,
+   75.3,
+   25.8,
+   13.0,
+   9.7,
+   14.5,
+   31.2,
+   78.6,
+   114.2,
+   117.5
+  ],
+  "minima_media_c": [
+   10.9,
+   9.6,
+   7.8,
+   3.9,
+   0.8,
+   -1.7,
+   -2.5,
+   -1.3,
+   0.4,
+   3.8,
+   6.6,
+   8.7
+  ],
+  "maxima_media_c": [
+   38.7,
+   37.0,
+   35.0,
+   30.8,
+   27.0,
+   24.3,
+   25.2,
+   30.1,
+   32.1,
+   34.9,
+   36.8,
+   38.0
+  ],
+  "t_media_c": [
+   23.5,
+   22.2,
+   20.0,
+   16.0,
+   12.0,
+   9.0,
+   8.5,
+   10.8,
+   13.8,
+   17.4,
+   20.2,
+   22.5
+  ],
+  "amplitud_diaria_c": [
+   15.1,
+   14.3,
+   13.7,
+   13.0,
+   12.2,
+   12.7,
+   13.3,
+   14.9,
+   15.6,
+   15.5,
+   15.7,
+   15.7
+  ],
+  "et0_mm": [
+   202.4,
+   157.3,
+   135.4,
+   87.8,
+   59.2,
+   44.9,
+   49.7,
+   73.0,
+   105.3,
+   148.8,
+   178.1,
+   205.5
+  ],
+  "balance_mm": [
+   -71.5,
+   -52.1,
+   -32.2,
+   -12.5,
+   -33.4,
+   -31.9,
+   -40.0,
+   -58.5,
+   -74.1,
+   -70.2,
+   -63.9,
+   -88.1
+  ],
+  "anios_con_helada": [
+   0,
+   0,
+   0,
+   0,
+   8,
+   25,
+   26,
+   20,
+   11,
+   0,
+   0,
+   0
+  ],
+  "anios_con_35c": [
+   29,
+   24,
+   16,
+   1,
+   0,
+   0,
+   0,
+   2,
+   5,
+   14,
+   25,
+   26
+  ],
+  "helada_frecuente": [
+   false,
+   false,
+   false,
+   false,
+   false,
+   true,
+   true,
+   true,
+   true,
+   false,
+   false,
+   false
+  ],
+  "n_anios": 30,
+  "periodo": "1996/97 a 2025/26",
+  "fuente": "NASA POWER mensual (comunidad AG)",
+  "resolucion": "~50 km (0,5° × 0,625°)"
+ },
+ "tipos_de_anio": {
+  "metodo": "terciles_balance",
+  "seco": [
+   "1996/97",
+   "2005/06",
+   "2008/09",
+   "2011/12",
+   "2017/18",
+   "2019/20",
+   "2020/21",
+   "2021/22",
+   "2022/23",
+   "2025/26"
+  ],
+  "normal": [
+   "2000/01",
+   "2001/02",
+   "2002/03",
+   "2009/10",
+   "2010/11",
+   "2012/13",
+   "2013/14",
+   "2016/17",
+   "2018/19",
+   "2023/24"
+  ],
+  "humedo": [
+   "1997/98",
+   "1998/99",
+   "1999/00",
+   "2003/04",
+   "2004/05",
+   "2006/07",
+   "2007/08",
+   "2014/15",
+   "2015/16",
+   "2024/25"
+  ],
+  "umbral_seco_mm": -730.6,
+  "umbral_humedo_mm": -529.6
+ },
+ "serie_anual": {
+  "fuente": "NASA POWER mensual (comunidad AG)",
+  "resolucion": "~50 km (0,5° × 0,625°)",
+  "periodo": "1996/97 a 2025/26",
+  "campanas": [
+   {
+    "campana": "1996/97",
+    "lluvia_mm": 678.0,
+    "balance_mm": -794.0,
+    "tipo": "seco"
+   },
+   {
+    "campana": "1997/98",
+    "lluvia_mm": 1156.0,
+    "balance_mm": -184.0,
+    "tipo": "humedo"
+   },
+   {
+    "campana": "1998/99",
+    "lluvia_mm": 933.0,
+    "balance_mm": -459.0,
+    "tipo": "humedo"
+   },
+   {
+    "campana": "1999/00",
+    "lluvia_mm": 1088.0,
+    "balance_mm": -272.0,
+    "tipo": "humedo"
+   },
+   {
+    "campana": "2000/01",
+    "lluvia_mm": 850.0,
+    "balance_mm": -575.0,
+    "tipo": "normal"
+   },
+   {
+    "campana": "2001/02",
+    "lluvia_mm": 734.0,
+    "balance_mm": -688.0,
+    "tipo": "normal"
+   },
+   {
+    "campana": "2002/03",
+    "lluvia_mm": 814.0,
+    "balance_mm": -651.0,
+    "tipo": "normal"
+   },
+   {
+    "campana": "2003/04",
+    "lluvia_mm": 1065.0,
+    "balance_mm": -433.0,
+    "tipo": "humedo"
+   },
+   {
+    "campana": "2004/05",
+    "lluvia_mm": 898.0,
+    "balance_mm": -509.0,
+    "tipo": "humedo"
+   },
+   {
+    "campana": "2005/06",
+    "lluvia_mm": 619.0,
+    "balance_mm": -852.0,
+    "tipo": "seco"
+   },
+   {
+    "campana": "2006/07",
+    "lluvia_mm": 959.0,
+    "balance_mm": -447.0,
+    "tipo": "humedo"
+   },
+   {
+    "campana": "2007/08",
+    "lluvia_mm": 894.0,
+    "balance_mm": -530.0,
+    "tipo": "humedo"
+   },
+   {
+    "campana": "2008/09",
+    "lluvia_mm": 632.0,
+    "balance_mm": -879.0,
+    "tipo": "seco"
+   },
+   {
+    "campana": "2009/10",
+    "lluvia_mm": 815.0,
+    "balance_mm": -660.0,
+    "tipo": "normal"
+   },
+   {
+    "campana": "2010/11",
+    "lluvia_mm": 754.0,
+    "balance_mm": -687.0,
+    "tipo": "normal"
+   },
+   {
+    "campana": "2011/12",
+    "lluvia_mm": 674.0,
+    "balance_mm": -835.0,
+    "tipo": "seco"
+   },
+   {
+    "campana": "2012/13",
+    "lluvia_mm": 834.0,
+    "balance_mm": -605.0,
+    "tipo": "normal"
+   },
+   {
+    "campana": "2013/14",
+    "lluvia_mm": 889.0,
+    "balance_mm": -546.0,
+    "tipo": "normal"
+   },
+   {
+    "campana": "2014/15",
+    "lluvia_mm": 942.0,
+    "balance_mm": -487.0,
+    "tipo": "humedo"
+   },
+   {
+    "campana": "2015/16",
+    "lluvia_mm": 1007.0,
+    "balance_mm": -319.0,
+    "tipo": "humedo"
+   },
+   {
+    "campana": "2016/17",
+    "lluvia_mm": 747.0,
+    "balance_mm": -704.0,
+    "tipo": "normal"
+   },
+   {
+    "campana": "2017/18",
+    "lluvia_mm": 651.0,
+    "balance_mm": -862.0,
+    "tipo": "seco"
+   },
+   {
+    "campana": "2018/19",
+    "lluvia_mm": 902.0,
+    "balance_mm": -534.0,
+    "tipo": "normal"
+   },
+   {
+    "campana": "2019/20",
+    "lluvia_mm": 621.0,
+    "balance_mm": -873.0,
+    "tipo": "seco"
+   },
+   {
+    "campana": "2020/21",
+    "lluvia_mm": 732.0,
+    "balance_mm": -733.0,
+    "tipo": "seco"
+   },
+   {
+    "campana": "2021/22",
+    "lluvia_mm": 546.0,
+    "balance_mm": -952.0,
+    "tipo": "seco"
+   },
+   {
+    "campana": "2022/23",
+    "lluvia_mm": 803.0,
+    "balance_mm": -731.0,
+    "tipo": "seco"
+   },
+   {
+    "campana": "2023/24",
+    "lluvia_mm": 795.0,
+    "balance_mm": -652.0,
+    "tipo": "normal"
+   },
+   {
+    "campana": "2024/25",
+    "lluvia_mm": 939.0,
+    "balance_mm": -520.0,
+    "tipo": "humedo"
+   },
+   {
+    "campana": "2025/26",
+    "lluvia_mm": 601.0,
+    "balance_mm": -879.0,
+    "tipo": "seco"
+   }
+  ],
+  "ultimas_10_mm": 733.6,
+  "previas_20_mm": 861.9,
+  "secos_en_ultimas_10": 6
+ },
+ "capas": {
+  "erosion": {
+   "valor": 1.8,
+   "unidad": "% × meses",
+   "fuente": "Pendiente: NASADEM · NASA, vía Planetary Computer · Cobertura: NASA HLS 30 m (Landsat + Sentinel-2) y MODIS MOD13Q1 250 m de respaldo en 1 mes, vía Planetary Computer",
+   "anios": "2025/26",
+   "resolucion": "valor del lote (pendiente 30 m, NDVI 30 m)",
+   "confianza": "baja",
+   "nota": "Pendiente general 0,6 % × 3 meses con NDVI medio < 0,3 en la campaña 2025/26. Índice relativo para comparar lotes y meses: no es pérdida de suelo (t/ha)",
+   "pendiente_pct": 0.6,
+   "meses_cobertura_baja": 3,
+   "meses_bajos": [
+    6,
+    8,
+    9
+   ]
+  },
+  "ndvi_mensual": [
+   {
+    "coleccion": "hls2-l30",
+    "item": "HLS.L30.T20HLJ.2026022T140852.v2.0",
+    "fecha": "2026-01-22"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2026038T140659.v2.0",
+    "fecha": "2026-02-07"
+   },
+   null,
+   {
+    "coleccion": "hls2-l30",
+    "item": "HLS.L30.T20HLJ.2026102T140820.v2.0",
+    "fecha": "2026-04-12"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2026143T140701.v2.0",
+    "fecha": "2026-05-23"
+   },
+   {
+    "coleccion": "hls2-l30",
+    "item": "HLS.L30.T20HLJ.2026174T140751.v2.0",
+    "fecha": "2026-06-23"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2025200T141111.v2.0",
+    "fecha": "2025-07-19"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2025240T141101.v2.0",
+    "fecha": "2025-08-28"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2025268T140721.v2.0",
+    "fecha": "2025-09-25"
+   },
+   {
+    "coleccion": "hls2-l30",
+    "item": "HLS.L30.T20HLJ.2025299T140848.v2.0",
+    "fecha": "2025-10-26"
+   },
+   {
+    "coleccion": "hls2-l30",
+    "item": "HLS.L30.T20HLJ.2025323T140852.v2.0",
+    "fecha": "2025-11-19"
+   },
+   {
+    "coleccion": "hls2-s30",
+    "item": "HLS.S30.T20HLJ.2025353T140709.v2.0",
+    "fecha": "2025-12-19"
+   }
+  ],
+  "agua_regional_mensual": null,
+  "heladas_regional_mensual": null,
+  "no_disponibles": [
+   "agua_regional_mensual",
+   "heladas_regional_mensual"
+  ]
+ },
+ "estrategias": [
+  {
+   "id": "actual",
+   "nombre": "Lo que hacés hoy",
+   "especies": "soja + barbecho",
+   "disponible": true,
+   "motivo_descarte": null,
+   "calendario": null,
+   "resumen": "Sin puntajes: motor de reglas pendiente.",
+   "valores": null,
+   "puntos": null,
+   "valores_por_tipo_anio": null,
+   "diferencia_vs_actual": null,
+   "cercania": null,
+   "cercania_objetivos": null,
+   "que_le_falta": [],
+   "sensible_clima": false,
+   "reglas_aplicadas": [],
+   "probabilidades": [],
+   "por_que": [],
+   "evidencia": [],
+   "beneficios": [],
+   "vacios": [
+    "Motor de reglas pendiente: las columnas todavía no tienen puntajes"
+   ],
+   "riesgos": []
+  },
+  {
+   "id": "A",
+   "nombre": "Cobertura de invierno",
+   "especies": "",
+   "disponible": true,
+   "motivo_descarte": null,
+   "calendario": null,
+   "resumen": "Sin puntajes: motor de reglas pendiente.",
+   "valores": null,
+   "puntos": null,
+   "valores_por_tipo_anio": null,
+   "diferencia_vs_actual": null,
+   "cercania": null,
+   "cercania_objetivos": null,
+   "que_le_falta": [],
+   "sensible_clima": false,
+   "reglas_aplicadas": [],
+   "probabilidades": [],
+   "por_que": [],
+   "evidencia": [],
+   "beneficios": [],
+   "vacios": [
+    "Motor de reglas pendiente: las columnas todavía no tienen puntajes"
+   ],
+   "riesgos": []
+  },
+  {
+   "id": "B",
+   "nombre": "Cultivo de invierno",
+   "especies": "",
+   "disponible": true,
+   "motivo_descarte": null,
+   "calendario": null,
+   "resumen": "Sin puntajes: motor de reglas pendiente.",
+   "valores": null,
+   "puntos": null,
+   "valores_por_tipo_anio": null,
+   "diferencia_vs_actual": null,
+   "cercania": null,
+   "cercania_objetivos": null,
+   "que_le_falta": [],
+   "sensible_clima": false,
+   "reglas_aplicadas": [],
+   "probabilidades": [],
+   "por_que": [],
+   "evidencia": [],
+   "beneficios": [],
+   "vacios": [
+    "Motor de reglas pendiente: las columnas todavía no tienen puntajes"
+   ],
+   "riesgos": []
+  },
+  {
+   "id": "C",
+   "nombre": "Diversificar el verano",
+   "especies": "",
+   "disponible": true,
+   "motivo_descarte": null,
+   "calendario": null,
+   "resumen": "Sin puntajes: motor de reglas pendiente.",
+   "valores": null,
+   "puntos": null,
+   "valores_por_tipo_anio": null,
+   "diferencia_vs_actual": null,
+   "cercania": null,
+   "cercania_objetivos": null,
+   "que_le_falta": [],
+   "sensible_clima": false,
+   "reglas_aplicadas": [],
+   "probabilidades": [],
+   "por_que": [],
+   "evidencia": [],
+   "beneficios": [],
+   "vacios": [
+    "Motor de reglas pendiente: las columnas todavía no tienen puntajes"
+   ],
+   "riesgos": []
+  }
+ ],
+ "choque": {
+  "hay": false,
+  "objetivos": [],
+  "texto": ""
+ },
+ "periodo_clima": "1996/97 a 2025/26",
+ "informacion_falta": [
+  "Motor de reglas pendiente: las columnas todavía no tienen puntajes"
+ ],
+ "aviso": "Herramienta de apoyo: no reemplaza el criterio del productor ni del agrónomo.",
+ "es_mock": false
+}
