@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import AvisoApoyo from "@/components/comunes/AvisoApoyo";
+import AvisoDesactualizado from "./AvisoDesactualizado";
 import { metadatosHoja } from "@/lib/formato";
 import { useResultado } from "@/lib/resultado";
 import { useVista } from "@/lib/vista";
@@ -66,6 +67,8 @@ export default function HojaComparacion() {
           </button>
         </div>
       </header>
+
+      <AvisoDesactualizado />
 
       <div className={css.cuerpo}>
         {resultado.estado === "cargando" && <p className={css.estado}>Trayendo los datos de NASA…</p>}
