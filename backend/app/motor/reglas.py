@@ -1,6 +1,13 @@
 """
 Motor de reglas de Field Shift (portado del prototipo: strategies, ev, sc, clash).
 
+Fuente: docs/prototipo/field-shift-prototipo.html (v1 y v2 tienen la misma
+lógica; se comparó función por función). Cada función de acá dice de qué
+línea del prototipo sale y qué cambió. Lo que NO cambia respecto del
+prototipo (para que el front dé lo mismo): suelo, erosión, ingreso,
+cercanía (`sc`) y choque (`clash`). Lo que SÍ cambia: el agua, que pasa a mm
+reales con la ET0 de NASA POWER en vez de `cons*80` y factores fijos.
+
 Son funciones puras: entran las entradas del productor y los indicadores
 de NASA, salen 4 columnas (actual, A, B, C). No llaman a ninguna API, así
 que se prueban con indicadores inventados (ver tests/test_motor.py).
@@ -19,7 +26,10 @@ entradas = {
 --- Indicadores (los arma Back 1 desde NASA POWER y Back 2 desde SRTM/MODIS) ---
 PROPUESTA: confirmar nombres con Back 1 antes de integrar.
 indicadores = {
-    "terciles": {                         # campañas julio-junio, cortadas por lluvia
+    # Back 1 ordena las 30 campañas (julio-junio) por balance de agua y las
+    # corta en tres grupos iguales (CLAUDE.md, "Incertidumbre"). El prototipo
+    # las cortaba por lluvia; al motor le da igual: recibe el promedio de cada grupo.
+    "terciles": {
         "seco":   {"pp": [12 mm], "et0": [12 mm], "n": 10},
         "normal": {"pp": [12 mm], "et0": [12 mm], "n": 10},
         "humedo": {"pp": [12 mm], "et0": [12 mm], "n": 10},
@@ -51,7 +61,11 @@ def _clamp(x, a=0, b=100):
 # --- Calendario y estrategias -----------------------------------------------
 
 def calendario(verano, invierno):
-    """12 meses (ene..dic). Si hay trigo o cebada, la soja pasa a soja de 2ª."""
+    """
+    12 meses (ene..dic). Si hay trigo o cebada, la soja pasa a soja de 2ª.
+    Prototipo: `cal(summer, winter)`. Primero se pone el invierno y después
+    el verano encima: si se pisan (por ejemplo noviembre), gana el verano.
+    """
     c = [BARBECHO] * 12
     if invierno != BARBECHO:
         for m in WIN[invierno]:
@@ -67,7 +81,11 @@ def _elegir(opciones, no_sembrar):
 
 
 def estrategias(entradas, pendiente):
-    """Las 4 columnas fijas (principio 9: siempre las mismas estrategias tipo)."""
+    """
+    Las 4 columnas fijas (principio 9: siempre las mismas estrategias tipo).
+    Prototipo: `strategies()`. Una columna descartada por "no sembrar" no
+    desaparece: vuelve con on=False y el motivo, y el front la pinta en gris.
+    """
     w, no = entradas["pesos"], set(entradas.get("no_sembrar", []))
     ver, inv = entradas["verano"], entradas["invierno"]
     lista = [{"id": "actual", "k": "·", "nombre": "Lo que hacés hoy",
@@ -127,6 +145,11 @@ def regla_agua(cal, ind):
 
 
 def regla_suelo(cal, entradas):
+    """
+    Prototipo (`ev`): su = 20 + Σ(nfix + rast) de cada cultivo
+                          + 2 × meses cubiertos − 10 si repite el verano.
+    Se separa en aportes para que cada punto tenga su dato (trazabilidad).
+    """
     cr = [x for x in dict.fromkeys(cal) if x != BARBECHO]
     pelados = cal.count(BARBECHO)
     aportes = [{"regla": "suelo_base", "efecto": {"suelo": 20}, "dato": "Base de la regla"}]
@@ -148,6 +171,11 @@ def regla_suelo(cal, entradas):
 
 
 def regla_erosion(cal, pendiente):
+    """
+    Prototipo (`ev`): ero = 100 − pelados × 12 × (0,6 + pendiente / 5)
+                           + 20 si el rastrojo total llega a 30.
+    La pendiente agranda el castigo de cada mes pelado: más pendiente, más erosión.
+    """
     pelados = cal.count(BARBECHO)
     rastrojo = sum(C[x]["rastrojo"] for x in dict.fromkeys(cal) if x != BARBECHO)
     meses = ", ".join(MESES[m] for m, x in enumerate(cal) if x == BARBECHO) or "ninguno"
@@ -161,6 +189,11 @@ def regla_erosion(cal, pendiente):
 
 
 def regla_ingreso(cal):
+    """
+    Prototipo (`ev`): 85 con 2 o más cultivos que se venden, 45 si hay una
+    cobertura (cuesta sembrarla y no se cosecha) y 50 en otro caso. Sin precios
+    (fuera de alcance): es una escala cualitativa.
+    """
     cr = [x for x in dict.fromkeys(cal) if x != BARBECHO]
     comerciales = [x for x in cr if C[x]["comercial"]]
     if len(comerciales) >= 2:
@@ -175,7 +208,11 @@ def regla_ingreso(cal):
 
 
 def heladas_y_calor(cal, ind):
-    """Meses con helada frecuente (1 de cada 3 años) y con calor en verano (1 de cada 2)."""
+    """
+    Meses con helada frecuente (1 de cada 3 años) y con calor en verano (1 de cada 2).
+    Prototipo: `helada(m)` y `calor(m)` con la serie real de POWER. No suman ni
+    restan puntos: van a "Revisar con el agrónomo" y se marcan en el calendario.
+    """
     n = ind["n_anios"]
     helada = [m for m in range(12) if ind["anios_con_helada"][m] >= n / 3]
     conflicto = [m for m in helada if not C[cal[m]]["tolera_helada"]]

@@ -42,6 +42,7 @@ def resumen(s, actual):
 
 
 def por_que(s):
+    """Prototipo: `why` en `render()`. Mismas frases."""
     r = []
     if s["id"] == "actual":
         r.append(f"{s['meses_pelados']} meses con el lote pelado")
@@ -96,7 +97,11 @@ def evidencia(s, n=4):
 
 
 def revisar(s, entradas, ind):
-    """Lo que tiene que mirar el agrónomo (reglas negativas)."""
+    """
+    Lo que tiene que mirar el agrónomo (reglas negativas).
+    Prototipo: `rev` en `render()`. Se agregan, con datos, las heladas y el
+    calor por mes y "sensible al clima", que el prototipo solo marcaba con color.
+    """
     r = []
     if s["agua_por_tipo"]["seco"] < 40:
         r.append("Poca reserva de agua en años secos")
@@ -126,6 +131,11 @@ def revisar(s, entradas, ind):
 
 
 def falta(entradas, resultado):
+    """
+    Prototipo: `falta` en `render()`. Se suma la pendiente cuando no llegó el
+    dato real (principio "nada inventado"). Los faltantes de NASA (fuente
+    caída) los agrega Back 1 en servicio.py, que es quien sabe qué falló.
+    """
     f = ["Precios"]
     if entradas.get("materia_organica_pct") is None:
         f.append("Materia orgánica")

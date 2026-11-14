@@ -12,6 +12,8 @@ Dominio de Lógica (persona 3). Ubicación según `backend/PLAN.md`: `app/motor/
 Correr los tests desde `backend/`: `python -m tests.motor.test_motor` (o `python -m pytest tests/motor`).
 Uso: `plantillas.armar(analizar(entradas, indicadores), entradas, indicadores)`.
 
+El prototipo v2 (intro, dibujar lote) tiene **la misma lógica** que el v1: se comparó `C`, `WIN`, `strategies`, `ev`, `sc` y `clash` línea por línea, así que el port sigue valiendo.
+
 ## Por qué cada decisión
 
 1. **Funciones puras, sin llamadas a NASA.** Así lo pide el doc de roles, y te deja probar todo sin esperar a Back 1.
