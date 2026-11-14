@@ -1,0 +1,59 @@
+/*
+ * Línea de la campaña (persona 5). La base (.tlw, .tl, .mx, .row2, .seg, .cur,
+ * .satcap, .lgd) es del prototipo en globals.css; acá van las marcas que el
+ * prototipo marcaba solo con color: el anillo del conflicto y la raya del calor.
+ */
+
+.linea {
+  min-height: 0;
+}
+
+/* Helada con cultivo sensible: anillo (forma), además del color */
+.conflicto {
+  box-shadow: inset 0 0 0 1.5px var(--bad);
+  color: var(--bad);
+  font-weight: 800;
+}
+
+/* Calor ≥ 35 °C con cultivo de verano: raya arriba del mes */
+.calor {
+  box-shadow: inset 0 2px 0 var(--warn);
+}
+.calor.conflicto {
+  box-shadow: inset 0 0 0 1.5px var(--bad), inset 0 3px 0 var(--warn);
+}
+
+/* Mes sin escena sin nubes: rayado, como el prototipo */
+.sinEscena {
+  background: repeating-linear-gradient(135deg, var(--soft), var(--soft) 3px, var(--line) 3px, var(--line) 6px);
+}
+
+/* --- Leyenda */
+.leyenda {
+  padding: 0 0 10px;
+}
+.muestraHelada {
+  background: color-mix(in srgb, var(--humedo) 35%, transparent);
+}
+.muestraConflicto {
+  box-shadow: inset 0 0 0 1.5px var(--bad);
+}
+.muestraCalor {
+  box-shadow: inset 0 2px 0 var(--warn);
+  background: var(--soft);
+}
+.escalaNdvi {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.rampa {
+  display: inline-flex;
+  gap: 1px;
+}
+.rampa i {
+  width: 12px !important;
+  height: 8px !important;
+  margin: 0 !important;
+  border-radius: 2px !important;
+}

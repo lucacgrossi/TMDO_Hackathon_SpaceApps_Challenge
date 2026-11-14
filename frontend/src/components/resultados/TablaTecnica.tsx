@@ -16,6 +16,8 @@ import { conSigno, fmt, mesesConAnios, NOMBRE_CULTIVO, rangoMeses, textoEfecto, 
 import { useEntradas } from "@/lib/store";
 import CeldaDato, { HuellaDato, type Origen } from "./CeldaDato";
 import InsigniaEstrategia from "./InsigniaEstrategia";
+import LeyendaLinea from "./LeyendaLinea";
+import LineaCampania from "./LineaCampania";
 import css from "./tabla.module.css";
 
 const NOMBRE_OBJETIVO: Record<Objetivo, string> = { agua: "Agua", suelo: "Suelo", erosion: "Erosión", ingreso: "Ingreso" };
@@ -68,8 +70,9 @@ const GRUPOS: Grupo[] = [
         id: "calendario",
         titulo: "Calendario",
         ayuda: "julio a junio",
-        celda: (e) => (
+        celda: (e, { salida }) => (
           <>
+            <LineaCampania salida={salida} estrategia={e} />
             <ul className={css.tramos}>
               {tramosCalendario(e.calendario).map((t) => (
                 <li key={t.desde} data-pelado={t.cultivo === "barbecho"}>
@@ -340,6 +343,7 @@ export default function TablaTecnica({ salida }: { salida: Salida }) {
 
   return (
     <div className={css.contenedor}>
+      <LeyendaLinea />
       <table className={css.tabla}>
         <caption className={css.oculto}>
           Comparación técnica de la rotación actual con las alternativas A, B y C
