@@ -11,10 +11,35 @@ Dueño: Back 2. Servicio `field-shift-api`, región `southamerica-east1` (São P
 
 Todos los comandos van en Git Bash, **desde `backend/`**. Se deploya desde `main` después de probar en `dev`; desde otra branch, solo una prueba sin tráfico (paso 4).
 
+> **Demo del 15/11: se deploya desde `dev`.** `main` no tiene el back de la demo (está 200 commits atrás) y no hay tiempo de mergearlo antes de presentar. Excepción decidida por Back 1 y Back 2; después de la demo, la persona 3 mergea `dev` → `main` y se vuelve a deployar desde `main`. Los pasos están en [Deploy de la demo](#deploy-de-la-demo-desde-dev).
+
 ```bash
 SERVICIO=field-shift-api
 REGION=southamerica-east1
 ```
+
+## Deploy de la demo (desde `dev`)
+La cuenta que deploya necesita, en el proyecto `nasa-space-app-fieldchange`, los roles **Editor** y **Administrador de Cloud Run** (este último por `--allow-unauthenticated`).
+```bash
+git checkout dev && git pull origin dev
+cd backend
+gcloud config set project nasa-space-app-fieldchange
+gcloud run deploy $SERVICIO \
+  --source . \
+  --region $REGION \
+  --allow-unauthenticated \
+  --memory 1Gi \
+  --timeout 60 \
+  --min-instances 1 \
+  --set-env-vars "^@^CORS_ORIGINS=https://<dominio-front>,http://localhost:3000@CORS_ORIGIN_REGEX=https://.*\.vercel\.app"
+```
+- `<dominio-front>`: la URL de producción del front. Las URL de vista previa de Vercel cambian en cada deploy: las cubre `CORS_ORIGIN_REGEX`. Si el front no está en Vercel, sacar esa variable.
+- `--min-instances 1`: sin arranque en frío durante la demo. Después, volver a 0 (paso 6).
+- Probar con el paso 5. Además, para confirmar que subió la versión nueva:
+  ```bash
+  curl -s "$URL/openapi.json" | grep -o '"/mediciones/planilla"\|"CapaRaster"' | sort -u   # las dos tienen que aparecer
+  ```
+- Avisar al front la URL (es la misma de siempre si el servicio ya existía) para `NEXT_PUBLIC_API_URL`, con `NEXT_PUBLIC_USAR_MOCK=false`.
 
 ## 1. Configuración inicial (una vez por compu)
 Instalar el [Google Cloud SDK](https://cloud.google.com/sdk/docs/install) y después:
@@ -90,7 +115,7 @@ Antes de presentar, pedir `/analizar` una vez para calentar. Después de la demo
 gcloud run revisions list --service $SERVICIO --region $REGION
 gcloud run services update-traffic $SERVICIO --region $REGION --to-revisions <REVISION_ANTERIOR>=100
 ```
-No hace build: pasa el tráfico a una revisión que ya andaba. Se corrige en `dev`, se deploya de nuevo desde `main` y se vuelve con `--to-latest`.
+No hace build: pasa el tráfico a una revisión que ya andaba. Se corrige en `dev`, se deploya de nuevo desde `main` (para la demo, desde `dev`) y se vuelve con `--to-latest`.
 
 ## Reglas
 - Secretos solo como variables de entorno de Cloud Run, nunca en el repo.

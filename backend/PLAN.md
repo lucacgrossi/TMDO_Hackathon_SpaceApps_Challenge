@@ -118,7 +118,7 @@ En `Capas` se agregan: `pendiente_mapa: CapaRaster | None = None`, `cultivo_mapa
 | 2 | Armonización, paso 4 (si hay tiempo) | `ndvi.py`, `capas.py` | El raster de cada mes sobre la grilla y la media del lote desde el raster (`CapaNdviMes.mapa`) |
 | 3 | Armonización, paso 5 (si hay tiempo) | `capas.py` | Erosión por píxel = pendiente × meses bajos del píxel (`erosion_mapa`) |
 | 4 | **Regenerar la demo** | `scripts/precalcular_demo.py` → `demo/rio_cuarto.json` | Después del #57 (prioridades de 1 a 5), después de cada paso de la armonización y **antes del congelamiento** (domingo 12:00) |
-| 5 | **Deploy estable** | Cloud Run (`DEPLOY.md`) | Cuando la persona 3 mergee `dev` → `main`: deploy, prueba de `/salud` y `/analizar` con el lote de ejemplo, URL al front, `--min-instances=1` para la demo |
+| 5 | **Deploy estable** | Cloud Run (`DEPLOY.md`) | **Para la demo, desde `dev`** (`DEPLOY.md`, "Deploy de la demo"); después, cuando la persona 3 mergee `dev` → `main`: deploy, prueba de `/salud` y `/analizar` con el lote de ejemplo, URL al front, `--min-instances=1` para la demo |
 | 6 | Mergear a `dev` | GitHub | Revisar la descripción de cada PR (sobre todo los de Benja) antes de mergear |
 
 ### Front (para coordinar, no es del back)
@@ -189,4 +189,5 @@ Back 2 expone funciones en `satelite/`; **Back 1 las llama desde `servicio.py`**
 - Secretos y configuración en variables de entorno de Cloud Run, nunca en el repo.
 - CORS abierto al dominio del front.
 - Durante la demo: `--min-instances=1`, para que no haya arranque en frío.
-- Se deploya desde `main` (lo mergea la persona 3), después de probar en `dev`.
+- Se deploya desde `main` (lo mergea la persona 3), después de probar en `dev`. **Excepción: la demo del 15/11 se deploya desde `dev`** (ver `DEPLOY.md`).
+- `CORS_ORIGIN_REGEX` (opcional) acepta las URL de vista previa de Vercel, que cambian en cada deploy.

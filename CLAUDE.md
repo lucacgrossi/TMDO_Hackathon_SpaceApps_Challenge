@@ -86,7 +86,7 @@ Todo se lleva a **escala mensual + climatología de 30 años**. Los datos grueso
 ## Cómo trabajamos
 - Una branch por feature, fix, etc., con el formato `<nombre-colaborador>/<tipo>/<area>-<descripcion-corta>`. Commits frecuentes.
 - Formato de commit: `<tipo>(<area>): <qué hace, en presente>` [opcional: por qué o detalle, si no es obvio].
-- Todo se trabaja sobre `dev`: las branches salen de `dev` y vuelven por PR. La persona 2 mergea a `dev`; después de probar, **solo la persona 3 mergea `dev` → `main`**. El backend se deploya desde `main` (`backend/DEPLOY.md`).
+- Todo se trabaja sobre `dev`: las branches salen de `dev` y vuelven por PR. La persona 2 mergea a `dev`; después de probar, **solo la persona 3 mergea `dev` → `main`**. El backend se deploya desde `main` (`backend/DEPLOY.md`); **para la demo del 15/11, desde `dev`**.
 - `dev` exige que pase la CI (lint, tests sin red, build, gitleaks y los checks del proyecto: `.github/README.md`).
 - El contrato de la API lo define la persona 1 en `backend/app/api/contrato.py`. No asumir nada que no figure en el repo.
 - Secretos en variables de entorno, nunca en el repo.
