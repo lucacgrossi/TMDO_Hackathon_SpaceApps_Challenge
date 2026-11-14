@@ -53,6 +53,7 @@ class Indicador(BaseModel):
     resolucion: str
     confianza: Confianza
     motivo: str | None = Field(None, description="Por qué falta o por qué la confianza es baja")
+    nota: str | None = Field(None, description="Cómo se calculó (ej. píxeles usados), para trazabilidad")
 
 
 # --- Entrada -----------------------------------------------------------------
@@ -122,28 +123,43 @@ class Entrada(BaseModel):
 class LoteSalida(BaseModel):
     localidad_aprox: str | None
     area_ha: float
-    pendiente_pct: Indicador
-    cobertura_agricola_pct: Indicador
+    pendiente_pct: Indicador = Field(description="Pendiente general: plano ajustado (satelite/elevacion.py)")
+    pendiente_maxima_pct: Indicador | None = Field(None, description="Percentil 95 por píxel; ruidoso")
+    cobertura_agricola_pct: Indicador = Field(description="% del lote que es cultivo (satelite/cobertura.py)")
 
 
 class MesSatelite(BaseModel):
+    """Un mes de `satelite/ndvi.py`, tal cual lo devuelve Back 2."""
+
+    mes: str | None = Field(None, description="AAAA-MM")
     fecha: str = Field(description="Fecha de la escena, AAAA-MM-DD")
     ndvi_medio: float
-    nubes_escena: float = Field(description="% de nubes de la escena")
-    fuente: str = Field(description='"NASA HLS 30 m" o "MODIS 250 m" si cayó al respaldo')
+    nubes_escena: float | None = Field(
+        None, description="% de nubes de la escena HLS; None en MODIS (compuesto de 16 días)")
+    coleccion: str | None = Field(None, description='"hls2-s30", "hls2-l30" o "modis-13Q1-061"')
+    item: str | None = Field(None, description="Id del item STAC, para armar las teselas")
+    pixeles: int | None = Field(None, description="Píxeles del lote que entraron en la media")
+    fuente: str = Field(description="Texto completo de la fuente; dice si cayó a MODIS de respaldo")
+
+
+class Faltante(BaseModel):
+    mes: str = Field(description="AAAA-MM")
+    motivo: str
 
 
 class VistoPorSatelite(BaseModel):
-    """RF14: NDVI medio del lote en cada mes de la última campaña."""
+    """RF14: NDVI medio del lote en cada mes de la última campaña (`satelite/ndvi.py`)."""
 
     campana: str | None
-    fuente: str
+    fuente: str = Field(description='"NASA HLS 30 m" o "NASA HLS 30 m + MODIS 250 m (respaldo en N de 12 meses)"')
     meses: list[MesSatelite | None] = _doce()
     meses_ndvi_bajo: int | None
-    meses_con_dato: int
+    meses_con_dato: int = Field(description="Lo cuenta servicio.py a partir de `meses`")
     umbral: float = 0.3
-    confianza: Confianza
-    motivo: str | None = None
+    confianza: Confianza = Field(description="La del indicador meses_cobertura_baja")
+    motivo: str | None = Field(None, description="Motivo o nota del indicador meses_cobertura_baja")
+    faltantes: list[Faltante] = Field([], description='Meses sin dato, para "Información que falta"')
+    orden_meses: str | None = None
 
 
 class CorregidoAlLado(BaseModel):

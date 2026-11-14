@@ -4,9 +4,15 @@ import copy
 import json
 from pathlib import Path
 
+import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+
+# La CI corre pytest con --disable-socket (pytest-socket). TestClient no sale a internet, pero el
+# event loop de asyncio abre un socketpair local para despertarse, y eso también lo bloquea.
+# Por eso estos tests habilitan sockets: siguen sin tocar la red (no hay ningún pedido HTTP real).
+pytestmark = pytest.mark.enable_socket
 
 cliente = TestClient(app)
 ENTRADA = json.loads((Path(__file__).parents[1] / "ejemplos" / "entrada_demo.json").read_text(encoding="utf-8"))
