@@ -7,16 +7,16 @@
  * previa y, al comparar, manda `serie.meses` en
  * `mediciones_propias.serie_mensual` de `/analizar`.
  *
- * DECISIÓN (Tobías, 14/11): la pantalla se arma ahora, pero la llamada real al
- * backend se conecta en la auditoría. Hasta entonces `leerPlanilla()` NO lee
- * el archivo: devuelve una respuesta de EJEMPLO marcada con `ejemplo: true`,
- * y la vista previa lo dice en grande. Así nada se muestra como si fuera dato
+ * Con la API conectada (`NEXT_PUBLIC_USAR_MOCK=false`) el archivo lo lee el back.
+ * Con el mock, `leerPlanilla()` NO lee el archivo: devuelve una respuesta de
+ * EJEMPLO marcada con `ejemplo: true`, y la vista previa lo dice en grande. Así nada se muestra como si fuera dato
  * del productor (principio "nada inventado").
  *
  * Los tipos copian `backend/app/api/contrato.py` (AvisoFila, MedicionMes,
- * SeriePlanilla, ResultadoPlanilla). Cuando exista `src/lib/contrato.ts`, se
- * importan de ahí.
+ * SeriePlanilla, ResultadoPlanilla).
  */
+
+import { subirPlanilla, USAR_MOCK } from "./api";
 
 export type VariablePlanilla = "lluvia_mm" | "t_min_c" | "t_max_c";
 
@@ -29,9 +29,10 @@ export interface AvisoFila {
 export interface MedicionMes {
   /** "AAAA-MM" */
   mes: string;
-  lluvia_mm?: number;
-  t_min_c?: number;
-  t_max_c?: number;
+  /** El back manda null cuando el mes no tiene esa medición. */
+  lluvia_mm?: number | null;
+  t_min_c?: number | null;
+  t_max_c?: number | null;
 }
 
 export interface SeriePlanilla {
@@ -140,11 +141,11 @@ export const RESULTADO_EJEMPLO: ResultadoPlanilla = {
 };
 
 /**
- * Lee la planilla. HOY: valida el tamaño y el tipo en el navegador y devuelve
- * la respuesta de ejemplo (no lee el contenido).
- * TODO(auditoría): reemplazar por `POST /mediciones/planilla` con
- * `FormData { archivo }`; 200 → ResultadoPlanilla, 422 → ResultadoPlanilla con
- * errores, 413 → "La planilla supera 1 MB".
+ * Lee la planilla. Primero valida tamaño y tipo en el navegador (sin gastar un
+ * pedido). Con la API (`NEXT_PUBLIC_USAR_MOCK=false`) la manda a
+ * `POST /mediciones/planilla`: 200 → ResultadoPlanilla, 422 → ResultadoPlanilla
+ * con errores, 413 → "La planilla supera 1 MB". Con el mock devuelve la
+ * respuesta de ejemplo (marcada `ejemplo`: no se manda a /analizar).
  */
 export async function leerPlanilla(archivo: File): Promise<ResultadoPlanilla> {
   if (archivo.size > LIMITE_BYTES) {
@@ -157,5 +158,5 @@ export async function leerPlanilla(archivo: File): Promise<ResultadoPlanilla> {
       errores: [{ fila: null, motivo: "El archivo tiene que ser CSV (Excel y Google Sheets lo exportan con «Guardar como CSV»)." }],
     };
   }
-  return RESULTADO_EJEMPLO;
+  return USAR_MOCK ? RESULTADO_EJEMPLO : subirPlanilla(archivo);
 }

@@ -32,6 +32,9 @@
   color: var(--muted);
   font-size: 13px;
 }
+.estado p {
+  margin: 0 0 10px;
+}
 
 /* Pie: el texto del prototipo y el aviso de apoyo (RF22) */
 .pie {

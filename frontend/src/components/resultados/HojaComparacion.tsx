@@ -5,7 +5,8 @@ import AvisoApoyo from "@/components/comunes/AvisoApoyo";
 import AvisoDesactualizado from "./AvisoDesactualizado";
 import { VENTANA_ENTRADA_MS, sinMovimiento } from "@/lib/animacion";
 import { AVISO_PRECALCULADO, metadatosHoja } from "@/lib/formato";
-import { useResultado } from "@/lib/resultado";
+import { despertar } from "@/lib/api";
+import { useResultado, useResultadoStore } from "@/lib/resultado";
 import { useVista } from "@/lib/vista";
 import ChoqueObjetivos from "./ChoqueObjetivos";
 import { EntradaHoja } from "./EntradaHoja";
@@ -33,11 +34,15 @@ export default function HojaComparacion() {
   const abierta = useVista((s) => s.hojaAbierta);
   const cerrar = useVista((s) => s.cerrarHoja);
   const resultado = useResultado();
+  const reintentar = useResultadoStore((s) => s.reintentar);
   const [vista, setVista] = useState<VistaResultado>("tabla");
   // La fecha se toma al abrir, en el cliente: así no difiere entre el servidor y el navegador
   const [fecha, setFecha] = useState<Date | null>(null);
   const titulo = useRef<HTMLHeadingElement>(null);
   const [entrada, setEntrada] = useState(false);
+
+  // Despierta el back (Cloud Run) al cargar la página: el primer pedido después de un rato tarda más
+  useEffect(() => despertar(), []);
 
   // body.sheet-open (subir los controles del mapa) lo pone ClaseBody de la persona 4, solo en compu
   useEffect(() => {
@@ -90,13 +95,18 @@ export default function HojaComparacion() {
         <div className={css.cuerpo}>
           {resultado.estado === "cargando" && (
             <p className={css.estado} role="status">
-              Trayendo los datos de NASA…
+              Trayendo los datos de NASA… puede tardar hasta medio minuto.
             </p>
           )}
           {resultado.estado === "error" && (
-            <p className={css.estado} role="alert">
-              No se pudo armar la comparación: {resultado.mensaje.replace(/[.\s]+$/, "")}. Para reintentar, cerrá la hoja y volvé a comparar.
-            </p>
+            <div className={css.estado} role="alert">
+              <p>No se pudo armar la comparación: {resultado.mensaje.replace(/[.\s]+$/, "")}.</p>
+              {resultado.reintentable && (
+                <button type="button" className="ghost" onClick={reintentar}>
+                  Probar de nuevo
+                </button>
+              )}
+            </div>
           )}
           {resultado.estado === "listo" && <ChoqueObjetivos estrategias={resultado.datos.estrategias} />}
           {resultado.estado === "listo" && <SerieCampanias salida={resultado.datos} />}

@@ -12,8 +12,8 @@ import CapaRasterLote from "./CapaRasterLote";
  * prototipo. La pendiente la calcula el backend con NASADEM a 30 m, la misma
  * que va a la tabla, así el mapa y la tabla no pueden dar números distintos.
  *
- * Hasta la conexión con el backend (auditoría), `useCapas.pendiente` queda en
- * null: no se dibuja nada y la leyenda dice "sin dato" y por qué.
+ * `useCapas.pendiente` la llena `lib/resultado.ts` con `capas.pendiente_mapa` de
+ * /analizar. Sin ella no se dibuja nada y la leyenda dice "sin dato" y por qué.
  */
 export default function CapaPendiente() {
   const activa = useMapa((s) => s.capa === "slope");

@@ -15,7 +15,6 @@ import {
 import {
   conSigno,
   fmt,
-  informacionQueFalta,
   mesesConAnios,
   NOMBRE_CULTIVO,
   rangoMeses,
@@ -368,7 +367,8 @@ export default function TablaTecnica({ salida }: { salida: Salida }) {
   const pesos = useEntradas((s) => s.objetivos);
   const actual = esDisponible(salida.estrategias[0]) ? salida.estrategias[0] : null;
   const ctx: Contexto = { salida, actual, pesos };
-  const falta = informacionQueFalta(salida);
+  // Ya trae los meses sin escena del satélite (servicio.py: "NDVI del lote · …")
+  const falta = salida.informacion_falta;
 
   return (
     <div className={css.contenedor}>

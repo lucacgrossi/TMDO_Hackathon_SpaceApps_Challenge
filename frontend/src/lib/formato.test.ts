@@ -2,8 +2,6 @@ import { describe, expect, it } from "vitest";
 import {
   conSigno,
   fmt,
-  informacionQueFalta,
-  mesAnio,
   listaMeses,
   mesesConAnios,
   metadatosHoja,
@@ -73,28 +71,4 @@ describe("calendario y meses", () => {
     expect(textoEfecto({ erosion: -12 })).toBe("erosión −12");
   });
 });
-
-describe("información que falta en todo el análisis", () => {
-  it("nombra el mes AAAA-MM en castellano", () => {
-    expect(mesAnio("2025-08")).toBe("agosto de 2025");
-    expect(mesAnio("raro")).toBe("raro");
-  });
-
-  it("suma los meses sin escena del satélite a la lista del back, sin repetir", () => {
-    const base = structuredClone(MOCK_BASE);
-    base.informacion_falta = ["Capa de erosión"];
-    base.visto_por_satelite.faltantes = [{ mes: "2025-11", motivo: "sin escena HLS limpia ni compuesto MODIS" }];
-    expect(informacionQueFalta(base)).toEqual([
-      "Capa de erosión",
-      "Satélite sin escena en noviembre de 2025: sin escena HLS limpia ni compuesto MODIS",
-    ]);
-    base.informacion_falta.push("Satélite sin escena en noviembre de 2025: sin escena HLS limpia ni compuesto MODIS");
-    expect(informacionQueFalta(base)).toHaveLength(2);
-  });
-
-  it("sin faltantes del satélite (campo opcional) devuelve la lista del back tal cual", () => {
-    const base = structuredClone(MOCK_BASE);
-    delete base.visto_por_satelite.faltantes;
-    expect(informacionQueFalta(base)).toEqual(base.informacion_falta);
-  });
-});
+

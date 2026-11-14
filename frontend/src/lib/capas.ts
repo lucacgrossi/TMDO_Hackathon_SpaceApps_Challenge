@@ -38,7 +38,7 @@ export type FuenteNdvi =
       /** Fecha de la escena, "AAAA-MM-DD". */
       fecha: string;
       /** Nubes en la escena, %. */
-      nubes: number;
+      nubes: number | null;
       /** NDVI medio dentro del lote. null mientras se calcula o si falló. */
       media: number | null;
     }
@@ -51,7 +51,7 @@ export type FuenteNdvi =
 /**
  * Climatología mensual de NASA POWER para la capa "Lluvia y heladas"
  * (`clima_mensual` de `/analizar`). Índice 0 = enero … 11 = diciembre.
- * Llega del backend en la auditoría de conexión; hasta entonces es null y la
+ * Llega con la respuesta de /analizar (`lib/resultado.ts`); hasta entonces es null y la
  * leyenda dice "sin dato" (no se muestran valores ilustrativos: pedido de
  * Back 2 en el PR #25, principio "nada inventado").
  */
@@ -77,7 +77,7 @@ interface EstadoCapas {
   ndvi: FuenteNdvi | null;
   /**
    * Capa raster de pendiente que manda el backend (NASADEM 30 m).
-   * null = todavía no hay dato: hasta la auditoría de conexión siempre es null.
+   * null = todavía no hay dato (no se comparó, es el mock o el back no la mandó).
    */
   pendiente: CapaRaster | null;
   /** Climatología del punto (NASA POWER). null = todavía sin dato del backend. */

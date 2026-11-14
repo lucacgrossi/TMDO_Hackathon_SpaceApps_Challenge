@@ -5,6 +5,7 @@ import { LOTE_DEMO, type LatLng } from "@/lib/entradas";
 import { useDibujo } from "@/lib/dibujo";
 import { areaHa, centro, formatoNumero, mismoPoligono } from "@/lib/geo";
 import { useMapa } from "@/lib/mapa";
+import { useSalidaDelLote } from "@/lib/resultado";
 import { useEntradas } from "@/lib/store";
 import { useZona } from "@/lib/zona";
 
@@ -25,8 +26,14 @@ import { useZona } from "@/lib/zona";
  *
  * Pendiente y lluvia/año quedan en "—": son datos de NASA (NASADEM y POWER)
  * que calcula el backend; el front no calcula datos de NASA (frontend/CLAUDE.md).
- * Se completan cuando llegue la respuesta de /analizar.
+ * Se completan con la respuesta de /analizar para este lote (`useSalidaDelLote`):
+ * `lote.pendiente_pct` y `indicadores.lluvia_anual`, con fuente y período en el title.
  */
+
+/** "0,6 %" o "819 mm" de un indicador del back; "—" si no vino o no tiene valor. */
+function valorIndicador(ind: { valor: number | string | null } | undefined, decimales: number, unidad: string): string {
+  return typeof ind?.valor === "number" ? `${formatoNumero(ind.valor, decimales)} ${unidad}` : "—";
+}
 
 /** "33,2477° S · 64,2325° O": hemisferio con letra, como en el prototipo. */
 function coordenadas([lat, lng]: LatLng): string {
@@ -45,6 +52,9 @@ export default function ResumenLote() {
   const c = centro(poligono);
   // Zona real del lote (geocodificación inversa de Esri), ver lib/zona.ts
   const zona = useZona(poligono);
+  const salida = useSalidaDelLote();
+  const pendiente = salida?.lote.pendiente_pct;
+  const lluvia = salida?.indicadores.lluvia_anual;
 
   /** "Lote de ejemplo": vuelve el rectángulo de Río Cuarto y lo encuadra (con 30 % de aire). */
   const usarEjemplo = () => {
@@ -84,11 +94,15 @@ export default function ResumenLote() {
         </div>
         <div>
           <div className="k">Pendiente</div>
-          <div className="v num">—</div>
+          <div className="v num" title={pendiente ? `${pendiente.fuente} · ${pendiente.resolucion}` : undefined}>
+            {valorIndicador(pendiente, 1, "%")}
+          </div>
         </div>
         <div>
           <div className="k">Lluvia/año</div>
-          <div className="v num">—</div>
+          <div className="v num" title={lluvia ? `${lluvia.fuente} · ${lluvia.anios ?? ""}` : undefined}>
+            {valorIndicador(lluvia, 0, "mm")}
+          </div>
         </div>
       </div>
     </div>
