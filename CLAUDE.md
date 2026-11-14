@@ -1,7 +1,9 @@
 # Field Shift — NASA Space Apps Córdoba 2026
 
 Proyecto de hackathon (equipo de 6, FCEFyN-UNC). **Demo: domingo 15/11 a las 18:00 · código congelado el domingo a las 12:00.**
-Objetivo: un MVP que funcione de punta a punta y se pueda demostrar. Si algo traba más de 45 min, se recorta o se simula con datos fijos.
+Objetivo: un MVP que funcione de punta a punta y se pueda demostrar. Si algo se traba, se avisa y se decide en equipo si se recorta o se simula con datos fijos.
+
+**Stack:** monorepo con `backend/` (Python + FastAPI, organizado por dominio: ver `backend/PLAN.md`) y `frontend/` (ver `frontend/CLAUDE.md`).
 
 **Detalle del alcance** (pantallas, casos de uso, requerimientos, contrato de API propuesto, orden de construcción): [docs/mvp-alcance.md](docs/mvp-alcance.md). Leerlo antes de implementar una funcionalidad.
 
@@ -50,13 +52,14 @@ Responde al desafío *"Field Shift: Adapting Farms with NASA Data"*: comparar ro
 Prioridad: POWER primero; después MODIS y SRTM; SoilGrids y GAEZ solo si sobra tiempo. Todo se lleva a **escala mensual + climatología de 20–30 años**. Los datos gruesos se presentan como "contexto regional". Los nombres de producto y las resoluciones se verifican en la fuente antes de usarlos.
 
 ## Equipo
-1 Backend clima + líder técnico (único que mergea a `main`) · 2 Datos satelitales y suelo · 3 Scoring y agronomía (dueño de las reglas y de la tabla de cultivos) · 4 Front: mapa y entradas · 5 Front: resultados y diseño · 6 Producto, pitch y coordinación (desempata y recorta alcance).
+1 Backend nucleo + líder técnico · 2 Datos satelitales y suelo · 3 Producto y logica: Motor de reglas y definicion de producto (Mergea a 'main')· 4 Front: mapa y entradas · 5 Front: resultados y comparacion.
 
 ## Cómo trabajamos
-- Una branch por feature, fix, etc. Con el formato: <nombre-colaborador>/<tipo>/<area>-<descripcion-corta>. Commits frecuentes; solo la persona 1 mergea a `main`.
+- Una branch por feature, fix, etc. Con el formato: <nombre-colaborador>/<tipo>/<area>-<descripcion-corta>. Commits frecuentes; **solo la persona 3 mergea a `main`**.
 - Formato de commit: <tipo>(<area>): <qué hace, en presente>
                       [opcional: por qué o detalle, si no es obvio]
-- Stack y contrato de API: los define la persona 1. No asumir nada que no figure en el repo.
+-Para desarrollo siempre se trabaja sobre la rama dev, ahi se mergean las branch, y luego de testear, recien se puede hacer el PR a main.
+- El contrato de la API lo define la persona 1. No asumir nada que no figure en el repo.
 - Secretos en variables de entorno, nunca en el repo.
 - App en español, con lenguaje agronómico técnico; lo satelital se explica en una línea.
 - Diseño pensado primero para la compu.
