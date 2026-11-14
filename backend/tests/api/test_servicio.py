@@ -471,3 +471,35 @@ def test_planilla_compara_en_las_mismas_campanas_sin_cambiar_puntajes(monkeypatc
     for e_sin, e_con in zip(sin.estrategias, s.estrategias):  # ningún puntaje cambia
         assert e_con.puntos == e_sin.puntos and e_con.cercania == e_sin.cercania
         assert e_con.probabilidades == e_sin.probabilidades
+
+
+def test_planilla_con_heladas_baja_la_confianza_y_suma_la_linea_sin_cambiar_probabilidades(monkeypatch):
+    """Planilla con temperaturas (5.4): confianza de heladas, línea del productor y nada más cambia."""
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado({}))
+    monkeypatch.setattr(servicio, "_cargar_cultivos", lambda: CULTIVOS_CLIMA)
+    sin = servicio.analizar(Entrada.model_validate(ENTRADA))
+
+    serie = power.armar_serie(json.loads((Path(__file__).parents[1] / "clima" / "fixtures" / "power_rio_cuarto.json")
+                                         .read_text(encoding="utf-8")))
+    ultimas = serie.campanas[-6:]
+    meses = []
+    for c in ultimas:
+        for m in (6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5):
+            t_min = -3.0 if m in (9, 10) else c.t_min_c[m]  # heladas en octubre y noviembre que NASA no tiene
+            meses.append({"mes": f"{c.anio_inicio + 1 if m < 6 else c.anio_inicio}-{m + 1:02d}",
+                          "t_min_c": t_min, "t_max_c": c.t_max_c[m]})
+    entrada = copy.deepcopy(ENTRADA)
+    entrada["mediciones_propias"] = {"serie_mensual": meses}
+    s = servicio.analizar(Entrada.model_validate(entrada))
+
+    assert s.indicadores["meses_helada_frecuente"].confianza == "baja"
+    assert "heladas que NASA POWER no ve" in s.indicadores["meses_helada_frecuente"].motivo
+    assert s.indicadores["meses_helada_frecuente"].valor == sin.indicadores["meses_helada_frecuente"].valor
+    assert s.indicadores["lluvia_anual"].confianza == sin.indicadores["lluvia_anual"].confianza
+    assert any(c.indicador == "helada" and c.mes == 10 for c in s.contraste_mediciones)
+    for e_sin, e_con in zip(sin.estrategias, s.estrategias):
+        assert e_con.puntos == e_sin.puntos and e_con.cercania == e_sin.cercania
+        for p_sin, p_con in zip(e_sin.probabilidades, e_con.probabilidades):
+            assert (p_con.anios, p_con.de, p_con.pct, p_con.texto) == (p_sin.anios, p_sin.de, p_sin.pct, p_sin.texto)
+            if p_con.evento in ("helada", "calor") and p_con.contraste:
+                assert p_con.contraste.startswith("Tu estación:")
