@@ -50,12 +50,13 @@ Responde al desafío *"Field Shift: Adapting Farms with NASA Data"*: comparar ro
 Prioridad: POWER primero; después MODIS y SRTM; SoilGrids y GAEZ solo si sobra tiempo. Todo se lleva a **escala mensual + climatología de 20–30 años**. Los datos gruesos se presentan como "contexto regional". Los nombres de producto y las resoluciones se verifican en la fuente antes de usarlos.
 
 ## Equipo
-1 Backend clima + líder técnico (único que mergea a `main`) · 2 Datos satelitales y suelo · 3 Scoring y agronomía (dueño de las reglas y de la tabla de cultivos) · 4 Front: mapa y entradas · 5 Front: resultados y diseño · 6 Producto, pitch y coordinación (desempata y recorta alcance).
+1 Backend nucleo + líder técnico · 2 Datos satelitales y suelo · 3 Producto y logica: Motor de reglas y definicion de producto (Mergea a 'main')· 4 Front: mapa y entradas · 5 Front: resultados y comparacion.
 
 ## Cómo trabajamos
 - Una branch por feature, fix, etc. Con el formato: <nombre-colaborador>/<tipo>/<area>-<descripcion-corta>. Commits frecuentes; solo la persona 1 mergea a `main`.
 - Formato de commit: <tipo>(<area>): <qué hace, en presente>
                       [opcional: por qué o detalle, si no es obvio]
+-Para desarrollo siempre se trabaja sobre la rama dev, ahi se mergean las branch, y luego de testear, recien se puede hacer el PR a main.
 - Stack y contrato de API: los define la persona 1. No asumir nada que no figure en el repo.
 - Secretos en variables de entorno, nunca en el repo.
 - App en español, con lenguaje agronómico técnico; lo satelital se explica en una línea.
