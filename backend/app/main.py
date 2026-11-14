@@ -6,8 +6,10 @@ Correr desde `backend/`:
 Documentación interactiva: http://localhost:8000/docs
 
 Variables de entorno:
-    CORS_ORIGINS  orígenes permitidos separados por coma
-                  (por defecto http://localhost:3000 para el front local)
+    CORS_ORIGINS       orígenes permitidos separados por coma
+                       (por defecto http://localhost:3000 para el front local)
+    CORS_ORIGIN_REGEX  opcional: expresión regular de orígenes permitidos, para las URL de
+                       Vercel que cambian en cada deploy (ej. https://.*\\.vercel\\.app)
 """
 
 import logging
@@ -31,6 +33,7 @@ _origenes = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:3000
 app.add_middleware(
     CORSMiddleware,
     allow_origins=_origenes,
+    allow_origin_regex=os.getenv("CORS_ORIGIN_REGEX") or None,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],
 )

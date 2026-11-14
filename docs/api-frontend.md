@@ -14,7 +14,7 @@ Qué rutas expone el back, qué mandarles y qué devuelven. Está escrita para l
 | Cloud Run | `https://field-shift-api-757348191517.southamerica-east1.run.app` |
 
 - En el front, la URL va en `NEXT_PUBLIC_API_URL` (sin barra final) y `NEXT_PUBLIC_USAR_MOCK=false` para usar la API real (ver `frontend/.env.example`).
-- **CORS:** el back acepta solo los orígenes de `CORS_ORIGINS` (por defecto `http://localhost:3000`). Si el front se publica en otro dominio, hay que pedirle a Back 2 que lo agregue en el deploy (`backend/DEPLOY.md`). Métodos permitidos: `GET` y `POST`.
+- **CORS:** el back acepta los orígenes de `CORS_ORIGINS` (por defecto `http://localhost:3000`) y, en el deploy de la demo, cualquier `https://*.vercel.app` (`CORS_ORIGIN_REGEX`). Si el front se publica en otro dominio, hay que pedirle a Back 2 que lo agregue en el deploy (`backend/DEPLOY.md`). Métodos permitidos: `GET` y `POST`.
 - No hay login, ni tokens, ni cookies.
 
 ## 2. Resumen de rutas
