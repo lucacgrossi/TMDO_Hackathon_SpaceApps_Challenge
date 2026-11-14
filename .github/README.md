@@ -4,7 +4,7 @@ GitHub Actions corre en cada PR a `dev` y `main` y en cada push a `dev`. Nada us
 
 | Workflow | Cuándo corre | Qué revisa |
 |---|---|---|
-| `backend.yml` | siempre se dispara; el job pesado corre si cambia `backend/**` | Python 3.12 · `ruff check` · `ruff format --check` (informativo, todavía no bloquea) · `pytest --disable-socket` (tests sin red) · que `app` y todos sus módulos importen (y `app.main` cuando exista) |
+| `backend.yml` | siempre se dispara; el job pesado corre si cambia `backend/**` | Python 3.12 · `ruff check` · `ruff format --check` (informativo, todavía no bloquea) · `pytest --disable-socket` (tests sin red) · que `app` y todos sus módulos importen, `app.main` incluido. Cloud Run usa 3.13 (`backend/.python-version`) |
 | `frontend.yml` | siempre se dispara; el job pesado corre si cambia `frontend/**` | Node 22 · `npm ci` · `npm run lint` · `typecheck` · `npm test` (vitest) · `npm run build` |
 | `secretos.yml` | siempre | gitleaks sobre el diff del PR y sobre todo el historial (config en `.gitleaks.toml`) |
 | `checks-proyecto.yml` | siempre | las reglas propias de abajo (`.github/scripts/`) |
@@ -17,7 +17,7 @@ Scripts de Python sin dependencias; se corren **desde la raíz del repo** (`py` 
 | Script | Regla | Falla si… |
 |---|---|---|
 | `lenguaje_prohibido.py` | "Compara, no recomienda" | `frontend/src/**` o `backend/app/**` (sin tests ni docs) contienen "recomendamos", "deberías" o "la mejor" (sin distinguir mayúsculas ni tildes). Excepción puntual: `lenguaje-ok` en la línea |
-| `fronteras_dominios.py` | Un dominio no importa a otro | un archivo de `backend/app/{clima,satelite,motor}/` importa algo de `app.*` que no sea su dominio ni `app.api.contrato`. Solo `servicio.py` y `api/` conectan dominios |
+| `fronteras_dominios.py` | Un dominio no importa a otro | un archivo de un dominio del back (los de `DOMINIOS` en el script: `clima`, `satelite`, `motor` y, con el parser de la planilla, `mediciones`) importa algo de `app.*` que no sea su dominio ni `app.api.contrato`. Solo `servicio.py` y `api/` conectan dominios |
 | `archivos_pesados.py` | Nada pesado en el repo | un archivo agregado/modificado pasa de 1 MB, es un dato crudo (`.nc`, `.hdf`, `.h5`, `.tif`, `.tiff`, `.zarr`) fuera de `backend/tests/**/fixtures/`, o una fixture pasa de 200 KB |
 | `sin_env.py` | Sin secretos en el repo | hay un `.env` o `.env.*` versionado (solo se permite `.env.example`) |
 | `nombre_branch.py` | `<nombre>/<tipo>/<area>-<descripcion>` | **nunca falla**: solo avisa. `<tipo>`: feat, fix, docs, chore, data, refactor, test |

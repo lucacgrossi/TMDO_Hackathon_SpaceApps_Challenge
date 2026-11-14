@@ -4,25 +4,26 @@ Contexto, principios y alcance: `../CLAUDE.md` (no se repiten acá). Producto y 
 
 Dueños: persona 4 (mapa y entradas) y persona 5 (resultados y diseño). Coordinar antes de tocar archivos del otro.
 
-## Stack (propuesto, confirmar con la persona 1)
-El MVP y el `CLAUDE.md` raíz dicen que el stack y el contrato de la API los define la persona 1. Hasta que lo cierre, esto es lo que usa el prototipo y la guía del equipo: **Next.js (App Router) + TypeScript + Tailwind + react-leaflet + recharts**. No asumir más que eso.
+## Stack
+**Next.js (App Router) + TypeScript + Tailwind + react-leaflet + recharts + zustand**, con vitest para los tests (ver `package.json`). El contrato de la API lo define la persona 1 en `../backend/app/api/contrato.py`.
 
-## Requerimientos del front (del MVP)
-**Must:** RF1 mapa centrado en Córdoba (click, buscador, lat/lon editable) · RF2 rotación y calendario de 12 meses automático · RF4 cuatro objetivos 0–5 (por defecto 3) · RF5 restricciones solo de lista · RF10 valores por tipo de año y "sensible al clima" · RF11 tabla de 4 columnas con valor, unidad, fuente, años, resolución y confianza · RF12 textos con plantillas, sin IA · RF13 recalcular la cercanía al mover las barras, **sin volver a llamar a la API** · RF21 "Información que falta" · RF22 aviso de apoyo visible.
+## Requerimientos del front (MVP 4.3)
+**Must:** RF1 mapa centrado en Córdoba (click, buscador, lat/lon editable) · RF2 rotación y calendario de 12 meses automático · RF4 cuatro objetivos **de 1 a 5** (por defecto 3) · RF5 restricciones solo de lista · RF10 valores por tipo de año y "sensible al clima" · RF11 tabla de 4 columnas con valor, unidad, fuente, años, resolución y confianza · RF12 textos con plantillas, sin IA · RF13 recalcular la cercanía al mover las barras, **sin volver a llamar a la API** y con la misma cuenta que el motor: prioridades al cuadrado (`Σ p²·v / Σ p²`) · RF21 "Información que falta" · RF22 aviso de apoyo visible · RF25 probabilidad climatológica en cada columna.
 
-**Should:** RF3 editar fechas · RF6 encharca y textura · RF14 lo que vio el satélite · RF15 mediciones propias · RF16 erosión · RF17 NDVI con línea de tiempo · RF18 leyenda y valor al tocar · RF20 mail y PDF.
+**Should:** RF3 editar fechas · RF6 encharca y textura · RF14 lo que vio el satélite · RF15 mediciones propias (al lado de NASA; los puntajes ya vienen mezclados del back) · RF16 erosión · RF17 NDVI con línea de tiempo · RF18 leyenda y valor al tocar · RF20 mail y PDF · RF26 subir la planilla CSV (`POST /mediciones/planilla` → vista previa → `mediciones_propias.serie_mensual` en `/analizar`; ver `../docs/plan-planilla-lluvia.md`).
 
 **Could:** RF19 capas regionales · RF23 tooltips.
 
 ## Reglas de implementación
-- **Un contrato, un tipo.** Los tipos de la respuesta de `/analizar` viven en un solo archivo (`src/lib/contrato.ts`) y copian el contrato del MVP. Es lo único que depende del back. Si el contrato cambia, se cambia ahí.
+- **Un contrato, un tipo.** Los tipos de la respuesta de `/analizar` viven en un solo archivo (`src/lib/contrato.ts`) y copian `../backend/app/api/contrato.py`, que es el contrato vigente (el del MVP es solo un resumen). Es lo único que depende del back. Si el contrato cambia, se cambia ahí.
 - **Datos falsos primero.** Un mock (`src/mocks/analizar.ts`) devuelve el contrato completo para el lote de Río Cuarto (≈ 33,2477° S, 64,2325° O). Un flag de entorno decide mock o API real; la URL del back va en una variable de entorno.
 - **El front no calcula datos de NASA.** Solo recalcula la cercanía a los objetivos (RF13) con valores ya recibidos.
+- **Capas del mapa: el back calcula, el front dibuja.** La escena NDVI de cada mes es la del back (`capas.ndvi_mensual[mes]`: colección, item, fecha), y la marca "Lote" de la leyenda es `visto_por_satelite.meses[mes].ndvi_medio`. La pendiente sale de `lote.pendiente_pct`. Nada de búsquedas de escenas propias, cálculo de la pendiente en el navegador ni valores ilustrativos. Todas las capas usan la campaña del back y el mismo `mes` (índice 0 = enero). Lo que viene (capas como `CapaRaster` con PNG, `bounds` comunes, escala y valores por píxel) está en `../docs/plan-armonizacion-capas.md`.
 - **El color nunca es la única señal:** heladas con marca, conflictos con anillo, descartadas con rayado.
 - **Compu primero.** En celular, la tabla hace scroll horizontal.
 - **Una pieza por archivo** (`TarjetaEstrategia`, `CalendarioMeses`, `BarraObjetivo`…) para evitar conflictos de merge.
 - Accesibilidad básica: foco visible, `aria-pressed`, `prefers-reduced-motion`, modo oscuro por `prefers-color-scheme`.
-- Leaflet se carga solo en el cliente (`dynamic` con `ssr: false`). Mapa base Esri con su atribución; NDVI de NASA GIBS (`MODIS_Terra_L3_NDVI_16Day`, nivel 9) y pendiente de AWS Terrain Tiles, como en el prototipo.
+- Leaflet se carga solo en el cliente (`dynamic` con `ssr: false`). Mapa base Esri con su atribución. NDVI con las teselas de Planetary Computer de la escena del back, y NASA GIBS (`MODIS_Terra_L3_NDVI_16Day`, nivel 9) en los meses sin escena HLS.
 - **Límites de zoom del mapa.** Esri no tiene imagen en todas las zonas a todos los zooms: en el lote de la demo llega a 18 y en 19 muestra "Map data not yet available" (el prototipo deja llegar a 19). Reglas:
   - Capa Esri con `maxNativeZoom: 17`, para que Leaflet agrande las teselas existentes en vez de pedir las que no hay. Vale para cualquier zona.
   - Mapa con `maxZoom: 18` y `minZoom: 5`.
