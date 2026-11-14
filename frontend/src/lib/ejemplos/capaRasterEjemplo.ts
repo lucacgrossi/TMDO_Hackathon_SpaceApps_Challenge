@@ -30,6 +30,7 @@ export const CAPA_RASTER_EJEMPLO: CapaRaster = {
   titulo: "Pendiente del lote",
   unidad: "%",
   fuente: "NASADEM",
+  fecha: null,
   campana: "2025/26",
   resolucion_nativa: "30 m",
   resolucion_grilla: "1 segundo de arco (~30 m)",

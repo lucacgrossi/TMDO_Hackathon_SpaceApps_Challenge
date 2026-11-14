@@ -14,9 +14,9 @@ import { useEntradas } from "@/lib/store";
  * si trae lluvia, el campo manual del pluviómetro se deshabilita
  * (lo hace SeccionMediciones). "Quitar planilla" vuelve a la carga a mano.
  *
- * HOY no se llama al backend (decisión del equipo: se conecta en la
- * auditoría). `leerPlanilla()` devuelve una respuesta de ejemplo y la vista
- * previa avisa en grande que NO es el contenido del archivo.
+ * Con la API conectada, `leerPlanilla()` manda el archivo al back. Con el mock
+ * devuelve una respuesta de ejemplo y la vista previa avisa en grande que NO es
+ * el contenido del archivo.
  */
 export default function SubirPlanilla() {
   const planilla = useEntradas((s) => s.mediciones.planilla);
@@ -72,10 +72,10 @@ export default function SubirPlanilla() {
       {planilla && r && (
         <div className="planilla-prev" role="status">
           {r.ejemplo && (
-            // Nada inventado: mientras no se conecte el backend, la vista
+            // Nada inventado: con el mock (sin backend), la vista
             // previa es un EJEMPLO y no lo que trae el archivo.
             <p className="planilla-ej">
-              Vista previa de ejemplo: la lectura real del archivo se conecta con el backend en la auditoría. Estos
+              Vista previa de ejemplo: la app está con datos de prueba, sin backend, y no leyó el archivo. Estos
               números no son de tu planilla.
             </p>
           )}

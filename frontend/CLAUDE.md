@@ -47,7 +47,7 @@ Referencia visual y de comportamiento: `../docs/prototipo/field-shift-prototipo.
 - `src/components/comunes/` · `ClaseBody` (sincroniza `body.onb` con el paso) y `AvisoApoyo`.
 - `public/img/` · imágenes de la intro (créditos en `CREDITOS.txt`).
 - El paso 1 / paso 2 lo maneja el CSS del prototipo con `body.onb`; el estado `paso` lo decide.
-- Sin conexión con el backend por ahora: la llamada a `/analizar` se arma en la auditoría.
+- Conexión con el back: `src/lib/api.ts` (rutas y errores), `src/lib/aEntrada.ts` (entradas → cuerpo de `/analizar`) y `src/lib/resultado.ts` (pide al comparar y llena las capas del mapa). Mock o API según `NEXT_PUBLIC_USAR_MOCK`.
 
 ## Fuera de alcance
 Lo del `CLAUDE.md` raíz, más: chat o IA, alfalfa y pasturas, guardar comparaciones.

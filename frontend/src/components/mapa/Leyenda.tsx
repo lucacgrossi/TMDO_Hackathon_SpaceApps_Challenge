@@ -75,8 +75,7 @@ function LeyendaNdvi({ mes }: { mes: number }) {
           </div>
         )}
         <div className="src">
-          NDVI de NASA HLS · {HLS_SENSOR[ndvi.coleccion] ?? ndvi.coleccion} · píxel de 30 m · nubes en la escena:{" "}
-          {fmt(ndvi.nubes)} %. Servido por Microsoft Planetary Computer. Dato real.
+          NDVI de NASA HLS · {HLS_SENSOR[ndvi.coleccion] ?? ndvi.coleccion} · píxel de 30 m{ndvi.nubes != null ? ` · nubes en la escena: ${fmt(ndvi.nubes)} %` : ""}. Servido por Microsoft Planetary Computer. Dato real.
         </div>
       </>
     );
@@ -108,8 +107,8 @@ function LeyendaPendiente() {
       <>
         <b>Pendiente del lote · sin dato</b>
         <div className="src">
-          La calcula el backend con NASADEM (30 m), la misma que usa la tabla. Llega cuando se conecte la app con el
-          backend.
+          La calcula el backend con NASADEM (30 m), la misma que usa la tabla. Aparece al comparar, si el backend la
+          pudo calcular para este lote.
         </div>
       </>
     );
@@ -124,10 +123,18 @@ function LeyendaPendiente() {
 function LeyendaRaster({ capa }: { capa: CapaRaster }) {
   const { cortes, colores, etiquetas } = capa.escala;
   const cuando = capa.fecha ? formatoFecha(capa.fecha) : capa.campana;
+  // El valor del lote (el de la tabla) si viene; si no, la media por píxel. Puede no haber ninguno.
+  const { valor_lote: lote, media } = capa.resumen;
+  const titulo =
+    lote != null
+      ? `valor del lote ${fmt(lote, 1)} ${capa.unidad}`
+      : media != null
+        ? `media ${fmt(media, 1)} ${capa.unidad}`
+        : "sin dato";
   return (
     <>
       <b>
-        {capa.titulo} · media {fmt(capa.resumen.media, 1)} {capa.unidad}
+        {capa.titulo} · {titulo}
       </b>
       <div className="ramp" style={{ background: `linear-gradient(90deg,${colores.join(",")})` }} />
       <div className="row">
@@ -166,7 +173,7 @@ function LeyendaClima({ mes }: { mes: number }) {
         <b>Lluvia y heladas · {MESES[mes].toLowerCase()} · sin dato</b>
         <div className="src">
           Lluvia, temperaturas y heladas salen de NASA POWER (últimas 30 campañas) y las manda el backend. Llegan
-          cuando se conecte la app con el backend. {zona}
+          al comparar. {zona}
         </div>
       </>
     );

@@ -113,20 +113,3 @@ export function metadatosHoja(salida: Salida, fecha: Date): string {
  */
 export const AVISO_PRECALCULADO = "Respuesta precalculada: no se pidió a NASA en este momento (ver «Información que falta»).";
 
-/** "2025-08" → "agosto de 2025". */
-export function mesAnio(aaaamm: string): string {
-  const [anio, mes] = aaaamm.split("-").map(Number);
-  return MESES[mes - 1] ? `${MESES[mes - 1]} de ${anio}` : aaaamm;
-}
-
-/**
- * Todo lo que falta en el análisis entero: `informacion_falta` del back más los
- * meses sin escena del satélite (`visto_por_satelite.faltantes`), como pide
- * docs/api-frontend.md (4.8). Sin repetir si el back ya lo puso en la lista.
- */
-export function informacionQueFalta(salida: Salida): string[] {
-  const satelite = (salida.visto_por_satelite.faltantes ?? []).map(
-    (f) => `Satélite sin escena en ${mesAnio(f.mes)}: ${f.motivo}`,
-  );
-  return [...salida.informacion_falta, ...satelite.filter((t) => !salida.informacion_falta.includes(t))];
-}

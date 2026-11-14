@@ -41,6 +41,12 @@ export function campanaEstimada(hoy: Date = new Date()): number {
 
 export const CAMP0 = campanaEstimada();
 
+/** Primer año de la campaña que manda la API ("2025/26" → 2025); sin dato, la estimada. */
+export function camp0De(campana: string | null | undefined): number {
+  const anio = Number(campana?.slice(0, 4));
+  return Number.isInteger(anio) && anio > 1900 ? anio : CAMP0;
+}
+
 /** Año calendario del mes m (0 = enero) dentro de la campaña: julio a diciembre caen en CAMP0. */
 export function anioCampania(m: number, camp0 = CAMP0): number {
   return m >= 6 ? camp0 : camp0 + 1;
@@ -86,12 +92,12 @@ export interface EscenaHls {
   nubes: number;
 }
 
-function consultaHls(sc: EscenaHls): string {
+function consultaHls(sc: Pick<EscenaHls, "coleccion" | "id">): string {
   return `collection=${sc.coleccion}&item=${encodeURIComponent(sc.id)}&expression=${encodeURIComponent(HLS_EXPR[sc.coleccion])}&asset_as_band=true`;
 }
 
 /** URL de teselas de NDVI pintado a 30 m (hlsLayer del prototipo). */
-export function urlTeselasHls(sc: EscenaHls): string {
+export function urlTeselasHls(sc: Pick<EscenaHls, "coleccion" | "id">): string {
   return `${PC}/data/v1/item/tiles/WebMercatorQuad/{z}/{x}/{y}@1x?${consultaHls(sc)}&rescale=0,${NDVI_MAX}&colormap=${colormapHls()}&format=png`;
 }
 

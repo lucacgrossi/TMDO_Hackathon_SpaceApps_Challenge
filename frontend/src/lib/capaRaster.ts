@@ -7,53 +7,17 @@
  * tabla muestren el mismo número. Todas las capas comparten `bounds`, así que
  * sus píxeles se superponen exactamente.
  *
- * OJO: este tipo copia la PROPUESTA de Luca. El contrato lo define la
- * persona 1 (Benja suma `CapaRaster` al contrato con un mock). Cuando eso
- * llegue a `src/lib/contrato.ts`, este tipo se reemplaza por el de ahí. La
- * conexión con `/analizar` se hace en la auditoría, no antes.
+ * El tipo es el de `contrato.ts`. `valores` puede venir null (NDVI de lotes
+ * grandes): sin valores no hay "tocar un píxel", pero el PNG se dibuja igual.
  */
 
+import type { Bounds, CapaRaster } from "./contrato";
+
+/** El tipo es el del contrato (`contrato.ts`, copia de `contrato.py`): un solo tipo para el mapa y la tabla. */
+export type { CapaRaster };
+
 /** [[sur, oeste], [norte, este]], como los `bounds` de Leaflet. */
-export type Limites = [[number, number], [number, number]];
-
-export interface EscalaRaster {
-  /** Límites de cada clase, de menor a mayor (por ejemplo NDVI 0 · 0,15 · 0,3 …). */
-  cortes: number[];
-  /** Un color por clase (`cortes.length - 1` colores). */
-  colores: string[];
-  /** Texto de cada corte o clase, para la leyenda. */
-  etiquetas: string[];
-}
-
-export interface CapaRaster {
-  id: string;
-  titulo: string;
-  unidad: string;
-  fuente: string;
-  /** Una de las dos: fecha de la escena ("AAAA-MM-DD") o campaña ("2025/26"). */
-  fecha?: string;
-  campana?: string;
-  /** Resolución del dato original, por ejemplo "30 m". */
-  resolucion_nativa: string;
-  /** Resolución de la grilla común (1 segundo de arco, ~30 m). */
-  resolucion_grilla: string;
-  bounds: Limites;
-  /** Columnas y filas de la grilla. */
-  ancho: number;
-  alto: number;
-  /** PNG en base64 (sin el prefijo data:), transparente fuera del lote. */
-  png: string;
-  /** Valores int16 little-endian en base64, fila por fila desde el NORTE. */
-  valores: string;
-  /** valor real = entero × factor (por ejemplo 0,001 para NDVI). */
-  factor: number;
-  /** Entero que significa "sin dato" (fuera del lote, nubes…). */
-  nodata: number;
-  escala: EscalaRaster;
-  resumen: { media: number; min: number; max: number; pixeles: number };
-  confianza: string;
-  nota?: string;
-}
+export type Limites = Bounds;
 
 /** Imagen lista para `ImageOverlay`. */
 export function urlImagen(capa: CapaRaster): string {
@@ -92,7 +56,8 @@ export function pixelEn(capa: CapaRaster, lat: number, lng: number): { fila: num
 export function valorEn(capa: CapaRaster, lat: number, lng: number, cache?: Int16Array): number | null {
   const p = pixelEn(capa, lat, lng);
   if (!p) return null;
-  const valores = cache ?? decodificarValores(capa.valores);
+  const valores = cache ?? (capa.valores ? decodificarValores(capa.valores) : null);
+  if (!valores) return null;
   const entero = valores[p.fila * capa.ancho + p.columna];
   if (entero === undefined || entero === capa.nodata) return null;
   return entero * capa.factor;

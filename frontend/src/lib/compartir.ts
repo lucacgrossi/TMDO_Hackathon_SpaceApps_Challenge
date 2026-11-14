@@ -9,7 +9,7 @@
  */
 import { cercania, cercaniaPorTipo, esSensibleAlClima, type Pesos } from "./cercania";
 import { esDisponible, type ContrasteMedicion, type Estrategia, type Salida } from "./contrato";
-import { AVISO_PRECALCULADO, fmt, informacionQueFalta, metadatosHoja } from "./formato";
+import { AVISO_PRECALCULADO, fmt, metadatosHoja } from "./formato";
 
 export const ASUNTO_MAIL = "Comparación de rotaciones · Field Shift";
 export const AVISO_APOYO = "Herramienta de apoyo: no reemplaza el criterio del productor ni del agrónomo.";
@@ -79,9 +79,8 @@ export function resumenComparacion(salida: Salida, pesos: Pesos, fecha: Date): s
   if (satelite) L.push(satelite);
   L.push(...contrastes);
 
-  const falta = informacionQueFalta(salida);
-  if (falta.length) {
-    L.push("", "Información que falta:", ...falta.map((v) => `- ${v}`));
+  if (salida.informacion_falta.length) {
+    L.push("", "Información que falta:", ...salida.informacion_falta.map((v) => `- ${v}`));
   }
   if (salida.es_mock) L.push("", AVISO_PRECALCULADO);
 

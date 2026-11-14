@@ -19,7 +19,7 @@ import { formatoNumero } from "@/lib/geo";
  */
 export default function CapaRasterLote({ capa, opacidad = 0.85 }: { capa: CapaRaster | null; opacidad?: number }) {
   // Se decodifica una vez por capa, no en cada movimiento del mouse.
-  const valores = useMemo(() => (capa ? decodificarValores(capa.valores) : null), [capa]);
+  const valores = useMemo(() => (capa?.valores ? decodificarValores(capa.valores) : null), [capa]);
   const [lectura, setLectura] = useState<{ lat: number; lng: number; valor: number } | null>(null);
 
   useMapEvents({
