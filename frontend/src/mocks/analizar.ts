@@ -10,12 +10,17 @@
  *   lo simula y sigue mostrando el cultivo de la salida fija.
  * - Pluviómetro (RF15): arma `contraste_mediciones` contra la lluvia de NASA.
  *   Si la diferencia pasa el 15 %, baja la confianza del agua y suma la nota a
- *   "Revisar con el agrónomo". NO cambia ningún puntaje.
- * - Materia orgánica: si está cargada, deja de figurar en "Información que falta".
+ *   "Revisar con el agrónomo".
+ * - Materia orgánica: llega como fila "dato del productor" del contraste (sin
+ *   valor de NASA) y deja de figurar en "Información que falta".
  *
- * Qué NO simula: el cambio de cultivo de verano o de invierno (el mock es
- * siempre soja + barbecho) ni las prioridades (la cercanía la recalcula el
- * front con `cercania.ts`, RF13).
+ * Qué NO simula:
+ * - La mezcla de la lluvia del productor con NASA en los puntajes (MVP 4.3):
+ *   la hace el motor del back según los años de registro. El mock deja los
+ *   puntos iguales y lo dice en "Información que falta".
+ * - El cambio de cultivo de verano o de invierno (el mock es siempre soja +
+ *   barbecho) ni las prioridades (la cercanía la recalcula el front con
+ *   `cercania.ts`, RF13).
  */
 import type { CultivoNoSembrar, Estrategia, IdEstrategia, Salida } from "@/lib/contrato";
 import { RIO_CUARTO } from "./rio-cuarto";
@@ -90,11 +95,12 @@ function contrastarPluviometro(salida: Salida, mm: number): void {
       // Los terciles son de balance: el umbral no se puede corregir solo con la lluvia
       corregido_al_lado: {
         umbral_seco_mm: null,
-        nota: `Lluvia media corregida con tu pluviómetro: ${fmt(mm)} mm/año (NASA: ${fmt(nasa)} mm). Solo informativo: no cambia ningún puntaje.`,
+        nota: `Lluvia media corregida con tu pluviómetro: ${fmt(mm)} mm/año (NASA: ${fmt(nasa)} mm). Solo informativo.`,
       },
       texto: `Tu pluviómetro: ${fmt(mm)} mm/año · NASA: ${fmt(nasa)} mm (${signo}${Math.abs(diferencia)} %)`,
     },
   ];
+  salida.informacion_falta.push(MOCK_SIN_MEZCLA);
   if (!difiere) return;
 
   const motivo = `Tu pluviómetro difiere ${Math.abs(diferencia)} % de NASA`;
@@ -106,7 +112,22 @@ function contrastarPluviometro(salida: Salida, mm: number): void {
   actual.riesgos.push(`${motivo}: el dato de agua tiene confianza baja`);
 }
 
-function quitarFaltaMateriaOrganica(salida: Salida): void {
+/** Aviso del mock: los puntos no reflejan la mezcla que haría el motor del back. */
+export const MOCK_SIN_MEZCLA =
+  "Mock: la mezcla de tu lluvia con NASA en los puntajes no está simulada (la hace el motor del back)";
+
+/** La materia orgánica no tiene fuente NASA: va como "dato del productor" y no puntúa. */
+function cargarMateriaOrganica(salida: Salida, pct: number): void {
+  salida.contraste_mediciones.push({
+    indicador: "materia_organica",
+    valor_productor: pct,
+    valor_nasa: null,
+    unidad: "%",
+    diferencia_pct: null,
+    confianza_resultante: null,
+    corregido_al_lado: null,
+    texto: `Materia orgánica: ${pct.toLocaleString("es-AR")} % · dato del productor (no hay fuente NASA)`,
+  });
   const noEsMO = (v: string) => !v.startsWith("Materia orgánica");
   salida.informacion_falta = salida.informacion_falta.filter(noEsMO);
   for (const e of salida.estrategias) e.vacios = e.vacios.filter(noEsMO);
@@ -117,7 +138,7 @@ export function mockAnalizar(opciones: OpcionesMock = {}): Salida {
   const salida = structuredClone(RIO_CUARTO);
   const { noSembrar = [], lluviaAnualMm = null, materiaOrganicaPct = null } = opciones;
   if (lluviaAnualMm != null && lluviaAnualMm > 0) contrastarPluviometro(salida, lluviaAnualMm);
-  if (materiaOrganicaPct != null) quitarFaltaMateriaOrganica(salida);
+  if (materiaOrganicaPct != null) cargarMateriaOrganica(salida, materiaOrganicaPct);
   const [actual, a, b, c] = salida.estrategias;
   salida.estrategias = [actual, descartar(a, noSembrar), descartar(b, noSembrar), descartar(c, noSembrar)];
   return salida;

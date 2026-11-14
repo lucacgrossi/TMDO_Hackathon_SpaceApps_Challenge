@@ -289,3 +289,10 @@
   padding-top: 6px;
   border-top: 1px dashed var(--line);
 }
+
+/* Contraste de la estación del productor bajo cada probabilidad (Probabilidad.contraste, MVP 4.3) */
+.contrasteProb {
+  display: block;
+  color: var(--muted);
+  font-style: italic;
+}
