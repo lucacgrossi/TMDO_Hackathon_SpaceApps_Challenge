@@ -13,7 +13,7 @@ from app.clima import probabilidad as pr
 from app.clima.power import LAT_DEMO, LON_DEMO, SeriePower, armar_serie
 
 FIXTURE = Path(__file__).parent / "fixtures" / "power_rio_cuarto.json"
-FUENTE = "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96 a 2024/25"
+FUENTE = "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
 
 CULTIVOS = {
     "soja": {"nombre": "Soja", "grupo": "verano", "tolera_helada": False},
@@ -47,7 +47,7 @@ def _por_evento(probs, evento):
 def test_soja_barbecho_lote_demo(clima):
     probs = pr.probabilidades(SOJA_BARBECHO, CULTIVOS, clima, SOJA_BARBECHO)
     assert [p.texto for p in probs] == [
-        "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 5 de 30 años (17 %)",
+        "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
         "Máxima de 35 °C o más en enero con soja: 29 de 30 años (97 %)",
     ]
     assert all(isinstance(p, Probabilidad) for p in probs)
@@ -115,8 +115,8 @@ def test_meses_de_siembra_recorren_julio_a_junio():
 def test_k_de_siembra_seca_a_mano(clima):
     raw = json.loads(FIXTURE.read_text(encoding="utf-8"))
     pp = raw["properties"]["parameter"]["PRECTOTCORR_SUM"]
-    # Noviembre de cada campaña 1995/96 … 2024/25 = noviembre de 1995 … 2024.
-    noviembres = [pp[f"{anio}11"] for anio in range(1995, 2025)]
+    # Noviembre de cada campaña 1996/97 … 2025/26 = noviembre de 1996 … 2025.
+    noviembres = [pp[f"{anio}11"] for anio in range(1996, 2026)]
     media = sum(noviembres) / 30
     k = sum(1 for v in noviembres if v < 0.5 * media)
     p = _por_evento(pr.probabilidades(SOJA_BARBECHO, CULTIVOS, clima, SOJA_BARBECHO), "siembra_seca")[0]
@@ -126,7 +126,7 @@ def test_k_de_siembra_seca_a_mano(clima):
 def test_k_de_calor_a_mano(clima):
     raw = json.loads(FIXTURE.read_text(encoding="utf-8"))
     tx = raw["properties"]["parameter"]["T2M_MAX"]
-    enero = [tx[f"{anio}01"] for anio in range(1996, 2026)]
+    enero = [tx[f"{anio}01"] for anio in range(1997, 2027)]
     k = sum(1 for v in enero if v >= 35)
     p = _por_evento(pr.probabilidades(SOJA_BARBECHO, CULTIVOS, clima, SOJA_BARBECHO), "calor")[0]
     assert (p.mes, p.cultivo, p.anios) == (0, "soja", k)
