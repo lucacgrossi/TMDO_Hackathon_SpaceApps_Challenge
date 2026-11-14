@@ -9,9 +9,10 @@
  * `#geo` (GPS) y `setTarget` (guardar el punto y mostrar "Tu lote está acá").
  * El marcado es el bloque `.where` de prototipo-body.html.
  *
- * Qué NO hace: no dibuja nada en el mapa. Solo escribe `ubicacion` en el store
- * compartido; el mapa la lee y pone la marca. ElegirLote decide cuándo se ve
- * este bloque (solo en el modo "Dibujar mi lote").
+ * Qué NO hace: no dibuja nada en el mapa. Solo escribe `ubicacion` (y
+ * `modoLote: "dibujo"`) en el store compartido; el mapa la lee y pone la marca.
+ * En el prototipo final este bloque está SIEMPRE visible en el paso 1, dentro
+ * de ElegirLote, arriba del "o · Probar con el lote de ejemplo".
  *
  * La lógica sin React (regex, llamadas a Esri, mensajes) está en
  * `src/lib/buscador.ts`.
@@ -62,7 +63,7 @@ export default function BuscadorLote() {
   const idLista = `${idBase}-sug`;
   const idOpcion = (i: number) => `${idBase}-op-${i}`;
 
-  // Al desmontar (por ejemplo, el productor vuelve a "Lote de ejemplo"), cortamos lo pendiente.
+  // Al desmontar el componente, cortamos el pedido pendiente (no queremos un setState huérfano).
   useEffect(
     () => () => {
       if (timerRef.current) clearTimeout(timerRef.current);
@@ -79,10 +80,15 @@ export default function BuscadorLote() {
     setAbierta(lista.length > 0 || msg !== "");
   }
 
-  /** Igual que `setTarget`: guarda el punto en el store y cierra la lista. */
+  /**
+   * Igual que `setTarget`: guarda el punto y cierra la lista. Elegir un lugar
+   * implica que el productor va a marcar SU lote, así que el modo pasa a
+   * "dibujo" (el prototipo hace `S.entry="draw"` y apaga el radio del ejemplo).
+   * Se escribe todo en un solo `cambiar` para que nadie lea un estado a medias.
+   */
   function elegir(u: UbicacionElegida) {
     setAbierta(false);
-    cambiar({ ubicacion: u });
+    cambiar({ ubicacion: u, modoLote: "dibujo" });
   }
 
   /** Cancela el pedido a Esri en curso o en espera. */
@@ -193,12 +199,16 @@ export default function BuscadorLote() {
     <div className="where">
       <label htmlFor={`${idBase}-q`}>¿Dónde está tu lote?</label>
       <div className="qrow">
+        {/* Lupa decorativa: aria-hidden para que el lector de pantalla no lea "⌕". */}
+        <span className="qic" aria-hidden="true">
+          ⌕
+        </span>
         <input
           id={`${idBase}-q`}
           type="search"
           autoComplete="off"
           spellCheck={false}
-          placeholder="Localidad, paraje o ruta · o pegá coordenadas o un link de Google Maps"
+          placeholder="Buscá la localidad, paraje o ruta · o pegá coordenadas o un link de Google Maps"
           value={texto}
           onChange={(e) => alEscribir(e.target.value)}
           onKeyDown={alTeclear}
@@ -209,7 +219,7 @@ export default function BuscadorLote() {
           aria-activedescendant={activa >= 0 && listaVisible ? idOpcion(activa) : undefined}
         />
         <button type="button" className="sm" onClick={usarMiUbicacion} disabled={buscandoGps}>
-          {buscandoGps ? "Buscando…" : "Usar mi ubicación"}
+          {buscandoGps ? "Buscando…" : "◉ Usar mi ubicación"}
         </button>
       </div>
 
@@ -248,7 +258,8 @@ export default function BuscadorLote() {
       )}
 
       <small className="wsrc">
-        Si estás en el campo, «Usar mi ubicación» toma el GPS del celu. Búsqueda de lugares: Esri.
+        Si estás en el campo, «Usar mi ubicación» toma el GPS del celu. Después marcás las
+        esquinas en el mapa. Búsqueda de lugares: Esri.
       </small>
     </div>
   );
