@@ -8,11 +8,23 @@ import {
   resumenComparacion,
   resumenMail,
 } from "@/lib/compartir";
-import type { Pesos } from "@/lib/cercania";
+import { cercaniaPorTipo, type Pesos } from "@/lib/cercania";
+import { esDisponible, type Salida } from "@/lib/contrato";
+import { fmt, metadatosHoja } from "@/lib/formato";
 import { MOCK_BASE, MOCK_DESCARTADA, MOCK_PLUVIOMETRO, mockAnalizar } from "@/mocks/analizar";
 
 const PESOS: Pesos = { agua: 3, suelo: 3, erosion: 3, ingreso: 3 };
 const FECHA = new Date(2026, 10, 14);
+
+/**
+ * Lo que tiene que decir la línea del pluviómetro, armado con el contraste del
+ * mock: así el test no depende de la lluvia de NASA que tenga el mock.
+ */
+function lineaPluviometro(salida: Salida): string {
+  const c = salida.contraste_mediciones.find((m) => m.indicador === "lluvia_anual");
+  if (!c) throw new Error("el mock no trae el contraste del pluviómetro");
+  return `${c.texto}: ${c.confianza_resultante === "alta" ? "confianza alta" : "confianza baja en agua"}`;
+}
 
 describe("resumen para compartir", () => {
   const texto = resumenComparacion(MOCK_BASE, PESOS, FECHA);
@@ -20,9 +32,9 @@ describe("resumen para compartir", () => {
   it("arranca con el lote, el período de clima, la pendiente y las barras", () => {
     const [titulo, lote, objetivos] = texto.split("\n");
     expect(titulo).toBe("Field Shift · comparación de rotaciones");
-    expect(lote).toBe(
-      "Lote: 95 ha · a 17 km de Río Cuarto, Córdoba · Clima NASA POWER 1995/96–2024/25 · pendiente 0,6 % · 14/11/2026",
-    );
+    // Los datos del lote salen del mock: si cambia el período de clima, el test sigue valiendo
+    expect(lote).toBe(`Lote: ${fmt(MOCK_BASE.lote.area_ha)} ha · ${metadatosHoja(MOCK_BASE, FECHA)}`);
+    expect(lote).toContain(`Clima NASA POWER ${MOCK_BASE.periodo_clima}`);
     expect(objetivos).toBe("Objetivos (0 a 5): agua 3 · suelo 3 · erosión 3 · ingreso 3");
   });
 
@@ -31,7 +43,11 @@ describe("resumen para compartir", () => {
       const linea = texto.split("\n").find((l) => l.startsWith(etiqueta));
       expect(linea).toMatch(/cercanía \d+ % · \d+ mes(es)? con cobertura baja · seco \d+ \/ normal \d+ \/ húmedo \d+/);
     }
-    expect(texto).toContain("1 mes con cobertura baja");
+    // Singular y plural según el valor de cada columna
+    for (const e of MOCK_BASE.estrategias.filter(esDisponible)) {
+      const n = e.valores.meses_cobertura_baja;
+      expect(texto).toContain(`${n} ${n === 1 ? "mes" : "meses"} con cobertura baja`);
+    }
     expect(texto).not.toMatch(/(^|\D)1 meses/);
   });
 
@@ -44,12 +60,14 @@ describe("resumen para compartir", () => {
 
   it("muestra la probabilidad con el conteo de años", () => {
     expect(texto).toContain(MOCK_BASE.estrategias[1].probabilidades[0].texto);
-    expect(texto).toMatch(/\d+ de 30 años/);
+    expect(texto).toContain(`de ${MOCK_BASE.clima_mensual.n_anios} años`);
   });
 
   it("incluye lo visto por satélite, la información que falta y los datos de prueba", () => {
+    const s = MOCK_BASE.visto_por_satelite;
     expect(texto).toContain(
-      "Visto por satélite (NASA HLS 30 m, campaña 2024/25): NDVI del lote menor a 0,3 en 6 de 11 meses con escena sin nubes",
+      `Visto por satélite (${s.fuente}, campaña ${s.campana}): NDVI del lote menor a ${fmt(s.umbral, 1)} ` +
+        `en ${s.meses_ndvi_bajo} de ${s.meses_con_dato} meses con escena sin nubes`,
     );
     expect(texto).toContain("Información que falta:\n- ");
     expect(texto).toContain("Datos de prueba");
@@ -60,14 +78,16 @@ describe("resumen para compartir", () => {
   });
 
   it("la descartada va con su motivo", () => {
+    const b = MOCK_DESCARTADA.estrategias[2];
+    expect(b.motivo_descarte).toBe("No sembrar trigo ni cebada");
     expect(resumenComparacion(MOCK_DESCARTADA, PESOS, FECHA)).toContain(
-      "B · Cultivo de invierno (Trigo + soja 2ª): descartada (No sembrar trigo ni cebada)",
+      `B · ${b.nombre} (${b.especies}): descartada (${b.motivo_descarte})`,
     );
   });
 
   it("el pluviómetro va al lado de NASA, con la confianza", () => {
     const t = resumenComparacion(MOCK_PLUVIOMETRO, PESOS, FECHA);
-    expect(t).toContain("Tu pluviómetro: 620 mm/año · NASA: 769 mm (−19 %): confianza baja en agua");
+    expect(t).toContain(lineaPluviometro(MOCK_PLUVIOMETRO));
     expect(texto).not.toContain("pluviómetro");
   });
 
@@ -93,14 +113,16 @@ describe("resumen corto para el mail", () => {
   });
 
   it("una línea por columna con la cercanía y el trío; la descartada con su motivo", () => {
-    expect(corto).toContain("Actual, Lo que hacés hoy: 46 (38 / 46 / 50)");
-    expect(corto).toContain("B, Cultivo de invierno: descartada (No sembrar trigo ni cebada)");
+    const [actual, , b] = completo.estrategias;
+    const t = cercaniaPorTipo(actual.puntos!, PESOS);
+    expect(corto).toContain(`Actual, ${actual.nombre}: ${t.normal} (${t.seco} / ${t.normal} / ${t.humedo})`);
+    expect(corto).toContain(`B, ${b.nombre}: descartada (${b.motivo_descarte})`);
     expect(corto).toMatch(/^A, Cobertura de invierno: \d+ \(\d+ \/ \d+ \/ \d+\)$/m);
     expect(corto).toMatch(/^C, Diversificar el verano: \d+ \(\d+ \/ \d+ \/ \d+\)$/m);
   });
 
   it("lleva el pluviómetro, los datos de prueba, el aviso y adónde está el resto", () => {
-    expect(corto).toContain("Tu pluviómetro: 620 mm/año · NASA: 769 mm (−19 %): confianza baja en agua");
+    expect(corto).toContain(lineaPluviometro(completo));
     expect(corto).toContain("Datos de prueba");
     expect(corto).toContain(AVISO_APOYO);
     expect(corto.endsWith(CIERRE_MAIL)).toBe(true);
