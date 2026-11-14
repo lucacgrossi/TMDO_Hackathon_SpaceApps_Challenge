@@ -59,11 +59,15 @@ def _mes(i):
     }
 
 
-def ndvi_ok(poligono):
+CAMPANAS_NDVI_PEDIDAS: list = []  # campañas con que se llamó a ndvi.calcular en el test
+
+
+def ndvi_ok(poligono, campana=None):
+    CAMPANAS_NDVI_PEDIDAS.append(campana)
     meses = [None if i == 10 else _mes(i) for i in range(12)]
     return {
         "visto_por_satelite": {
-            "campana": "2024/25",
+            "campana": f"{campana}/{str(campana + 1)[2:]}" if campana else "2024/25",
             "fuente": "NASA HLS 30 m",
             "meses": meses,
             "meses_ndvi_bajo": 4,
@@ -94,6 +98,7 @@ def serie_power():
 
 @pytest.fixture(autouse=True)
 def fuentes_simuladas(monkeypatch, serie_power):
+    CAMPANAS_NDVI_PEDIDAS.clear()
     monkeypatch.setattr(power, "pedir_power", lambda lat, lon: serie_power)
     monkeypatch.setattr(cobertura, "calcular", cobertura_ok)
     monkeypatch.setattr(elevacion, "calcular", elevacion_ok)

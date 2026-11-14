@@ -18,7 +18,7 @@ from app.api.contrato import Entrada, Salida
 from app.clima import power
 from app.main import app
 from app.satelite import cobertura, et, ndvi
-from tests.api.conftest import cobertura_ok
+from tests.api.conftest import CAMPANAS_NDVI_PEDIDAS, cobertura_ok
 
 # TestClient no sale a internet, pero el event loop abre un socketpair local (ver test_rutas.py).
 pytestmark = pytest.mark.enable_socket
@@ -171,7 +171,7 @@ def test_lote_no_agricola_da_422_con_el_aviso(monkeypatch):
 
 
 def test_cobertura_sin_dato_no_bloquea(monkeypatch):
-    def caida(poligono):
+    def caida(poligono, **_):
         raise RuntimeError("sin red")
 
     monkeypatch.setattr(cobertura, "calcular", caida)
@@ -201,7 +201,7 @@ def test_power_caido_con_lote_de_ejemplo_devuelve_la_demo(monkeypatch):
 
 
 def test_fuente_satelital_caida_va_a_informacion_que_falta(monkeypatch):
-    def caida(poligono):
+    def caida(poligono, **_):
         raise ConnectionError("Planetary Computer caído")
 
     monkeypatch.setattr(ndvi, "calcular", caida)
@@ -302,3 +302,21 @@ def test_traduce_el_motor_al_contrato(monkeypatch):
     assert not c.disponible and c.motivo_descarte == "No sembrar sorgo ni girasol"
     assert c.valores is None and c.puntos is None and c.resumen.startswith("Descartada")
     assert servicio.MOTOR_PENDIENTE not in s.informacion_falta
+
+
+# --- Campaña del NDVI = última campaña de POWER -----------------------------
+
+
+def test_ndvi_se_pide_de_nuevo_si_power_termina_en_otra_campana(monkeypatch):
+    monkeypatch.setattr(ndvi, "campana_inicio", lambda hoy=None: 2025)  # el fixture de POWER termina en 2024/25
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert CAMPANAS_NDVI_PEDIDAS[-1] == 2024
+    assert s.visto_por_satelite.campana == "2024/25"
+    assert s.periodo_clima.endswith("2024/25")
+
+
+def test_ndvi_se_pide_una_sola_vez_si_coincide_con_power(monkeypatch):
+    monkeypatch.setattr(ndvi, "campana_inicio", lambda hoy=None: 2024)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert CAMPANAS_NDVI_PEDIDAS == [2024]
+    assert s.visto_por_satelite.campana == "2024/25"

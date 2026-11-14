@@ -158,6 +158,14 @@ def _resultado(futuro: cf.Future, respaldo: Callable[[str], Any], fuente: str) -
         return respaldo(f"No se pudo calcular {fuente} ({type(e).__name__})")
 
 
+def _ultima_campana(clima: clima_indicadores.ResultadoClima) -> int | None:
+    """Año de inicio de la última campaña de POWER ("2025/26" → 2025), o None si no hay."""
+    try:
+        return int(clima.campanas[-1].etiqueta.split("/")[0])
+    except (IndexError, ValueError, AttributeError):
+        return None
+
+
 def _clima_sin_dato(motivo: str) -> clima_indicadores.ResultadoClima:
     return clima_indicadores.ResultadoClima(ok=False, motivo=motivo)
 
@@ -377,10 +385,18 @@ def analizar(entrada: Entrada) -> Salida:
     poligono = v["poligono"]
     lat, lon = v["centro"]
 
-    pool = cf.ThreadPoolExecutor(max_workers=len(_SATELITE) + 1, thread_name_prefix="analizar")
+    # El NDVI arranca en paralelo con la campaña que se espera que sea la última de POWER; si POWER
+    # termina en otra, se vuelve a pedir con esa (NDVI, terciles y serie siempre en la misma campaña).
+    campana_ndvi = ndvi.campana_inicio()
+    pool = cf.ThreadPoolExecutor(max_workers=len(_SATELITE) + 2, thread_name_prefix="analizar")
     try:
         f_clima = pool.submit(_clima, lat, lon)
-        f_sat = {k: pool.submit(mod.calcular, poligono) for k, (mod, _, _) in _SATELITE.items()}
+        f_sat = {
+            k: pool.submit(mod.calcular, poligono, campana=campana_ndvi)
+            if k == "ndvi"
+            else pool.submit(mod.calcular, poligono)
+            for k, (mod, _, _) in _SATELITE.items()
+        }
 
         def restante() -> float:
             return max(0.0, PRESUPUESTO_S - (time.monotonic() - inicio))
@@ -394,6 +410,12 @@ def analizar(entrada: Entrada) -> Salida:
         if not clima.ok:
             log.warning("NASA POWER sin dato: %s", clima.motivo)
             raise ErrorServicio(503, MENSAJE_POWER_CAIDO, power_caido=True)
+
+        ultima = _ultima_campana(clima)
+        if ultima is not None and ultima != campana_ndvi:
+            log.info("NDVI: POWER termina en %s, no en %s; se pide de nuevo", ultima, campana_ndvi)
+            f_sat["ndvi"].cancel()
+            f_sat["ndvi"] = pool.submit(ndvi.calcular, poligono, campana=ultima)
 
         cf.wait(list(f_sat.values()), timeout=restante())
         sat = {k: _resultado(f_sat[k], resp, fuente) for k, (_, resp, fuente) in _SATELITE.items()}
