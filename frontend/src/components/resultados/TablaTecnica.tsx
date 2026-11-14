@@ -150,7 +150,7 @@ const GRUPOS: Grupo[] = [
         id: "suelo",
         titulo: "Suelo",
         ayuda: "puntos de 0 a 100",
-        celda: (e, { actual }) => (
+        celda: (e, { actual, salida }) => (
           <div className={css.celda}>
             <CeldaDato
               valor={fmt(e.puntos.suelo)}
@@ -161,7 +161,7 @@ const GRUPOS: Grupo[] = [
               Aporte de N {fmt(e.valores.aporte_n)} · rastrojo {fmt(e.valores.rastrojo)} (índices)
             </CeldaDato>
             {/* Es del lote, no de la rotación: va una sola vez, en la actual, y no entra en los puntos */}
-            {e.id === "actual" && <MateriaOrganicaProductor />}
+            {e.id === "actual" && <MateriaOrganicaProductor salida={salida} />}
           </div>
         ),
       },

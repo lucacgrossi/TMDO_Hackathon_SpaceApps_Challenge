@@ -2,14 +2,24 @@
 
 import type { ContrasteMedicion, Salida } from "@/lib/contrato";
 import { fmt } from "@/lib/formato";
-import { useEntradas } from "@/lib/store";
 import PildoraConfianza from "./PildoraConfianza";
 import css from "./mediciones.module.css";
 
 /** Diferencia con NASA a partir de la cual baja la confianza del agua (RF15). La decide el back. */
 const UMBRAL_DIFERENCIA_PCT = 15;
 
-const NOMBRE_INDICADOR: Record<string, string> = { lluvia_anual: "Lluvia anual" };
+const NOMBRE_INDICADOR: Record<string, string> = {
+  lluvia_anual: "Lluvia anual",
+  materia_organica: "Materia orgánica",
+};
+
+/** Sin valor de NASA la fila es "dato del productor" (contrato, `ContrasteMedicion`). */
+const esDatoDelProductor = (c: ContrasteMedicion) => c.valor_nasa == null;
+
+/** La fila de la materia orgánica que manda el back, si el productor la cargó. */
+export function filaMateriaOrganica(salida: Salida): ContrasteMedicion | undefined {
+  return salida.contraste_mediciones.find((c) => c.indicador === "materia_organica");
+}
 
 /** Una medición contra NASA: el texto del contraste, la confianza que queda y lo corregido (informativo). */
 function FilaContraste({ c }: { c: ContrasteMedicion }) {
@@ -39,14 +49,33 @@ function FilaContraste({ c }: { c: ContrasteMedicion }) {
   );
 }
 
-/** Materia orgánica cargada por el productor, para la fila Suelo. Nada si no la cargó. */
-export function MateriaOrganicaProductor() {
-  const pct = useEntradas((s) => s.mediciones.materiaOrganicaPct);
-  if (pct == null) return null;
+/** Un dato del productor sin fuente NASA para contrastar (hoy, la materia orgánica). */
+function FilaDatoProductor({ c }: { c: ContrasteMedicion }) {
+  return (
+    <li className={css.fila}>
+      <span className={css.indicador}>{NOMBRE_INDICADOR[c.indicador] ?? c.indicador}</span>
+      <div className={css.cuerpo}>
+        <p className={css.texto}>
+          {fmt(c.valor_productor, 1)} {c.unidad} <span className={css.etiqueta}>dato del productor</span>
+        </p>
+        <p className={css.efecto}>
+          {c.indicador === "materia_organica"
+            ? "Se muestra en la fila Suelo. Sin dato de NASA para contrastar y no entra en los puntajes."
+            : "Sin dato de NASA para contrastar."}
+        </p>
+      </div>
+    </li>
+  );
+}
+
+/** Materia orgánica del productor, para la fila Suelo. Sale de la respuesta; nada si no la cargó. */
+export function MateriaOrganicaProductor({ salida }: { salida: Salida }) {
+  const mo = filaMateriaOrganica(salida);
+  if (!mo) return null;
   return (
     <p className={css.datoProductor}>
       <span>
-        Materia orgánica <b>{fmt(pct, 1)} %</b>
+        Materia orgánica <b>{fmt(mo.valor_productor, 1)} %</b>
       </span>
       <span className={css.etiqueta}>dato del productor</span>
     </p>
@@ -55,35 +84,32 @@ export function MateriaOrganicaProductor() {
 
 /**
  * Mediciones propias al lado de NASA (RF15, CU4). Va arriba de la tabla, solo si
- * el productor cargó el pluviómetro o la materia orgánica. NASA sigue siendo la
- * base: estas mediciones ajustan la confianza y se muestran al lado, pero no
- * cambian ningún puntaje.
+ * la respuesta trae contrastes. Todo sale de `contraste_mediciones`, así coincide
+ * con la comparación que se está mostrando.
+ *
+ * Desde el MVP 4.3, el contraste ajusta la confianza y, además, el motor mezcla
+ * la lluvia y las temperaturas del productor con NASA en los puntajes, con un
+ * peso que crece con los años de registro (lo cuenta la evidencia de cada
+ * columna). La materia orgánica no puntúa.
  */
 export default function ContrasteMediciones({ salida }: { salida: Salida }) {
-  const materiaOrganicaPct = useEntradas((s) => s.mediciones.materiaOrganicaPct);
   const contrastes = salida.contraste_mediciones;
-  if (!contrastes.length && materiaOrganicaPct == null) return null;
+  if (!contrastes.length) return null;
+  const hayMedicionesQuePuntuan = contrastes.some((c) => !esDatoDelProductor(c));
 
   return (
     <section className={css.bloque} aria-labelledby="titulo-mediciones">
       <h3 id="titulo-mediciones" className={css.titulo}>
         Tus mediciones, al lado de NASA
-        <span className={css.aclaracion}>Ajustan la confianza; no cambian ningún puntaje</span>
+        <span className={css.aclaracion}>
+          {hayMedicionesQuePuntuan
+            ? "El contraste ajusta la confianza. Tu lluvia, además, se mezcla con NASA en los puntajes según tus años de registro: lo dice la evidencia de cada columna"
+            : "Se muestran al lado; no entran en los puntajes"}
+        </span>
       </h3>
       <ul className={css.lista}>
-        {contrastes.map((c) => (
-          <FilaContraste key={c.indicador} c={c} />
-        ))}
-        {materiaOrganicaPct != null && (
-          <li className={css.fila}>
-            <span className={css.indicador}>Materia orgánica</span>
-            <div className={css.cuerpo}>
-              <p className={css.texto}>
-                {fmt(materiaOrganicaPct, 1)} % <span className={css.etiqueta}>dato del productor</span>
-              </p>
-              <p className={css.efecto}>Se muestra en la fila Suelo. Sin dato de NASA para contrastar.</p>
-            </div>
-          </li>
+        {contrastes.map((c) =>
+          esDatoDelProductor(c) ? <FilaDatoProductor key={c.indicador} c={c} /> : <FilaContraste key={c.indicador} c={c} />,
         )}
       </ul>
     </section>
