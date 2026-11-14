@@ -1,0 +1,35 @@
+[
+ {
+  "id": "HLS.S30.T20HLJ.2024209T140709.v2.0",
+  "collection": "hls2-s30",
+  "properties": {
+   "datetime": "2024-07-27T14:21:59.342560Z",
+   "eo:cloud_cover": 0.0,
+   "start_datetime": "2024-07-27T14:21:59.342560Z",
+   "end_datetime": "2024-07-27T14:21:59.342560Z",
+   "platform": "sentinel-2b"
+  }
+ },
+ {
+  "id": "HLS.S30.T20HLJ.2024194T140711.v2.0",
+  "collection": "hls2-s30",
+  "properties": {
+   "datetime": "2024-07-12T14:21:59.711490Z",
+   "eo:cloud_cover": 0.0,
+   "start_datetime": "2024-07-12T14:21:59.711490Z",
+   "end_datetime": "2024-07-12T14:21:59.711490Z",
+   "platform": "sentinel-2a"
+  }
+ },
+ {
+  "id": "HLS.S30.T20HLJ.2024184T140711.v2.0",
+  "collection": "hls2-s30",
+  "properties": {
+   "datetime": "2024-07-02T14:22:00.556360Z",
+   "eo:cloud_cover": 0.0,
+   "start_datetime": "2024-07-02T14:22:00.556360Z",
+   "end_datetime": "2024-07-02T14:22:00.556360Z",
+   "platform": "sentinel-2a"
+  }
+ }
+]
