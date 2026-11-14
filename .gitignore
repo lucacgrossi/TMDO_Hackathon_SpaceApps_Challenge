@@ -1,0 +1,38 @@
+# Contexto local de Claude (por persona / por máquina)
+CLAUDE.local.md
+claude.md.local
+.claude/settings.local.json
+
+# Secretos
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+
+# Node / Next.js
+node_modules/
+.next/
+out/
+.vercel/
+
+# Datos descargados (pesados)
+data/raw/
+*.hdf
+*.h5
+*.he5
+*.nc
+*.nc4
+*.tif
+*.tiff
+
+# SO / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
