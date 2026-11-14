@@ -223,3 +223,37 @@ def test_ultima_campana_completa():
     assert ndvi.campana_inicio(date(2026, 11, 14)) == 2025   # 2025/26 terminó el 30/06/2026
     assert ndvi.campana_inicio(date(2026, 7, 1)) == 2025
     assert ndvi.campana_inicio(date(2026, 3, 10)) == 2024    # 2025/26 todavía en curso
+
+
+def test_meses_bajos_por_pixel(monkeypatch):
+    """Cuántos meses estuvo cada píxel bajo 0,3: con la escena de julio en los 12 meses, 12 o 0."""
+    monkeypatch.setattr(pc, "_cliente", _servidor())
+    r = ndvi.calcular(LOTE_EJEMPLO, campana=2024)
+    capa, g = r["meses_bajos_mapa"], grilla.crear(LOTE_EJEMPLO)
+    assert r["meses_bajos_motivo"] is None and capa["id"] == "meses_bajos" and capa["bounds"] == g.bounds
+    v = raster.descuantizar(capa["valores"], capa["factor"], capa["nodata"], capa["alto"], capa["ancho"])
+    julio = np.load(FIX / "grilla_hls_s30_2024209.npy")[0] / 10000
+    m = grilla.mascara(g, LOTE_EJEMPLO)
+    assert (v[m] == np.where(julio[m] < ndvi.UMBRAL_NDVI_BAJO, 12, 0)).all()
+    assert np.isnan(v[~m]).all() and capa["resumen"]["pixeles"] == int(m.sum())
+
+
+def test_meses_bajos_siempre_con_valores(monkeypatch):
+    """La erosión por píxel los necesita: no se recortan aunque el lote sea grande."""
+    monkeypatch.setattr(ndvi, "MAX_PIXELES_VALORES", 100)
+    monkeypatch.setattr(pc, "_cliente", _servidor())
+    r = ndvi.calcular(LOTE_EJEMPLO, campana=2024)
+    assert r["mapas"][6]["valores"] is None and r["meses_bajos_mapa"]["valores"]
+
+
+def test_meses_bajos_con_modis_lo_dice(monkeypatch):
+    monkeypatch.setattr(pc, "_cliente", _servidor(hls_vacio=("2024-07",)))
+    capa = ndvi.calcular(LOTE_EJEMPLO, campana=2024)["meses_bajos_mapa"]
+    assert "MODIS" in capa["nota"] and capa["confianza"] == "media"
+
+
+def test_meses_bajos_sin_raster_en_algun_mes(monkeypatch):
+    """Sin raster en algún mes con dato, el conteo por píxel no se compara con el del lote: no hay capa."""
+    monkeypatch.setattr(pc, "_cliente", _servidor(en_grilla=False))
+    r = ndvi.calcular(LOTE_EJEMPLO, campana=2024)
+    assert r["meses_bajos_mapa"] is None and "sin raster" in r["meses_bajos_motivo"]

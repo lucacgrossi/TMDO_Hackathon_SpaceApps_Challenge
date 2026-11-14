@@ -80,11 +80,13 @@ def test_lluvia_del_productor_cambia_agua_y_erosion(ind):
 
 
 def test_temperaturas_del_productor_cambian_el_ingreso(ind):
-    filas = [{"mes": f"{a}-{m:02d}", "t_min_c": 5.0, "t_max_c": 38.0 if m in (1, 2) else 30.0}
+    # En 2016/17–2024/25 NASA marca 35 °C o más en enero y febrero todas las campañas; una estación más
+    # fresca en esas mismas campañas (máxima de 33 °C) baja el riesgo de calor y sube el ingreso.
+    filas = [{"mes": f"{a}-{m:02d}", "t_min_c": 5.0, "t_max_c": 33.0}
              for a in range(2016, 2026) for m in range(1, 13)]
     nasa = _correr(ind)
     prod = _correr(ind, mediciones={"serie_mensual": filas})
-    assert _col(prod, "actual")["ingreso"] < _col(nasa, "actual")["ingreso"]
+    assert _col(prod, "actual")["ingreso"] > _col(nasa, "actual")["ingreso"]
 
 
 def test_sin_et0_no_lanza_y_lo_dice(ind):
