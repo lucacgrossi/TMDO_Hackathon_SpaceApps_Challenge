@@ -1,9 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { esDisponible, OBJETIVOS, TIPOS_DE_ANIO, type Salida } from "@/lib/contrato";
+import { esDisponible, type Salida } from "@/lib/contrato";
 import { MOCK_BASE, MOCK_DESCARTADA, MOCK_PLUVIOMETRO, mockAnalizar } from "@/mocks/analizar";
 
-const puntajes = (s: Salida) =>
-  s.estrategias.filter(esDisponible).map((e) => ({ id: e.id, normal: e.cercania_objetivos, tipos: e.valores_por_tipo_anio }));
+const puntos = (s: Salida) => s.estrategias.map((e) => ({ id: e.id, puntos: e.puntos, cercania: e.cercania }));
 
 describe("mock de /analizar · forma del contrato", () => {
   it.each([
@@ -14,33 +13,17 @@ describe("mock de /analizar · forma del contrato", () => {
     expect(s.estrategias.map((e) => e.id)).toEqual(["actual", "A", "B", "C"]);
   });
 
+  it("dice que es un mock", () => {
+    expect(MOCK_BASE.es_mock).toBe(true);
+  });
+
   it("los arrays mensuales tienen 12 meses", () => {
     const c = MOCK_BASE.clima_mensual;
     for (const a of [c.lluvia_mm, c.minima_media_c, c.maxima_media_c, c.anios_con_helada, c.anios_con_35c]) {
       expect(a).toHaveLength(12);
     }
-    expect(MOCK_BASE.visto_por_satelite?.meses).toHaveLength(12);
+    expect(MOCK_BASE.visto_por_satelite.meses).toHaveLength(12);
     for (const e of MOCK_BASE.estrategias.filter(esDisponible)) expect(e.calendario).toHaveLength(12);
-  });
-
-  it("30 campañas cortadas en terciles de 10", () => {
-    const t = MOCK_BASE.tipos_de_anio;
-    expect(MOCK_BASE.serie_anual?.campanas).toHaveLength(30);
-    expect([t.seco.length, t.normal.length, t.humedo.length]).toEqual([10, 10, 10]);
-  });
-
-  it("cada estrategia trae los 5 puntos y puntajes por tipo de año", () => {
-    for (const e of MOCK_BASE.estrategias.filter(esDisponible)) {
-      expect(e.por_que.length).toBeGreaterThan(0);
-      expect(e.evidencia.length).toBeGreaterThan(0);
-      expect(e.vacios.length).toBeGreaterThan(0);
-      expect(Array.isArray(e.beneficios)).toBe(true);
-      expect(Array.isArray(e.riesgos)).toBe(true);
-      for (const t of TIPOS_DE_ANIO) for (const o of OBJETIVOS) {
-        expect(e.valores_por_tipo_anio[t].puntajes[o]).toBeGreaterThanOrEqual(0);
-        expect(e.valores_por_tipo_anio[t].puntajes[o]).toBeLessThanOrEqual(100);
-      }
-    }
   });
 
   it("las probabilidades muestran el conteo de años, no solo el porcentaje", () => {
@@ -59,33 +42,36 @@ describe("mock de /analizar · forma del contrato", () => {
 });
 
 describe("mock de /analizar · variantes", () => {
-  it("No sembrar trigo ni cebada descarta B con el motivo", () => {
+  it("No sembrar trigo ni cebada descarta B con el motivo y sin datos", () => {
     const b = MOCK_DESCARTADA.estrategias[2];
-    expect(b.disponible).toBe(false);
-    expect(b.motivo_descarte).toBe("No sembrar trigo ni cebada");
+    expect(b).toMatchObject({ disponible: false, motivo_descarte: "No sembrar trigo ni cebada", puntos: null });
+    expect(esDisponible(b)).toBe(false);
   });
 
   it("excluir un solo cultivo no descarta la alternativa", () => {
     expect(mockAnalizar({ noSembrar: ["trigo"] }).estrategias[2].disponible).toBe(true);
   });
 
-  it("pluviómetro de 650 mm: −21 % contra NASA, confianza baja y nota para el agrónomo", () => {
+  it("pluviómetro de 620 mm: −19 % contra NASA, confianza baja y nota para el agrónomo", () => {
     const [c] = MOCK_PLUVIOMETRO.contraste_mediciones;
-    expect(c).toMatchObject({ valor_productor: 650, valor_nasa: 824, diferencia_pct: -21, confianza_resultante: "baja" });
-    const actual = MOCK_PLUVIOMETRO.estrategias[0];
-    if (!esDisponible(actual)) throw new Error("la actual siempre está disponible");
-    expect(actual.valores.agua_mm.confianza).toBe("baja");
-    expect(actual.riesgos.some((r) => r.includes("pluviómetro difiere 21 %"))).toBe(true);
+    expect(c).toMatchObject({ valor_productor: 620, valor_nasa: 769, diferencia_pct: -19, confianza_resultante: "baja" });
+    expect(c.texto).toBe("Tu pluviómetro: 620 mm/año · NASA: 769 mm (−19 %)");
+    expect(MOCK_PLUVIOMETRO.indicadores.lluvia_anual.confianza).toBe("baja");
+    expect(MOCK_PLUVIOMETRO.estrategias[0].riesgos.some((r) => r.includes("difiere 19 %"))).toBe(true);
   });
 
   it("el pluviómetro no cambia ningún puntaje", () => {
-    expect(puntajes(MOCK_PLUVIOMETRO)).toEqual(puntajes(MOCK_BASE));
+    expect(puntos(MOCK_PLUVIOMETRO)).toEqual(puntos(MOCK_BASE));
   });
 
-  it("un pluviómetro que coincide (±15 %) deja la confianza alta", () => {
-    const s = mockAnalizar({ lluviaAnualMm: 800 });
+  it("decide con la diferencia exacta: 650 mm es −15,5 %, pasa el 15 % y baja la confianza", () => {
+    expect(mockAnalizar({ lluviaAnualMm: 650 }).contraste_mediciones[0].confianza_resultante).toBe("baja");
+  });
+
+  it("un pluviómetro que coincide (±15 %) deja la confianza como estaba", () => {
+    const s = mockAnalizar({ lluviaAnualMm: 760 });
     expect(s.contraste_mediciones[0].confianza_resultante).toBe("alta");
-    expect(s.indicadores.lluvia_campana.confianza).toBe("alta");
+    expect(s.indicadores.lluvia_anual.confianza).toBe(MOCK_BASE.indicadores.lluvia_anual.confianza);
   });
 
   it("sin mediciones el contraste viene vacío", () => {
@@ -94,13 +80,13 @@ describe("mock de /analizar · variantes", () => {
 
   it("con materia orgánica cargada deja de figurar en lo que falta", () => {
     const s = mockAnalizar({ materiaOrganicaPct: 2.4 });
-    for (const e of s.estrategias.filter(esDisponible)) {
-      expect(e.vacios.some((v) => v.startsWith("Materia orgánica"))).toBe(false);
-    }
+    const textos = [...s.informacion_falta, ...s.estrategias.flatMap((e) => e.vacios)];
+    expect(textos.some((v) => v.startsWith("Materia orgánica"))).toBe(false);
   });
 
   it("cada llamada devuelve una copia: no se pisa el mock base", () => {
-    mockAnalizar({ lluviaAnualMm: 650 });
-    expect(MOCK_BASE.indicadores.lluvia_campana.confianza).toBe("alta");
+    mockAnalizar({ lluviaAnualMm: 620 });
+    expect(MOCK_BASE.contraste_mediciones).toEqual([]);
+    expect(MOCK_BASE.estrategias[0].riesgos.some((r) => r.includes("pluviómetro"))).toBe(false);
   });
 });

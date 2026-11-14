@@ -1,113 +1,177 @@
 /**
- * Tipos de la SALIDA de POST /analizar (MVP 4.2, docs/mvp-alcance.md, "Contrato de la API").
+ * Contrato de POST /analizar: copia en TypeScript de `backend/app/api/contrato.py`
+ * (Back 1, PR #27). Es el único archivo del front que depende del backend: si
+ * `contrato.py` cambia, se cambia acá en el mismo sentido y TypeScript marca
+ * todo lo que hay que ajustar. No agregar campos que el back no mande.
  *
- * Es el único archivo del front que depende del backend: si el contrato cambia,
- * se cambia acá y TypeScript marca todo lo que hay que ajustar. Las entradas
- * del productor viven en `entradas.ts`.
- *
- * Convenciones (a confirmar con la persona 1 en la auditoría):
- * - Todo array de 12 meses usa el índice 0 = enero … 11 = diciembre, igual que
- *   `useVista().mes` y el prototipo. La campaña (julio a junio) se dibuja con
- *   `ORDEN_CAMPANIA`. `backend/PLAN.md` deja esto abierto.
- * - Los campos marcados "PROPUESTO" no figuran en el contrato del MVP y se
- *   agregaron porque la hoja los necesita (los 5 puntos de cada columna, la
- *   línea de la campaña). Hay que pedírselos a la persona 1.
+ * Decisiones del contrato (contrato.py):
+ * - Todo array de 12 meses va con índice 0 = enero, igual que `useVista().mes`.
+ *   La campaña (julio a junio) se dibuja con `ORDEN_CAMPANIA`.
+ * - La entrada va en snake_case y el polígono en GeoJSON [lon, lat]; el front
+ *   convierte desde su store (`entradas.ts`).
+ * - Cada valor de NASA viaja como `Indicador` (unidad, fuente, años, resolución,
+ *   confianza y motivo).
  */
-import type { Invierno, Objetivo, Verano } from "./entradas";
+
+// --- Tipos básicos -----------------------------------------------------------
+
+export type Confianza = "alta" | "media" | "baja" | "sin_dato";
+export type TipoAnio = "seco" | "normal" | "humedo";
+export type Objetivo = "agua" | "suelo" | "erosion" | "ingreso";
+export type IdEstrategia = "actual" | "A" | "B" | "C";
+export type CultivoVerano = "soja" | "maiz" | "girasol" | "sorgo" | "mani";
+export type CultivoInvierno = "barbecho" | "trigo" | "cebada" | "vicia" | "centeno";
+export type CultivoNoSembrar = "vicia" | "centeno" | "trigo" | "cebada" | "sorgo" | "girasol";
+/** Lo que puede ocupar un mes del calendario. "barbecho" = lote pelado; "soja2" = soja de 2ª. */
+export type CultivoMes = CultivoVerano | CultivoInvierno | "soja2";
+export type Restriccion = "sin_riego" | "sin_hacienda" | "maquinaria_limitada";
 
 /** Meses en el orden de la campaña: julio (6) a junio (5). */
 export const ORDEN_CAMPANIA = [6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5] as const;
-
 export const OBJETIVOS: readonly Objetivo[] = ["agua", "suelo", "erosion", "ingreso"];
-export const TIPOS_DE_ANIO = ["seco", "normal", "humedo"] as const;
+export const TIPOS_DE_ANIO: readonly TipoAnio[] = ["seco", "normal", "humedo"];
 
-export type Confianza = "alta" | "media" | "baja";
-export type TipoAnio = (typeof TIPOS_DE_ANIO)[number];
-export type IdEstrategia = "actual" | "A" | "B" | "C";
-/** Cultivo de un mes del calendario. "barbecho" = lote pelado. "soja2" = soja de segunda. */
-export type CultivoCalendario = Verano | Invierno | "soja2";
-/** Puntaje de 0 a 100 por objetivo: la base de la cercanía (RF9, RF13). */
-export type Puntajes = Record<Objetivo, number>;
-
-/** Un valor trazable: siempre con unidad, fuente, años, resolución y confianza (RF11). */
+/** Un valor con todo lo que hace falta para rastrearlo hasta el dato. */
 export interface Indicador {
-  valor: number | null;
+  valor: number | string | null;
   unidad: string;
   fuente: string;
-  /** Período del dato ("1995/96 a 2024/25"). null si no depende de años (tabla de cultivos). */
+  /** Período del dato, ej. "1995/96–2024/25". */
   anios: string | null;
   resolucion: string;
   confianza: Confianza;
+  /** Por qué falta o por qué la confianza es baja. */
+  motivo: string | null;
+}
+
+// --- Entrada -----------------------------------------------------------------
+
+export interface PoligonoGeoJSON {
+  type: "Polygon";
+  /** Coordenadas en [lon, lat]; el primer anillo es el borde del lote y cierra en el primer punto. */
+  coordinates: [number, number][][];
+}
+
+export interface LoteEntrada {
+  tipo: "ejemplo" | "dibujado";
+  poligono: PoligonoGeoJSON;
+  /** Centroide en [lat, lon]. */
+  centro: [number, number];
+  /** De 1 a 20.000 ha. */
+  area_ha: number;
+}
+
+/** Barritas de 0 (nada) a 5 (mucho). Por defecto 3 (RF4). */
+export type Prioridades = Record<Objetivo, number>;
+
+export interface MedicionesPropias {
+  lluvia_anual_mm: number | null;
+  anios_registro: number | null;
+  materia_organica_pct: number | null;
+}
+
+export interface Entrada {
+  lote: LoteEntrada;
+  /** = lote.centro[0], por compatibilidad. */
+  lat: number;
+  /** = lote.centro[1], por compatibilidad. */
+  lon: number;
+  cultivo_verano: CultivoVerano;
+  invierno: CultivoInvierno;
+  campana_pasada: CultivoVerano;
+  /** Opcional (RF3): pisa al calendario automático. Índice 0 = enero. */
+  calendario: CultivoMes[] | null;
+  prioridades: Prioridades;
+  restricciones: Restriccion[];
+  no_sembrar: CultivoNoSembrar[];
+  anegable: "si" | "a_veces" | "no" | "no_se";
+  textura_suelo: "arenoso" | "franco" | "arcilloso" | "no_se";
+  mediciones_propias: MedicionesPropias;
+}
+
+// --- Salida: lote, satélite y clima -----------------------------------------
+
+export interface LoteSalida {
+  localidad_aprox: string | null;
+  area_ha: number;
+  pendiente_pct: Indicador;
+  cobertura_agricola_pct: Indicador;
 }
 
 export interface MesSatelite {
-  /** Fecha de la escena usada (AAAA-MM-DD). */
+  /** Fecha de la escena, AAAA-MM-DD. */
   fecha: string;
   ndvi_medio: number;
-  /** Nubes en la escena, en %. */
+  /** % de nubes de la escena. */
   nubes_escena: number;
-  /**
-   * PROPUESTO. Fuente del mes cuando no es la general: MODIS 250 m es el respaldo
-   * si HLS no tiene escena limpia (CLAUDE.md). Si falta, vale `VistoPorSatelite.fuente`.
-   */
-  fuente?: string;
+  /** "NASA HLS 30 m" o "MODIS 250 m" si cayó al respaldo. */
+  fuente: string;
 }
 
-/** Lo que vio el satélite en la última campaña (RF14). */
+/** RF14: NDVI medio del lote en cada mes de la última campaña. */
 export interface VistoPorSatelite {
-  campana: string;
+  campana: string | null;
   fuente: string;
-  /** 12 meses; null = sin escena sin nubes ese mes. */
+  /** 12 meses; null = sin escena ese mes. */
   meses: (MesSatelite | null)[];
-  meses_ndvi_bajo: number;
+  meses_ndvi_bajo: number | null;
+  meses_con_dato: number;
   /** NDVI por debajo del cual el mes cuenta como "pelado" (0,3). */
   umbral: number;
+  confianza: Confianza;
+  motivo: string | null;
 }
 
-/** Pluviómetro (u otra medición) al lado de NASA (RF15). No cambia ningún puntaje. */
+export interface CorregidoAlLado {
+  umbral_seco_mm: number | null;
+  nota: string;
+}
+
+/** RF15: medición del productor al lado de NASA. No cambia ningún puntaje. */
 export interface ContrasteMedicion {
   indicador: string;
   valor_productor: number;
   valor_nasa: number;
-  /** (productor − NASA) / NASA, en %. */
+  unidad: string;
   diferencia_pct: number;
-  /** "baja" si la diferencia pasa el 15 %. */
   confianza_resultante: "alta" | "baja";
-  /** Valor "corregido con tu pluviómetro", solo informativo. */
-  corregido_al_lado: { umbral_seco_mm: number; nota: string } | null;
+  corregido_al_lado: CorregidoAlLado | null;
+  texto: string;
 }
 
+/** Celda de NASA POWER (0,5° × 0,625°), para dibujarla a la escala real del dato. */
 export interface ClimaCelda {
-  /** [oeste, sur, este, norte] de la celda de NASA POWER (~50 km). */
+  /** [oeste, sur, este, norte]. */
   bbox: [number, number, number, number];
   posicion_lote: string;
+  resolucion: string;
 }
 
-/** Clima de cada mes, promediado en las 30 campañas (índice 0 = enero). */
+/** Climatología de las 30 campañas. Índice 0 = enero. */
 export interface ClimaMensual {
   lluvia_mm: number[];
   minima_media_c: number[];
   maxima_media_c: number[];
-  /** Años (de 30) con mínima < 0 °C en ese mes. */
+  et0_mm: (number | null)[];
+  balance_mm: (number | null)[];
   anios_con_helada: number[];
-  /** Años (de 30) con máxima ≥ 35 °C en ese mes. */
   anios_con_35c: number[];
+  helada_frecuente: boolean[];
+  n_anios: number;
+  periodo: string;
+  fuente: string;
+  resolucion: string;
 }
 
-/** Terciles de las 30 campañas (RF10). Los años van como etiqueta de campaña ("2021/22"). */
 export interface TiposDeAnio {
-  metodo: "terciles";
-  /**
-   * PROPUESTO. Con qué se ordenaron las campañas. El MVP pide el balance de agua
-   * y, si falta la ET, la lluvia "y se dice": este campo es ese "se dice".
-   */
-  ordenado_por?: "balance_mm" | "lluvia_mm";
+  metodo: "terciles_balance" | "terciles_lluvia";
+  /** Campañas, ej. "2008/09". */
   seco: string[];
   normal: string[];
   humedo: string[];
-  /** Campañas con hasta este valor son "secas". */
+  /** Valor máximo del tercio seco (de balance o de lluvia, según el método). */
   umbral_seco_mm: number;
-  /** Campañas con más de este valor son "húmedas". */
+  /** Valor mínimo del tercio húmedo. */
   umbral_humedo_mm: number;
 }
 
@@ -118,7 +182,7 @@ export interface CampanaSerie {
   tipo: TipoAnio;
 }
 
-/** Serie de las 30 campañas (RF24). Describe, no proyecta. */
+/** RF24 (Could): describe, no proyecta. */
 export interface SerieAnual {
   fuente: string;
   resolucion: string;
@@ -129,125 +193,144 @@ export interface SerieAnual {
   secos_en_ultimas_10: number;
 }
 
-/** Capa del mapa (persona 4). La forma exacta la cierra la persona 1. */
-export interface CapaMapa {
-  url: string;
-  fuente: string;
-  resolucion: string;
+/** Escena HLS del mes, para armar las teselas sin repetir la búsqueda. */
+export interface CapaNdviMes {
+  coleccion: string;
+  item: string;
+  fecha: string;
 }
 
 export interface Capas {
-  erosion: CapaMapa | null;
-  ndvi_mensual: (CapaMapa | null)[];
-  agua_regional_mensual: (CapaMapa | null)[] | null;
-  heladas_regional_mensual: (CapaMapa | null)[] | null;
-  /** Nombres de las capas que no se pudieron armar. */
+  /** Formato a acordar entre Back 2 y Front 1. */
+  erosion: Record<string, unknown> | null;
+  ndvi_mensual: (CapaNdviMes | null)[];
+  agua_regional_mensual: number[] | null;
+  heladas_regional_mensual: number[] | null;
   no_disponibles: string[];
 }
 
-/** Valores de una estrategia. Cada uno es trazable (RF11). */
-export interface ValoresEstrategia {
-  /** Balance de agua de la campaña en año normal. */
-  agua_mm: Indicador;
-  meses_cobertura_baja: Indicador;
-  aporte_n: Indicador;
-  rastrojo: Indicador;
-  erosion: Indicador;
-  ingreso: Indicador;
-  conflictos_helada_calor: Indicador;
+// --- Salida: las 4 estrategias ----------------------------------------------
+
+export type PorTipo = Record<TipoAnio, number>;
+
+/**
+ * Puntos de 0 a 100 por dimensión (RF13). Con esto el front recalcula la
+ * cercanía al mover las barritas, sin volver a llamar a la API:
+ *   cercania(tipo) = Σ prioridad[o] · valor[o] / Σ prioridad[o]
+ * donde valor.agua = agua[tipo] y el resto no cambia con el tipo de año.
+ */
+export interface Puntos {
+  agua: PorTipo;
+  suelo: number;
+  erosion: number;
+  ingreso: number;
+}
+
+export interface ConflictosHeladaCalor {
+  /** Índices de mes (0 = enero). */
+  meses_helada_frecuente: number[];
+  /** Helada frecuente con cultivo sensible. */
+  meses_conflicto_helada: number[];
+  /** Cultivo de verano con ≥ 35 °C en la mitad de los años. */
+  meses_calor: number[];
+}
+
+export interface Valores {
+  /** Balance de agua de la campaña en años normales (mm). */
+  agua_mm: number;
+  meses_cobertura_baja: number;
+  aporte_n: number;
+  rastrojo: number;
+  erosion: number;
+  ingreso: number;
+  conflictos_helada_calor: ConflictosHeladaCalor;
 }
 
 export interface ValoresTipoAnio {
+  /** Balance de agua en ese tipo de año (mm). */
   agua_mm: number;
-  /** Puntajes de ese tipo de año: con ellos el front recalcula la cercanía (RF10, RF13). */
-  puntajes: Puntajes;
+  lluvia_mm: number;
+  uso_mm: number;
+  cercania: number | null;
 }
+
+export type Diferencia = Record<Objetivo, number>;
 
 export interface ReglaAplicada {
   regla: string;
-  /** Texto con signo: "+30 suelo", "−52 erosión", "= 50 ingreso". */
-  efecto: string;
-  /** El dato que la disparó. */
+  /** Cuánto movió cada dimensión, ej. { suelo: 30 }. */
+  efecto: Record<string, number>;
   dato: string;
 }
 
+/** RF25: frecuencia observada en las 30 campañas. Siempre con el conteo de años. */
 export interface Probabilidad {
   evento: "helada" | "siembra_seca" | "calor";
-  /** Mes del evento (0 = enero). */
+  /** 0 = enero. */
   mes: number;
-  cultivo: CultivoCalendario;
-  /** Años en que pasó… */
+  cultivo: string;
   anios: number;
-  /** …de cuántos (30). */
   de: number;
   pct: number;
-  /** Plantilla fija: "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)". */
   texto: string;
   fuente: string;
 }
 
-interface EstrategiaBase {
+export interface Estrategia {
   id: IdEstrategia;
   nombre: string;
-}
-
-/** Alternativa descartada por una restricción: la columna va en gris con el motivo. */
-export interface EstrategiaDescartada extends EstrategiaBase {
-  disponible: false;
-  /** "No sembrar trigo ni cebada". */
-  motivo_descarte: string;
-}
-
-export interface EstrategiaDisponible extends EstrategiaBase {
-  disponible: true;
-  motivo_descarte: null;
-  /** PROPUESTO. Cultivos en una línea: "Soja + vicia". */
-  descripcion: string;
-  /** 12 meses (0 = enero). */
-  calendario: CultivoCalendario[];
-  valores: ValoresEstrategia;
-  /**
-   * PROPUESTO. Meses (0 = enero) para la línea de la campaña. `helada`: cultivo
-   * sensible en un mes de helada frecuente (mínima < 0 °C en 1 de cada 3 años o más).
-   * `calor`: cultivo de verano en un mes con máxima ≥ 35 °C en la mitad de los años
-   * o más. Umbrales del prototipo, a confirmar con la persona 3.
-   */
-  conflictos: { helada: number[]; calor: number[] };
-  valores_por_tipo_anio: Record<TipoAnio, ValoresTipoAnio>;
-  /**
-   * Diferencia de puntaje (0 a 100) contra la actual, en año normal. En la actual,
-   * todo 0. Las diferencias en unidades físicas (+5 meses, −60 mm) van en `resumen`.
-   * A confirmar con la persona 1.
-   */
-  diferencia_vs_actual: Puntajes;
-  /** Puntaje por objetivo en año normal (= valores_por_tipo_anio.normal.puntajes). */
-  cercania_objetivos: Puntajes;
-  /** Qué le falta por objetivo; null si ya está al máximo. */
-  que_le_falta: Record<Objetivo, string | null>;
-  sensible_clima: boolean;
-  /** PROPUESTO. Fila "Resumen" (plantilla fija): "Cobertura: +5 meses · Agua: −160 mm en años secos · …". */
+  especies: string;
+  disponible: boolean;
+  motivo_descarte: string | null;
+  /** 12 meses, índice 0 = enero. */
+  calendario: CultivoMes[] | null;
   resumen: string;
-  /** PROPUESTO. "Por qué aparece" (uno de los 5 puntos). */
-  por_que: string[];
-  /** PROPUESTO. "Beneficios" (uno de los 5 puntos), en números contra la actual. */
-  beneficios: string[];
+  // Lo siguiente es null cuando la estrategia está descartada (columna en gris).
+  valores: Valores | null;
+  puntos: Puntos | null;
+  valores_por_tipo_anio: Record<TipoAnio, ValoresTipoAnio> | null;
+  diferencia_vs_actual: Diferencia | null;
+  /** Cercanía en años normales con las prioridades enviadas. */
+  cercania: number | null;
+  cercania_objetivos: Record<Objetivo, number> | null;
+  que_le_falta: string[];
+  sensible_clima: boolean;
   reglas_aplicadas: ReglaAplicada[];
   probabilidades: Probabilidad[];
-  /** "Evidencia" (uno de los 5 puntos). */
+  // Los 5 puntos de cada columna.
+  por_que: string[];
   evidencia: string[];
-  /** "Información que falta" (uno de los 5 puntos, RF21). */
+  beneficios: string[];
+  /** Información que falta. */
   vacios: string[];
-  /** "A revisar con el agrónomo" (uno de los 5 puntos). */
+  /** A revisar con el agrónomo. */
   riesgos: string[];
 }
 
-export type Estrategia = EstrategiaDisponible | EstrategiaDescartada;
+/** Una estrategia disponible: todo lo que es null en las descartadas viene con datos. */
+export type EstrategiaDisponible = Estrategia & {
+  disponible: true;
+  calendario: CultivoMes[];
+  valores: Valores;
+  puntos: Puntos;
+  valores_por_tipo_anio: Record<TipoAnio, ValoresTipoAnio>;
+  diferencia_vs_actual: Diferencia;
+  cercania_objetivos: Record<Objetivo, number>;
+};
+
+export const esDisponible = (e: Estrategia): e is EstrategiaDisponible =>
+  e.disponible && e.puntos != null && e.valores != null && e.calendario != null;
+
+export interface Choque {
+  hay: boolean;
+  objetivos: Objetivo[];
+  texto: string;
+}
 
 export interface Salida {
-  lote: { localidad_aprox: string; pendiente_pct: number | null };
-  visto_por_satelite: VistoPorSatelite | null;
+  lote: LoteSalida;
+  visto_por_satelite: VistoPorSatelite;
   indicadores: Record<string, Indicador>;
-  /** Vacío si el productor no cargó mediciones. */
   contraste_mediciones: ContrasteMedicion[];
   clima_celda: ClimaCelda;
   clima_mensual: ClimaMensual;
@@ -256,6 +339,15 @@ export interface Salida {
   capas: Capas;
   /** Siempre 4, en este orden: actual, A, B, C. */
   estrategias: [Estrategia, Estrategia, Estrategia, Estrategia];
+  choque: Choque;
+  periodo_clima: string;
+  informacion_falta: string[];
+  aviso: string;
+  /** true si la respuesta es el mock fijo. */
+  es_mock: boolean;
 }
 
-export const esDisponible = (e: Estrategia): e is EstrategiaDisponible => e.disponible;
+/** Respuesta de error con texto para mostrar (422 lote no agrícola, 503 POWER caído). */
+export interface ErrorApi {
+  mensaje: string;
+}
