@@ -530,6 +530,7 @@ def _con_linea_del_productor(
 
 
 _NOMBRE_CAPA = {"pendiente_mapa": "Capa de pendiente", "cultivo_mapa": "Capa de cultivo",
+                "erosion_mapa": "Capa de erosión por píxel",
                 "ndvi_mapa": "Capas de NDVI por mes", "ndvi_mensual": "Escenas de NDVI por mes"}
 
 
@@ -557,7 +558,7 @@ def _capas_salida(capas_sat: dict, capas_ndvi: list[CapaNdviMes | None], erosion
     grilla = _validar(GrillaLote, capas_sat.get("grilla"), "Grilla del lote", faltan)
 
     mapas: dict[str, CapaRaster | None] = {}
-    for clave in ("pendiente_mapa", "cultivo_mapa"):
+    for clave in ("pendiente_mapa", "cultivo_mapa", "erosion_mapa"):
         capa = _validar(CapaRaster, capas_sat.get(clave), _NOMBRE_CAPA[clave], faltan)
         if capa is not None and grilla is not None and (capa.bounds, capa.ancho, capa.alto) != (
                 grilla.bounds, grilla.ancho, grilla.alto):
@@ -577,7 +578,11 @@ def _capas_salida(capas_sat: dict, capas_ndvi: list[CapaNdviMes | None], erosion
         ndvi_mensual = capas_ndvi
 
     # Por qué falta cada raster, con el motivo que da Back 2.
-    motivos = {"pendiente_mapa": sat.get("elevacion", {}).get("mapa_motivo"), "cultivo_mapa": cob.get("mapa_motivo")}
+    motivos = {"pendiente_mapa": sat.get("elevacion", {}).get("mapa_motivo"), "cultivo_mapa": cob.get("mapa_motivo"),
+               # Solo si Back 2 intentó el mapa (tenía meses bajos por píxel); sin erosión del lote ya
+               # se avisa en _armar_salida.
+               "erosion_mapa": capas_sat.get("erosion_motivo") if "erosion_mapa" in (
+                   capas_sat.get("no_disponibles") or []) else None}
     for clave, motivo in motivos.items():
         if clave in no_disp and motivo:
             faltan.append(f"{_NOMBRE_CAPA[clave]}: {motivo}")
@@ -590,6 +595,7 @@ def _capas_salida(capas_sat: dict, capas_ndvi: list[CapaNdviMes | None], erosion
         grilla=grilla,
         pendiente_mapa=mapas["pendiente_mapa"],
         cultivo_mapa=mapas["cultivo_mapa"],
+        erosion_mapa=mapas["erosion_mapa"],
         no_disponibles=list(dict.fromkeys([*no_disp, "agua_regional_mensual", "heladas_regional_mensual"])),
     )
 

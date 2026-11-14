@@ -582,3 +582,43 @@ def test_sin_capas_nuevas_la_salida_es_la_de_antes():
     s = servicio.analizar(Entrada.model_validate(ENTRADA))
     assert s.capas.grilla is None and s.capas.capas_raster() == []
     assert any(s.capas.ndvi_mensual)
+
+
+def _meses_bajos(meses: int) -> dict:
+    """`meses_bajos_mapa` de ndvi.py sobre la misma grilla: `meses` en cada píxel del lote, nodata afuera."""
+    import base64
+
+    import numpy as np
+
+    pend = np.frombuffer(base64.b64decode(_PEND["valores"]), dtype="<i2")
+    q = np.where(pend == _PEND["nodata"], _PEND["nodata"], meses).astype("<i2")
+    return {**_PEND, "id": "meses_bajos", "titulo": "Meses con NDVI bajo", "unidad": "meses", "factor": 1.0,
+            "valores": base64.b64encode(q.tobytes()).decode(), "confianza": "alta"}
+
+
+def _con_erosion_por_pixel(monkeypatch, meses_bajos):
+    _con_capas(monkeypatch)
+    monkeypatch.setattr(ndvi, "calcular", lambda pol, campana=None: {**ndvi_ok(pol, campana),
+                                                                      "meses_bajos_mapa": meses_bajos})
+
+
+def test_capa_de_erosion_por_pixel_sale_en_la_grilla_y_cierra_con_la_tabla(monkeypatch):
+    _con_erosion_por_pixel(monkeypatch, _meses_bajos(4))
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    c = s.capas
+    assert c.erosion_mapa is not None and c.erosion_mapa.id == "erosion"
+    assert (c.erosion_mapa.bounds, c.erosion_mapa.ancho, c.erosion_mapa.alto) == (
+        c.grilla.bounds, c.grilla.ancho, c.grilla.alto)
+    assert "erosion_mapa" not in c.no_disponibles
+    # El número de la tabla es la media de la capa (pendiente del píxel × 4 meses).
+    assert c.erosion_mapa.resumen.valor_lote == s.indicadores["riesgo_erosion"].valor
+    assert s.indicadores["riesgo_erosion"].valor == pytest.approx(c.pendiente_mapa.resumen.media * 4, abs=0.1)
+    assert c.erosion["metodo"] == "por_pixel"
+
+
+def test_sin_meses_bajos_por_pixel_la_erosion_queda_del_lote_y_dice_por_que(monkeypatch):
+    _con_erosion_por_pixel(monkeypatch, None)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.erosion_mapa is None and "erosion_mapa" in s.capas.no_disponibles
+    assert s.capas.erosion["metodo"] == "lote" and "riesgo_erosion" in s.indicadores
+    assert any(f.startswith("Capa de erosión por píxel: ") for f in s.informacion_falta)
