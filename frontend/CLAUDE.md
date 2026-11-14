@@ -34,6 +34,7 @@ Desde `frontend/` (Node 20 o más):
 - `npm run dev` · servidor local en http://localhost:3000.
 - `npm run build` · build de producción (es lo que corre Vercel).
 - `npm run lint` y `npm run typecheck` · revisar antes de abrir un PR.
+- `npm test` · tests de lógica pura con vitest (`src/**/*.test.ts`).
 - Variables: copiar `.env.example` a `.env.local`. Sin `.env.local`, se usa el mock.
 
 ## Estructura
