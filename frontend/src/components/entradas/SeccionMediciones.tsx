@@ -23,10 +23,13 @@
  * `mediciones.css` solo agrega el aviso de fuera de rango (ver ahí por qué).
  */
 import { useState } from "react";
+import { traeLluvia } from "@/lib/planilla";
 import { useEntradas } from "@/lib/store";
+import SubirPlanilla from "./SubirPlanilla";
 import "./mediciones.css";
 
 type Campo = "lluviaAnualMm" | "aniosRegistro" | "materiaOrganicaPct";
+
 
 /** Los dos campos, con los mismos atributos que el prototipo. */
 const CAMPOS: {
@@ -58,6 +61,11 @@ export default function SeccionMediciones() {
     aniosRegistro: false,
     materiaOrganicaPct: false,
   });
+
+  // Con una planilla que trae lluvia, manda la planilla (plan 4.2 y 5.3.9): el
+  // pluviómetro y sus años de registro a mano se deshabilitan.
+  const conPlanilla = traeLluvia(mediciones.planilla?.resultado ?? null);
+  const deshabilitado = (k: Campo) => conPlanilla && (k === "lluviaAnualMm" || k === "aniosRegistro");
 
   const escribir = (c: (typeof CAMPOS)[number], input: HTMLInputElement) => {
     const v = input.validity;
@@ -96,6 +104,8 @@ export default function SeccionMediciones() {
               // el navegador todavía lee como vacío) se borraría solo.
               defaultValue={mediciones[c.k] ?? ""}
               onChange={(e) => escribir(c, e.currentTarget)}
+              disabled={deshabilitado(c.k)}
+              title={deshabilitado(c.k) ? "Se usa la lluvia de tu planilla" : undefined}
               aria-invalid={fuera[c.k]}
               aria-describedby={fuera[c.k] ? `${c.id}-err` : undefined}
             />
@@ -109,6 +119,7 @@ export default function SeccionMediciones() {
           </label>
         ))}
       </div>
+      <SubirPlanilla />
     </details>
   );
 }

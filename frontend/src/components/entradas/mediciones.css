@@ -9,3 +9,22 @@
 .sel3 .err{font-size:11px;color:var(--bad);font-weight:600}
 /* Borde rojo además del texto: el color nunca es la única señal. */
 .sel3 input[aria-invalid=true]{border-color:var(--bad)}
+
+/*
+ * Planilla CSV (RF26, SubirPlanilla.tsx). El prototipo no la tiene: se arma
+ * con los tokens del prototipo (--soft, --line, --muted, --accent) para que
+ * se vea igual que el resto del panel.
+ */
+.planilla{margin-top:12px;display:flex;flex-direction:column;gap:6px}
+.planilla-acc{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.planilla-link{font-size:13px;font-weight:600;color:var(--accent)}
+.planilla-prev{background:var(--soft);border-radius:12px;padding:10px 14px;font-size:13px;display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.planilla-prev ul{margin:0;padding-left:18px}
+.planilla-prev summary{cursor:pointer;font-weight:600;color:var(--muted)}
+/* El prototipo pone "+"/"–" a todo summary dentro de un details abierto: sin esto,
+   "Ver avisos" mostraba "–" estando cerrado (lo heredaba de "Mediciones propias"). */
+.planilla-prev summary::after{margin-left:6px}
+.planilla-prev details:not([open]) summary::after{content:"+"}
+.planilla-ej{margin:0;font-size:12px;font-weight:600;color:var(--warn)}
+.planilla-err{margin:0;font-weight:600;color:var(--bad)}
+.sel3 input:disabled{opacity:.5;cursor:not-allowed}

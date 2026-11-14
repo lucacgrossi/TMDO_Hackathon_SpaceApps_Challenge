@@ -1,3 +1,5 @@
+import type { ResultadoPlanilla } from "@/lib/planilla";
+
 /**
  * Tipos y valores iniciales de las ENTRADAS del productor (persona 4).
  *
@@ -63,6 +65,11 @@ export interface Entradas {
     /** Años de registro del pluviómetro (entero ≥ 1): el back decide con esto cuánto pesa la lluvia del productor. */
     aniosRegistro: number | null;
     materiaOrganicaPct: number | null;
+    /**
+     * Planilla CSV subida (RF26): nombre del archivo y lo que devolvió el
+     * parser. Sus `serie.meses` van en `mediciones_propias.serie_mensual`.
+     */
+    planilla: { nombre: string; resultado: ResultadoPlanilla } | null;
   };
 }
 
@@ -93,5 +100,5 @@ export const ENTRADAS_INICIALES: Entradas = {
   noSembrar: [],
   anegable: "no",
   textura: "franco",
-  mediciones: { lluviaAnualMm: null, aniosRegistro: null, materiaOrganicaPct: null },
+  mediciones: { lluviaAnualMm: null, aniosRegistro: null, materiaOrganicaPct: null, planilla: null },
 };
