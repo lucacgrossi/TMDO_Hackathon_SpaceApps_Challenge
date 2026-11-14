@@ -44,7 +44,7 @@ backend/
 | | Back 1 · núcleo y líder técnico | Back 2 · datos satelitales |
 |---|---|---|
 | **Dominios** | `api/`, `clima/`, `servicio.py`, `main.py` | `satelite/`, `demo/`, `scripts/precalcular_demo.py` |
-| **Además** | Integra `motor/` en `servicio.py`, mock para el front, deploy, merges a `dev` | Ayuda con la integración y el deploy cuando termina lo suyo |
+| **Además** | Integra `motor/` en `servicio.py`, mock para el front | Deploy en Cloud Run y merges a `dev` |
 | **No toca** | `satelite/`, `demo/` | `api/`, `clima/`, `servicio.py`, `main.py`, `motor/` |
 | **Le entrega al otro** | `contrato.py` (tipo `Indicador`) y `servicio.analizar()` | Las funciones públicas de `satelite/` |
 
@@ -101,7 +101,7 @@ Back 2 expone funciones en `satelite/`; **Back 1 las llama desde `servicio.py`**
 
 **Commits:** `<tipo>(<area>): <qué hace, en presente>`.
 
-**Merges:** Back 1 mergea a `dev` seguido; **solo la persona 3 mergea `dev` → `main`**, después de probar.
+**Merges:** Back 2 mergea a `dev` seguido; **solo la persona 3 mergea `dev` → `main`**, después de probar.
 
 **PRs:** chicos (un módulo o una función) y con descripción de 3 líneas: qué agrega, cómo se probó (comando y resultado en el lote demo) y si toca algo ajeno.
 
@@ -126,7 +126,7 @@ Back 2 expone funciones en `satelite/`; **Back 1 las llama desde `servicio.py`**
 | Internet en la demo | `demo/rio_cuarto.json` servido por la API cuando el lote es el de la demo | Sin cambios |
 
 ## 6. Deploy
-- El backend va en **GCP Cloud Run**, región `southamerica-east1` (São Paulo). Dueño: Back 1; Back 2 ayuda.
+- El backend va en **GCP Cloud Run**, región `southamerica-east1` (São Paulo). Dueño: Back 2.
 - Deploy desde `backend/` con `gcloud run deploy --source .`. Cloud Run construye el contenedor solo.
 - Secretos y configuración en variables de entorno de Cloud Run, nunca en el repo.
 - CORS abierto al dominio del front.
