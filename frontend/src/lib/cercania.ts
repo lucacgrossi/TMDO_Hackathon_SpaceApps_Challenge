@@ -2,8 +2,10 @@
  * Cercanía a los objetivos (RF9, RF13). Lógica pura, sin React: la usan la
  * tabla, las tarjetas y el texto para compartir.
  *
- * Fórmula del contrato (`Puntos` en contrato.py), que es el `sc()` del prototipo:
- *   cercania(tipo) = Σ prioridad[o] · valor[o] / Σ prioridad[o]
+ * Fórmula del contrato (`Puntos` en contrato.py, la del motor `app/motor/reglas.py`):
+ *   cercania(tipo) = round(Σ prioridad[o]² · valor[o] / Σ prioridad[o]²)
+ * Las prioridades van de 1 a 5 y pesan al cuadrado: una 5 pesa 25 veces una 1
+ * (MVP 4.3, RF4). El prototipo (`sc()`) pesaba lineal; ya no.
  * con valor.agua = puntos.agua[tipo]; suelo, erosión e ingreso no cambian con
  * el tipo de año. Se recalcula al mover las barras con los puntos que ya mandó
  * /analizar: nunca se vuelve a pedir datos. No elige ganador.
@@ -20,7 +22,7 @@ import {
   type TipoAnio,
 } from "./contrato";
 
-/** Barras de 0 a 5 por objetivo (`useEntradas((s) => s.objetivos)`). */
+/** Barras de 1 a 5 por objetivo (`useEntradas((s) => s.objetivos)`). */
 export type Pesos = Prioridades;
 
 /** Diferencia de cercanía entre tipos de año a partir de la cual es "sensible al clima" (prototipo). */
@@ -46,14 +48,21 @@ export function valoresDe(puntos: Puntos, tipo: TipoAnio = "normal"): Record<Obj
   return { agua: puntos.agua[tipo], suelo: puntos.suelo, erosion: puntos.erosion, ingreso: puntos.ingreso };
 }
 
-/** Promedio ponderado, redondeado. null si todas las barras están en 0 (no hay nada que comparar). */
+/** Cuánto pesa una prioridad en la cercanía (`EXPONENTE_PRIORIDAD` del motor). */
+export const EXPONENTE_PRIORIDAD = 2;
+
+/**
+ * Promedio ponderado por las prioridades al cuadrado, redondeado como el back.
+ * null si todas las barras están en 0: ya no pasa (van de 1 a 5), queda por las dudas.
+ */
 export function cercania(puntos: Puntos, pesos: Pesos, tipo: TipoAnio = "normal"): number | null {
   const v = valoresDe(puntos, tipo);
   let peso = 0;
   let total = 0;
   for (const o of OBJETIVOS) {
-    peso += pesos[o];
-    total += pesos[o] * v[o];
+    const p = pesos[o] ** EXPONENTE_PRIORIDAD;
+    peso += p;
+    total += p * v[o];
   }
   return peso ? redondearComoBackend(total / peso) : null;
 }
