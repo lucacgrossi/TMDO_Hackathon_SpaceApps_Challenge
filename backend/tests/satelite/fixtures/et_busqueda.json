@@ -1,0 +1,38 @@
+[
+  {
+    "type": "Feature",
+    "id": "MYD16A3GF.A2025001.h12v12.061.2026036100740",
+    "collection": "modis-16A3GF-061",
+    "properties": {
+      "start_datetime": "2025-01-01T00:00:00.000000Z",
+      "end_datetime": "2025-12-31T23:59:59.000000Z"
+    }
+  },
+  {
+    "type": "Feature",
+    "id": "MOD16A3GF.A2025001.h12v12.061.2026036044539",
+    "collection": "modis-16A3GF-061",
+    "properties": {
+      "start_datetime": "2025-01-01T00:00:00.000000Z",
+      "end_datetime": "2025-12-31T23:59:59.000000Z"
+    }
+  },
+  {
+    "type": "Feature",
+    "id": "MYD16A3GF.A2024001.h12v12.061.2025020003821",
+    "collection": "modis-16A3GF-061",
+    "properties": {
+      "start_datetime": "2024-01-01T00:00:00.000000Z",
+      "end_datetime": "2024-12-31T23:59:59.000000Z"
+    }
+  },
+  {
+    "type": "Feature",
+    "id": "MOD16A3GF.A2024001.h12v12.061.2025019231420",
+    "collection": "modis-16A3GF-061",
+    "properties": {
+      "start_datetime": "2024-01-01T00:00:00.000000Z",
+      "end_datetime": "2024-12-31T23:59:59.000000Z"
+    }
+  }
+]

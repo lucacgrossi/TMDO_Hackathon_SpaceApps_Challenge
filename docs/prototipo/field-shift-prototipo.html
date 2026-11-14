@@ -661,9 +661,13 @@ function onLoteChange(){const c=center(S.poly),ha=areaHa(S.poly),d=distKm(c,CITY
 const PC="https://planetarycomputer.microsoft.com/api";
 const HLS_EXPR={"hls2-s30":"(B08-B04)/(B08+B04)","hls2-l30":"(B05-B04)/(B05+B04)"};
 const HLS_SENSOR={"hls2-s30":"Sentinel-2","hls2-l30":"Landsat"};
-const CAMP0=new Date().getFullYear()-2;/* última campaña completa: la misma con la que termina la serie de lluvia */
+/* Última campaña completa (julio a junio). NUNCA fijar el año a mano:
+   se estima con la fecha (si ya pasó junio, la que terminó este junio) y después se confirma
+   con NASA POWER: la campaña de NDVI es la misma con la que termina la serie de clima. */
+const HOY=new Date();let CAMP0=HOY.getMonth()>=6?HOY.getFullYear()-1:HOY.getFullYear()-2;
 const campYear=m=>m>=6?CAMP0:CAMP0+1;
-const CAMP_LAB=`${CAMP0}/${String(CAMP0+1).slice(2)}`;
+let CAMP_LAB=`${CAMP0}/${String(CAMP0+1).slice(2)}`;
+function setCamp(y0){if(y0===CAMP0)return;CAMP0=y0;CAMP_LAB=`${CAMP0}/${String(CAMP0+1).slice(2)}`;HLS_CACHE.clear();loadSeen();if(S.layer==="ndvi")setNdvi()}
 const BAJO=.3;/* NDVI medio del lote por debajo de 0,3 = lote pelado o casi (regla del prototipo, a validar con la persona 3) */
 let hlsLayer=null,modisLayer=null,NDVI_SRC=null,ndviToken=0;
 const HLS_CACHE=new Map(),SEEN={key:null,m:Array(12).fill(undefined)};
@@ -752,7 +756,7 @@ function slopeColor(s){const st=[[0,[46,125,50]],[1,[124,179,66]],[2.5,[253,216,
 const NOMT={seco:"seco",normal:"normal",humedo:"húmedo"};
 let SERIE={real:false,c:[]},powerToken=0;
 const avgOf=a=>a.reduce((x,y)=>x+y,0)/a.length;
-async function loadPower(){const tok=++powerToken,[lat,lng]=center(S.poly),end=new Date().getFullYear()-1,start=end-31;
+async function loadPower(){const tok=++powerToken,[lat,lng]=center(S.poly),end=new Date().getFullYear(),start=end-32;
   try{const u=`https://power.larc.nasa.gov/api/temporal/monthly/point?parameters=PRECTOTCORR_SUM,T2M_MIN,T2M_MAX&community=AG&longitude=${lng.toFixed(4)}&latitude=${lat.toFixed(4)}&start=${start}&end=${end}&format=JSON`;
     const r=await fetch(u);if(!r.ok)throw 0;const j=await r.json();if(tok!==powerToken)return;
     const P=j.properties.parameter,PP=P.PRECTOTCORR_SUM,TN=P.T2M_MIN,TX=P.T2M_MAX,k2=(y,m)=>`${y}${String(m).padStart(2,"0")}`,ok=v=>v!=null&&v>-999;
@@ -760,6 +764,8 @@ async function loadPower(){const tok=++powerToken,[lat,lng]=center(S.poly),end=n
       if(ks.some(k=>!ok(PP[k])||!ok(TN[k])||!ok(TX[k])))continue;
       c.push({lab:`${y}/${String(y+1).slice(2)}`,ks,mm:Math.round(ks.reduce((a,k)=>a+PP[k],0))})}
     c=c.slice(-30);const n=c.length;if(n<15)throw 0;
+    /* la serie manda: NDVI y satélite usan la misma última campaña completa que confirmó POWER */
+    setCamp(+c[n-1].lab.slice(0,4));
     /* Mes m (0 = enero) de cada campaña: la campaña arranca en julio */
     const per=m=>c.map(x=>x.ks[(m+6)%12]);
     Object.assign(CLIMA,{real:true,n,per:`${c[0].lab} a ${c[n-1].lab}`,
