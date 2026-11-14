@@ -29,7 +29,18 @@ El MVP y el `CLAUDE.md` raíz dicen que el stack y el contrato de la API los def
   - Capas de datos con `maxNativeZoom` igual a su resolución real (NDVI GIBS: 9). Se ven los píxeles grandes a propósito: es la escala real del dato.
 
 ## Comandos
-Se completan cuando exista `package.json`.
+Desde `frontend/` (Node 20 o más):
+- `npm install` · instala las dependencias (versiones fijas en `package.json`).
+- `npm run dev` · servidor local en http://localhost:3000.
+- `npm run build` · build de producción (es lo que corre Vercel).
+- `npm run lint` y `npm run typecheck` · revisar antes de abrir un PR.
+- Variables: copiar `.env.example` a `.env.local`. Sin `.env.local`, se usa el mock.
+
+## Estructura
+- `src/app/` · `layout.tsx` (fuente Inter, tokens) y `page.tsx` (mapa + panel + hoja).
+- `src/components/` · una pieza por archivo. `Mapa.tsx` se importa siempre con `MapaDinamico.tsx`.
+- `src/lib/` · `mapa.ts` (lote demo y límites de zoom). Acá van `contrato.ts` y `cercania.ts`.
+- Tailwind toma los colores de las variables CSS de `globals.css` (`bg-panel`, `text-muted`, `bg-accent`…).
 
 ## Fuera de alcance
 Lo del `CLAUDE.md` raíz, más: chat o IA, alfalfa y pasturas, guardar comparaciones.
