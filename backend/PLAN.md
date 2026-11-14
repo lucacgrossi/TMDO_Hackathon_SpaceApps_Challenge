@@ -18,15 +18,15 @@ backend/
 │  │  └─ contrato.py            ←         modelos Pydantic (Entrada, Salida, Indicador)
 │  ├─ servicio.py               ← Back 1  analizar(entrada) -> salida: orquesta los dominios, sin FastAPI
 │  ├─ clima/                    ← Back 1  NASA POWER e indicadores climáticos
-│  │  ├─ power.py               ←         POWER mensual y diario, 1991–2024
-│  │  ├─ indicadores.py         ←         balance hídrico (Hargreaves), heladas, calor, lluvia extrema, terciles
-│  │  ├─ probabilidad.py        ←         probabilidad climatológica de cada riesgo (frecuencia en 30 años)
-│  │  └─ correccion.py          ←         corrección de la serie NASA con las mediciones del productor
+│  │  ├─ power.py               ←         POWER mensual: un solo pedido, últimas 30 campañas (jul–jun)
+│  │  ├─ indicadores.py         ←         balance hídrico (Hargreaves), heladas, calor, terciles, serie por campaña
+│  │  ├─ probabilidad.py        ←         probabilidad climatológica por estrategia (frecuencia en 30 campañas)
+│  │  └─ correccion.py          ←         contraste con las mediciones del productor (al lado, no cambia puntajes)
 │  ├─ satelite/                 ← Back 2  datos satelitales del lote
 │  │  ├─ pc.py                  ←         cliente de Planetary Computer (búsqueda STAC + estadísticas por polígono)
-│  │  ├─ lote.py                ←         polígono por defecto a partir de lat/lon
+│  │  ├─ lote.py                ←         polígono del lote: validación, área, centro y lote de ejemplo
 │  │  ├─ cobertura.py           ←         ESA WorldCover: ¿el punto es un lote agrícola?
-│  │  ├─ ndvi.py                ←         NDVI MODIS (serie) + HLS (lote) → meses de cobertura baja
+│  │  ├─ ndvi.py                ←         NDVI HLS 30 m por mes de la última campaña (MODIS de respaldo) → visto por satélite
 │  │  ├─ elevacion.py           ←         pendiente con NASADEM (plano ajustado) + capa de pendiente
 │  │  ├─ et.py                  ←         ET real anual de MODIS, para contrastar Hargreaves
 │  │  └─ capas.py               ←         capas del mapa: ndvi_mensual[12], erosión
@@ -52,36 +52,40 @@ backend/
 
 ## 2. Qué hace cada uno
 Las fuentes están verificadas contra el lote demo (ver "Datos que usamos" en `../CLAUDE.md`). Todas andan sin login.
+El alcance que manda es el de **MVP 4.2** (`../docs/mvp-alcance.md`): el lote es un **polígono dibujado** (de 1 a 20.000 ha), el NDVI del lote sale de **HLS a 30 m**, POWER es **un solo pedido mensual con las últimas 30 campañas** y las mediciones del productor **se muestran al lado sin cambiar puntajes**.
 
 ### Back 1 · núcleo, clima y predicción estadística
 | # | Tarea | Archivo | Hecho cuando |
 |---|---|---|---|
 | 1 | Esqueleto, contrato Pydantic y mock para el front | `main.py`, `api/` | El front puede trabajar con el mock y `/analizar` responde con la forma del contrato |
-| 2 | NASA POWER mensual y diario, 1991–2024 | `clima/power.py` | Series por mes y por día del punto. Descarta la clave `AAAA13` (total anual) y pasa la lluvia de mm/día a mm/mes |
-| 3 | Indicadores climáticos | `clima/indicadores.py` | Balance hídrico mensual (lluvia − ET0 de Hargreaves), fecha de última y primera helada, días > 35 °C, días con lluvia > 50 mm, terciles seco/normal/húmedo por balance de la campaña |
-| 4 | **Probabilidad climatológica** | `clima/probabilidad.py` | Para cada riesgo y mes: cantidad de años en que ocurrió sobre el total, y su porcentaje ("balance de julio negativo en 22 de 30 años → 73 %"). Cubre helada, calor > 35 °C, déficit de agua y lluvia extrema |
-| 5 | **Corrección con mediciones** | `clima/correccion.py` | Con la lluvia del pluviómetro y sus años de registro: factor = medición / POWER en el mismo período. Devuelve el valor NASA, la medición, el factor, el valor corregido y la confianza resultante. Sin mediciones, devuelve la serie tal cual |
-| 6 | Orquestación | `servicio.py` | `analizar()` llama a `clima/`, `satelite/` y `motor/` y arma la `Salida` completa, con "Información que falta" |
+| 2 | NASA POWER mensual, últimas 30 campañas | `clima/power.py` | **Un solo pedido** mensual (`PRECTOTCORR_SUM`, `T2M_MIN`, `T2M_MAX`, comunidad `AG`) con las últimas 30 campañas completas de julio a junio (hoy 1995/96 a 2024/25). Descarta la clave `AAAA13` (anual). No mezclar con la climatología precalculada de POWER (otro período, extremos absolutos) |
+| 3 | Indicadores climáticos | `clima/indicadores.py` | `clima_mensual` (lluvia, mínima y máxima media, años con helada, años con ≥ 35 °C, por mes); balance hídrico (lluvia − ET0 de Hargreaves); mes de "helada frecuente" si tuvo mínima < 0 °C en ≥ 1 de cada 3 años; terciles seco/normal/húmedo por balance de la campaña (si falta la ET, por lluvia, y se dice); `clima_celda` (bbox de la celda de POWER y posición del lote) |
+| 4 | **Probabilidad climatológica** (RF25, Must) | `clima/probabilidad.py` | Por estrategia, frecuencia en las 30 campañas de los eventos de su calendario: helada con cultivo sensible, siembra con menos de la mitad de la lluvia normal, máxima ≥ 35 °C. Devuelve `probabilidades: [{evento, mes, cultivo, anios, de, pct, texto, fuente}]` con texto fijo ("Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)") |
+| 5 | **Contraste con mediciones** (RF15) | `clima/correccion.py` | Pluviómetro contra POWER en el mismo período: `contraste_mediciones` con valor del productor, valor NASA, diferencia %, confianza resultante (diferencia > 15 % → "baja") y un `corregido_al_lado` informativo (por ejemplo, el umbral de año seco). **No cambia ningún puntaje.** Sin mediciones, devuelve la lista vacía |
+| 6 | Orquestación | `servicio.py` | `analizar()` llama a `clima/`, `satelite/` y `motor/` y arma la `Salida` completa, con "Información que falta". Si el NDVI observado no coincide con la rotación cargada (2 meses o más), lo manda a "Revisar con el agrónomo" (RF14) |
+| 7 | Serie por campaña (RF24, Could) | `clima/indicadores.py` | `serie_anual`: lluvia (y balance si existe) de cada una de las 30 campañas, su tercio, el promedio de las últimas 10 contra las 20 previas. Describe, no proyecta |
 
 
 ### Back 2 · datos satelitales del lote
 | # | Tarea | Archivo | Hecho cuando |
 |---|---|---|---|
 | 1 | Cliente de Planetary Computer | `satelite/pc.py` | Búsqueda STAC y `item/statistics` sobre un polígono, con timeout y sin excepciones hacia afuera |
-| 2 | Lote y validación agrícola | `satelite/lote.py`, `satelite/cobertura.py` | Rectángulo de ~95 ha alrededor del punto; WorldCover dice si el punto es cultivo (clase 40) y el % del lote que lo es. Si no es agrícola → "Marcá un lote de campo" |
-| 3 | Pendiente | `satelite/elevacion.py` | NASADEM recortado como array (`item/crop/.npy`) → plano por mínimos cuadrados → pendiente general y máxima (%). AWS Terrain Tiles de respaldo. En el lote demo ≈ 0,6 % |
-| 4 | NDVI | `satelite/ndvi.py` | MODIS MOD13Q1: NDVI medio del lote por mes en los últimos 10 años → meses de cobertura baja y "en N de 10 años". HLS: NDVI del lote en la última campaña, a 30 m. Filtra nubes con la banda de confiabilidad |
+| 2 | Lote y validación agrícola | `satelite/lote.py`, `satelite/cobertura.py` | `lote.py`: recibe el polígono GeoJSON (`[lon, lat]`) que dibujó el usuario o el lote de ejemplo; valida de 1 a 20.000 ha y sin líneas cruzadas; calcula área, centroide y bbox. `cobertura.py`: WorldCover dice qué % del polígono es cultivo (clase 40). Si no es agrícola → "Marcá un lote de campo" |
+| 3 | Pendiente | `satelite/elevacion.py` | NASADEM recortado al bbox como array (`item/crop/.npy`), solo con los píxeles dentro del polígono → plano por mínimos cuadrados → pendiente general y máxima (%). AWS Terrain Tiles de respaldo. En el lote demo ≈ 0,6 %. Probar también con un lote grande (20.000 ha) para el tamaño y el tiempo |
+| 4 | NDVI · visto por satélite (RF14) | `satelite/ndvi.py` | **HLS 30 m** (`hls2-s30` + `hls2-l30`): por cada mes de la última campaña, la escena con menos nubes (< 30 %) y el NDVI medio del polígono → `visto_por_satelite: {campana, fuente, meses[12]: {fecha, ndvi_medio, nubes_escena} \| null, meses_ndvi_bajo, umbral: 0.3}`. 12 meses en paralelo. **MODIS MOD13Q1 de respaldo** para los meses sin escena limpia (se dice en la fuente) |
 | 5 | ET satelital | `satelite/et.py` | ET real anual de MODIS (escala 0,1 → mm/año), para mostrarla al lado del balance de Back 1 |
-| 6 | Capas del mapa | `satelite/capas.py` | `ndvi_mensual[12]` y erosión (pendiente × meses de cobertura baja), con el formato que se acuerde con Front 1 |
+| 6 | Capas del mapa | `satelite/capas.py` | `ndvi_mensual[12]`: la escena HLS de cada mes (colección, item, fecha), para que el front arme las teselas de Planetary Computer sin repetir la búsqueda. Erosión: pendiente × meses de cobertura baja, con el formato que se acuerde con Front 1 |
 | 7 | Demo precalculada | `scripts/precalcular_demo.py`, `demo/rio_cuarto.json` | El JSON sale de `servicio.analizar()` para el lote demo y se regenera después de cada cambio de contrato |
 | 8 | Deploy y merges | Cloud Run, `dev` | `/analizar` deployado y respondiendo en menos de 30 s |
 
 ### Para acordar entre los dos (y con Lógica / Front)
-- **Orden de los meses** en todos los arrays de 12: campaña julio → junio o enero → diciembre. Tiene que ser el mismo en el clima, el NDVI, el motor y el front.
-- **Umbral de cobertura baja por fuente:** MODIS a 250 m mezcla el lote con los vecinos (julio de 2024: MODIS 0,31 contra HLS 0,264). Lo define Lógica.
-- **Si la corrección cambia los puntajes** o solo se muestra al lado: lo define la persona 3 (hoy `docs/mvp-alcance.md` dice que no cambia ninguno).
-- **Formato de las capas** del mapa: lo acuerdan Back 2 y Front 1.
+- **Orden de los meses** en todos los arrays de 12 (`clima_mensual`, `visto_por_satelite.meses`, `capas.ndvi_mensual`, calendario): la campaña es de julio a junio, pero hay que fijar si el índice 0 es julio o enero. Tiene que ser igual en el clima, el NDVI, el motor y el front.
+- **Umbral de cobertura baja:** la 4.2 fija NDVI < 0,3 sobre HLS (a validar con la persona 3). Si un mes cae a MODIS de respaldo, el mismo umbral marca menos meses (julio de 2024: MODIS 0,31 contra HLS 0,264): avisarlo en la fuente de ese mes.
+- **Formato de las capas** del mapa (erosión y la escena NDVI por mes): lo acuerdan Back 2 y Front 1.
 - **Qué confianza lleva cada indicador** (alta / media / baja), según la resolución, los años y el contraste con la medición.
+- **Contrato:** la 4.2 propone campos nuevos (`lote.poligono`, `visto_por_satelite.meses`, `clima_celda`, `clima_mensual`, `serie_anual`, `probabilidades`). Back 1 los pasa a `api/contrato.py` y al mock.
+
+**Decidido en la 4.2 (ya no se discute):** las mediciones del productor no cambian puntajes · probabilidad climatológica sí (Must) · sin tendencias ni años análogos · sin modelo de predicción propio · NDVI del lote con HLS · POWER con un solo período de 30 campañas.
 
 ## 3. Interfaz entre Back 1 y Back 2
 Back 2 expone funciones en `satelite/`; **Back 1 las llama desde `servicio.py`**. Back 2 nunca edita `servicio.py`.
@@ -90,8 +94,9 @@ Back 2 expone funciones en `satelite/`; **Back 1 las llama desde `servicio.py`**
 - `Indicador` = `{valor, unidad, fuente, anios, resolucion, confianza}` y lo define Back 1 en `api/contrato.py`. Hasta que exista, Back 2 devuelve un `dict` con esas mismas claves.
 - **Nunca lanzan excepción hacia afuera.** Si falla una fuente: `valor: None`, `confianza: "sin_dato"` y un `motivo` en texto. Back 1 lo manda a "Información que falta".
 - Cada llamada externa tiene un timeout, para que `/analizar` responda en menos de 30 s (RNF7).
-- Las funciones son puras respecto del input (lat/lon → resultado): se prueban sueltas, sin levantar FastAPI.
-- Cada módulo se puede correr solo desde `backend/`: `python -m app.satelite.elevacion -33.2476 -64.2325` imprime el resultado del lote demo.
+- **Las funciones reciben el polígono del lote** (GeoJSON Polygon en `[lon, lat]`, el de `entrada.lote.poligono`), no lat/lon sueltos. `lat`/`lon` (el centroide) solo se usan para lo que es por punto (POWER, WorldCover del centro).
+- Las funciones son puras respecto del input (polígono → resultado): se prueban sueltas, sin levantar FastAPI.
+- Cada módulo se puede correr solo desde `backend/`: `py -m app.satelite.elevacion` sin argumentos usa el lote de ejemplo e imprime el resultado.
 
 **Interfaz Back 1 → Back 2:** `servicio.analizar(entrada: Entrada) -> Salida`. La usan `/analizar` y `scripts/precalcular_demo.py`. Así el JSON de la demo sale del mismo código que la API, no a mano.
 
@@ -117,7 +122,7 @@ Back 2 expone funciones en `satelite/`; **Back 1 las llama desde `servicio.py`**
 ## 5. Planes B
 | Si falla | Plan B | Qué ve el usuario |
 |---|---|---|
-| MODIS en Planetary Computer, o 10 años tardan demasiado | Menos años, o HLS solo para la última campaña | La serie dice cuántos años cubre |
+| HLS sin escena limpia en un mes | MODIS MOD13Q1 (250 m) para ese mes | La fuente del mes dice "MODIS 250 m" |
 | Planetary Computer entero | ORNL MODIS subsets para el NDVI; AWS Terrain Tiles para la pendiente | Igual, con otra fuente |
 | Todo el NDVI numérico | GIBS solo como capa visual; meses de cobertura baja desde el calendario | "Información que falta: NDVI numérico" |
 | Pendiente (NASADEM y AWS) | Pendiente fija del lote demo (0,6 %) con `confianza: "baja"` | Nota en "Información que falta" |
