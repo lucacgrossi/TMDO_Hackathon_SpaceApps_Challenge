@@ -168,15 +168,20 @@ class CorregidoAlLado(BaseModel):
 
 
 class ContrasteMedicion(BaseModel):
-    """RF15: medición del productor al lado de NASA. No cambia ningún puntaje."""
+    """RF15: medición del productor al lado de NASA. No cambia ningún puntaje.
+
+    Sin valor de NASA (`valor_nasa` None) la fila es "dato del productor": la materia
+    orgánica (no hay fuente NASA) o la lluvia cuando NASA POWER no respondió.
+    """
 
     indicador: str
     valor_productor: float
-    valor_nasa: float
+    valor_nasa: float | None = Field(None, description="None: dato del productor, sin valor de NASA para comparar")
     unidad: str
-    diferencia_pct: int
-    confianza_resultante: Literal["alta", "baja"]
-    corregido_al_lado: CorregidoAlLado | None
+    diferencia_pct: int | None = Field(None, description="(productor − NASA) / NASA · 100; None si no hay NASA")
+    confianza_resultante: Literal["alta", "baja"] | None = Field(
+        None, description="Diferencia > 15 % o pocos años de registro → baja; None si no hay comparación")
+    corregido_al_lado: CorregidoAlLado | None = None
     texto: str
 
 
