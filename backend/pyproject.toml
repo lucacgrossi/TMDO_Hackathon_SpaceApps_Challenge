@@ -1,0 +1,18 @@
+# Config de herramientas del back (no es un paquete instalable).
+# Lo usa la CI (.github/workflows/backend.yml) y se puede correr igual en local, desde backend/.
+
+[tool.ruff]
+line-length = 120
+
+[tool.ruff.lint]
+# Las reglas clásicas de ruff, escritas a propósito: errores de sintaxis, pyflakes (imports sin usar,
+# nombres sin definir) y pycodestyle básico. Así el resultado no cambia si una versión nueva de ruff
+# agrega reglas por defecto. Sumar reglas es decisión del equipo.
+select = ["E4", "E7", "E9", "F"]
+# E741 (nombre ambiguo `l`) lo incumple un test existente (tests/satelite/test_lote.py); es de estilo.
+ignore = ["E741"]
+
+[tool.pytest.ini_options]
+# Los tests importan `app.…`: se corren desde backend/ y esto lo pone en el path.
+pythonpath = ["."]
+testpaths = ["tests"]
