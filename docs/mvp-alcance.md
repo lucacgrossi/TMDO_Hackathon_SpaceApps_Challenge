@@ -6,7 +6,7 @@
 - **Flujo en 2 pasos** con intro, en lugar de 5 pantallas (ver "Flujo").
 - **Un solo período de clima** para todo: POWER mensual, últimas 30 campañas.
 - **NDVI a 30 m** con NASA HLS (Planetary Computer); MODIS de respaldo.
-- **Alineado con `backend/PLAN.md`:** las dos decisiones coinciden con `clima/probabilidad.py` y `clima/correccion.py`. Esta versión cierra lo que el plan dejaba abierto: **la corrección con el pluviómetro se muestra al lado y no cambia ningún puntaje**.
+- **Alineado con `backend/PLAN.md`:** las dos decisiones coinciden con `clima/probabilidad.py` y `clima/correccion.py`. Esta versión cierra lo que el plan dejaba abierto: **la corrección con el pluviómetro se muestra al lado y no cambia ningún puntaje**. *Actualizado 2026-11-14 (aprobado por la persona 3): las mediciones del productor sí entran en los puntajes del motor; ver RF15.*
 
 
 **Último ajuste (4.1):**
@@ -39,7 +39,7 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 3. **Sin IA dentro de la app.** Indicadores, reglas de puntaje y textos salen de cálculos y plantillas fijas. Todo resultado se puede rastrear hasta el dato y la regla que lo produjo.
 4. **Técnico por defecto:** valores con unidades, fuente, años, resolución y confianza siempre visibles.
 5. **Estandarizado.** Mismas pantallas, misma tabla, mismas filas, unidades y escalas, **mismas 4 columnas (actual + 3 alternativas tipo)** y mismas reglas para todos. Solo cambian los datos de entrada.
-6. **NASA es la base.** Los puntajes salen solo de datos de NASA. Las mediciones propias se muestran al lado para contrastar y ajustar la confianza.
+6. **NASA es la base; el productor pesa más.** Sin mediciones propias, los puntajes salen solo de datos de NASA. La lluvia y las temperaturas mínima y máxima del productor (opcionales) se mezclan con NASA y pesan más según sus años de registro; se muestran también al lado, para contrastar.
 7. **Cada capa del mapa se dibuja a la escala real del dato.**
 8. **Nada inventado.** Lo que falta va a "Información que falta".
 9. **Lenguaje:** nunca "te recomendamos", "deberías" ni "la mejor". Los textos describen datos: "esta alternativa tiene 5 meses más de cobertura y un balance de agua 60 mm menor en años secos".
@@ -75,7 +75,7 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
   - **Usar el lote de ejemplo:** campo real cerca de Río Cuarto, 95 ha.
   - **Marcar mi lote:** "¿Dónde está tu lote?" con buscador de localidad, paraje o ruta (Esri); acepta coordenadas (decimales o grados) o un link de Google Maps; "Usar mi ubicación" toma el GPS si está en el campo. Hasta elegir el lugar, el botón dice "Elegí dónde está tu lote".
 - Rotación actual (verano, invierno, campaña pasada).
-- Objetivos con barritas de 0 a 5 ("cuánto te importa cada uno: 0 nada, 5 mucho").
+- Objetivos con barritas de 1 a 5 ("cuánto te importa cada uno: 1 poco, 5 mucho").
 - Restricciones de lista y "No sembrar".
 - Datos del lote (se encharca, textura) y mediciones propias (pluviómetro, materia orgánica), plegados.
 
@@ -108,7 +108,7 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 **CU4:**
 - La lluvia del pluviómetro se muestra junto a NASA POWER. Si la diferencia pasa del 15 %, la confianza de los indicadores de agua baja a "media" y aparece una nota.
 - La materia orgánica se muestra en la fila Suelo como "dato del productor".
-- Ningún puntaje cambia.
+- La lluvia y las temperaturas del productor entran en los puntajes del motor, mezcladas con NASA según los años de registro (RF15).
 
 **CU5:** `mailto:` con la comparación en texto armado con una plantilla fija. Plan B: PDF.
 
@@ -204,7 +204,7 @@ La app funciona en cualquier punto; Río Cuarto es el lote precalculado para la 
 | RF1 | Ubicar y marcar el lote: lote de ejemplo, o buscador de lugares (Esri `suggest` + `findAddressCandidates`, sin cuenta), coordenadas o link de Google Maps, o GPS. **Dibujo por puntos** (polígono de cualquier forma, una L por ejemplo), esquinas arrastrables, mínimo 1 ha y máximo 20.000 ha, sin líneas cruzadas; tocar el mapa mueve el lote sin cambiar su forma. Probado en el prototipo | Must |
 | RF2 | Cultivo de verano, invierno y campaña pasada; calendario de 12 meses automático | Must |
 | RF3 | Editar las fechas del calendario | Should |
-| RF4 | 4 objetivos con barritas de 0 a 5, por defecto en 3 | Must |
+| RF4 | 4 objetivos con barritas de 1 a 5, por defecto en 3. Pesan al cuadrado en la cercanía (una 5 pesa 25 veces una 1) | Must |
 | RF5 | Restricciones de lista: sin riego (por defecto), sin hacienda, maquinaria limitada, no sembrar | Must |
 | RF6 | Campos del lote: se encharca, textura del suelo | Should |
 | RF7 | Traer datos de NASA: POWER (P0); MODIS y SRTM (P1); SoilGrids y GAEZ (P2) | Must (P0) / Should (P1) |
@@ -215,7 +215,7 @@ La app funciona en cualquier punto; Río Cuarto es el lote precalculado para la 
 | RF12 | Textos de la tabla generados con plantillas fijas a partir de los valores (sin IA) | Must |
 | RF13 | Recalcular la cercanía al mover las barritas, sin volver a llamar a NASA | Must |
 | RF14 | Mostrar lo que vio el satélite: NDVI medio del lote en cada mes de la última campaña (HLS 30 m, `POST /api/data/v1/item/statistics` con el polígono del lote). Mes "pelado" si el NDVI medio es < 0,3 (regla a validar con la persona 3). Si no coincide con la rotación cargada (2 meses o más de diferencia), va a "Revisar con el agrónomo". No cambia los puntajes | Should |
-| RF15 | **Decisión 2026-11-14.** Mediciones propias **al lado** de NASA: "Tu pluviómetro: 650 mm/año · NASA: 824 mm (−21 %)". Diferencia > 15 % baja la confianza del agua a "baja" y va a "Revisar con el agrónomo". Se muestra un "corregido con tu pluviómetro" informativo (por ejemplo, el umbral de año seco). Carga a mano, sin subir archivo. **No cambian los puntajes** | Should |
+| RF15 | **Decisión 2026-11-14.** Mediciones propias **al lado** de NASA: "Tu pluviómetro: 650 mm/año · NASA: 824 mm (−21 %)". Diferencia > 15 % baja la confianza del agua a "baja" y va a "Revisar con el agrónomo". Se muestra un "corregido con tu pluviómetro" informativo (por ejemplo, el umbral de año seco). Carga a mano, sin subir archivo. **Actualizado 2026-11-14 (aprobado por la persona 3):** la lluvia y las temperaturas mínima y máxima del productor **sí cambian los puntajes**: el motor las mezcla con NASA con un peso que crece con los años de registro (1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10 o más 75 %) y lo dice en la evidencia | Should |
 | RF16 | Capa de riesgo de erosión dentro del lote | Should |
 | RF17 | Capa NDVI por mes con línea de tiempo sincronizada con el calendario | Should |
 | RF18 | Leyenda con valores y escala; tocar una zona muestra el valor y la fuente | Should |
@@ -272,7 +272,7 @@ entrada: {
   lat, lon,  (= centro, por compatibilidad)
   cultivo_verano, invierno, campana_pasada,
   calendario: [12] (opcional; pisa al automático),
-  prioridades: { agua, suelo, ingreso, erosion } (0 a 5),
+  prioridades: { agua, suelo, ingreso, erosion } (1 a 5),
   restricciones: ['sin_riego', 'sin_hacienda', 'maquinaria_limitada'],
   no_sembrar: [cultivos],
   anegable: 'si' | 'a_veces' | 'no' | 'no_se',

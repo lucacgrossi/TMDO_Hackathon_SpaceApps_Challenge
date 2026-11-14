@@ -16,7 +16,7 @@ Responde al desafío *"Field Shift: Adapting Farms with NASA Data"*: comparar ro
 - **Compara, no recomienda.** La app nunca dice cuál es mejor ni qué hacer. Prohibido escribir "te recomendamos", "deberías" o "la mejor"; los textos describen datos ("5 meses más de cobertura, −60 mm de balance en años secos").
 - **Sin IA dentro de la app.** No hay LLM ni machine learning en tiempo de uso: todo sale de reglas fijas, estadística y plantillas de texto. Las predicciones son **estadísticas**: frecuencias observadas en 30 años, no un modelo entrenado.
 - **Trazable.** Cada valor y cada texto se puede rastrear hasta el dato y la regla que lo produjo.
-- **NASA es la base.** Los puntajes salen solo de datos de NASA. Las mediciones del productor se muestran **al lado**, para contrastar y ajustar la confianza; **no cambian ningún puntaje**.
+- **NASA es la base; el productor pesa más.** Sin mediciones propias, los puntajes salen solo de datos de NASA. Si el productor carga su lluvia o sus temperaturas mínima y máxima (opcionales), **se mezclan con NASA y pesan más** según sus años de registro (1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10 o más 75 %), y cada valor dice cuánto pesó cada fuente. Sus **prioridades** (de 1 a 5) eligen las especies y pesan al cuadrado en la cercanía. *(Decisión 2026-11-14, aprobada por la persona 3.)*
 - **Nada inventado.** Lo que falta o tiene baja confianza va a "Información que falta".
 - **Estandarizado.** Misma estructura de salida para todos: siempre 4 columnas (actual + A, B, C). Una alternativa descartada por restricción aparece en gris con el motivo.
 - **Técnico por defecto.** Cada valor muestra unidad, fuente, años, resolución y confianza. Cada capa del mapa se dibuja a la escala real del dato.
@@ -33,7 +33,7 @@ Responde al desafío *"Field Shift: Adapting Farms with NASA Data"*: comparar ro
 
 **Predicción estadística (probabilidad climatológica):** la probabilidad de cada evento sale de la frecuencia con que ocurrió en las 30 campañas del punto, según el calendario de cada estrategia: helada con cultivo sensible, siembra con menos de la mitad de la lluvia normal, máxima ≥ 35 °C. Ejemplo: "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)". Siempre muestra el conteo de años, no solo el porcentaje.
 
-**Contraste con mediciones propias:** si el productor carga sus mediciones a mano (lluvia del pluviómetro y años de registro, materia orgánica), se muestran al lado de NASA ("Tu pluviómetro: 650 mm/año · NASA: 824 mm (−21 %)"). Si la diferencia pasa el 15 %, la confianza del agua baja y el punto va a "Revisar con el agrónomo". Puede mostrarse un valor "corregido con tu pluviómetro", solo informativo. **No cambia ningún puntaje.** Sin mediciones, todo funciona solo con NASA.
+**Contraste con mediciones propias:** si el productor carga sus mediciones a mano (lluvia del pluviómetro y años de registro, materia orgánica), se muestran al lado de NASA ("Tu pluviómetro: 650 mm/año · NASA: 824 mm (−21 %)"). Si la diferencia pasa el 15 %, la confianza del agua baja y el punto va a "Revisar con el agrónomo". Además, la lluvia y las temperaturas del productor **entran en los puntajes** del motor (agua, erosión, riesgo de helada y calor), mezcladas con NASA según los años de registro (`backend/app/motor/mezcla.py`). Sin mediciones, todo funciona solo con NASA.
 
 **Clima:** un solo pedido mensual a NASA POWER con las **últimas 30 campañas completas de julio a junio**. Todo lo climático (lluvia, heladas, calor, terciles, serie por campaña) sale de ese mismo período.
 
