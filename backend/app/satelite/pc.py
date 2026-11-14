@@ -118,3 +118,36 @@ def array_poligono(coleccion: str, item: str, poligono: dict, asset: str
     xs = [p[0] for p in poligono["coordinates"][0]]
     ys = [p[1] for p in poligono["coordinates"][0]]
     return arr[0], arr[1] > 0, [min(xs), min(ys), max(xs), max(ys)]
+
+
+def raster_en_grilla(coleccion: str, item: str, grilla, assets: str | None = None,
+                     expresion: str | None = None, resampling: str | None = None) -> np.ndarray:
+    """Valores del asset (o de la expresión) sobre la grilla común del lote (`grilla.Grilla`).
+
+    Devuelve un array float [alto, ancho] con NaN donde la fuente no tiene dato (fuera de la
+    tesela o enmascarado), con fila 0 = norte y columna 0 = oeste. No aplica la máscara del lote.
+    Usa `item/bbox/{bbox}/{W}x{H}.npy` con `dst_crs=epsg:4326`: anda para NASADEM, HLS, WorldCover
+    y MODIS (con `item/crop`, HLS da 404). El `.npy` trae las bandas y, al final, la máscara (0 = sin dato).
+    resampling: `nearest`, `bilinear`, `mode`, … (el del servidor de teselas).
+    """
+    oeste, sur, este, norte = grilla.bbox
+    params: dict = {"collection": coleccion, "item": item, "dst_crs": "epsg:4326"}
+    if expresion:
+        params["expression"] = expresion
+        params["asset_as_band"] = "true"
+    elif assets:
+        params["assets"] = assets
+    if resampling:
+        params["resampling"] = resampling
+    url = f"{URL_DATOS}/item/bbox/{oeste!r},{sur!r},{este!r},{norte!r}/{grilla.ancho}x{grilla.alto}.npy"
+    r = _pedir("GET", url, params=params)
+    try:
+        arr = np.load(io.BytesIO(r.content), allow_pickle=False)
+    except (ValueError, OSError) as e:
+        raise ErrorPC(f"No se pudo leer el raster de {coleccion}") from e
+    if arr.ndim != 3 or arr.shape[0] < 2 or arr.shape[1:] != (grilla.alto, grilla.ancho):
+        raise ErrorPC(f"Raster de {coleccion} con forma inesperada {arr.shape} "
+                      f"(se esperaba la grilla {grilla.alto} × {grilla.ancho})")
+    valores = arr[0].astype(float)
+    valores[(arr[-1] == 0) | ~np.isfinite(valores)] = np.nan
+    return valores

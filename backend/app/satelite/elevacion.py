@@ -5,8 +5,12 @@
   elevación (misma lógica que `loadSlope`/`solve3` del prototipo).
 - Pendiente máxima: pendiente por píxel sobre la elevación suavizada, percentil 95 dentro
   del lote. Es ruidosa: sirve como referencia y para la capa, no para el valor general.
+- Con NASADEM, todo se calcula sobre la **grilla común del lote** (`grilla.py`, 1″ = la grilla
+  nativa de NASADEM, sin remuestrear) y con su máscara: el plano, la pendiente por píxel y la capa
+  `mapa` (`CapaRaster`, plan de armonización §4–5) salen del mismo raster, así que el número de la
+  tabla y los colores del mapa cierran.
 - Si NASADEM falla o no tiene datos, se usa SRTM vía AWS Terrain Tiles (`terrario.py`), con el
-  mismo cálculo y confianza "media". Si fallan los dos: None + motivo.
+  mismo cálculo y confianza "media", pero sin capa (`mapa: None`). Si fallan los dos: None + motivo.
 """
 from __future__ import annotations
 
@@ -16,11 +20,11 @@ import time
 
 import numpy as np
 
-from app.satelite import pc, terrario
+from app.satelite import escalas, grilla, pc, raster, terrario
 from app.satelite.lote import LOTE_EJEMPLO, bbox, centroide, mascara
 
 COLECCION = "nasadem"
-ASSET = "elevation"           # metros, int16 (verificado el 14/11 con item/feature.npy)
+ASSET = "elevation"           # metros, int16 (verificado el 14/11 con item/feature.npy e item/bbox)
 FUENTE = "NASADEM · NASA, vía Planetary Computer"
 RESOLUCION = "30 m"
 ANIOS = "2000 (misión SRTM, reprocesada en NASADEM)"
@@ -28,6 +32,9 @@ FUENTE_AWS = "SRTM vía AWS Terrain Tiles"
 RESOLUCION_AWS = "~30 m"
 ANIOS_AWS = "2000 (misión SRTM)"
 UNIDAD = "%"
+FECHA_CAPA = "estática"       # como en el contrato (#63); los años van en la fuente y en `anios`
+FACTOR_CAPA = 0.01            # valores de la capa: centésimos de %
+CONFIANZA_CAPA = "media"      # pendiente por píxel: ruidosa (ver PASO_M); el valor del lote es el plano
 
 MIN_PIXELES = 9               # menos que esto (~1 ha a 30 m) no alcanza para ajustar un plano
 LOTE_CHICO_HA = 5             # por debajo, el plano depende de pocos píxeles → confianza media
@@ -47,7 +54,8 @@ M_POR_GRADO_LON_ECUADOR = 111_320
 def _sin_dato(motivo: str) -> dict:
     ind = {"valor": None, "unidad": UNIDAD, "fuente": FUENTE, "anios": ANIOS,
            "resolucion": RESOLUCION, "confianza": "sin_dato", "motivo": motivo}
-    return {"pendiente_general": dict(ind), "pendiente_maxima": dict(ind)}
+    return {"pendiente_general": dict(ind), "pendiente_maxima": dict(ind),
+            "mapa": None, "grilla": None, "mapa_motivo": motivo}
 
 
 def _suma_ventana(a: np.ndarray, r: int) -> np.ndarray:
@@ -108,25 +116,46 @@ def _plano(puntos: np.ndarray) -> float:
     return math.hypot(a, b) * 100
 
 
-def _desde_nasadem(poligono: dict, lat0: float, lon0: float) -> tuple[np.ndarray, np.ndarray]:
-    """Puntos y pendientes por píxel con NASADEM. Lanza pc.ErrorPC o ValueError si no hay dato."""
+def _margen(px_x: float, px_y: float) -> int:
+    """Píxeles de más de cada lado para que la pendiente por píxel del borde del lote tenga vecinos."""
+    lado = (px_x + px_y) / 2
+    return max(1, round(RADIO_SUAVIZADO_M / lado)) + max(1, round(PASO_M / lado))
+
+
+def _desde_nasadem(poligono: dict, lat0: float, lon0: float
+                   ) -> tuple[np.ndarray, np.ndarray, grilla.Grilla, np.ndarray, np.ndarray]:
+    """NASADEM sobre la grilla común. Lanza pc.ErrorPC o ValueError si no hay dato.
+
+    Devuelve (puntos (x, y, z) del lote, pendiente por píxel del lote, grilla, máscara,
+    raster de pendiente por píxel [alto, ancho] con NaN donde no hay dato).
+    """
+    g = grilla.crear(poligono)
+    adentro = grilla.mascara(g, poligono)
     items = pc.buscar(COLECCION, poligono, limite=10)
     if not items:
         raise ValueError("sin datos de elevación para el lote")
-    todos_puntos, todas_pend = [], []
+    m_lon = M_POR_GRADO_LON_ECUADOR * math.cos(math.radians(lat0))
+    px_x, px_y = g.paso * m_lon, g.paso * M_POR_GRADO_LAT
+    n = _margen(px_x, px_y)
+    ampliada = g.ampliada(n)
+    # 1″ es la grilla de NASADEM: no hay remuestreo. Con lotes grandes (2″ o más), promedio.
+    resampling = "nearest" if g.segundos == 1 else "average"
+    z = np.full((ampliada.alto, ampliada.ancho), np.nan)
     for item in items:  # más de uno solo si el lote cruza el borde de una tesela de 1°
-        z, adentro, (oeste, sur, este, norte) = pc.array_poligono(COLECCION, item["id"], poligono, ASSET)
-        h, w = z.shape
-        lons = oeste + (np.arange(w) + 0.5) * (este - oeste) / w
-        lats = norte - (np.arange(h) + 0.5) * (norte - sur) / h
-        puntos, pend = _puntos_y_pendientes(z, adentro, lons, lats, lat0, lon0)
-        todos_puntos.append(puntos)
-        todas_pend.append(pend)
-    puntos = np.concatenate(todos_puntos)
-    if len(items) > 1:  # las teselas vecinas comparten la fila/columna del borde
-        _, unicos = np.unique(np.round(puntos[:, :2]), axis=0, return_index=True)
-        puntos = puntos[np.sort(unicos)]
-    return puntos, np.concatenate(todas_pend)
+        parte = pc.raster_en_grilla(COLECCION, item["id"], ampliada, assets=ASSET, resampling=resampling)
+        z = np.where(np.isnan(z), parte, z)
+    z[z <= SIN_DATO_ELEV] = np.nan
+    valido = np.isfinite(z)
+    pend_mapa = grilla.recortar(pendiente_por_pixel(np.where(valido, z, 0.0), valido, px_x, px_y), n)
+    z = grilla.recortar(z, n)
+
+    sel = adentro & np.isfinite(z)
+    x = (g.lons()[None, :] - lon0) * m_lon
+    y = (g.lats()[:, None] - lat0) * M_POR_GRADO_LAT
+    xx = np.broadcast_to(x, z.shape)[sel]
+    yy = np.broadcast_to(y, z.shape)[sel]
+    puntos = np.column_stack([xx, yy, z[sel]])
+    return puntos, pend_mapa[sel], g, adentro, pend_mapa
 
 
 def _desde_aws(poligono: dict, lat0: float, lon0: float) -> tuple[np.ndarray, np.ndarray, int]:
@@ -158,8 +187,36 @@ def _resultado(puntos: np.ndarray, pend: np.ndarray, fuente: str, resolucion: st
     return {"pendiente_general": r_general, "pendiente_maxima": r_maxima}
 
 
+def _coma(x: float) -> str:
+    return f"{x:g}".replace(".", ",")
+
+
+def _capa(g: grilla.Grilla, adentro: np.ndarray, pend_mapa: np.ndarray, general: float) -> dict:
+    """{mapa: CapaRaster | None, grilla, mapa_motivo} de la pendiente por píxel. Nunca lanza."""
+    try:
+        nota = (f"Pendiente por píxel: diferencias a ±{PASO_M} m sobre la elevación suavizada "
+                f"(±{RADIO_SUAVIZADO_M} m), es ruidosa. El valor del lote ({_coma(general)} %) es el "
+                "plano ajustado sobre los mismos píxeles")
+        if g.nota:
+            nota += f". {g.nota}"
+        mapa = raster.capa(
+            id="pendiente", titulo="Pendiente del terreno", unidad=UNIDAD, fuente=FUENTE,
+            resolucion_nativa=RESOLUCION, grilla=g, array=pend_mapa, mascara=adentro,
+            escala=escalas.PENDIENTE, factor=FACTOR_CAPA, confianza=CONFIANZA_CAPA, nota=nota,
+            fecha=FECHA_CAPA, valor_lote=general)
+    except Exception as e:  # noqa: BLE001 — la capa nunca rompe el valor del lote
+        return {"mapa": None, "grilla": g.a_dict(), "mapa_motivo": f"No se pudo armar la capa ({type(e).__name__})"}
+    motivo = None if mapa else "El lote no tiene píxeles con pendiente calculada"
+    return {"mapa": mapa, "grilla": g.a_dict(), "mapa_motivo": motivo}
+
+
 def calcular(poligono: dict) -> dict:
-    """poligono: GeoJSON Polygon en [lon, lat]. Devuelve pendiente_general y pendiente_maxima."""
+    """poligono: GeoJSON Polygon en [lon, lat].
+
+    Devuelve pendiente_general y pendiente_maxima (indicadores) y, para el mapa: `mapa` (CapaRaster
+    de la pendiente por píxel, o None), `grilla` ({bounds, ancho, alto, paso}) y `mapa_motivo`
+    (por qué no hay capa, o None).
+    """
     try:
         lat0, lon0 = centroide(poligono)
     except Exception as e:  # noqa: BLE001 — nunca propagar
@@ -167,12 +224,16 @@ def calcular(poligono: dict) -> dict:
 
     # 1) NASADEM en Planetary Computer
     try:
-        puntos, pend = _desde_nasadem(poligono, lat0, lon0)
+        puntos, pend, g, adentro, pend_mapa = _desde_nasadem(poligono, lat0, lon0)
         if len(puntos) < MIN_PIXELES:
             raise ValueError(f"muy pocos píxeles dentro del lote ({len(puntos)})")
         chico = len(puntos) < LOTE_CHICO_HA * 10_000 / 900   # píxeles de 30 m en 5 ha
         nota = " (lote chico: pocos píxeles)" if chico else ""
-        return _resultado(puntos, pend, FUENTE, RESOLUCION, ANIOS, "media" if chico else "alta", nota)
+        if g.nota:
+            nota += f". {g.nota}"
+        r = _resultado(puntos, pend, FUENTE, RESOLUCION, ANIOS, "media" if chico else "alta", nota)
+        r.update(_capa(g, adentro, pend_mapa, r["pendiente_general"]["valor"]))
+        return r
     except pc.ErrorPC as e:
         motivo_nasadem = str(e)
     except ValueError as e:
@@ -187,7 +248,11 @@ def calcular(poligono: dict) -> dict:
             raise ValueError(f"muy pocos píxeles dentro del lote ({len(puntos)})")
         px = terrario.tamano_pixel_m(lat0, zoom)
         nota = f". Respaldo porque NASADEM falló ({motivo_nasadem}); teselas zoom {zoom}, píxel de {px:.0f} m"
-        return _resultado(puntos, pend, FUENTE_AWS, RESOLUCION_AWS, ANIOS_AWS, "media", nota)
+        r = _resultado(puntos, pend, FUENTE_AWS, RESOLUCION_AWS, ANIOS_AWS, "media", nota)
+        r.update(mapa=None, grilla=None,
+                 mapa_motivo=f"Sin capa de pendiente: NASADEM falló ({motivo_nasadem}) y el respaldo "
+                             "de AWS da solo el valor del lote")
+        return r
     except terrario.ErrorTerrario as e:
         motivo_aws = str(e)
     except Exception as e:  # noqa: BLE001
@@ -202,5 +267,9 @@ if __name__ == "__main__":
     poligono = json.loads(sys.argv[1]) if len(sys.argv) > 1 else LOTE_EJEMPLO
     t = time.perf_counter()
     resultado = calcular(poligono)
+    if resultado.get("mapa"):
+        resultado["mapa"] = {k: (f"<{len(v)} caracteres>" if k in ("png", "valores") else v)
+                             for k, v in resultado["mapa"].items()}
+    sys.stdout.reconfigure(encoding="utf-8")
     print(json.dumps(resultado, ensure_ascii=False, indent=2))
     print(f"Tiempo: {time.perf_counter() - t:.1f} s")
