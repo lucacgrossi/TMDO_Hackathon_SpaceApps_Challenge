@@ -1,6 +1,6 @@
 # Field Shift · Diseño
 
-Extraído del prototipo final `../docs/prototipo/field-shift-prototipo.html` (alineado al MVP 4.2): es la fuente de verdad visual. Reglas de producto: `../docs/mvp-alcance.md` (v4.2).
+Extraído del prototipo final `../docs/prototipo/field-shift-prototipo.html` (alineado al MVP 4.2): es la fuente de verdad visual. Reglas de producto: `../docs/mvp-alcance.md` (v4.3).
 
 **Dónde viven los estilos:** el CSS del prototipo está copiado tal cual en `src/app/globals.css` (tokens y clases `.panel`, `.sheet`, `.card`, `.tl`, `.seg`, `.mets`…). Los componentes reusan esas clases. Lo nuevo que no existe en el prototipo (por ejemplo, la tabla técnica) va en un CSS propio del área, para no editar `globals.css` entre dos personas.
 

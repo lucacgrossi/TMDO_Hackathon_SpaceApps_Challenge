@@ -11,8 +11,12 @@ Con la planilla, el productor sube su **registro mes a mes** y la comparación s
 
 **Temperaturas (Should):** si el productor tiene una estación propia, la planilla también trae la mínima y la máxima diarias. Sirven para contrastar **las heladas y el calor** con NASA POWER, que mide en una celda de ~50 km y no ve los bajos donde se acumula el frío. Ejemplo: "Heladas en mayo: tu estación, 4 de 6 campañas · NASA en las mismas campañas, 2 de 6".
 
+**Cómo se usan los datos de la planilla (actualizado con el MVP 4.3):**
+- **Contraste al lado de NASA** (`clima/correccion.py`): filas en las mismas campañas y ajuste de la confianza de los indicadores de agua y de helada. El contraste no puntúa.
+- **Puntajes:** la serie también llega al motor (`motor/mezcla.py`), que la mezcla con NASA según los años de registro (1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10 o más 75 %). Esto cambia el agua, la erosión y los riesgos de helada y calor. *(Cuando se escribió este plan, la regla era "no cambia ningún puntaje"; la persona 3 aprobó el cambio con el motor, PR #53.)*
+- Las **probabilidades climatológicas** no cambian: salen de las 30 campañas de NASA.
+
 **Qué no cambia:**
-- No se modifica ningún puntaje (RF15). Solo se ajusta la confianza de los indicadores de agua y de helada.
 - Sin la planilla, todo sigue igual que hoy.
 - No se guarda nada (RNF6). El archivo se procesa en el pedido y se descarta.
 - La materia orgánica sigue cargándose a mano (es un valor suelto).
@@ -153,7 +157,7 @@ Si `mediciones.serie_mensual` trae lluvia:
 1. Armar las campañas julio–junio del productor con lluvia completa (las mismas reglas que en la sección 3) y cruzarlas con `ResultadoClima.campanas` por `etiqueta`.
 2. **Campañas en común** = las completas del productor que también están en las 30 de NASA.
 3. `valor_productor` = media de lluvia del productor en esas campañas · `valor_nasa` = media de NASA **en las mismas campañas** (no las 30) · `diferencia_pct` con la regla actual (más de 15 % → confianza del agua "baja", la misma que hoy).
-4. `anios_registro` = cantidad de campañas en común. Con menos de `MIN_ANIOS_REGISTRO` (5): la fila va con confianza baja y la nota "pocos años en común con NASA".
+4. `anios_registro` = cantidad de campañas en común. *(Implementado en #52: `MIN_ANIOS_REGISTRO = 1`, igual que el motor. Más años no cambian la confianza del contraste, pero dan más peso en los puntajes.)*
 5. `campanas_comparadas` y `detalle_campanas` (por campaña: productor, NASA y diferencia %).
 6. Texto de la fila: "Tu pluviómetro (2018/19 a 2023/24, 6 campañas): 702 mm/año · NASA en las mismas campañas: 781 mm (−10 %)".
 7. Sin campañas en común: la fila se muestra sin comparar, con la nota "tu registro no coincide con el período de NASA (1996/97 a 2025/26)".
@@ -166,12 +170,12 @@ Si `serie_mensual` trae `t_min_c` o `t_max_c`:
 2. **Calor por mes:** igual, con `t_max_c >= UMBRAL_CALOR_C` (35 °C).
 3. Por cada mes en el que el productor o NASA tienen al menos una campaña con helada, contar `productor_k de n` y `nasa_k de n` en las **mismas** campañas.
 4. **Filas de contraste:** `indicador="helada"`, `unidad="campañas con helada"`, con texto fijo por mes: "Heladas en mayo: tu estación, 4 de 6 campañas · NASA en las mismas campañas, 2 de 6". Lo mismo para el calor.
-5. **Regla de confianza:** si en algún mes la diferencia entre productor y NASA es de **2 campañas o más** (sobre n ≥ 5), la confianza de `meses_helada_frecuente` baja a "baja", con el motivo y un riesgo para "A revisar con el agrónomo": "Tu estación registra heladas que NASA POWER no ve (mayo: 4 contra 2 de 6 campañas): revisar fechas de siembra con datos locales". Lo mismo para el calor. Con n < 5: la fila se muestra con confianza baja y "pocos años en común", sin tocar la confianza de NASA.
-6. **No cambia ninguna probabilidad ni ningún puntaje:** las probabilidades siguen saliendo de las 30 campañas de NASA. Si se hace 5.1.5, `servicio.py` completa `Probabilidad.contraste` con la línea del productor para el mismo mes y evento.
+5. **Regla de confianza** *(implementada en #54)*: si en algún mes la diferencia entre productor y NASA llega a **1 de cada 3 campañas en común** (mínimo 1; con 6 campañas da 2), la confianza de `meses_helada_frecuente` baja a "baja", con el motivo y un riesgo para "A revisar con el agrónomo": "Tu estación registra heladas que NASA POWER no ve (mayo: 4 contra 2 de 6 campañas): revisar fechas de siembra con datos locales". Lo mismo para el calor. Es el mismo criterio que la "helada frecuente" de `indicadores.py`.
+6. **El contraste no cambia ninguna probabilidad:** las probabilidades siguen saliendo de las 30 campañas de NASA. `servicio.py` completa `Probabilidad.contraste` con la línea del productor para el mismo mes y evento. Los puntajes sí cambian, pero por la mezcla del motor (sección 1), no por el contraste.
 7. Nueva constante `INDICADORES_HELADA = ("meses_helada_frecuente",)`, igual que `INDICADORES_AGUA`.
 
 ### 5.5 Conexión · `app/servicio.py`
-1. Pasar `entrada.mediciones_propias` (con `serie_mensual`) a `correccion.contrastar`, como hoy.
+1. Pasar `entrada.mediciones_propias` (con `serie_mensual`) a `correccion.contrastar`, como hoy, **y al motor** (`"mediciones": {lluvia_anual_mm, anios_registro, serie_mensual}`, sin la materia orgánica), que la mezcla en los puntajes.
 2. Aplicar la confianza baja a `INDICADORES_AGUA` y, si corresponde, a `INDICADORES_HELADA`, con su motivo. **El valor no cambia.**
 3. Sumar los riesgos del contraste a "A revisar con el agrónomo" de cada columna disponible (como ya se hace con la lluvia).
 4. (Should) Completar `Probabilidad.contraste` en las probabilidades de helada y calor.
@@ -183,8 +187,8 @@ En `tests/clima/test_correccion.py` y `tests/api/test_servicio.py`:
 - planilla y `lluvia_anual_mm` a la vez → manda la planilla;
 - temperaturas con heladas que NASA no tiene → filas de helada, confianza baja y el riesgo;
 - temperaturas que coinciden con NASA → filas sin cambios de confianza;
-- menos de 5 campañas en común → confianza baja en la fila, NASA sin tocar;
-- **con y sin planilla, todos los puntajes y cercanías son idénticos.**
+- el motor recibe las mediciones (con planilla, los puntajes del agua cambian y la evidencia dice cuánto pesó cada fuente);
+- **con y sin planilla, las probabilidades son idénticas** (salen de NASA).
 
 ## 6. Casos de prueba del parser (`backend/tests/mediciones/test_planilla.py`, Back 2)
 
@@ -221,10 +225,23 @@ En `tests/clima/test_correccion.py` y `tests/api/test_servicio.py`:
 
 Los pasos 2 y 4 son independientes. El 3 junta los dos. El front puede arrancar con el mock de `ResultadoPlanilla`. Si falta tiempo, el paso 5 se corta sin afectar al resto.
 
-## 8. Decisiones abiertas
-- **Persona 3:** aprobar el alcance (paso 0). Además, las dos dudas que dejó Benja en #39: la confianza con más de 15 % de diferencia ("baja" o "media") y el mínimo de 5 años de registro. Para la temperatura: la regla de "2 campañas o más de diferencia" (5.4.5).
-- **Persona 3:** que `materia_organica_pct` no se use para puntuar en el motor (#40 se la pasa al motor; si puntúa, viola "no cambia ningún puntaje").
-- **Benja:** confirmar que la ruta es suya en `api/rutas.py` y sumar `python-multipart`.
+**Estado (14/11, a la noche):**
+- Paso 0: aprobado, MVP 4.3.
+- Pasos 1, 3, 4 y 5: en `dev` (#50, #51, #52 y #54).
+- Paso 2: parser en PR #55.
+- Paso 6: pendiente (Front 1).
+- Paso 7: después de mergear #55.
+
+## 8. Decisiones
+**Resueltas (14/11):**
+- Alcance aprobado por la persona 3.
+- Con más de 15 % de diferencia, la confianza baja a **"baja"**.
+- Alcanza **1 año** de registro.
+- Heladas y calor: diferencia de **1 de cada 3 campañas en común** (mínimo 1).
+- La materia orgánica **no se usa para puntuar** (el motor no la recibe).
+- La ruta es de Benja, con `python-multipart`.
+
+**Abiertas:**
 - **Front 1:** quién toma la UI y cómo convive con #18 y #45, que siguen abiertos.
 
 ## 9. Próximos pasos (fuera de esta propuesta)
