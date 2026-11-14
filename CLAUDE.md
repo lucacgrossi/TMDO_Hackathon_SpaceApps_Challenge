@@ -53,7 +53,9 @@ Prioridad: POWER primero; después MODIS y SRTM; SoilGrids y GAEZ solo si sobra 
 1 Backend clima + líder técnico (único que mergea a `main`) · 2 Datos satelitales y suelo · 3 Scoring y agronomía (dueño de las reglas y de la tabla de cultivos) · 4 Front: mapa y entradas · 5 Front: resultados y diseño · 6 Producto, pitch y coordinación (desempata y recorta alcance).
 
 ## Cómo trabajamos
-- Una branch por persona, commits frecuentes; solo la persona 1 mergea a `main`.
+- Una branch por feature, fix, etc. Con el formato: <nombre-colaborador>/<tipo>/<area>-<descripcion-corta>. Commits frecuentes; solo la persona 1 mergea a `main`.
+- Formato de commit: <tipo>(<area>): <qué hace, en presente>
+                      [opcional: por qué o detalle, si no es obvio]
 - Stack y contrato de API: los define la persona 1. No asumir nada que no figure en el repo.
 - Secretos en variables de entorno, nunca en el repo.
 - App en español, con lenguaje agronómico técnico; lo satelital se explica en una línea.
