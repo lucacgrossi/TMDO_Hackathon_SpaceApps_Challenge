@@ -1,0 +1,29 @@
+{
+ "ok": true,
+ "serie": {
+  "meses": [
+   {"mes": "2022-07", "lluvia_mm": 4.0, "t_min_c": -4.1, "t_max_c": 24.0},
+   {"mes": "2022-08", "lluvia_mm": 9.5, "t_min_c": -3.0, "t_max_c": 29.5},
+   {"mes": "2022-09", "lluvia_mm": 22.0, "t_min_c": -0.8, "t_max_c": 31.2},
+   {"mes": "2022-10", "lluvia_mm": 61.0, "t_min_c": 2.5, "t_max_c": 34.0},
+   {"mes": "2022-11", "lluvia_mm": 88.5, "t_min_c": 6.0, "t_max_c": 37.1},
+   {"mes": "2022-12", "lluvia_mm": 104.0, "t_min_c": 9.2, "t_max_c": 38.4},
+   {"mes": "2023-01", "lluvia_mm": 120.5, "t_min_c": 12.1, "t_max_c": 37.4},
+   {"mes": "2023-02", "lluvia_mm": 98.0, "t_min_c": 11.8, "t_max_c": 35.0},
+   {"mes": "2023-03", "lluvia_mm": 87.0, "t_min_c": 8.0, "t_max_c": 34.2},
+   {"mes": "2023-04", "lluvia_mm": 55.5, "t_min_c": 3.1, "t_max_c": 30.0},
+   {"mes": "2023-05", "lluvia_mm": 18.0, "t_min_c": -1.5, "t_max_c": 26.3},
+   {"mes": "2023-06", "lluvia_mm": 6.0, "t_min_c": -3.6, "t_max_c": 23.9}
+  ],
+  "variables": ["lluvia_mm", "t_min_c", "t_max_c"],
+  "granularidad": "mensual",
+  "periodo": {"desde": "2022-07", "hasta": "2023-06"},
+  "campanas_completas": {"lluvia_mm": ["2022/23"], "t_min_c": ["2022/23"], "t_max_c": ["2022/23"]},
+  "lluvia_media_campana_mm": 774.0,
+  "filas_leidas": 13,
+  "filas_usadas": 12,
+  "avisos": [{"fila": 1, "motivo": "Encabezado reconocido: mes, lluvia_mm, t_min_c, t_max_c"}],
+  "formato": {"codificacion": "utf-8", "separador": ";", "decimal": ","}
+ },
+ "errores": []
+}

@@ -1,4 +1,12 @@
-# Field Shift · MVP (versión 4.2, 2026-11-14)
+# Field Shift · MVP (versión 4.3, 2026-11-14)
+
+**Cambios de la 4.3 (sábado 14, a la noche; todos aprobados por la persona 3):**
+- **Las mediciones del productor sí cambian los puntajes:** el motor (`backend/app/motor/mezcla.py`) mezcla su lluvia y sus temperaturas con NASA, con un peso que crece con los años de registro (1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10 o más 75 %). El contraste al lado de NASA sigue (RF15) y no puntúa. Las probabilidades climatológicas siguen saliendo solo de NASA.
+- **Prioridades de 1 a 5** (antes 0 a 5), que pesan al cuadrado en la cercanía (RF4, RF13).
+- **Planilla CSV del productor** (RF26): lluvia diaria o mensual y, opcionalmente, temperaturas mínima y máxima. Se compara con NASA en las mismas campañas. Plan: `docs/plan-planilla-lluvia.md`.
+- **Capas del mapa armonizadas:** el back las calcula y el front las dibuja, con la misma campaña, el mismo mes y la misma escala que la tabla. Plan: `docs/plan-armonizacion-capas.md`.
+- **Período de clima:** 1996/97 a 2025/26. La campaña de toda la salida es la última completa de POWER.
+- **El contrato vigente es `backend/app/api/contrato.py`.** La sección "Contrato de la API" de este documento es solo un resumen.
 
 **Cambios de la 4.2 (sábado 14):**
 - **Dos decisiones de producto** (de las 4 opciones estadísticas que trajo el back, validadas con el guía): **probabilidad climatológica** (RF25) y **mediciones del productor como contraste al lado de NASA** (RF15). Descartadas: tendencia por pendiente y años análogos. Sin modelo de predicción propio (va a "próximos pasos").
@@ -6,7 +14,7 @@
 - **Flujo en 2 pasos** con intro, en lugar de 5 pantallas (ver "Flujo").
 - **Un solo período de clima** para todo: POWER mensual, últimas 30 campañas.
 - **NDVI a 30 m** con NASA HLS (Planetary Computer); MODIS de respaldo.
-- **Alineado con `backend/PLAN.md`:** las dos decisiones coinciden con `clima/probabilidad.py` y `clima/correccion.py`. Esta versión cierra lo que el plan dejaba abierto: **la corrección con el pluviómetro se muestra al lado y no cambia ningún puntaje**.
+- **Alineado con `backend/PLAN.md`:** las dos decisiones coinciden con `clima/probabilidad.py` y `clima/correccion.py`. *(En la 4.2, la corrección con el pluviómetro no cambiaba puntajes; desde la 4.3, las mediciones sí entran en el motor: ver arriba y RF15.)*
 
 
 **Último ajuste (4.1):**
@@ -24,11 +32,11 @@ Se mantiene de la v3:
 - Solo usuarios expertos.
 - Salida estandarizada, igual para todos.
 - NASA es la base del análisis.
-- Mediciones propias como Should, solo para contrastar.
+- Mediciones propias como Should (desde la 4.3 también entran en los puntajes del motor).
 - Mapa de riesgos con línea de tiempo.
 - No se guarda nada.
 
-**En una frase:** el productor experto o su agrónomo marca el lote, carga qué siembra, sus objetivos, sus restricciones y, si quiere, sus mediciones. Recibe **una tabla técnica que compara su rotación actual con 3 alternativas**, construida con datos de NASA de 20 a 30 años de ese punto, más un mapa de riesgos con línea de tiempo.
+**En una frase:** el productor experto o su agrónomo marca el lote, carga qué siembra, sus objetivos, sus restricciones y, si quiere, sus mediciones. Recibe **una tabla técnica que compara su rotación actual con 3 alternativas**, construida con las últimas 30 campañas de datos de NASA de ese lote (y con sus mediciones, si las carga), más un mapa de riesgos con línea de tiempo.
 
 ## Usuario
 Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede ser nuevo para ellos es lo satelital (resolución, confianza, NDVI).
@@ -39,7 +47,7 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 3. **Sin IA dentro de la app.** Indicadores, reglas de puntaje y textos salen de cálculos y plantillas fijas. Todo resultado se puede rastrear hasta el dato y la regla que lo produjo.
 4. **Técnico por defecto:** valores con unidades, fuente, años, resolución y confianza siempre visibles.
 5. **Estandarizado.** Mismas pantallas, misma tabla, mismas filas, unidades y escalas, **mismas 4 columnas (actual + 3 alternativas tipo)** y mismas reglas para todos. Solo cambian los datos de entrada.
-6. **NASA es la base.** Los puntajes salen solo de datos de NASA. Las mediciones propias se muestran al lado para contrastar y ajustar la confianza.
+6. **NASA es la base; el productor pesa más.** Sin mediciones propias, los puntajes salen solo de datos de NASA. La lluvia y las temperaturas mínima y máxima del productor (opcionales) se mezclan con NASA y pesan más según sus años de registro; se muestran también al lado, para contrastar.
 7. **Cada capa del mapa se dibuja a la escala real del dato.**
 8. **Nada inventado.** Lo que falta va a "Información que falta".
 9. **Lenguaje:** nunca "te recomendamos", "deberías" ni "la mejor". Los textos describen datos: "esta alternativa tiene 5 meses más de cobertura y un balance de agua 60 mm menor en años secos".
@@ -75,9 +83,9 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
   - **Usar el lote de ejemplo:** campo real cerca de Río Cuarto, 95 ha.
   - **Marcar mi lote:** "¿Dónde está tu lote?" con buscador de localidad, paraje o ruta (Esri); acepta coordenadas (decimales o grados) o un link de Google Maps; "Usar mi ubicación" toma el GPS si está en el campo. Hasta elegir el lugar, el botón dice "Elegí dónde está tu lote".
 - Rotación actual (verano, invierno, campaña pasada).
-- Objetivos con barritas de 0 a 5 ("cuánto te importa cada uno: 0 nada, 5 mucho").
+- Objetivos con barritas de 1 a 5 ("cuánto te importa cada uno: 1 poco, 5 mucho").
 - Restricciones de lista y "No sembrar".
-- Datos del lote (se encharca, textura) y mediciones propias (pluviómetro, materia orgánica), plegados.
+- Datos del lote (se encharca, textura) y mediciones propias, plegados: a mano (lluvia anual del pluviómetro y años de registro, materia orgánica) o **"Subir planilla (CSV)"** con su registro de lluvia y, opcionalmente, de temperaturas, con vista previa y plantilla para descargar (RF26).
 
 **Paso 2 · Mapa + comparación:** la caja se achica hacia la derecha, el mapa aparece detrás y vuela al lote (o al lugar elegido, ya en modo dibujo).
 - Selector "Lote de ejemplo / Dibujar mi lote"; las esquinas se arrastran; tocar el mapa mueve el lote sin cambiar su forma.
@@ -106,9 +114,11 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 **CU2:** con los mismos valores ya calculados, se recalcula la cercanía a los objetivos ponderada por las barritas. No se vuelve a llamar a NASA. **No se elige ganador:** solo cambia el indicador de cercanía.
 
 **CU4:**
-- La lluvia del pluviómetro se muestra junto a NASA POWER. Si la diferencia pasa del 15 %, la confianza de los indicadores de agua baja a "media" y aparece una nota.
-- La materia orgánica se muestra en la fila Suelo como "dato del productor".
-- Ningún puntaje cambia.
+- El productor carga sus mediciones a mano o sube una planilla CSV (RF26).
+- La lluvia del pluviómetro se muestra junto a NASA POWER; con planilla, en las **mismas campañas**. Si la diferencia pasa del 15 %, la confianza de los indicadores de agua baja a **"baja"** y aparece una nota.
+- Con temperaturas: las heladas y el calor de su estación se comparan con NASA por mes. Si difieren en 1 de cada 3 campañas en común o más (mínimo 1), baja la confianza de las heladas.
+- La materia orgánica se muestra en la fila Suelo como "dato del productor" y no puntúa.
+- La lluvia y las temperaturas del productor entran en los puntajes del motor, mezcladas con NASA según los años de registro (RF15). Las probabilidades climatológicas no cambian: salen de las 30 campañas de NASA.
 
 **CU5:** `mailto:` con la comparación en texto armado con una plantilla fija. Plan B: PDF.
 
@@ -124,10 +134,10 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 |---|---|---|
 | Resumen (plantilla fija) | "Cobertura: +5 meses · Agua: −60 mm en años secos · Erosión: −X" | Diferencias vs. actual |
 | Calendario 12 meses | Cultivo por mes con días de helada y días > 35 °C marcados | NASA POWER + tabla de cultivos |
-| Meses con cobertura baja | Actual: observado (NDVI). Alternativas: según el calendario | MODIS / calendario |
-| Agua | Balance por temporada (mm) y diferencia vs. actual; pluviómetro al lado si existe | POWER (+ medición propia) |
-| Suelo | Aporte de N, rastrojo, materia orgánica | Tabla de cultivos + SoilGrids / productor |
-| Erosión | Meses con cobertura baja × pendiente (%) | MODIS + SRTM |
+| Meses con cobertura baja | Actual: observado (NDVI). Alternativas: según el calendario | HLS 30 m (MODIS 250 m de respaldo) / calendario |
+| Agua | Balance por temporada (mm) y diferencia vs. actual; pluviómetro al lado si existe | POWER, mezclado con las mediciones del productor si las hay (motor) |
+| Suelo | Aporte de N, rastrojo; materia orgánica del productor como dato (no puntúa) | Tabla de cultivos + productor |
+| Erosión | Meses con cobertura baja × pendiente (%) | HLS + NASADEM (lluvia del productor en los meses pelados, si la hay) |
 | Ingreso | Cultivos comerciales o forraje (sin precios) | Tabla de cultivos |
 | Riesgo de helada / calor | Meses en conflicto con el calendario del cultivo | POWER |
 | Cercanía a los objetivos | Por objetivo, en %, y qué le falta | Reglas de puntaje |
@@ -137,7 +147,7 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 | Información que falta | Datos ausentes o de baja confianza | Indicadores |
 | A revisar con el agrónomo | Reglas negativas y lo sensible al clima | Reglas de puntaje |
 
-**Un solo período para todo (desde 2026-11-14):** todo lo que sale de POWER (lluvia y temperatura de cada mes, heladas, serie por campaña y terciles) sale de **un solo pedido mensual con las últimas 30 campañas completas, de julio a junio** (hoy, 1995/96 a 2024/25). **A alinear con Back 1:** `backend/PLAN.md` hoy pide POWER 1991–2024 por año calendario; si se mantiene, que sean 30 campañas completas y que la app diga el período. No mezclar con la climatología precalculada de POWER: usa otro período (2001-2025) y su mínima y máxima son extremos absolutos, no medias. Heladas: un mes es "de helada frecuente" si tuvo mínima < 0 °C en al menos 1 de cada 3 años, y se muestra como "helada en X de 30 años".
+**Un solo período para todo (desde 2026-11-14):** todo lo que sale de POWER (lluvia y temperatura de cada mes, heladas, serie por campaña y terciles) sale de **un solo pedido mensual con las últimas 30 campañas completas, de julio a junio** (hoy, **1996/97 a 2025/26**: POWER se pide hasta el año en curso y se descartan los meses que todavía no procesó). Esa última campaña es la de toda la salida: NDVI, erosión y capas. No mezclar con la climatología precalculada de POWER: usa otro período (2001-2025) y su mínima y máxima son extremos absolutos, no medias. Heladas: un mes es "de helada frecuente" si tuvo mínima < 0 °C en al menos 1 de cada 3 años, y se muestra como "helada en X de 30 años".
 
 **Incertidumbre sin IA:** los 30 años se ordenan por el balance de agua de la campaña (en el prototipo, por la lluvia de la campaña; si el backend no llega con la evapotranspiración, se usa la lluvia y se dice) y se cortan en **tercios**: el tercio más seco son los "años secos", el del medio los "normales" y el más húmedo los "húmedos". Es una técnica estándar de climatología, simple de explicar, y reemplaza al k-means de la guía. Cada indicador muestra su confianza (alta / media / baja) según la resolución, los años y el contraste con la medición propia.
 
@@ -147,14 +157,16 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 
 | Capa | Dato y escala | ¿Dentro del lote? | Prioridad |
 |---|---|---|---|
-| Riesgo de erosión (pendiente × meses con cobertura baja) | SRTM 30 m + MODIS | Sí | **Should** |
+| Riesgo de erosión (pendiente × meses con cobertura baja) | NASADEM 30 m + HLS 30 m | Sí | **Should** |
 | NDVI mes a mes, con línea de tiempo | **NASA HLS 30 m** (Landsat + Sentinel-2, servido por Microsoft Planetary Computer) de la última campaña; MODIS 250 m de respaldo | Sí, lote por lote | **Should** |
+| Pendiente | NASADEM 30 m (la misma de la tabla) | Sí | **Should** |
 | Balance de agua del mes | POWER ~50 km | No: contexto regional ("cada celda ≈ 50 km") | **Could** |
 | Heladas del mes | POWER ~50 km | No: contexto regional | **Could** |
 
-- Línea de tiempo de 12 meses, sincronizada con el calendario de la tabla.
+- Línea de tiempo de 12 meses, sincronizada con el calendario de la tabla (índice 0 = enero).
 - Leyenda con valores y escala.
-- Las capas del lote de la demo se precalculan.
+- **El back calcula y el front dibuja** (desde la 4.3): la escena de cada mes la elige el back (`capas.ndvi_mensual[mes]`) y la pendiente sale del back (NASADEM). El front no busca escenas propias, no calcula la pendiente y no muestra valores ilustrativos. El plan para llevar todas las capas a una grilla común del lote, con PNG y valores por píxel desde el back, está en `docs/plan-armonizacion-capas.md`.
+- Las capas del lote de la demo se precalculan (`backend/app/demo/rio_cuarto.json`).
 
 **Configuración del mapa para que se vea bien al acercar y alejar** (probada en el prototipo, Leaflet 1.9.4; copiar tal cual):
 
@@ -162,7 +174,7 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 |---|---|---|
 | Zoom del mapa | `minZoom: 5`, `maxZoom: 18`, `zoomSnap: 0.25`, `wheelPxPerZoomLevel: 90` | En 19, Esri muestra "Map data not yet available" en el campo. Medio paso de zoom encuadra mejor el lote y la rueda queda suave |
 | Imagen satelital (Esri World Imagery) | `maxNativeZoom: 17`, `maxZoom: 18`, `keepBuffer: 4` | Hasta 17 hay imagen real en la zona; en 18 se estira la de 17. Con el buffer no aparecen bordes grises al moverse |
-| NDVI (NASA HLS 30 m, vía Planetary Computer; respaldo: GIBS `MODIS_Terra_L3_NDVI_16Day`) | HLS: buscar en `POST https://planetarycomputer.microsoft.com/api/stac/v1/search` las colecciones `hls2-s30` y `hls2-l30` que tocan el lote, en el mes, con `eo:cloud_cover < 30`, ordenadas por nubes; usar la primera. Tiles: `/api/data/v1/item/tiles/WebMercatorQuad/{z}/{x}/{y}@1x?collection=…&item=…&expression=(B08-B04)/(B08+B04)` (en `hls2-l30`: `(B05-B04)/(B05+B04)`) `&asset_as_band=true&rescale=0,0.9&colormap=<6 clases>&format=png`. Escala clasificada de suelo a vegetación (arena = pelado, verdes = cubierto), validada con la skill de visualización: cortes 0 / 0,15 / 0,3 / 0,45 / 0,6 / 0,75 con `#E6D8AE #CDBA86 #94AF63 #689C49 #3F8139 #1B5E2E`; la leyenda marca el umbral 0,3 y el valor del lote. La fila del satélite en la tarjeta usa la misma escala, con el `+` codificado como `%2B`. Capa: `minZoom: 9`, `maxNativeZoom: 16`, `opacity: 0.85`, CSS `image-rendering: pixelated`, zoom máximo 17. MODIS de respaldo: `maxNativeZoom: 9`, zoom máximo 16 | Sin cuenta y con CORS abierto: anda desde el navegador. Se ve lote por lote (30 m contra 250 m de MODIS) y sigue siendo dato de NASA. Si no hay escena sin nubes en el mes, cae a MODIS y la leyenda lo dice |
+| NDVI (NASA HLS 30 m, vía Planetary Computer; respaldo: GIBS `MODIS_Terra_L3_NDVI_16Day`) | HLS: la escena de cada mes **la elige el back** (`capas.ndvi_mensual[mes]`: colección, item y fecha; la busca en STAC con `eo:cloud_cover < 30` y la de menos nubes). En el prototipo la buscaba el navegador. Tiles: `/api/data/v1/item/tiles/WebMercatorQuad/{z}/{x}/{y}@1x?collection=…&item=…&expression=(B08-B04)/(B08+B04)` (en `hls2-l30`: `(B05-B04)/(B05+B04)`) `&asset_as_band=true&rescale=0,0.9&colormap=<6 clases>&format=png`. Escala clasificada de suelo a vegetación (arena = pelado, verdes = cubierto), validada con la skill de visualización: cortes 0 / 0,15 / 0,3 / 0,45 / 0,6 / 0,75 con `#E6D8AE #CDBA86 #94AF63 #689C49 #3F8139 #1B5E2E`; la leyenda marca el umbral 0,3 y el valor del lote. La fila del satélite en la tarjeta usa la misma escala, con el `+` codificado como `%2B`. Capa: `minZoom: 9`, `maxNativeZoom: 16`, `opacity: 0.85`, CSS `image-rendering: pixelated`, zoom máximo 17. MODIS de respaldo: `maxNativeZoom: 9`, zoom máximo 16 | Sin cuenta y con CORS abierto: anda desde el navegador. Se ve lote por lote (30 m contra 250 m de MODIS) y sigue siendo dato de NASA. Si no hay escena sin nubes en el mes, cae a MODIS y la leyenda lo dice |
 | Lote chico en pantalla | Si el lote mide menos de 28 px, se muestra un punto en su centro; tocarlo vuelve a encuadrar el lote | Alejando, el lote nunca se pierde |
 | Encuadre | `fitBounds` con lugar para el panel y la hoja (zoom máximo 17); en NDVI, el lote con un margen del 35 % | El lote siempre queda visible, aunque sea chico |
 | Clima (POWER) | Recuadro de la celda de ~50 km, nunca pintado dentro del lote | Escala real del dato |
@@ -176,7 +188,7 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 | Clima del punto | NASA POWER API **mensual** (`PRECTOTCORR_SUM`, `T2M_MIN`, `T2M_MAX`, comunidad AG), últimas 30 campañas | Un solo pedido y un solo período para todo (desde la 4.2; antes, climatología) |
 | Buscar el lugar del lote | Esri World Geocoding (`suggest`, `findAddressCandidates`), sin cuenta y con CORS | Mostrar "Búsqueda: Esri" |
 | NDVI del lote a 30 m | NASA HLS vía Planetary Computer (STAC + `item/statistics`) | Ver `backend/PLAN.md` (Back 2, `satelite/ndvi.py`) |
-| Pendiente | AWS Terrain Tiles (formato terrarium, incluye SRTM), zoom 14 | Usar el **plano ajustado** sobre el lote para la pendiente general; el valor por píxel es ruidoso |
+| Pendiente | AWS Terrain Tiles (formato terrarium, incluye SRTM), zoom 14 | Usar el **plano ajustado** sobre el lote para la pendiente general; el valor por píxel es ruidoso. **En la app** la calcula el back con NASADEM (Planetary Computer), con AWS de respaldo |
 | Celda de clima | Grilla de NASA POWER de 0,5° × 0,625° | Se dibuja como recuadro de ~50 km para mostrar la escala |
 
 Ojo: las páginas de artifact de Claude bloquean estos mapas. El prototipo es un HTML que se abre en el navegador; la app real (Next.js + Leaflet) los carga sin problema.
@@ -204,27 +216,28 @@ La app funciona en cualquier punto; Río Cuarto es el lote precalculado para la 
 | RF1 | Ubicar y marcar el lote: lote de ejemplo, o buscador de lugares (Esri `suggest` + `findAddressCandidates`, sin cuenta), coordenadas o link de Google Maps, o GPS. **Dibujo por puntos** (polígono de cualquier forma, una L por ejemplo), esquinas arrastrables, mínimo 1 ha y máximo 20.000 ha, sin líneas cruzadas; tocar el mapa mueve el lote sin cambiar su forma. Probado en el prototipo | Must |
 | RF2 | Cultivo de verano, invierno y campaña pasada; calendario de 12 meses automático | Must |
 | RF3 | Editar las fechas del calendario | Should |
-| RF4 | 4 objetivos con barritas de 0 a 5, por defecto en 3 | Must |
+| RF4 | 4 objetivos con barritas de 1 a 5, por defecto en 3. Pesan al cuadrado en la cercanía (una 5 pesa 25 veces una 1) | Must |
 | RF5 | Restricciones de lista: sin riego (por defecto), sin hacienda, maquinaria limitada, no sembrar | Must |
 | RF6 | Campos del lote: se encharca, textura del suelo | Should |
-| RF7 | Traer datos de NASA: POWER (P0); MODIS y SRTM (P1); SoilGrids y GAEZ (P2) | Must (P0) / Should (P1) |
+| RF7 | Traer datos de NASA: POWER (P0); HLS (MODIS de respaldo), NASADEM y ESA WorldCover (P1); MODIS ET (P1, contraste); GAEZ (P2). SoilGrids quedó afuera | Must (P0) / Should (P1) |
 | RF8 | Generar las 3 alternativas tipo (A, B, C) con reglas fijas, respetando las restricciones; descartadas en gris con el motivo | Must |
-| RF9 | Calcular valores, diferencias vs. actual y cercanía a los objetivos **con datos de NASA y reglas fijas** | Must |
+| RF9 | Calcular valores, diferencias vs. actual y cercanía a los objetivos **con datos de NASA (mezclados con las mediciones del productor si las hay) y reglas fijas** | Must |
 | RF10 | Calcular valores por tipo de año (terciles de 30 años) y marcar "sensible al clima" | Must |
 | RF11 | Tabla comparativa técnica de 4 columnas con valores, unidades, fuente, años, resolución y confianza | Must |
 | RF12 | Textos de la tabla generados con plantillas fijas a partir de los valores (sin IA) | Must |
 | RF13 | Recalcular la cercanía al mover las barritas, sin volver a llamar a NASA | Must |
 | RF14 | Mostrar lo que vio el satélite: NDVI medio del lote en cada mes de la última campaña (HLS 30 m, `POST /api/data/v1/item/statistics` con el polígono del lote). Mes "pelado" si el NDVI medio es < 0,3 (regla a validar con la persona 3). Si no coincide con la rotación cargada (2 meses o más de diferencia), va a "Revisar con el agrónomo". No cambia los puntajes | Should |
-| RF15 | **Decisión 2026-11-14.** Mediciones propias **al lado** de NASA: "Tu pluviómetro: 650 mm/año · NASA: 824 mm (−21 %)". Diferencia > 15 % baja la confianza del agua a "baja" y va a "Revisar con el agrónomo". Se muestra un "corregido con tu pluviómetro" informativo (por ejemplo, el umbral de año seco). Carga a mano, sin subir archivo. **No cambian los puntajes** | Should |
-| RF16 | Capa de riesgo de erosión dentro del lote | Should |
-| RF17 | Capa NDVI por mes con línea de tiempo sincronizada con el calendario | Should |
-| RF18 | Leyenda con valores y escala; tocar una zona muestra el valor y la fuente | Should |
+| RF15 | Mediciones del productor (a mano o con la planilla de RF26). **Al lado** de NASA: "Tu pluviómetro: 650 mm/año · NASA: 819 mm (−21 %)"; con planilla, en las mismas campañas. Diferencia > 15 % → la confianza del agua baja a "baja" y va a "Revisar con el agrónomo". Se muestra un "corregido con tu pluviómetro" informativo (por ejemplo, el umbral de año seco). **Además** (4.3, aprobado por la persona 3), la lluvia y las temperaturas mínima y máxima **cambian los puntajes**: el motor las mezcla con NASA con un peso que crece con los años de registro (1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10 o más 75 %) y lo dice en la evidencia. La materia orgánica es un dato al lado y no puntúa | Should |
+| RF16 | Capa de riesgo de erosión dentro del lote (calculada por el back; ver `docs/plan-armonizacion-capas.md`) | Should |
+| RF17 | Capa NDVI por mes con línea de tiempo sincronizada con el calendario, con la escena que eligió el back | Should |
+| RF18 | Leyenda con valores y escala (las escalas salen del back); tocar una zona muestra el valor y la fuente | Should |
 | RF19 | Capas regionales de balance de agua y heladas | Could |
 | RF20 | Enviar por mail (`mailto:`, plantilla fija) y descargar PDF | Should |
 | RF21 | "Información que falta" por columna | Must |
 | RF22 | Aviso de apoyo visible en inicio y resultados | Must |
 | RF23 | Tooltips fijos de términos satelitales | Could |
 | RF25 | **Decisión 2026-11-14. Probabilidad climatológica** por estrategia: frecuencia observada en las 30 campañas de los eventos que importan para su calendario (helada con cultivo sensible; siembra con menos de la mitad de la lluvia normal; máxima de 35 °C o más). Texto fijo: "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)". La primera va en la tarjeta; todas, en el detalle. Implementado en el prototipo | Must |
+| RF26 | **Decisión 2026-11-14 (4.3). Planilla CSV del productor:** registro diario o mensual de lluvia y, opcionalmente, temperaturas mínima y máxima. El back la valida y la normaliza (`POST /mediciones/planilla`; detecta la codificación, el separador `;` o `,` y la coma decimal) y devuelve una vista previa con avisos por fila. La serie viaja en `/analizar` (`mediciones_propias.serie_mensual`). Sin guardar nada. Plantilla para descargar. Detalle: `docs/plan-planilla-lluvia.md` | Should |
 | RF24 | Serie año a año: lluvia de cada una de las 30 campañas (julio a junio, POWER mensual), pintada por tercio, con el promedio de las últimas 10 contra las 20 previas. Describe, no proyecta: sin tendencias ni pronósticos. Sale de los mismos datos que RF10 | Could (primero del sábado a la noche) |
 
 ## Requerimientos no funcionales
@@ -238,7 +251,7 @@ La app funciona en cualquier punto; Río Cuarto es el lote precalculado para la 
 | RNF5 | **Compu primero:** la tabla de 4 columnas se diseña para la compu; en el celu, scroll horizontal |
 | RNF6 | **Sin login y sin guardar datos** |
 | RNF7 | **Respuesta:** menos de 30 s, con progreso por fuente |
-| RNF8 | **Demo a prueba de WiFi:** el lote de Córdoba, con capas, está precalculado |
+| RNF8 | **Demo a prueba de WiFi:** el lote de Córdoba, con capas, está precalculado (`backend/app/demo/rio_cuarto.json`, generado con `scripts/precalcular_demo.py`) |
 | RNF9 | **Seguridad:** claves en variables de entorno |
 | RNF10 | **Idioma:** español en la app; confirmar con la organización si la entrega va en inglés |
 | RNF11 | **Accesibilidad básica:** buen contraste; el color nunca es la única señal |
@@ -252,7 +265,7 @@ La app funciona en cualquier punto; Río Cuarto es el lote precalculado para la 
 - Login, cuentas.
 - Guardar comparaciones o historial.
 - Varios lotes.
-- Subir planillas o historial de mediciones.
+- Planillas en XLSX (solo CSV) y otras variables del productor (humedad del suelo, napa): próximos pasos.
 - Precios de mercado reales.
 - Elegir "la mejor" alternativa.
 - Mails desde un servidor propio.
@@ -263,7 +276,14 @@ La app funciona en cualquier punto; Río Cuarto es el lote precalculado para la 
 
 ---
 
-## Contrato de la API (confirmar con la persona 1)
+## Contrato de la API (resumen)
+
+> **El contrato vigente es `backend/app/api/contrato.py`** (Back 1). Este bloque es un resumen de la 4.2 para orientarse y puede no tener todos los campos. Desde la 4.3 se suman:
+> - En la entrada: `mediciones_propias.serie_mensual: [{mes: "AAAA-MM", lluvia_mm?, t_min_c?, t_max_c?}]` (planilla).
+> - En la salida: `contraste_mediciones[].campanas_comparadas`, `detalle_campanas` y `mes` (filas de helada y calor), y `probabilidades[].contraste`.
+> - Una ruta nueva: `POST /mediciones/planilla` (archivo CSV → `ResultadoPlanilla` con la serie, los avisos y los errores).
+> - Las prioridades van de 1 a 5.
+> - Previstos en `docs/plan-armonizacion-capas.md`: `CapaRaster` y las capas `*_mapa`.
 
 ```
 POST /analizar
@@ -272,12 +292,12 @@ entrada: {
   lat, lon,  (= centro, por compatibilidad)
   cultivo_verano, invierno, campana_pasada,
   calendario: [12] (opcional; pisa al automático),
-  prioridades: { agua, suelo, ingreso, erosion } (0 a 5),
+  prioridades: { agua, suelo, ingreso, erosion } (1 a 5),
   restricciones: ['sin_riego', 'sin_hacienda', 'maquinaria_limitada'],
   no_sembrar: [cultivos],
   anegable: 'si' | 'a_veces' | 'no' | 'no_se',
   textura_suelo: 'arenoso' | 'franco' | 'arcilloso' | 'no_se',
-  mediciones_propias: { lluvia_anual_mm?, anios_registro?, materia_organica_pct? }
+  mediciones_propias: { lluvia_anual_mm?, anios_registro?, materia_organica_pct?, serie_mensual? (4.3) }
 }
 
 salida: {
@@ -309,23 +329,30 @@ Los textos (resumen, "qué le falta", evidencia, riesgos, probabilidades) los ar
 
 ---
 
-## Orden de construcción
+## Estado y orden de construcción
+
+**Estado (sábado 14, a la noche):**
+- **Backend en `dev`:**
+  - POWER de 30 campañas, indicadores, terciles, serie por campaña (RF24) y probabilidad climatológica (RF25).
+  - Satélite: lote, WorldCover, pendiente con NASADEM y AWS de respaldo, NDVI con HLS y MODIS de respaldo, ET de MODIS y capas.
+  - Motor de reglas con la mezcla de mediciones, `servicio.analizar()` y `/analizar` real.
+  - Contraste de lluvia y temperatura con planilla (RF15) y la ruta `POST /mediciones/planilla`.
+  - Demo precalculada, CI y archivos de deploy.
+- **En PR:** el parser de la planilla (`mediciones/planilla.py`) y los PRs del front.
+- **Pendiente:** `Prioridades` con mínimo 1 en el contrato; `cercania.ts` con las prioridades al cuadrado (Front 2); capas armonizadas (`docs/plan-armonizacion-capas.md`); interfaz de la planilla (Front 1); deploy estable.
 
 | Cuándo | Qué tiene que estar |
 |---|---|
-| Viernes 01:00 | API con indicadores reales de POWER para el lote de Córdoba; front con pantallas 2 a 5 con datos falsos |
-| Sábado 13:00 | De punta a punta: RF1, RF2, RF4, RF5, RF7 (POWER), RF8-RF13, RF21, RF22. Primer deploy |
-| Sábado 20:00 | + RF14, RF16-RF18 (MODIS, SRTM, mapa precalculado para la demo), RF15, RF20, RF3, RF6. **Deploy estable: lo que no anda se recorta** |
-| Sábado noche | Solo si todo está estable: RF24 (primero), RF19, SoilGrids, GAEZ, RF23 |
-| Domingo 12:00 | Congelado total |
+| Sábado noche | De punta a punta con datos reales y el motor. Deploy estable. Si sobra tiempo: la interfaz de la planilla, las capas armonizadas mínimas (pendiente y NDVI desde el back), RF19, GAEZ, RF23 |
+| Domingo 12:00 | Congelado total. Regenerar la demo precalculada antes |
 
-Orden de recorte a las 20:00: capas regionales → tooltips → mail/PDF → mediciones propias → mapa. **Nunca:** las 4 columnas, los 5 puntos de cada una ni la incertidumbre por tipo de año.
+Orden de recorte: capas regionales → tooltips → mail/PDF → temperaturas de la planilla → planilla → capas armonizadas (queda lo mínimo: escena y pendiente del back) → mapa. **Nunca:** las 4 columnas, los 5 puntos de cada una ni la incertidumbre por tipo de año con su probabilidad climatológica.
 
 ---
 
 ## Para el pitch y el jurado
 - El desafío menciona SI (inteligencia) como **opción**, no como obligación ("may"). Nuestra respuesta a "¿dónde está la inteligencia?": **"Decidimos a propósito no poner IA en la app: reglas agronómicas y estadística de 30 años de datos de NASA. Cada resultado se puede rastrear hasta el dato que lo produjo. Para que un agrónomo confíe, tiene que poder verificarlo."** Coincide con lo que pidieron los técnicos en la encuesta (4 de 7: "que explique por qué").
 - **"¿Predicen?"** Sí, con estadística explicable: "en 14 de 30 años la siembra de vicia en mayo tuvo menos de la mitad de la lluvia normal (47 %)". Es frecuencia observada en 30 campañas de NASA, no un modelo de caja negra.
-- **"¿Y el dato del productor?"** Se contrasta con NASA y ajusta la confianza; no la reemplaza.
+- **"¿Y el dato del productor?"** Se muestra al lado de NASA, en las mismas campañas, y ajusta la confianza. Además se mezcla con NASA en los puntajes, con un peso que crece con sus años de registro, y cada valor dice cuánto pesó cada fuente ("tu pluviómetro 650 mm/año (60 %, 6 años) + NASA POWER 819 mm (40 %)"). Las probabilidades siguen siendo solo de NASA.
 - **Próximos pasos:** modelo entrenado y validado con rendimientos por lote (productores, INTA) y años análogos.
 - Ojo: el equipo sí usa IA (Claude Code) **para programar**. Eso se declara en la sección "Use of SI" de la entrega.
