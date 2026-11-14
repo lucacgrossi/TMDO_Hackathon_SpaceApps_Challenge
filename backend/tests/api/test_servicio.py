@@ -17,7 +17,7 @@ from app.api import rutas
 from app.api.contrato import Entrada, Salida
 from app.clima import power
 from app.main import app
-from app.satelite import cobertura, et, ndvi
+from app.satelite import cobertura, elevacion, et, ndvi
 from tests.api.conftest import CAMPANAS_NDVI_PEDIDAS, cobertura_ok
 
 # TestClient no sale a internet, pero el event loop abre un socketpair local (ver test_rutas.py).
@@ -140,6 +140,29 @@ def test_visto_por_satelite_y_capas():
     assert s.capas.ndvi_mensual[0].item == "HLS-TEST-2026-01-15"
     assert "NDVI del lote · Noviembre 2025: sin escena HLS con < 30 % de nubes" in s.informacion_falta
     assert {"lluvia_anual", "balance_anual", "et_real_anual", "meses_cobertura_baja"} <= set(s.indicadores)
+
+
+def test_capa_de_erosion_sale_de_satelite_capas():
+    """Pendiente general × meses con NDVI bajo (satelite/capas.py), sin pedidos nuevos."""
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.erosion is not None
+    assert s.capas.erosion["valor"] == round(0.6 * 4, 1)
+    assert "erosion" not in s.capas.no_disponibles
+    assert s.indicadores["riesgo_erosion"].unidad == "% × meses"
+    assert not any(f.startswith("Capa de erosión") for f in s.informacion_falta)
+
+
+def test_sin_pendiente_la_erosion_va_a_informacion_que_falta(monkeypatch):
+    monkeypatch.setattr(elevacion, "calcular", lambda pol: {
+        "pendiente_general": {"valor": None, "unidad": "%", "fuente": "NASADEM", "anios": None,
+                              "resolucion": "30 m", "confianza": "sin_dato", "motivo": "caída"},
+        "pendiente_maxima": {"valor": None, "unidad": "%", "fuente": "NASADEM", "anios": None,
+                             "resolucion": "30 m", "confianza": "sin_dato", "motivo": "caída"},
+    })
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.erosion is None and "erosion" in s.capas.no_disponibles
+    assert "riesgo_erosion" not in s.indicadores
+    assert "Capa de erosión: falta la pendiente o el NDVI del lote" in s.informacion_falta
 
 
 def test_sin_lenguaje_de_recomendacion():
@@ -304,6 +327,65 @@ def test_traduce_el_motor_al_contrato(monkeypatch):
     assert not c.disponible and c.motivo_descarte == "No sembrar sorgo ni girasol"
     assert c.valores is None and c.puntos is None and c.resumen.startswith("Descartada")
     assert servicio.MOTOR_PENDIENTE not in s.informacion_falta
+
+
+# --- Probabilidad climatológica por columna (RF25) ---------------------------
+
+CULTIVOS = {
+    "soja": {"nombre": "Soja", "grupo": "verano", "tolera_helada": False, "kc": 0.9},
+    "barbecho": {"nombre": "Barbecho", "grupo": "barbecho", "tolera_helada": True, "kc": 0.15},
+}
+CULTIVOS_CLIMA = {k: {c: d[c] for c in ("nombre", "grupo", "tolera_helada")} for k, d in CULTIVOS.items()}
+
+
+def test_probabilidades_por_columna(monkeypatch):
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado({}))
+    monkeypatch.setattr(servicio, "_cargar_cultivos", lambda: CULTIVOS_CLIMA)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    actual, a, c = s.estrategias[0], s.estrategias[1], s.estrategias[3]
+    m = s.clima_mensual
+
+    # Actual: soja de septiembre a marzo → helada en septiembre (el único mes con soja y helada).
+    assert [p.evento for p in actual.probabilidades] == ["helada", "siembra_seca", "calor"]
+    h = actual.probabilidades[0]
+    k = m.anios_con_helada[8]
+    assert (h.mes, h.cultivo, h.anios, h.de) == (8, "soja", k, 30)
+    assert h.texto == f"Helada en septiembre con soja en el lote: {k} de 30 años ({round(k / 30 * 100)} %)"
+    assert h.fuente.endswith(s.periodo_clima)
+    assert actual.probabilidades[2].texto.startswith("Máxima de 35 °C o más en enero con soja: ")
+
+    # A: soja de mayo a marzo (1 mes de barbecho) → la siembra cae en mayo.
+    assert [(p.evento, p.mes) for p in a.probabilidades if p.evento == "siembra_seca"] == [("siembra_seca", 4)]
+    assert c.probabilidades == []  # descartada: sin calendario
+    assert not any("Probabilidad climatológica" in f for f in s.informacion_falta)
+
+
+def test_cargar_cultivos_sin_motor_da_none(monkeypatch):
+    def falta(nombre):
+        raise ImportError(nombre)
+
+    monkeypatch.setattr(servicio.importlib, "import_module", falta)
+    assert servicio._cargar_cultivos() is None
+
+
+def test_cargar_cultivos_toma_solo_lo_que_pide_clima(monkeypatch):
+    monkeypatch.setattr(servicio.importlib, "import_module", lambda nombre: SimpleNamespace(C=CULTIVOS))
+    assert servicio._cargar_cultivos() == CULTIVOS_CLIMA
+
+
+def test_motor_sin_catalogo_de_cultivos_lo_dice(monkeypatch):
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado({}))
+    monkeypatch.setattr(servicio, "_cargar_cultivos", lambda: None)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert all(e.probabilidades == [] for e in s.estrategias)
+    assert servicio.PROBABILIDAD_SIN_CULTIVOS in s.informacion_falta
+
+
+def test_stub_sin_probabilidades_y_sin_aviso_extra(monkeypatch):
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: None)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert all(e.probabilidades == [] for e in s.estrategias)
+    assert servicio.PROBABILIDAD_SIN_CULTIVOS not in s.informacion_falta
 
 
 # --- Campaña del NDVI = última campaña de POWER -----------------------------
