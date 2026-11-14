@@ -4,8 +4,8 @@ GitHub Actions corre en cada PR a `dev` y `main` y en cada push a `dev`. Nada us
 
 | Workflow | Cuándo corre | Qué revisa |
 |---|---|---|
-| `backend.yml` | cambia `backend/**` | Python 3.12 · `ruff check` · `ruff format --check` (informativo, todavía no bloquea) · `pytest --disable-socket` (tests sin red) · que `app` y todos sus módulos importen (y `app.main` cuando exista) |
-| `frontend.yml` | cambia `frontend/**` | Node 22 · `npm ci` · `npm run lint` · `typecheck` · `npm test` (vitest) · `npm run build` |
+| `backend.yml` | siempre se dispara; el job pesado corre si cambia `backend/**` | Python 3.12 · `ruff check` · `ruff format --check` (informativo, todavía no bloquea) · `pytest --disable-socket` (tests sin red) · que `app` y todos sus módulos importen (y `app.main` cuando exista) |
+| `frontend.yml` | siempre se dispara; el job pesado corre si cambia `frontend/**` | Node 22 · `npm ci` · `npm run lint` · `typecheck` · `npm test` (vitest) · `npm run build` |
 | `secretos.yml` | siempre | gitleaks sobre el diff del PR y sobre todo el historial (config en `.gitleaks.toml`) |
 | `checks-proyecto.yml` | siempre | las reglas propias de abajo (`.github/scripts/`) |
 
@@ -42,9 +42,13 @@ py .github/scripts/fronteras_dominios.py
 py .github/scripts/archivos_pesados.py --base origin/dev
 py .github/scripts/sin_env.py
 py .github/scripts/nombre_branch.py luca/feat/satelite-ndvi-mensual
+
+# ¿Correría el job del back / del front para este cambio?
+BASE_SHA=origin/dev py .github/scripts/cambios.py '^backend/'
+BASE_SHA=origin/dev py .github/scripts/cambios.py '^frontend/'
 ```
 
 ## Notas
 - Si un test del back necesita red, no uses internet en el test: monkeypatchea el cliente con `httpx.MockTransport` y fixtures chicas (como en `backend/tests/satelite/`).
-- Los workflows de back y front tienen filtro de paths: si se agregan como "required" en las reglas de la branch, un PR que no toca ese lado queda esperando. Hoy no hay reglas requeridas.
+- **Back y front no usan `paths:`**: el workflow se dispara siempre y un primer job (`¿Cambió el back?` / `¿Cambió el front?`, `.github/scripts/cambios.py`, ~5 s) compara con la base del PR. Si el cambio no toca su lado, el job pesado queda *skipped*, que cuenta como aprobado en las reglas de branch. Así se pueden exigir los 4 checks sin que un PR quede esperando, y no se gastan minutos en `pip install` / `npm ci`. Ante la duda (sin base, historial incompleto) corre.
 - Para actualizar gitleaks: cambiar `GITLEAKS_VERSION` y `GITLEAKS_SHA256` en `secretos.yml` (el sha256 sale de la página del release).
