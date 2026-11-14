@@ -6,6 +6,7 @@ import { metadatosHoja } from "@/lib/formato";
 import { useResultado } from "@/lib/resultado";
 import { useVista } from "@/lib/vista";
 import InterruptorVista, { type VistaResultado } from "./InterruptorVista";
+import MenuCompartir from "./MenuCompartir";
 import TablaTecnica from "./TablaTecnica";
 import VistaPreviaColumnas from "./VistaPreviaColumnas";
 import css from "./resultados.module.css";
@@ -15,7 +16,7 @@ import css from "./resultados.module.css";
  * el panel, cuando el panel llama a `abrirHoja()`. Reusa `.sheet` del prototipo.
  *
  * Encabezado: título, metadatos (lote, período de clima, pendiente, fecha),
- * interruptor Tabla / Tarjetas, Compartir (llega en la feature 9) y Cerrar.
+ * interruptor Tabla / Tarjetas, Compartir (`MenuCompartir`) y Cerrar.
  * Pie: el texto del prototipo y el aviso de apoyo, siempre visibles.
  */
 export default function HojaComparacion() {
@@ -56,9 +57,7 @@ export default function HojaComparacion() {
         )}
         <div className="sp">
           <InterruptorVista valor={vista} onCambio={setVista} />
-          <button type="button" className="ghost" disabled title="Mail, copiar resumen y PDF: próxima entrega">
-            Compartir
-          </button>
+          <MenuCompartir salida={resultado.estado === "listo" ? resultado.datos : null} />
           <button type="button" className="ghost" onClick={cerrarYVolver} aria-label="Cerrar comparación">
             Cerrar
           </button>
