@@ -1,4 +1,12 @@
-# Field Shift · MVP (versión 4.3, 2026-11-14)
+# Field Shift · MVP (versión 4.4, 2026-11-14)
+
+**Cambios de la 4.4 (sábado 14, a la tarde; aprobados por la persona 3):**
+- **La campaña y el período los da la API; el front no los calcula.** El front muestra `periodo_clima` y la campaña de `visto_por_satelite` tal como vienen en la respuesta de `/analizar`. Nada de "año − 2" ni de años fijos en el código. El prototipo (`docs/prototipo/`) ya calcula la última campaña completa con la fecha y la confirma contra POWER.
+- **Tabla técnica a todo el ancho y "Mapa de riesgos" en una pestaña aparte** (ver "Flujo", paso 2). Las dos vistas leen el mismo mes del estado de vista, así que el calendario de la tabla y la línea de tiempo del mapa siguen sincronizados.
+- **La intro se queda:** se saltea con un click.
+- **Plazo:** se hace hoy. Si a las 19:00 no está andando, se presenta con el flujo de la 4.3.
+- **Cómo se integra:** primero se mergea todo lo abierto en `dev` con **merge commit (no squash)**; el cambio de layout va en PRs nuevos encima.
+- **Barras de objetivos:** si aparecen en más de una vista, son el mismo componente leyendo el mismo estado (`useEntradas`), para que no se desincronicen.
 
 **Cambios de la 4.3 (sábado 14, a la noche; todos aprobados por la persona 3):**
 - **Las mediciones del productor sí cambian los puntajes:** el motor (`backend/app/motor/mezcla.py`) mezcla su lluvia y sus temperaturas con NASA, con un peso que crece con los años de registro (1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10 o más 75 %). El contraste al lado de NASA sigue (RF15) y no puntúa. Las probabilidades climatológicas siguen saliendo solo de NASA.
@@ -88,6 +96,8 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 - Datos del lote (se encharca, textura) y mediciones propias, plegados: a mano (lluvia anual del pluviómetro y años de registro, materia orgánica) o **"Subir planilla (CSV)"** con su registro de lluvia y, opcionalmente, de temperaturas, con vista previa y plantilla para descargar (RF26).
 
 **Paso 2 · Mapa + comparación:** la caja se achica hacia la derecha, el mapa aparece detrás y vuela al lote (o al lugar elegido, ya en modo dibujo).
+
+*Desde la 4.4:* al comparar, la **tabla técnica ocupa todo el ancho** y el mapa con capas y línea de tiempo pasa a una **pestaña "Mapa de riesgos"**. Las dos vistas comparten el mes elegido. Si a las 19:00 del sábado no está andando, queda el paso 2 de la 4.3 (abajo).
 - Selector "Lote de ejemplo / Dibujar mi lote"; las esquinas se arrastran; tocar el mapa mueve el lote sin cambiar su forma.
 - Capas: Vista aérea · Vegetación (NDVI) · Pendiente · Lluvia y heladas, con desplegable de meses.
 - "Comparar alternativas": serie de lluvia de 30 campañas y las 4 tarjetas (actual + A, B, C), con la fila "visto por satélite" en la actual y la probabilidad climatológica en cada una.
