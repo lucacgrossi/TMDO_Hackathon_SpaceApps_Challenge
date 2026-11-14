@@ -78,9 +78,23 @@ def test_no_usa_claves_anuales_13(respuesta):
     assert "202113" in P["PRECTOTCORR_SUM"]  # el fixture sí las trae
     # Si se colara el anual, la campaña tendría 13 valores o el total se duplicaría.
     c = next(c for c in power.armar_serie(respuesta).campanas if c.etiqueta == "2021/22")
-    esperado = sum(P["PRECTOTCORR_SUM"][k] for k in
-                   ["202107", "202108", "202109", "202110", "202111", "202112",
-                    "202201", "202202", "202203", "202204", "202205", "202206"])
+    esperado = sum(
+        P["PRECTOTCORR_SUM"][k]
+        for k in [
+            "202107",
+            "202108",
+            "202109",
+            "202110",
+            "202111",
+            "202112",
+            "202201",
+            "202202",
+            "202203",
+            "202204",
+            "202205",
+            "202206",
+        ]
+    )
     assert c.lluvia_total_mm == pytest.approx(esperado)
 
 
@@ -143,8 +157,7 @@ def test_timeout_no_lanza(monkeypatch):
 
 def test_http_error_no_lanza(monkeypatch):
     def error_422(url, **kwargs):
-        return httpx.Response(422, json={"messages": ["latitude fuera de rango"]},
-                               request=httpx.Request("GET", url))
+        return httpx.Response(422, json={"messages": ["latitude fuera de rango"]}, request=httpx.Request("GET", url))
 
     monkeypatch.setattr(power.httpx, "get", error_422)
     s = power.pedir_power(95.0, 0.0)

@@ -143,9 +143,7 @@ def armar_serie(respuesta: dict[str, Any]) -> SeriePower:
         return SeriePower(ok=False, motivo="La respuesta de NASA POWER no trae los parámetros pedidos.")
 
     # Claves AAAAMM con MM de 01 a 12: así se descarta la AAAA13 (anual).
-    anios = sorted(
-        {int(k[:4]) for k in series[0] if len(k) == 6 and k.isdigit() and 1 <= int(k[4:]) <= 12}
-    )
+    anios = sorted({int(k[:4]) for k in series[0] if len(k) == 6 and k.isdigit() and 1 <= int(k[4:]) <= 12})
     if not anios:
         return SeriePower(ok=False, motivo="La respuesta de NASA POWER no trae meses.")
 
@@ -174,10 +172,7 @@ def armar_serie(respuesta: dict[str, Any]) -> SeriePower:
     if n < CAMPANAS_MIN:
         return SeriePower(
             ok=False,
-            motivo=(
-                f"NASA POWER devolvió {n} campañas completas (julio–junio); "
-                f"se necesitan al menos {CAMPANAS_MIN}."
-            ),
+            motivo=(f"NASA POWER devolvió {n} campañas completas (julio–junio); se necesitan al menos {CAMPANAS_MIN}."),
             campanas=campanas,
             n=n,
         )
