@@ -9,7 +9,7 @@ from __future__ import annotations
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import numpy as np
 
@@ -34,7 +34,7 @@ def _sin_dato(motivo: str, anio: str | None = None) -> dict:
 
 def _ultimo_anio_completo(items: list[dict]) -> tuple[str, list[dict]] | None:
     """(año, items de ese año) del último año que ya terminó."""
-    ahora = datetime.now(timezone.utc).isoformat()
+    ahora = datetime.now(UTC).isoformat()
     por_anio: dict[str, list[dict]] = {}
     for it in items:
         p = it.get("properties", {})
@@ -57,7 +57,7 @@ def _valores(item: dict, poligono: dict) -> tuple[str, np.ndarray]:
 def calcular(poligono: dict) -> dict:
     """poligono: GeoJSON Polygon en [lon, lat]. Devuelve {"et_real_anual": Indicador}."""
     try:
-        hoy = datetime.now(timezone.utc).year
+        hoy = datetime.now(UTC).year
         fechas = f"{hoy - ANIOS_BUSQUEDA}-01-01/{hoy}-12-31"   # el producto sale con ~1 mes de demora
         elegido = _ultimo_anio_completo(pc.buscar(COLECCION, poligono, fechas=fechas, limite=20))
         if elegido is None:
