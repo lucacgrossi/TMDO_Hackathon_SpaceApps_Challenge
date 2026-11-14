@@ -437,3 +437,37 @@ def test_pluviometro_que_coincide_no_toca_la_confianza():
     s = servicio.analizar(Entrada.model_validate(entrada))
     assert s.contraste_mediciones[0].confianza_resultante == "alta"
     assert s.indicadores["lluvia_anual"].confianza == "media"
+
+
+def _planilla_desde_power(campanas: list[str], factor: float) -> list[dict]:
+    """Planilla mensual que copia la lluvia de POWER (fixture) en esas campañas, por `factor`."""
+    serie = power.armar_serie(json.loads((Path(__file__).parents[1] / "clima" / "fixtures" / "power_rio_cuarto.json")
+                                         .read_text(encoding="utf-8")))
+    meses = []
+    for c in serie.campanas:
+        if c.etiqueta in campanas:
+            for m in (6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5):
+                anio = c.anio_inicio + 1 if m < 6 else c.anio_inicio
+                meses.append({"mes": f"{anio}-{m + 1:02d}", "lluvia_mm": round(c.lluvia_mm[m] * factor, 1)})
+    return meses
+
+
+def test_planilla_compara_en_las_mismas_campanas_sin_cambiar_puntajes(monkeypatch):
+    """Planilla (5.3 y 5.5): mismas campañas que NASA, confianza baja en agua y ningún puntaje cambia."""
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado({}))
+    sin = servicio.analizar(Entrada.model_validate(ENTRADA))
+    seis = ["2018/19", "2019/20", "2020/21", "2021/22", "2022/23", "2023/24"]
+    entrada = copy.deepcopy(ENTRADA)
+    entrada["mediciones_propias"] = {"lluvia_anual_mm": 900, "serie_mensual": _planilla_desde_power(seis, 0.8)}
+    s = servicio.analizar(Entrada.model_validate(entrada))
+
+    (lluvia,) = s.contraste_mediciones
+    assert lluvia.campanas_comparadas == seis and lluvia.diferencia_pct == -20
+    assert "se usó la planilla" in lluvia.texto
+    for k in ("lluvia_anual", "balance_anual"):
+        assert s.indicadores[k].confianza == "baja" and "mismas campañas" in s.indicadores[k].motivo
+        assert s.indicadores[k].valor == sin.indicadores[k].valor
+    assert any("difiere 20 %" in r for r in s.estrategias[1].riesgos)
+    for e_sin, e_con in zip(sin.estrategias, s.estrategias):  # ningún puntaje cambia
+        assert e_con.puntos == e_sin.puntos and e_con.cercania == e_sin.cercania
+        assert e_con.probabilidades == e_sin.probabilidades
