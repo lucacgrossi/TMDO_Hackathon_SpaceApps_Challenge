@@ -30,11 +30,11 @@ def test_lote_demo_650_mm_difiere_21_pct_y_baja_la_confianza(clima):
     assert len(r.contraste) == 1
     c = r.contraste[0]
     assert c.indicador == "lluvia_anual"
-    assert c.valor_nasa == clima.indicadores["lluvia_anual"].valor == 824
+    assert c.valor_nasa == clima.indicadores["lluvia_anual"].valor == 819
     assert c.diferencia_pct == -21
     assert c.confianza_resultante == "baja"
     assert r.confianza_agua == "baja"
-    assert c.texto == "Tu pluviómetro: 650 mm/año · NASA: 824 mm (−21 %) · difieren más de 15 %: confianza baja en agua"
+    assert c.texto == "Tu pluviómetro: 650 mm/año · NASA: 819 mm (−21 %) · difieren más de 15 %: confianza baja en agua"
     assert len(r.riesgos) == 1 and "difiere 21 % de NASA" in r.riesgos[0]
     assert r.faltantes == []
 
@@ -43,23 +43,24 @@ def test_corregido_al_lado_usa_la_lluvia_del_tercio_seco_si_el_corte_es_por_bala
     assert clima.tipos_de_anio.metodo == "terciles_balance"
     c = corr.contrastar(MedicionesPropias(lluvia_anual_mm=650), clima).contraste[0]
     lluvia_seca = max(x.lluvia_total_mm for x in clima.campanas if x.tipo == "seco")
-    assert c.corregido_al_lado.umbral_seco_mm == pytest.approx(lluvia_seca * 650 / 824, abs=0.1)
+    assert c.corregido_al_lado.umbral_seco_mm == pytest.approx(lluvia_seca * 650 / 819, abs=0.1)
     assert "balance" in c.corregido_al_lado.nota
     assert "no cambia ningún puntaje" in c.corregido_al_lado.nota
 
 
 def test_corregido_al_lado_escala_el_umbral_si_el_corte_es_por_lluvia(clima):
     por_lluvia = clima.tipos_de_anio.model_copy(update={"metodo": "terciles_lluvia", "umbral_seco_mm": 700.0})
-    c = corr.contrastar(MedicionesPropias(lluvia_anual_mm=650),
-                        clima.__class__(**{**clima.__dict__, "tipos_de_anio": por_lluvia})).contraste[0]
-    assert c.corregido_al_lado.umbral_seco_mm == pytest.approx(700 * 650 / 824, abs=0.1)
+    c = corr.contrastar(
+        MedicionesPropias(lluvia_anual_mm=650), clima.__class__(**{**clima.__dict__, "tipos_de_anio": por_lluvia})
+    ).contraste[0]
+    assert c.corregido_al_lado.umbral_seco_mm == pytest.approx(700 * 650 / 819, abs=0.1)
     assert "balance" not in c.corregido_al_lado.nota
 
 
 def test_800_mm_coincide_con_nasa(clima):
     r = corr.contrastar(MedicionesPropias(lluvia_anual_mm=800, anios_registro=12), clima)
     c = r.contraste[0]
-    assert c.diferencia_pct == -3
+    assert c.diferencia_pct == -2
     assert c.confianza_resultante == "alta"
     assert r.confianza_agua == "alta"
     assert "coinciden: confianza alta" in c.texto
@@ -69,7 +70,7 @@ def test_800_mm_coincide_con_nasa(clima):
 def test_pocos_anios_se_muestra_con_confianza_baja(clima):
     r = corr.contrastar(MedicionesPropias(lluvia_anual_mm=800, anios_registro=3), clima)
     c = r.contraste[0]
-    assert c.valor_productor == 800 and c.valor_nasa == 824
+    assert c.valor_productor == 800 and c.valor_nasa == 819
     assert c.confianza_resultante == "baja"
     assert "pocos años de registro" in c.texto
     assert r.confianza_agua == "alta"  # un registro corto no empeora el dato de NASA

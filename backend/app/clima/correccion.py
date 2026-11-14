@@ -34,6 +34,9 @@ from app.clima.indicadores import ResultadoClima
 
 UMBRAL_DIFERENCIA_PCT = 15  # RF15: más de 15 % de diferencia → confianza baja en agua
 MIN_ANIOS_REGISTRO = 5  # propuesta: con menos años, el contraste tiene confianza baja
+# Indicadores de `ResultadoClima.indicadores` que dependen de la lluvia: a estos les baja la confianza.
+# La ET0 sale de las temperaturas, no de la lluvia: no se toca.
+INDICADORES_AGUA = ("lluvia_anual", "balance_anual")
 
 ConfianzaAgua = Literal["alta", "baja"]
 
@@ -46,17 +49,20 @@ class ResultadoContraste:
     - `riesgos` → "A revisar con el agrónomo".
     - `confianza_agua` → confianza de los indicadores de agua: "baja" si el pluviómetro difiere
       más de 15 % de NASA; "alta" si coinciden (no hace falta cambiar nada); None si no hubo
-      comparación (sin pluviómetro o sin NASA POWER).
+      comparación (sin pluviómetro o sin NASA POWER). Se aplica a `INDICADORES_AGUA`.
+    - `motivo_agua` → el `motivo` de esos indicadores cuando la confianza baja.
     - `faltantes` → "Información que falta" (solo si el contraste no se pudo armar).
     """
 
     contraste: list[ContrasteMedicion] = field(default_factory=list)
     riesgos: list[str] = field(default_factory=list)
     confianza_agua: ConfianzaAgua | None = None
+    motivo_agua: str | None = None
     faltantes: list[str] = field(default_factory=list)
 
 
 # --- Formato -----------------------------------------------------------------
+
 
 def _mm(x: float) -> str:
     """Milímetros redondeados con punto de miles: 1.204."""
@@ -76,6 +82,7 @@ def _decimal(x: float) -> str:
 
 # --- Lluvia ------------------------------------------------------------------
 
+
 def _umbral_seco_lluvia(clima: ResultadoClima) -> tuple[float | None, bool]:
     """Umbral de lluvia del año seco y si viene del corte por balance."""
     tipos = clima.tipos_de_anio
@@ -94,60 +101,96 @@ def _corregido(clima: ResultadoClima, factor: float) -> CorregidoAlLado | None:
     corregido = umbral * factor
     nota = f"Corregido con tu pluviómetro, al lado de NASA: año seco hasta {_mm(corregido)} mm (NASA: {_mm(umbral)} mm)"
     if por_balance:
-        nota += (". Los tipos de año se cortan por balance (lluvia − ET0); se escala la lluvia de la campaña "
-                 "seca más lluviosa")
+        nota += (
+            ". Los tipos de año se cortan por balance (lluvia − ET0); se escala la lluvia de la campaña "
+            "seca más lluviosa"
+        )
     nota += ". Solo informativo: no cambia ningún puntaje."
     return CorregidoAlLado(umbral_seco_mm=round(corregido, 1), nota=nota)
 
 
 def _lluvia(mm: float, anios: int | None, clima: ResultadoClima, salida: ResultadoContraste) -> None:
     pocos_anios = anios is not None and anios < MIN_ANIOS_REGISTRO
-    nota_anios = (f" · pocos años de registro ({anios}, menos de {MIN_ANIOS_REGISTRO}): contraste con confianza baja"
-                  if pocos_anios else "")
+    nota_anios = (
+        f" · pocos años de registro ({anios}, menos de {MIN_ANIOS_REGISTRO}): contraste con confianza baja"
+        if pocos_anios
+        else ""
+    )
     if pocos_anios:
         salida.riesgos.append(
             f"Tu pluviómetro tiene {anios} años de registro (menos de {MIN_ANIOS_REGISTRO}): "
-            "el contraste con NASA tiene confianza baja")
+            "el contraste con NASA tiene confianza baja"
+        )
 
     ind = clima.indicadores.get("lluvia_anual")
     nasa = ind.valor if ind is not None else None
     if not clima.ok or nasa is None or nasa <= 0:
-        salida.contraste.append(ContrasteMedicion(
-            indicador="lluvia_anual", valor_productor=mm, valor_nasa=None, unidad="mm/año",
-            diferencia_pct=None, confianza_resultante="baja" if pocos_anios else None, corregido_al_lado=None,
-            texto=f"Tu pluviómetro: {_mm(mm)} mm/año · NASA POWER sin dato: no se pudo comparar{nota_anios}",
-        ))
+        salida.contraste.append(
+            ContrasteMedicion(
+                indicador="lluvia_anual",
+                valor_productor=mm,
+                valor_nasa=None,
+                unidad="mm/año",
+                diferencia_pct=None,
+                confianza_resultante="baja" if pocos_anios else None,
+                corregido_al_lado=None,
+                texto=f"Tu pluviómetro: {_mm(mm)} mm/año · NASA POWER sin dato: no se pudo comparar{nota_anios}",
+            )
+        )
         return
 
     d = round((mm - nasa) / nasa * 100)
     difieren = abs(d) > UMBRAL_DIFERENCIA_PCT
     salida.confianza_agua = "baja" if difieren else "alta"
-    estado = (f"difieren más de {UMBRAL_DIFERENCIA_PCT} %: confianza baja en agua" if difieren
-              else "coinciden: confianza alta")
-    salida.contraste.append(ContrasteMedicion(
-        indicador="lluvia_anual", valor_productor=mm, valor_nasa=nasa, unidad="mm/año", diferencia_pct=d,
-        confianza_resultante="baja" if difieren or pocos_anios else "alta",
-        corregido_al_lado=_corregido(clima, mm / nasa),
-        texto=f"Tu pluviómetro: {_mm(mm)} mm/año · NASA: {_mm(nasa)} mm ({_pct(d)}) · {estado}{nota_anios}",
-    ))
+    estado = (
+        f"difieren más de {UMBRAL_DIFERENCIA_PCT} %: confianza baja en agua"
+        if difieren
+        else "coinciden: confianza alta"
+    )
+    salida.contraste.append(
+        ContrasteMedicion(
+            indicador="lluvia_anual",
+            valor_productor=mm,
+            valor_nasa=nasa,
+            unidad="mm/año",
+            diferencia_pct=d,
+            confianza_resultante="baja" if difieren or pocos_anios else "alta",
+            corregido_al_lado=_corregido(clima, mm / nasa),
+            texto=f"Tu pluviómetro: {_mm(mm)} mm/año · NASA: {_mm(nasa)} mm ({_pct(d)}) · {estado}{nota_anios}",
+        )
+    )
     if difieren:
+        salida.motivo_agua = (
+            f"Tu pluviómetro difiere {abs(d)} % de NASA POWER ({_mm(mm)} contra {_mm(nasa)} "
+            "mm/año): confianza baja en agua. No cambia ningún puntaje"
+        )
         salida.riesgos.append(
             f"Tu pluviómetro difiere {abs(d)} % de NASA POWER ({_mm(mm)} contra {_mm(nasa)} mm/año): "
-            "el dato de agua tiene confianza baja")
+            "el dato de agua tiene confianza baja"
+        )
 
 
 # --- Materia orgánica --------------------------------------------------------
 
+
 def _materia_organica(pct: float, salida: ResultadoContraste) -> None:
-    salida.contraste.append(ContrasteMedicion(
-        indicador="materia_organica", valor_productor=pct, valor_nasa=None, unidad="%", diferencia_pct=None,
-        confianza_resultante=None, corregido_al_lado=None,
-        texto=f"Materia orgánica: {_decimal(pct)} % (dato del productor) · sin fuente NASA de materia orgánica "
-              "para comparar",
-    ))
+    salida.contraste.append(
+        ContrasteMedicion(
+            indicador="materia_organica",
+            valor_productor=pct,
+            valor_nasa=None,
+            unidad="%",
+            diferencia_pct=None,
+            confianza_resultante=None,
+            corregido_al_lado=None,
+            texto=f"Materia orgánica: {_decimal(pct)} % (dato del productor) · sin fuente NASA de materia orgánica "
+            "para comparar",
+        )
+    )
 
 
 # --- Público -----------------------------------------------------------------
+
 
 def contrastar(mediciones: MedicionesPropias | None, clima: ResultadoClima) -> ResultadoContraste:
     """Pone las mediciones del productor al lado de NASA. No cambia puntajes. Nunca lanza."""
@@ -161,8 +204,7 @@ def contrastar(mediciones: MedicionesPropias | None, clima: ResultadoClima) -> R
             _materia_organica(mediciones.materia_organica_pct, salida)
         return salida
     except Exception as e:  # noqa: BLE001 — nunca hacia afuera: va a "Información que falta"
-        return ResultadoContraste(
-            faltantes=[f"Contraste con tus mediciones: no se pudo armar ({type(e).__name__})"])
+        return ResultadoContraste(faltantes=[f"Contraste con tus mediciones: no se pudo armar ({type(e).__name__})"])
 
 
 if __name__ == "__main__":

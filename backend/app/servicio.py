@@ -44,6 +44,7 @@ from app.api.contrato import (
     Salida,
     VistoPorSatelite,
 )
+from app.clima import correccion
 from app.clima import indicadores as clima_indicadores
 from app.clima import power
 from app.satelite import cobertura, elevacion, et, lote, ndvi
@@ -259,7 +260,7 @@ def _puntos_normal(s: dict) -> dict[str, int]:
     return {"agua": s["agua_por_tipo"]["normal"], "suelo": s["suelo"], "erosion": s["erosion"], "ingreso": s["ingreso"]}
 
 
-def _estrategia(s: dict, actual: dict, vacios_back: list[str]) -> Estrategia:
+def _estrategia(s: dict, actual: dict, vacios_back: list[str], riesgos_back: list[str]) -> Estrategia:
     """Traduce una columna del motor a `Estrategia` del contrato."""
     vacios = list(dict.fromkeys([*s.get("falta", []), *vacios_back]))
     base = {
@@ -312,7 +313,7 @@ def _estrategia(s: dict, actual: dict, vacios_back: list[str]) -> Estrategia:
         por_que=s.get("por_que", []),
         evidencia=s.get("evidencia", []),
         beneficios=s.get("beneficios", []),
-        riesgos=s.get("revisar", []),
+        riesgos=list(dict.fromkeys([*s.get("revisar", []), *riesgos_back])),
     )
 
 
@@ -425,6 +426,18 @@ def analizar(entrada: Entrada) -> Salida:
     return _armar_salida(entrada, v, clima, sat, cob)
 
 
+def _confianza_agua(indicadores: dict[str, Indicador], contraste: correccion.ResultadoContraste) -> dict:
+    """Con el pluviómetro a más de 15 % de NASA, los indicadores de agua pasan a confianza baja (RF15)."""
+    if contraste.confianza_agua != "baja":
+        return dict(indicadores)
+    return {
+        k: ind.model_copy(update={"confianza": "baja", "motivo": contraste.motivo_agua})
+        if k in correccion.INDICADORES_AGUA and ind.confianza != "sin_dato"
+        else ind
+        for k, ind in indicadores.items()
+    }
+
+
 def _armar_salida(
     entrada: Entrada, v: dict, clima: clima_indicadores.ResultadoClima, sat: dict[str, dict], cob: dict
 ) -> Salida:
@@ -448,8 +461,12 @@ def _armar_salida(
         faltan.append(resultado["estrategias"][0]["falta"][0])
     vacios_back = list(dict.fromkeys(faltan))
 
+    # RF15: las mediciones del productor van al lado de NASA; no cambian ningún puntaje.
+    contraste = correccion.contrastar(entrada.mediciones_propias, clima)
+    faltan += contraste.faltantes
+
     lista = resultado["estrategias"]
-    estrategias = [_estrategia(s, lista[0], vacios_back) for s in lista]
+    estrategias = [_estrategia(s, lista[0], vacios_back, contraste.riesgos) for s in lista]
     ch = resultado.get("choque") or {}
 
     faltan += [
@@ -457,8 +474,6 @@ def _armar_salida(
         "Serie por campaña",
         "Capa de erosión",
     ]
-    if entrada.mediciones_propias.lluvia_anual_mm is not None:
-        faltan.append("Contraste con tus mediciones de lluvia: en preparación")
 
     return Salida(
         lote=LoteSalida(
@@ -469,8 +484,12 @@ def _armar_salida(
             cobertura_agricola_pct=cultivo_pct,
         ),
         visto_por_satelite=visto,
-        indicadores={**clima.indicadores, "et_real_anual": et_real, "meses_cobertura_baja": cobertura_baja},
-        contraste_mediciones=[],
+        indicadores={
+            **_confianza_agua(clima.indicadores, contraste),
+            "et_real_anual": et_real,
+            "meses_cobertura_baja": cobertura_baja,
+        },
+        contraste_mediciones=contraste.contraste,
         clima_celda=clima.clima_celda or ClimaCelda(bbox=(0, 0, 0, 0), posicion_lote="sin dato"),
         clima_mensual=clima.clima_mensual,
         tipos_de_anio=clima.tipos_de_anio,

@@ -320,3 +320,36 @@ def test_ndvi_se_pide_una_sola_vez_si_coincide_con_power(monkeypatch):
     s = servicio.analizar(Entrada.model_validate(ENTRADA))
     assert CAMPANAS_NDVI_PEDIDAS == [2025]
     assert s.visto_por_satelite.campana == "2025/26"
+
+
+# --- Contraste con las mediciones del productor (RF15) ----------------------
+
+
+def test_pluviometro_que_difiere_baja_la_confianza_del_agua_sin_cambiar_puntajes(monkeypatch):
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado({}))
+    sin = servicio.analizar(Entrada.model_validate(ENTRADA))
+    entrada = copy.deepcopy(ENTRADA)
+    entrada["mediciones_propias"] = {"lluvia_anual_mm": 650, "anios_registro": 10, "materia_organica_pct": 2.8}
+    s = servicio.analizar(Entrada.model_validate(entrada))
+
+    lluvia, mo = s.contraste_mediciones
+    assert lluvia.diferencia_pct == -21 and lluvia.confianza_resultante == "baja"
+    assert mo.indicador == "materia_organica" and mo.valor_nasa is None
+    for k in ("lluvia_anual", "balance_anual"):
+        assert s.indicadores[k].confianza == "baja" and "21 %" in s.indicadores[k].motivo
+        assert s.indicadores[k].valor == sin.indicadores[k].valor
+    assert s.indicadores["et0_anual"].confianza == sin.indicadores["et0_anual"].confianza
+    a, c = s.estrategias[1], s.estrategias[3]
+    assert any("difiere 21 %" in r for r in a.riesgos) and a.riesgos[0] == "Secado ~30 días antes de la siembra"
+    assert c.riesgos == []  # descartada: solo el motivo
+    for e_sin, e_con in zip(sin.estrategias, s.estrategias):  # ningún puntaje cambia
+        assert e_con.puntos == e_sin.puntos and e_con.cercania == e_sin.cercania
+    assert not any("en preparación" in f and "Contraste" in f for f in s.informacion_falta)
+
+
+def test_pluviometro_que_coincide_no_toca_la_confianza():
+    entrada = copy.deepcopy(ENTRADA)
+    entrada["mediciones_propias"] = {"lluvia_anual_mm": 800}
+    s = servicio.analizar(Entrada.model_validate(entrada))
+    assert s.contraste_mediciones[0].confianza_resultante == "alta"
+    assert s.indicadores["lluvia_anual"].confianza == "media"
