@@ -32,7 +32,7 @@ import math
 from dataclasses import dataclass, field
 
 from app.api.contrato import ClimaCelda, ClimaMensual, Indicador, TiposDeAnio
-from app.clima.power import FUENTE, LAT_DEMO, LON_DEMO, RESOLUCION, SeriePower, celda_power, pedir_power
+from app.clima.power import CAMPANAS_MAX, FUENTE, LAT_DEMO, LON_DEMO, RESOLUCION, SeriePower, celda_power, pedir_power
 
 TIPOS = ("seco", "normal", "humedo")
 MESES = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto",
@@ -261,6 +261,11 @@ def calcular(serie: SeriePower, lat: float, lon: float) -> ResultadoClima:
         tipos = _cortar_terciles(campanas)
         mensual = _clima_mensual(serie, campanas)
         faltantes = []
+        if len(campanas) < CAMPANAS_MAX:
+            # POWER descarta las campañas con algún mes sin dato (−999): la serie es más corta y las
+            # probabilidades se cuentan sobre menos años. Se dice, no se rellena.
+            faltantes.append(f"Clima de NASA POWER: {len(campanas)} campañas completas de julio a junio, no "
+                             f"{CAMPANAS_MAX} ({serie.periodo}); las campañas con meses sin dato se descartan")
         if tipos.metodo == "terciles_lluvia":
             faltantes.append("ET0 de Hargreaves: los tipos de año se cortaron por lluvia, no por balance")
         return ResultadoClima(

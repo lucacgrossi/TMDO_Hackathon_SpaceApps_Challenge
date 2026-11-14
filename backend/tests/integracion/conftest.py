@@ -59,11 +59,22 @@ def planetary_computer(estado: dict):
     """Planetary Computer falso con las respuestas reales del lote de ejemplo.
 
     estado["caido"] = True → todo responde 503 (simula la caída del servicio).
+    estado["caidas"] = {"nasadem", ...} → solo esas colecciones responden 503.
+    estado["sin_escenas"] = {"hls2-s30", ...} → la búsqueda STAC de esas colecciones vuelve vacía.
+    estado["worldcover"] = dict → reemplaza la respuesta de estadísticas de WorldCover.
     """
+
+    def coleccion_de(request: httpx.Request) -> str:
+        if request.url.path.endswith("/stac/v1/search"):
+            return json.loads(request.content)["collections"][0]
+        return request.url.params.get("collection", "")
 
     def responder(request: httpx.Request) -> httpx.Response:
         if estado.get("caido"):
             RED["pc_caido"] += 1
+            return httpx.Response(503)
+        if coleccion_de(request) in estado.get("caidas", ()):
+            RED[f"pc_caido:{coleccion_de(request)}"] += 1
             return httpx.Response(503)
         ruta, p = request.url.path, request.url.params
         if "/item/bbox/" in ruta:  # rasters sobre la grilla común del lote (armonización)
@@ -72,7 +83,8 @@ def planetary_computer(estado: dict):
             if coleccion == "nasadem":
                 return httpx.Response(200, content=(FIX_SAT / "grilla_nasadem.npy").read_bytes())
             if coleccion == "esa-worldcover":
-                return httpx.Response(200, content=(FIX_SAT / "grilla_worldcover.npy").read_bytes())
+                return httpx.Response(200, content=estado.get("grilla_worldcover")
+                                      or (FIX_SAT / "grilla_worldcover.npy").read_bytes())
             if coleccion.startswith("hls2-"):
                 return httpx.Response(200, content=_hls_grilla())
             if p.get("assets") == ndvi.MODIS_FIABILIDAD:
@@ -83,11 +95,12 @@ def planetary_computer(estado: dict):
             cuerpo = json.loads(request.content)
             coleccion = cuerpo["collections"][0]
             RED[f"pc_busqueda:{coleccion}"] += 1
-            if coleccion not in BUSQUEDAS:
+            if coleccion not in BUSQUEDAS or coleccion in estado.get("sin_escenas", ()):
                 return httpx.Response(200, json={"features": []})
             items = _leer(BUSQUEDAS[coleccion])
-            if coleccion.startswith("hls2-") and cuerpo.get("datetime"):
-                # Como el STAC real: la escena cae dentro del mes pedido (se conserva el día).
+            if coleccion.startswith(("hls2-", "modis-13Q1")) and cuerpo.get("datetime"):
+                # Como el STAC real: la escena (o el compuesto de MODIS) cae dentro del mes pedido
+                # (se conserva el día).
                 mes = cuerpo["datetime"][:7]
                 for it in items:
                     for k in ("datetime", "start_datetime", "end_datetime"):
@@ -98,7 +111,7 @@ def planetary_computer(estado: dict):
             coleccion = p.get("collection", "")
             RED[f"pc_estadisticas:{coleccion}"] += 1
             if coleccion == "esa-worldcover":
-                return httpx.Response(200, json=_leer("worldcover_stats.json"))
+                return httpx.Response(200, json=estado.get("worldcover") or _leer("worldcover_stats.json"))
             if coleccion.startswith("hls2-"):
                 return httpx.Response(200, json=_leer("ndvi_hls_stats.json"))
             if p.get("assets") == ndvi.MODIS_FIABILIDAD:
@@ -138,7 +151,7 @@ def red_nasa(monkeypatch):
         pedido = httpx.Request("GET", url, params=params)
         if estado["power_caido"]:
             raise httpx.ConnectError("sin red (simulado)", request=pedido)
-        return httpx.Response(200, json=datos_power, request=pedido)
+        return httpx.Response(200, json=estado.get("power_datos") or datos_power, request=pedido)
 
     monkeypatch.setattr(power.httpx, "get", power_get)
     monkeypatch.setattr(pc, "_cliente", planetary_computer(estado["pc"]))
