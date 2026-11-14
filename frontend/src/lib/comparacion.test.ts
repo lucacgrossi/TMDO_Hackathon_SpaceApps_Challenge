@@ -56,10 +56,10 @@ describe("cambiosDesdeLaComparacion", () => {
   });
 
   it("mediciones: pluviómetro o materia orgánica, también al borrarlas", () => {
-    expect(cambiosDesdeLaComparacion(base, con({ mediciones: { lluviaAnualMm: 650, materiaOrganicaPct: null } }))).toEqual([
+    expect(cambiosDesdeLaComparacion(base, con({ mediciones: { ...base.mediciones, lluviaAnualMm: 650, materiaOrganicaPct: null } }))).toEqual([
       "mediciones",
     ]);
-    const foto = con({ mediciones: { lluviaAnualMm: null, materiaOrganicaPct: 2.4 } });
+    const foto = con({ mediciones: { ...base.mediciones, lluviaAnualMm: null, materiaOrganicaPct: 2.4 } });
     expect(cambiosDesdeLaComparacion(foto, base)).toEqual(["mediciones"]);
   });
 
@@ -81,7 +81,7 @@ describe("cambiosDesdeLaComparacion", () => {
   });
 
   it("varios cambios, siempre en el mismo orden", () => {
-    const actuales = con({ mediciones: { lluviaAnualMm: 650, materiaOrganicaPct: null }, verano: "maiz", modoLote: "dibujo" });
+    const actuales = con({ mediciones: { ...base.mediciones, lluviaAnualMm: 650, materiaOrganicaPct: null }, verano: "maiz", modoLote: "dibujo" });
     expect(cambiosDesdeLaComparacion(base, actuales)).toEqual(["lote", "rotacion", "mediciones"]);
   });
 });
@@ -117,7 +117,7 @@ describe("useComparacion · foto de las entradas", () => {
 
   it("volver a comparar saca una foto nueva", () => {
     useVista.getState().abrirHoja();
-    useEntradas.getState().cambiar({ mediciones: { lluviaAnualMm: 620, materiaOrganicaPct: null } });
+    useEntradas.getState().cambiar({ mediciones: { ...base.mediciones, lluviaAnualMm: 620, materiaOrganicaPct: null } });
     useComparacion.getState().volverAComparar();
     expect(useComparacion.getState().foto?.mediciones.lluviaAnualMm).toBe(620);
   });
