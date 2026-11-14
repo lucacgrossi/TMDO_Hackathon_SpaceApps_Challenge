@@ -1,0 +1,39 @@
+# Qué NO se sube a Cloud Run con `gcloud run deploy --source .` (desde backend/).
+# Con este archivo, gcloud no lee el .gitignore: todo lo que haga falta excluir va acá.
+# Las rutas con "/" adelante son relativas a backend/.
+# No excluir app/demo/ ni app/api/mock_rio_cuarto.json: son el respaldo de la demo sin internet.
+
+.gcloudignore
+.git/
+.gitignore
+.gitattributes
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Solo para desarrollo y CI
+/tests/
+/scripts/
+/requirements-dev.txt
+# Configuración de ruff y pytest; se excluye para que el buildpack instale solo con requirements.txt
+/pyproject.toml
+/*.md
+
+# Datos crudos y pesados
+/data/
+*.hdf
+*.h5
+*.he5
+*.nc
+*.nc4
+*.tif
+*.zarr/
+
+# Secretos (van como variables de entorno de Cloud Run)
+.env
+.env.*

@@ -111,7 +111,9 @@ def test_salida_valida_con_4_columnas():
     Salida.model_validate(s.model_dump())
     assert [e.id for e in s.estrategias] == ["actual", "A", "B", "C"]
     assert s.es_mock is False
-    assert s.serie_anual is None
+    assert s.serie_anual is not None and len(s.serie_anual.campanas) == 30
+    assert s.serie_anual.periodo == s.periodo_clima
+    assert not any(f.startswith("Serie por campaña") for f in s.informacion_falta)
     assert s.contraste_mediciones == []
     assert s.periodo_clima == "1996/97 a 2025/26"
     assert s.clima_mensual.n_anios == 30

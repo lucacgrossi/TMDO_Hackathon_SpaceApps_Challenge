@@ -51,6 +51,7 @@ from app.clima import correccion
 from app.clima import indicadores as clima_indicadores
 from app.clima import power
 from app.clima import probabilidad as clima_probabilidad
+from app.clima import serie as clima_serie
 from app.satelite import cobertura, elevacion, et, lote, ndvi
 
 log = logging.getLogger("fieldshift.servicio")
@@ -514,8 +515,10 @@ def _armar_salida(
     estrategias = [_estrategia(s, lista[0], vacios_back, contraste.riesgos, probs.get(s["id"])) for s in lista]
     ch = resultado.get("choque") or {}
 
+    serie_anual = clima_serie.serie_anual(clima)
+    if serie_anual is None:
+        faltan.append("Serie por campaña: no se pudo armar con las campañas de NASA POWER")
     faltan += [
-        "Serie por campaña",
         "Capa de erosión",
     ]
 
@@ -537,7 +540,7 @@ def _armar_salida(
         clima_celda=clima.clima_celda or ClimaCelda(bbox=(0, 0, 0, 0), posicion_lote="sin dato"),
         clima_mensual=clima.clima_mensual,
         tipos_de_anio=clima.tipos_de_anio,
-        serie_anual=None,
+        serie_anual=serie_anual,
         capas=Capas(
             ndvi_mensual=capas_ndvi,
             no_disponibles=["erosion", "agua_regional_mensual", "heladas_regional_mensual"],
