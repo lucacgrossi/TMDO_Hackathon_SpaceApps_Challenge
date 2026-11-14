@@ -1,8 +1,9 @@
 import ClaseBody from "@/components/comunes/ClaseBody";
 import Toast from "@/components/comunes/Toast";
+// Persona 5: la hoja de resultados. El import va acá, lejos de los de la persona 4, para no chocar en los merges
+import HojaComparacion from "@/components/resultados/HojaComparacion";
 import PanelEntradas from "@/components/entradas/PanelEntradas";
 import BarraDibujo from "@/components/mapa/BarraDibujo";
-import HojaComparacion from "@/components/resultados/HojaComparacion";
 import MapaDinamico from "@/components/mapa/MapaDinamico";
 
 /**
