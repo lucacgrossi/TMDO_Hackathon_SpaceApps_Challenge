@@ -24,6 +24,13 @@ import MarcaUbicacion from "./MarcaUbicacion";
 const CENTRO_DEMO: [number, number] = [-33.2476, -64.2325];
 
 /**
+ * Zoom inicial alejado (11): en el paso 1 el mapa "espera atrás" y al pasar al
+ * paso 2 vuela hasta el lote (arranque del prototipo final, ~línea 490). Si
+ * arrancara cerca, no habría vuelo que mostrar.
+ */
+const ZOOM_INICIAL = 11;
+
+/**
  * Zoom máximo del mapa. Esri tiene imagen hasta 18 en el lote demo, pero no en
  * todas las zonas: por eso las capas piden teselas reales hasta 17
  * (maxNativeZoom) y en 18 Leaflet agranda las de 17 en vez de mostrar
@@ -65,7 +72,7 @@ export default function Mapa() {
       <div id="map" aria-label="Mapa satelital">
         <MapContainer
           center={CENTRO_DEMO}
-          zoom={15}
+          zoom={ZOOM_INICIAL}
           minZoom={5}
           maxZoom={ZOOM_MAX}
           // Zoom en cuartos y rueda más suave: permite encuadrar el lote justo,

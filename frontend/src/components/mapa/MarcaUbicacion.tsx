@@ -2,15 +2,17 @@
 
 import L from "leaflet";
 import { Marker } from "react-leaflet";
+import { useMapa } from "@/lib/mapa";
 import { useEntradas } from "@/lib/store";
 
 /**
  * Marca "Tu lote está acá": el punto que eligió el productor con el buscador
  * o el GPS (BuscadorLote solo escribe `ubicacion` en el estado; el mapa se
- * encarga de mostrarla). Sale de `showTarget()` del prototipo (~línea 137).
+ * encarga de mostrarla). Sale de `showTarget()` del prototipo (~línea 150).
  *
- * Solo se ve cuando el modo es "dibujo": es la guía para marcar las esquinas.
- * Con el lote de ejemplo no tiene sentido mostrarla.
+ * Cuándo se ve lo decide `useMapa.marcaVisible`, no el modo: en el prototipo
+ * final la marca aparece recién cuando el mapa LLEGA al lugar (no durante el
+ * vuelo del paso 1 al 2) y se va al terminar o cancelar el dibujo (endDraw).
  */
 
 // Ícono hecho con HTML (divIcon) para reusar la clase `.tmark` del prototipo
@@ -24,8 +26,8 @@ const icono = L.divIcon({
 
 export default function MarcaUbicacion() {
   const ubicacion = useEntradas((s) => s.ubicacion);
-  const modoLote = useEntradas((s) => s.modoLote);
-  if (!ubicacion || modoLote !== "dibujo") return null;
+  const marcaVisible = useMapa((s) => s.marcaVisible);
+  if (!ubicacion || !marcaVisible) return null;
   return (
     <Marker
       position={[ubicacion.lat, ubicacion.lng]}
