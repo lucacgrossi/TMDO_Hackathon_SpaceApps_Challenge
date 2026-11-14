@@ -141,3 +141,66 @@ def test_grilla_sale_del_ndvi_si_faltan_las_otras():
     mapas = [_mapa("ndvi", GRILLA) for _ in MESES]
     r = capas.armar({**_ndvi(MESES), "mapas": mapas, "grilla": GRILLA}, None)
     assert r["grilla"] == GRILLA and r["ndvi_mensual"][0]["mapa"]
+
+
+def _capas_px(pendiente: float, meses: float, poligono=None, grilla_de=None):
+    """Capas reales (raster.capa) de pendiente y meses bajos constantes sobre la grilla de un lote."""
+    import numpy as np
+
+    from app.satelite import escalas, grilla, raster
+    from app.satelite.lote import LOTE_EJEMPLO
+    poligono = poligono or LOTE_EJEMPLO
+    g = grilla_de or grilla.crear(poligono)
+    m = grilla.mascara(g, poligono)
+    comun = {"grilla": g, "mascara": m, "fuente": "x", "resolucion_nativa": "30 m"}
+    pend = raster.capa(id="pendiente", titulo="p", unidad="%", array=np.full((g.alto, g.ancho), pendiente),
+                       escala=escalas.PENDIENTE, factor=0.01, confianza="media", **comun)
+    bajos = raster.capa(id="meses_bajos", titulo="m", unidad="meses", array=np.full((g.alto, g.ancho), meses),
+                        escala=escalas.MESES_BAJOS, factor=1.0, confianza="alta", **comun)
+    return pend, bajos, g.a_dict(), int(m.sum())
+
+
+LOTE_L = {"type": "Polygon", "coordinates": [[
+    [-64.250, -33.248], [-64.244, -33.248], [-64.244, -33.254], [-64.235, -33.254],
+    [-64.235, -33.260], [-64.250, -33.260], [-64.250, -33.248]]]}
+
+
+def test_erosion_por_pixel_en_l():
+    """Pendiente 2 % y 3 meses pelados en todo un lote en L → 6 en cada píxel, y el valor del lote es 6."""
+    pend, bajos, g, pixeles = _capas_px(2.0, 3.0, LOTE_L)
+    elev = {**_pendiente(), "mapa": pend, "grilla": g}
+    r = capas.armar({**_ndvi(MESES), "meses_bajos_mapa": bajos, "grilla": g}, elev)
+    Capas(**r)
+    ero, mapa = r["erosion"], r["erosion_mapa"]
+    assert ero["valor"] == mapa["resumen"]["media"] == mapa["resumen"]["valor_lote"] == 6.0
+    assert mapa["resumen"]["pixeles"] == pixeles and mapa["bounds"] == g["bounds"]
+    assert ero["metodo"] == "por_pixel" and ero["valor_con_pendiente_general"] == 1.8
+    assert ero["confianza"] == "media" and "no es pérdida de suelo" in ero["nota"]
+    assert ero["meses_bajos"] == [6, 8, 9] and r["erosion_motivo"] is None and r["no_disponibles"] == []
+    assert mapa["id"] == "erosion" and mapa["escala"]["cortes"] == [0.0, 2.0, 5.0, 10.0, 20.0]
+    Indicador(**{k: v for k, v in ero.items() if k in Indicador.model_fields})
+
+
+def test_erosion_sin_meses_bajos_por_pixel_usa_el_lote():
+    pend, _, g, _ = _capas_px(2.0, 3.0)
+    ndvi_r = {**_ndvi(MESES), "meses_bajos_mapa": None, "meses_bajos_motivo": "x", "grilla": g}
+    r = capas.armar(ndvi_r, {**_pendiente(), "mapa": pend, "grilla": g})
+    assert r["erosion"]["valor"] == 1.8 and r["erosion"]["metodo"] == "lote" and r["erosion_mapa"] is None
+    assert r["no_disponibles"] == ["erosion_mapa"] and r["erosion_motivo"]
+
+
+def test_erosion_capas_en_grillas_distintas_usa_el_lote():
+    from app.satelite import grilla
+    from app.satelite.lote import LOTE_EJEMPLO
+    pend, _, g, _ = _capas_px(2.0, 3.0)
+    otra = grilla.crear(LOTE_EJEMPLO).ampliada(1)
+    _, bajos, _, _ = _capas_px(2.0, 3.0, grilla_de=otra)
+    r = capas.armar({**_ndvi(MESES), "meses_bajos_mapa": bajos, "grilla": g}, {**_pendiente(), "mapa": pend, "grilla": g})
+    assert r["erosion"]["metodo"] == "lote" and r["erosion_mapa"] is None and "grilla" in r["erosion_motivo"]
+
+
+def test_erosion_sin_valores_de_pendiente_usa_el_lote():
+    pend, bajos, g, _ = _capas_px(2.0, 3.0)
+    r = capas.armar({**_ndvi(MESES), "meses_bajos_mapa": bajos, "grilla": g},
+                    {**_pendiente(), "mapa": {**pend, "valores": None}, "grilla": g})
+    assert r["erosion"]["metodo"] == "lote" and r["erosion_mapa"] is None

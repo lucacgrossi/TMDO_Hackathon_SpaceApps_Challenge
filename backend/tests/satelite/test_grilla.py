@@ -80,3 +80,10 @@ def test_ampliada_y_recortar():
     assert r.shape == (g.alto, g.ancho) and r[0, 0] == arr[5, 5]
     # los centros de la grilla recortada coinciden con los de la original
     assert np.allclose(a.lons()[5:-5], g.lons()) and np.allclose(a.lats()[5:-5], g.lats())
+
+
+def test_desde_dict_ida_y_vuelta():
+    for poli in (LOTE_EJEMPLO, LOTE_L):
+        g = grilla.crear(poli)
+        h = grilla.desde_dict(g.a_dict())
+        assert h.a_dict() == g.a_dict() and h.segundos == g.segundos and h.resolucion == g.resolucion

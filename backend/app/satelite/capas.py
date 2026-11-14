@@ -14,9 +14,12 @@ Planetary Computer.
   Planetary Computer con ese `item`). Un mes con MODIS de respaldo aparece solo si tiene raster
   (sus teselas de PC no sirven con la expresión de HLS). Un mes sin nada va en `None`: el front
   muestra ahí la capa MODIS de GIBS de esa fecha, como el prototipo.
-- `erosion`: pendiente general del lote × meses con cobertura baja (NDVI < umbral). Es un valor
-  del lote con forma de `Indicador` + el detalle para la línea de tiempo. **Formato propuesto,
-  a acordar con Front 1 (PLAN.md §6).** Es un índice relativo: no es pérdida de suelo (t/ha).
+- `erosion` y `erosion_mapa` (paso 5): por píxel, pendiente del píxel × meses con cobertura baja
+  (NDVI < umbral) del píxel, sobre la grilla común. El valor del lote es la **media de la capa dentro
+  del lote**: se ve dónde está el riesgo y el número cierra con el mapa. Si falta alguno de los dos
+  rasters, el valor sale como antes (pendiente general × meses bajos del lote) y no hay capa. Es un
+  valor con forma de `Indicador` + el detalle para la línea de tiempo. Es un índice relativo: no es
+  pérdida de suelo (t/ha).
 """
 from __future__ import annotations
 
@@ -24,11 +27,14 @@ import concurrent.futures as cf
 import sys
 import time
 
-from app.satelite import cobertura, elevacion, ndvi
+import numpy as np
+
+from app.satelite import cobertura, elevacion, escalas, grilla, ndvi, raster
 from app.satelite.lote import LOTE_EJEMPLO
 
 UNIDAD_EROSION = "% × meses"
 RESOLUCION_EROSION = "valor del lote (pendiente 30 m, NDVI 30 m)"
+FACTOR_EROSION = 0.01
 # Orden de la confianza, de peor a mejor: la del índice es la peor de sus dos datos.
 ORDEN_CONFIANZA = ("sin_dato", "baja", "media", "alta")
 
@@ -65,7 +71,10 @@ def ndvi_mensual(visto_por_satelite: dict | None, mapas: list | None = None,
 
 def erosion(visto_por_satelite: dict | None, cobertura_baja: dict | None,
             pendiente: dict | None) -> dict | None:
-    """Pendiente general (%) × meses con NDVI bajo. None si falta alguno de los dos datos."""
+    """Valor del lote: pendiente general (%) × meses con NDVI bajo. None si falta alguno de los dos.
+
+    Es el método de respaldo: con los dos rasters, `erosion_por_pixel` lo reemplaza.
+    """
     pendiente = pendiente or {}
     cobertura_baja = cobertura_baja or {}
     pend, meses_bajos = pendiente.get("valor"), cobertura_baja.get("valor")
@@ -94,7 +103,57 @@ def erosion(visto_por_satelite: dict | None, cobertura_baja: dict | None,
         "pendiente_pct": pend,
         "meses_cobertura_baja": meses_bajos,
         "meses_bajos": indices_bajos,
+        "metodo": "lote",
     }
+
+
+def _decodificar(capa: dict) -> np.ndarray:
+    return raster.descuantizar(capa["valores"], capa["factor"], capa["nodata"], capa["alto"], capa["ancho"])
+
+
+def erosion_por_pixel(base: dict | None, pendiente_mapa: dict | None, meses_bajos_mapa: dict | None,
+                      grilla_lote: dict | None) -> tuple[dict | None, dict | None, str | None]:
+    """(erosion, erosion_mapa, motivo): pendiente del píxel × meses bajos del píxel, y su media.
+
+    base: el `erosion()` del lote (para la fuente, los años y la línea de tiempo). Si falta algo,
+    devuelve (base, None, motivo). Nunca lanza.
+    """
+    if not base:
+        return base, None, "Sin pendiente o sin NDVI del lote"
+    capas_px = (pendiente_mapa, meses_bajos_mapa)
+    if not all(c and c.get("valores") for c in capas_px) or not grilla_lote:
+        return base, None, "Faltan la pendiente o los meses bajos por píxel sobre la grilla"
+    if not all(_misma_grilla(c, grilla_lote) for c in capas_px):
+        return base, None, "La pendiente y los meses bajos por píxel no están en la misma grilla"
+    try:
+        g = grilla.desde_dict(grilla_lote)
+        ero = _decodificar(pendiente_mapa) * _decodificar(meses_bajos_mapa)
+        validos = np.isfinite(ero)          # fuera del lote los dos rasters vienen en nodata
+        orden = ORDEN_CONFIANZA
+        confianza = min((base["confianza"], pendiente_mapa.get("confianza", "sin_dato"),
+                         meses_bajos_mapa.get("confianza", "sin_dato")),
+                        key=lambda c: orden.index(c) if c in orden else 0)
+        res = raster.resumen(ero, validos, decimales=1)
+        if res is None:
+            return base, None, "Sin píxeles con pendiente y NDVI a la vez"
+        nota = (f"Media dentro del lote de pendiente del píxel × meses con NDVI < "
+                f"{_numero(ndvi.UMBRAL_NDVI_BAJO)} del píxel ({res['pixeles']} píxeles de la grilla de "
+                f"{g.resolucion}, campaña {base.get('anios')}). Índice relativo para comparar lotes, "
+                "zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases propuesta, a "
+                "validar por la persona 3")
+        mapa = raster.capa(
+            id="erosion", titulo="Riesgo de erosión (índice)", unidad=UNIDAD_EROSION, fuente=base["fuente"],
+            resolucion_nativa="30 m (pendiente NASADEM × NDVI HLS)", grilla=g, array=ero, mascara=validos,
+            escala=escalas.EROSION, factor=FACTOR_EROSION, confianza=confianza, nota=nota,
+            campana=base.get("anios"), decimales=1, valor_lote=res["media"])
+    except Exception as e:  # noqa: BLE001 — nunca propagar: queda el valor del lote
+        return base, None, f"No se pudo armar la erosión por píxel ({type(e).__name__})"
+    if mapa is None:
+        return base, None, "Sin píxeles con pendiente y NDVI a la vez"
+    por_pixel = {**base, "valor": res["media"], "confianza": confianza,
+                 "resolucion": f"media por píxel en la grilla de {g.resolucion}; pendiente y NDVI a 30 m",
+                 "nota": nota, "metodo": "por_pixel", "valor_con_pendiente_general": base["valor"]}
+    return por_pixel, mapa, None
 
 
 def _misma_grilla(capa: dict, grilla: dict) -> bool:
@@ -135,7 +194,13 @@ def armar(resultado_ndvi: dict | None, resultado_elevacion: dict | None,
         }
     except Exception:  # noqa: BLE001 — nunca propagar
         capas = {"ndvi_mensual": [None] * 12, "erosion": None}
+    capas["erosion"], capas["erosion_mapa"], motivo_erosion = erosion_por_pixel(
+        capas["erosion"], r.get("pendiente_mapa"), resultado_ndvi.get("meses_bajos_mapa"), r.get("grilla"))
+    capas["erosion_motivo"] = motivo_erosion
     capas["no_disponibles"] = [] if capas["erosion"] else ["erosion"]
+    # La capa se pidió solo si `ndvi` ya devuelve los meses bajos por píxel (paso 5).
+    if capas["erosion"] and not capas["erosion_mapa"] and "meses_bajos_mapa" in resultado_ndvi:
+        capas["no_disponibles"].append("erosion_mapa")
     if not any(capas["ndvi_mensual"]):
         capas["no_disponibles"].append("ndvi_mensual")
     elif "mapas" in resultado_ndvi and not any(c and c.get("mapa") for c in capas["ndvi_mensual"]):
@@ -169,7 +234,7 @@ if __name__ == "__main__":
     poligono = json.loads(sys.argv[1]) if len(sys.argv) > 1 else LOTE_EJEMPLO
     t0 = time.perf_counter()
     resultado = calcular(poligono)
-    for clave in ("pendiente_mapa", "cultivo_mapa"):
+    for clave in ("pendiente_mapa", "cultivo_mapa", "erosion_mapa"):
         resultado[clave] = _corto(resultado.get(clave))
     for mes in resultado["ndvi_mensual"]:
         if mes and mes.get("mapa"):

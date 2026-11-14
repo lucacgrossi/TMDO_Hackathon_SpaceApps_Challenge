@@ -40,3 +40,19 @@ CULTIVO = {
 def copia(escala: dict) -> dict:
     """Copia de una escala para poner en una capa (que nadie modifique la definición compartida)."""
     return {k: list(v) for k, v in escala.items()}
+
+# Meses con cobertura baja por píxel (NDVI < umbral), de 0 a 12 en la campaña.
+MESES_BAJOS = {
+    "cortes": [0.0, 1.0, 3.0, 5.0, 7.0],
+    "colores": ["#1B5E2E", "#94AF63", "#E6D8AE", "#CDA35F", "#8D5524"],
+    "etiquetas": ["0 meses", "1–2 meses", "3–4 meses", "5–6 meses", "≥ 7 meses"],
+}
+
+# Erosión (índice relativo, % × meses): pendiente del píxel × meses con cobertura baja del píxel.
+# Misma rampa que la pendiente (plan §3.3). Cortes PROPUESTOS por Back 2: 1 % de pendiente con 2, 5,
+# 10 y 20 meses pelados; la escala de clases la define la persona 3 (plan §10).
+EROSION = {
+    "cortes": [0.0, 2.0, 5.0, 10.0, 20.0],
+    "colores": list(PENDIENTE["colores"]),
+    "etiquetas": ["< 2", "2–5", "5–10", "10–20", "≥ 20"],
+}

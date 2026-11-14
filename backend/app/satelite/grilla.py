@@ -83,6 +83,13 @@ class Grilla:
         return {"bounds": self.bounds, "ancho": self.ancho, "alto": self.alto, "paso": self.paso}
 
 
+def desde_dict(d: dict) -> Grilla:
+    """La grilla a partir de su forma `{bounds, ancho, alto, paso}` (la que viaja en las capas)."""
+    (sur, oeste), (norte, este) = d["bounds"]
+    return Grilla(oeste, sur, este, norte, int(d["ancho"]), int(d["alto"]),
+                  max(1, round(float(d["paso"]) * SEGUNDOS_POR_GRADO)))
+
+
 def recortar(array: np.ndarray, n: int) -> np.ndarray:
     """Saca n píxeles de cada borde (lo inverso de `Grilla.ampliada`)."""
     return array[n:array.shape[0] - n, n:array.shape[1] - n] if n else array
