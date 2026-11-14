@@ -26,9 +26,8 @@ export default function HojaComparacion() {
   const [fecha, setFecha] = useState<Date | null>(null);
   const titulo = useRef<HTMLHeadingElement>(null);
 
+  // body.sheet-open (subir los controles del mapa) lo pone ClaseBody de la persona 4, solo en compu
   useEffect(() => {
-    // body.sheet-open sube los controles del mapa por encima de la hoja (CSS del prototipo)
-    document.body.classList.toggle("sheet-open", abierta);
     if (!abierta) return;
     setFecha(new Date());
     titulo.current?.focus();
