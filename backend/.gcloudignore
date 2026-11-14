@@ -6,6 +6,7 @@
 .gcloudignore
 .git/
 .gitignore
+.gitattributes
 
 # Python
 __pycache__/
