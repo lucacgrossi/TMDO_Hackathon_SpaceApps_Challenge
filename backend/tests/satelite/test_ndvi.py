@@ -53,12 +53,15 @@ def test_lote_demo_hls(monkeypatch):
 
     assert visto["campana"] == "2024/25" and visto["umbral"] == 0.3
     assert len(visto["meses"]) == 12 and all(visto["meses"])
-    julio = visto["meses"][0]
+    julio = visto["meses"][6]
     assert CLAVES_MES <= julio.keys()
     assert julio["mes"] == "2024-07" and julio["fecha"] == "2024-07-27"
     assert julio["ndvi_medio"] == 0.264 and julio["pixeles"] == 1092
     assert julio["coleccion"] == "hls2-s30" and julio["nubes_escena"] == 0.0
-    assert [m["mes"] for m in visto["meses"]][6] == "2025-01"  # índice 0 = julio, 6 = enero
+    # Índice 0 = enero (como el front); la campaña 2024/25 va de jul-2024 a jun-2025.
+    assert [m["mes"] for m in visto["meses"]] == [
+        "2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06",
+        "2024-07", "2024-08", "2024-09", "2024-10", "2024-11", "2024-12"]
     assert visto["meses_ndvi_bajo"] == 12 and visto["faltantes"] == []
 
     assert CLAVES <= ind.keys()
@@ -70,13 +73,13 @@ def test_mes_cae_a_modis(monkeypatch):
     """Julio sin escena HLS limpia → MODIS de respaldo (0,31) y se dice en la fuente."""
     monkeypatch.setattr(pc, "_cliente", _servidor(hls_vacio=("2024-07",)))
     r = ndvi.calcular(LOTE_EJEMPLO, campana=2024)
-    julio = r["visto_por_satelite"]["meses"][0]
+    julio = r["visto_por_satelite"]["meses"][6]
 
     assert julio["coleccion"] == ndvi.MODIS_COLECCION
     assert julio["ndvi_medio"] == 0.311 and julio["pixeles"] == 48
     assert julio["nubes_escena"] is None and julio["fecha"].startswith("2024-07")
     assert "respaldo" in julio["fuente"] and "250 m" in julio["fuente"]
-    assert r["visto_por_satelite"]["meses"][1]["coleccion"] == "hls2-s30"
+    assert r["visto_por_satelite"]["meses"][7]["coleccion"] == "hls2-s30"
     # Con MODIS, 0,311 no pasa el umbral: julio deja de contar como mes pelado.
     assert r["visto_por_satelite"]["meses_ndvi_bajo"] == 11
     ind = r["meses_cobertura_baja"]
@@ -92,7 +95,7 @@ def test_modis_con_nubes_se_descarta(monkeypatch):
     r = ndvi.calcular(LOTE_EJEMPLO, campana=2024)
     visto = r["visto_por_satelite"]
 
-    assert visto["meses"][0] is None
+    assert visto["meses"][6] is None
     assert visto["faltantes"][0]["mes"] == "2024-07" and "Julio 2024" in visto["faltantes"][0]["motivo"]
     assert r["meses_cobertura_baja"]["valor"] == 11 and r["meses_cobertura_baja"]["confianza"] == "baja"
 

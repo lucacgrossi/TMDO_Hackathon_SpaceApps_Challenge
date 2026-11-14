@@ -41,10 +41,11 @@ INTENTOS_MODIS = 2
 # Lote "pelado" o casi: NDVI medio < 0,3 (regla del prototipo, la valida la persona 3).
 UMBRAL_NDVI_BAJO = 0.3
 
-# Orden de los 12 meses en `meses`: campaña de julio a junio, índice 0 = julio.
-# TODO: todavía no está acordado con Back 1, la persona 3 y el front (PLAN.md, "Para acordar").
-ORDEN_MESES = (7, 8, 9, 10, 11, 12, 1, 2, 3, 4, 5, 6)
-ORDEN_TEXTO = "julio a junio (índice 0 = julio)"
+# Orden de los 12 meses en `meses`: índice 0 = enero … 11 = diciembre, igual que el front
+# (`frontend/src/lib/vista.ts`) y `MES` del prototipo. La campaña sigue siendo de julio a junio:
+# los índices 6–11 (jul–dic) son del primer año y los 0–5 (ene–jun) del segundo.
+ORDEN_MESES = tuple(range(1, 13))
+ORDEN_TEXTO = "índice 0 = enero … 11 = diciembre; julio a diciembre del primer año de la campaña, enero a junio del segundo"
 
 PLAZO_TOTAL = 20.0             # s para todo el módulo (/analizar tiene 30 s); cada pedido tiene 10 s (pc.TIMEOUT)
 HILOS = 12
