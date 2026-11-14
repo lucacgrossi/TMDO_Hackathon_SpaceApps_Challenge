@@ -1,0 +1,30 @@
+[
+  {
+    "type": "Feature",
+    "id": "ESA_WorldCover_10m_2021_v200_S36W066",
+    "collection": "esa-worldcover",
+    "bbox": [
+      -66.0,
+      -36.0,
+      -63.0,
+      -33.0
+    ],
+    "properties": {
+      "start_datetime": "2021-01-01T00:00:00.000000Z"
+    }
+  },
+  {
+    "type": "Feature",
+    "id": "ESA_WorldCover_10m_2020_v100_S36W066",
+    "collection": "esa-worldcover",
+    "bbox": [
+      -66.0,
+      -36.0,
+      -63.0,
+      -33.0
+    ],
+    "properties": {
+      "start_datetime": "2020-01-01T00:00:00.000000Z"
+    }
+  }
+]

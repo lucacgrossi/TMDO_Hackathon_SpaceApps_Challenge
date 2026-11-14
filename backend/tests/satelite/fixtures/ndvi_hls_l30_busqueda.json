@@ -1,0 +1,13 @@
+[
+ {
+  "id": "HLS.L30.T20HLJ.2024209T140759.v2.0",
+  "collection": "hls2-l30",
+  "properties": {
+   "datetime": "2024-07-27T14:07:59.534501Z",
+   "eo:cloud_cover": 1.0,
+   "start_datetime": "2024-07-27T14:07:59.534501Z",
+   "end_datetime": "2024-07-27T14:08:23.489056Z",
+   "platform": "landsat-9"
+  }
+ }
+]

@@ -1,0 +1,28 @@
+{
+  "lote": {
+    "tipo": "ejemplo",
+    "poligono": {
+      "type": "Polygon",
+      "coordinates": [[
+        [-64.2381, -33.2436],
+        [-64.2268, -33.2436],
+        [-64.2268, -33.2517],
+        [-64.2381, -33.2517],
+        [-64.2381, -33.2436]
+      ]]
+    },
+    "centro": [-33.24765, -64.23245],
+    "area_ha": 95
+  },
+  "lat": -33.24765,
+  "lon": -64.23245,
+  "cultivo_verano": "soja",
+  "invierno": "barbecho",
+  "campana_pasada": "soja",
+  "prioridades": { "agua": 3, "suelo": 3, "ingreso": 3, "erosion": 3 },
+  "restricciones": ["sin_riego"],
+  "no_sembrar": [],
+  "anegable": "no",
+  "textura_suelo": "franco",
+  "mediciones_propias": {}
+}
