@@ -36,7 +36,7 @@ export interface Indicador {
   valor: number | string | null;
   unidad: string;
   fuente: string;
-  /** Período del dato, ej. "1995/96–2024/25". */
+  /** Período del dato, ej. "1996/97 a 2025/26". */
   anios: string | null;
   resolucion: string;
   confianza: Confianza;

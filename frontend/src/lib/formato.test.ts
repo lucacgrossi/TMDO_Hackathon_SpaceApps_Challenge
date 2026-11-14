@@ -27,7 +27,7 @@ describe("formato es-AR", () => {
 describe("metadatos de la hoja", () => {
   it("lote, período de clima, pendiente y fecha", () => {
     expect(metadatosHoja(MOCK_BASE, new Date(2026, 10, 14))).toBe(
-      "a 17 km de Río Cuarto, Córdoba · Clima NASA POWER 1995/96–2024/25 · pendiente 0,6 % · 14/11/2026",
+      "a 17 km de Río Cuarto, Córdoba · Clima NASA POWER 1996/97 a 2025/26 · pendiente 0,6 % · 14/11/2026",
     );
   });
 

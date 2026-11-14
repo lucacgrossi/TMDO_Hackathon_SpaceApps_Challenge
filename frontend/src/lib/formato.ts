@@ -93,7 +93,7 @@ export function conSigno(n: number, decimales = 0): string {
 
 /**
  * Metadatos del encabezado de la hoja: lote, período de clima, pendiente y fecha.
- * "a 17 km de Río Cuarto, Córdoba · Clima NASA POWER 1995/96–2024/25 · pendiente 0,6 % · 14/11/2026"
+ * "a 17 km de Río Cuarto, Córdoba · Clima NASA POWER 1996/97 a 2025/26 · pendiente 0,6 % · 14/11/2026"
  */
 export function metadatosHoja(salida: Salida, fecha: Date): string {
   const partes: string[] = [];

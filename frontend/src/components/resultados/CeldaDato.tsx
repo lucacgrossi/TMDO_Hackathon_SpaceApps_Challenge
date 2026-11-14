@@ -15,7 +15,7 @@ export interface Origen {
   motivo?: string | null;
 }
 
-/** "NASA POWER mensual · 1995/96–2024/25 · ~50 km" */
+/** "NASA POWER mensual · 1996/97 a 2025/26 · ~50 km" */
 export function textoOrigen(o: Origen): string {
   return [o.fuente, o.anios, o.resolucion].filter(Boolean).join(" · ");
 }
