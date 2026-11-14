@@ -28,8 +28,9 @@ def test_arma_30_campanas_julio_junio(respuesta):
     s = power.armar_serie(respuesta)
     assert s.ok and s.motivo is None
     assert s.n == 30 == len(s.campanas)
-    assert s.periodo == "1995/96 a 2024/25"
-    assert [c.etiqueta for c in s.campanas[:2]] == ["1995/96", "1996/97"]
+    assert s.periodo == "1996/97 a 2025/26"
+    assert [c.etiqueta for c in s.campanas[:2]] == ["1996/97", "1997/98"]
+    assert s.campanas[-1].etiqueta == "2025/26"
     assert s.fuente == "NASA POWER mensual (comunidad AG)"
     assert s.resolucion == "~50 km (0,5° × 0,625°)"
     for c in s.campanas:
@@ -64,14 +65,36 @@ def test_t2m_media_anual_del_lote_demo(respuesta):
     assert 15 <= t_media <= 18
 
 
+def test_descarta_la_campana_en_curso(respuesta):
+    # El fixture es del 14/11/2026: POWER trae 2026 hasta septiembre y -999 después.
+    P = respuesta["properties"]["parameter"]["PRECTOTCORR_SUM"]
+    assert P["202609"] > -999 and P["202610"] == -999
+    etiquetas = [c.etiqueta for c in power.armar_serie(respuesta).campanas]
+    assert "2026/27" not in etiquetas and etiquetas[-1] == "2025/26"
+
+
 def test_no_usa_claves_anuales_13(respuesta):
     P = respuesta["properties"]["parameter"]
     assert "202113" in P["PRECTOTCORR_SUM"]  # el fixture sí las trae
     # Si se colara el anual, la campaña tendría 13 valores o el total se duplicaría.
     c = next(c for c in power.armar_serie(respuesta).campanas if c.etiqueta == "2021/22")
-    esperado = sum(P["PRECTOTCORR_SUM"][k] for k in
-                   ["202107", "202108", "202109", "202110", "202111", "202112",
-                    "202201", "202202", "202203", "202204", "202205", "202206"])
+    esperado = sum(
+        P["PRECTOTCORR_SUM"][k]
+        for k in [
+            "202107",
+            "202108",
+            "202109",
+            "202110",
+            "202111",
+            "202112",
+            "202201",
+            "202202",
+            "202203",
+            "202204",
+            "202205",
+            "202206",
+        ]
+    )
     assert c.lluvia_total_mm == pytest.approx(esperado)
 
 
@@ -87,8 +110,8 @@ def test_descarta_campana_con_faltante(respuesta, parametro):
     s = power.armar_serie(respuesta)
     etiquetas = [c.etiqueta for c in s.campanas]
     assert "2010/11" not in etiquetas
-    # Sigue habiendo 30: entra la campaña 1994/95 que antes quedaba afuera.
-    assert s.n == 30 and etiquetas[0] == "1994/95"
+    # Sigue habiendo 30: entra la campaña 1995/96 que antes quedaba afuera.
+    assert s.n == 30 and etiquetas[0] == "1995/96"
 
 
 def test_descarta_mes_ausente(respuesta):
@@ -99,7 +122,7 @@ def test_descarta_mes_ausente(respuesta):
 
 def test_menos_de_15_campanas_da_error(respuesta):
     P = respuesta["properties"]["parameter"]["PRECTOTCORR_SUM"]
-    for anio in range(1994, 2012):  # rompe un mes por año: quedan 13 campañas
+    for anio in range(1995, 2013):  # rompe un mes por año: quedan 13 campañas
         P[f"{anio}08"] = -999.0
     s = power.armar_serie(respuesta)
     assert not s.ok
@@ -134,8 +157,7 @@ def test_timeout_no_lanza(monkeypatch):
 
 def test_http_error_no_lanza(monkeypatch):
     def error_422(url, **kwargs):
-        return httpx.Response(422, json={"messages": ["latitude fuera de rango"]},
-                               request=httpx.Request("GET", url))
+        return httpx.Response(422, json={"messages": ["latitude fuera de rango"]}, request=httpx.Request("GET", url))
 
     monkeypatch.setattr(power.httpx, "get", error_422)
     s = power.pedir_power(95.0, 0.0)

@@ -11,7 +11,11 @@ Convenciones
   6 julio de 2021 y en el índice 0 enero de 2022.
 - Una campaña entra solo si tiene los 12 meses completos en los 5 parámetros.
   Se descartan las claves ``AAAA13`` (total o valor anual) y los faltantes
-  (``-999``, el ``fill_value`` de POWER).
+  (``-999``, el ``fill_value`` de POWER, que también marca los meses del año
+  en curso que POWER todavía no procesó).
+- La serie termina en la última campaña julio–junio completa en POWER (hoy
+  2025/26). Esa es "la campaña" de toda la salida: el NDVI y la erosión
+  usan la misma (``servicio.py`` se la pasa a ``satelite/``).
 - ``pedir_power`` nunca lanza excepción: si algo falla devuelve ``ok=False``
   con el ``motivo`` en texto, para que vaya a "Información que falta".
 
@@ -97,7 +101,7 @@ class SeriePower:
     ok: bool
     motivo: str | None = None
     campanas: list[Campana] = field(default_factory=list)
-    periodo: str | None = None  # "1995/96 a 2024/25"
+    periodo: str | None = None  # "1996/97 a 2025/26"
     n: int = 0
     fuente: str = FUENTE
     resolucion: str = RESOLUCION
@@ -139,9 +143,7 @@ def armar_serie(respuesta: dict[str, Any]) -> SeriePower:
         return SeriePower(ok=False, motivo="La respuesta de NASA POWER no trae los parámetros pedidos.")
 
     # Claves AAAAMM con MM de 01 a 12: así se descarta la AAAA13 (anual).
-    anios = sorted(
-        {int(k[:4]) for k in series[0] if len(k) == 6 and k.isdigit() and 1 <= int(k[4:]) <= 12}
-    )
+    anios = sorted({int(k[:4]) for k in series[0] if len(k) == 6 and k.isdigit() and 1 <= int(k[4:]) <= 12})
     if not anios:
         return SeriePower(ok=False, motivo="La respuesta de NASA POWER no trae meses.")
 
@@ -170,10 +172,7 @@ def armar_serie(respuesta: dict[str, Any]) -> SeriePower:
     if n < CAMPANAS_MIN:
         return SeriePower(
             ok=False,
-            motivo=(
-                f"NASA POWER devolvió {n} campañas completas (julio–junio); "
-                f"se necesitan al menos {CAMPANAS_MIN}."
-            ),
+            motivo=(f"NASA POWER devolvió {n} campañas completas (julio–junio); se necesitan al menos {CAMPANAS_MIN}."),
             campanas=campanas,
             n=n,
         )
@@ -192,11 +191,15 @@ def pedir_power(lat: float, lon: float) -> SeriePower:
     """Pide POWER mensual para el punto y devuelve las últimas 30 campañas julio–junio.
 
     Un solo GET con ``PRECTOTCORR_SUM``, ``T2M``, ``T2M_MIN``, ``T2M_MAX`` y
-    ``T2M_RANGE`` desde el año
-    actual − 32 hasta el año actual − 1. Guarda en memoria por celda de POWER
-    (solo los pedidos que salieron bien). Nunca lanza excepción.
+    ``T2M_RANGE`` desde el año actual − 31 hasta **el año actual**. Del año en
+    curso POWER trae los meses ya procesados y −999 en el resto (el 14/11/2026
+    traía hasta septiembre de 2026), así que la última campaña es la última
+    julio–junio completa: hoy 2025/26 (la serie va de 1996/97 a 2025/26).
+    ``servicio.py`` le pasa esa campaña al NDVI para que toda la salida termine
+    en la misma. Guarda en memoria por celda de POWER (solo los pedidos que
+    salieron bien). Nunca lanza excepción.
     """
-    fin = date.today().year - 1
+    fin = date.today().year
     inicio = fin - 31
     celda = celda_power(lat, lon)
     clave = (*celda, fin)
