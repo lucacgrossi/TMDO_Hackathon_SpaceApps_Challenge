@@ -35,11 +35,13 @@ from typing import Any, Callable
 from app.api.contrato import (
     Capas,
     CapaNdviMes,
+    CapaRaster,
     Choque,
     ClimaCelda,
     Entrada,
     Estrategia,
     Faltante,
+    GrillaLote,
     Indicador,
     LoteSalida,
     MedicionesPropias,
@@ -255,6 +257,14 @@ def _indicadores_motor(clima: clima_indicadores.ResultadoClima, pendiente: Any, 
         "n_anios": m.n_anios,
         "pendiente_pct": pendiente,
         "visto_satelite": visto,
+        # NASA campaña por campaña (índice 0 = enero), para que el motor pueda mezclar las mediciones
+        # del productor con NASA **del mismo período** que cubre su registro, como hace el contraste
+        # (#64). El motor que no lo usa lo ignora.
+        "campanas_nasa": [
+            {"campana": c.etiqueta, "lluvia_mm": list(c.lluvia_mm), "t_min_c": list(c.t_min_c),
+             "t_max_c": list(c.t_max_c)}
+            for c in clima.campanas
+        ],
     }
 
 
@@ -519,6 +529,71 @@ def _con_linea_del_productor(
     }
 
 
+_NOMBRE_CAPA = {"pendiente_mapa": "Capa de pendiente", "cultivo_mapa": "Capa de cultivo",
+                "ndvi_mapa": "Capas de NDVI por mes", "ndvi_mensual": "Escenas de NDVI por mes"}
+
+
+def _validar(modelo, datos: dict | None, nombre: str, faltan: list[str]):
+    """Valida una capa de Back 2 contra el contrato. Si no valida, va a "Información que falta" y no rompe /analizar."""
+    if not datos:
+        return None
+    try:
+        return modelo.model_validate(datos)
+    except Exception as e:  # noqa: BLE001 — una capa mal armada no puede tumbar la respuesta
+        log.warning("Capa %s no valida contra el contrato: %s", nombre, e)
+        faltan.append(f"{nombre}: no se pudo leer ({type(e).__name__})")
+        return None
+
+
+def _capas_salida(capas_sat: dict, capas_ndvi: list[CapaNdviMes | None], erosion: dict | None,
+                  sat: dict[str, dict], cob: dict, faltan: list[str]) -> Capas:
+    """Capas armonizadas sobre la grilla del lote (docs/plan-armonizacion-capas.md).
+
+    La grilla y los rasters salen de `satelite/capas.armar` (Back 2). Cada capa se valida suelta: si
+    una falla o no coincide con la grilla, va a `no_disponibles` y a "Información que falta" con el
+    motivo, y el resto de la respuesta sale igual.
+    """
+    no_disp = list(capas_sat.get("no_disponibles") or [])
+    grilla = _validar(GrillaLote, capas_sat.get("grilla"), "Grilla del lote", faltan)
+
+    mapas: dict[str, CapaRaster | None] = {}
+    for clave in ("pendiente_mapa", "cultivo_mapa"):
+        capa = _validar(CapaRaster, capas_sat.get(clave), _NOMBRE_CAPA[clave], faltan)
+        if capa is not None and grilla is not None and (capa.bounds, capa.ancho, capa.alto) != (
+                grilla.bounds, grilla.ancho, grilla.alto):
+            faltan.append(f"{_NOMBRE_CAPA[clave]}: no coincide con la grilla del lote")
+            capa = None
+        if capa is None and clave not in no_disp:
+            no_disp.append(clave)
+        mapas[clave] = capa
+
+    ndvi_mensual: list[CapaNdviMes | None] = []
+    for i, m in enumerate(capas_sat.get("ndvi_mensual") or [None] * 12):
+        mes = _validar(CapaNdviMes, m, f"Escena de NDVI del mes {i + 1}", faltan)
+        if mes is None and m:  # la escena no validó: sin raster, queda la de `visto_por_satelite`
+            mes = capas_ndvi[i] if i < len(capas_ndvi) else None
+        ndvi_mensual.append(mes)
+    if not any(ndvi_mensual):
+        ndvi_mensual = capas_ndvi
+
+    # Por qué falta cada raster, con el motivo que da Back 2.
+    motivos = {"pendiente_mapa": sat.get("elevacion", {}).get("mapa_motivo"), "cultivo_mapa": cob.get("mapa_motivo")}
+    for clave, motivo in motivos.items():
+        if clave in no_disp and motivo:
+            faltan.append(f"{_NOMBRE_CAPA[clave]}: {motivo}")
+    if "ndvi_mapa" in no_disp:
+        faltan.append("Capas de NDVI por mes: hay escenas, pero ningún raster sobre la grilla del lote")
+
+    return Capas(
+        ndvi_mensual=ndvi_mensual,
+        erosion=erosion,
+        grilla=grilla,
+        pendiente_mapa=mapas["pendiente_mapa"],
+        cultivo_mapa=mapas["cultivo_mapa"],
+        no_disponibles=list(dict.fromkeys([*no_disp, "agua_regional_mensual", "heladas_regional_mensual"])),
+    )
+
+
 def _armar_salida(
     entrada: Entrada, v: dict, clima: clima_indicadores.ResultadoClima, sat: dict[str, dict], cob: dict
 ) -> Salida:
@@ -560,11 +635,12 @@ def _armar_salida(
         faltan.append("Serie por campaña: no se pudo armar con las campañas de NASA POWER")
     # Capas del mapa (satelite/capas.py, Back 2): arma la escena NDVI de cada mes y el índice de
     # erosión con lo que ya devolvieron ndvi y elevacion, sin pedidos nuevos.
-    capas_sat = capas.armar(sat["ndvi"], sat["elevacion"])
+    capas_sat = capas.armar(sat["ndvi"], sat["elevacion"], cob)
     erosion = capas_sat.get("erosion")
     if erosion is None:
         faltan.append("Capa de erosión: falta la pendiente o el NDVI del lote")
     indicador_erosion = {"riesgo_erosion": Indicador.model_validate(erosion)} if erosion else {}
+    capas_salida = _capas_salida(capas_sat, capas_ndvi, erosion, sat, cob, faltan)
 
     return Salida(
         lote=LoteSalida(
@@ -586,11 +662,7 @@ def _armar_salida(
         clima_mensual=clima.clima_mensual,
         tipos_de_anio=clima.tipos_de_anio,
         serie_anual=serie_anual,
-        capas=Capas(
-            ndvi_mensual=capas_sat.get("ndvi_mensual") or capas_ndvi,
-            erosion=erosion,
-            no_disponibles=[*capas_sat.get("no_disponibles", []), "agua_regional_mensual", "heladas_regional_mensual"],
-        ),
+        capas=capas_salida,
         estrategias=estrategias,
         choque=Choque(hay=bool(ch.get("hay")), objetivos=ch.get("objetivos", []), texto=ch.get("texto", "")),
         periodo_clima=clima.periodo or "",
