@@ -3,7 +3,8 @@
 Cómo trabajamos los dos del back sin pisarnos. Contexto general: `../CLAUDE.md`. Alcance: `../docs/mvp-alcance.md`.
 **Stack:** Python + FastAPI. Monorepo: `backend/` y `frontend/`.
 **Meta:** `/analizar` deployado, con datos reales de NASA para cualquier punto y la tabla de 4 columnas armada.
-**Propuesta en evaluación (falta el OK de la persona 3):** planilla CSV de mediciones del productor (lluvia, y temperaturas como Should), con un dominio nuevo `mediciones/` (Back 2) y la ruta `POST /mediciones/planilla` (Back 1). Las tareas de Benja están detalladas en la sección 5. Ver `../docs/plan-planilla-lluvia.md`.
+**Aprobado por la persona 3 (14/11):** planilla CSV de mediciones del productor (lluvia, y temperaturas como Should), con un dominio nuevo `mediciones/` (Back 2) y la ruta `POST /mediciones/planilla` (Back 1). Las tareas de Benja están detalladas en la sección 5. Ver `../docs/plan-planilla-lluvia.md`.
+**Propuesta:** armonización de las capas del mapa sobre una grilla común del lote (el back calcula los rasters y el front los dibuja). Ver `../docs/plan-armonizacion-capas.md`.
 
 ## 1. Estructura por dominio y dueños
 Cada dominio es una carpeta con **un solo dueño**. Para tocar un dominio ajeno: avisar antes y que lo cambie el dueño, o hacer un PR chico que el dueño revise.
