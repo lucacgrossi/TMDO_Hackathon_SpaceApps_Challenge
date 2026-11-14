@@ -1,7 +1,12 @@
-"""Capas del mapa del lote: escena NDVI de cada mes y riesgo de erosión (`salida.capas`).
+"""Capas del mapa del lote: escena NDVI de cada mes, riesgo de erosión y rasters (`salida.capas`).
 
-No hace pedidos propios: arma las capas con lo que ya devolvieron `ndvi.calcular()` y
-`elevacion.calcular()`, para que `/analizar` no repita búsquedas en Planetary Computer.
+No hace pedidos propios: arma las capas con lo que ya devolvieron `ndvi.calcular()`,
+`elevacion.calcular()` y `cobertura.calcular()`, para que `/analizar` no repita búsquedas en
+Planetary Computer.
+
+- `pendiente_mapa` y `cultivo_mapa`: `CapaRaster` (plan de armonización §5) sobre la grilla común
+  del lote, tal como los arman `elevacion.py` y `cobertura.py`. `grilla`: {bounds, ancho, alto, paso},
+  la misma para todas las capas, para que el front verifique que todo coincide.
 
 - `ndvi_mensual[12]`: la escena HLS de cada mes (colección, item, fecha), para que el front pida
   las teselas de Planetary Computer sin buscar de nuevo. Un mes sin escena HLS (MODIS de respaldo
@@ -16,7 +21,7 @@ import concurrent.futures as cf
 import sys
 import time
 
-from app.satelite import elevacion, ndvi
+from app.satelite import cobertura, elevacion, ndvi
 from app.satelite.lote import LOTE_EJEMPLO
 
 UNIDAD_EROSION = "% × meses"
@@ -76,8 +81,29 @@ def erosion(visto_por_satelite: dict | None, cobertura_baja: dict | None,
     }
 
 
-def armar(resultado_ndvi: dict | None, resultado_elevacion: dict | None) -> dict:
-    """Capas del mapa a partir de lo que ya calcularon `ndvi` y `elevacion`. Nunca lanza."""
+def _misma_grilla(capa: dict, grilla: dict) -> bool:
+    return (capa.get("bounds") == grilla.get("bounds") and capa.get("ancho") == grilla.get("ancho")
+            and capa.get("alto") == grilla.get("alto"))
+
+
+def rasters(resultado_elevacion: dict | None, resultado_cobertura: dict | None) -> dict:
+    """{pendiente_mapa, cultivo_mapa, grilla} y los que faltan. Una capa que no está en la grilla común se descarta."""
+    elev, cob = resultado_elevacion or {}, resultado_cobertura or {}
+    grilla = elev.get("grilla") or cob.get("grilla")
+    salida: dict = {"pendiente_mapa": None, "cultivo_mapa": None, "grilla": grilla, "faltan": []}
+    for clave, resultado, pasado in (("pendiente_mapa", elev, resultado_elevacion is not None),
+                                     ("cultivo_mapa", cob, resultado_cobertura is not None)):
+        mapa = resultado.get("mapa")
+        if mapa and grilla and _misma_grilla(mapa, grilla):
+            salida[clave] = mapa
+        elif pasado:  # si el servicio no pasó el resultado, la capa no se pidió: no "falta"
+            salida["faltan"].append(clave)
+    return salida
+
+
+def armar(resultado_ndvi: dict | None, resultado_elevacion: dict | None,
+          resultado_cobertura: dict | None = None) -> dict:
+    """Capas del mapa a partir de lo que ya calcularon `ndvi`, `elevacion` y `cobertura`. Nunca lanza."""
     try:
         resultado_ndvi = resultado_ndvi or {}
         visto = resultado_ndvi.get("visto_por_satelite")
@@ -88,21 +114,35 @@ def armar(resultado_ndvi: dict | None, resultado_elevacion: dict | None) -> dict
         }
     except Exception:  # noqa: BLE001 — nunca propagar
         capas = {"ndvi_mensual": [None] * 12, "erosion": None}
+    try:
+        r = rasters(resultado_elevacion, resultado_cobertura)
+    except Exception:  # noqa: BLE001
+        r = {"pendiente_mapa": None, "cultivo_mapa": None, "grilla": None, "faltan": ["pendiente_mapa"]}
     capas["no_disponibles"] = [] if capas["erosion"] else ["erosion"]
     if not any(capas["ndvi_mensual"]):
         capas["no_disponibles"].append("ndvi_mensual")
+    capas["no_disponibles"] += r.pop("faltan")
+    capas.update(r)
     return capas
 
 
 def calcular(poligono: dict) -> dict:
-    """Corre `ndvi` y `elevacion` en paralelo y arma las capas (uso suelto y demo).
+    """Corre `ndvi`, `elevacion` y `cobertura` en paralelo y arma las capas (uso suelto y demo).
 
     En `/analizar` conviene `armar()` con los resultados que el servicio ya tiene.
     """
-    with cf.ThreadPoolExecutor(max_workers=2) as pool:
+    with cf.ThreadPoolExecutor(max_workers=3) as pool:
         f_ndvi = pool.submit(ndvi.calcular, poligono)
         f_elev = pool.submit(elevacion.calcular, poligono)
-        return armar(f_ndvi.result(), f_elev.result())
+        f_cob = pool.submit(cobertura.calcular, poligono)
+        return armar(f_ndvi.result(), f_elev.result(), f_cob.result())
+
+
+def _corto(capa: dict | None) -> dict | None:
+    """La capa sin el PNG ni los valores (para imprimirla)."""
+    if not capa:
+        return capa
+    return {k: (f"<{len(v)} caracteres en base64>" if k in ("png", "valores") else v) for k, v in capa.items()}
 
 
 if __name__ == "__main__":
@@ -110,5 +150,8 @@ if __name__ == "__main__":
     poligono = json.loads(sys.argv[1]) if len(sys.argv) > 1 else LOTE_EJEMPLO
     t0 = time.perf_counter()
     resultado = calcular(poligono)
+    for clave in ("pendiente_mapa", "cultivo_mapa"):
+        resultado[clave] = _corto(resultado.get(clave))
+    sys.stdout.reconfigure(encoding="utf-8")  # ″ y – en la consola de Windows
     print(json.dumps(resultado, ensure_ascii=False, indent=2))
     print(f"Tiempo: {time.perf_counter() - t0:.1f} s", file=sys.stderr)
