@@ -34,15 +34,15 @@ def test_valida_contra_el_contrato(s):
 
 def test_fuente_resolucion_y_periodo_de_power(s):
     assert s.fuente == FUENTE and s.resolucion == RESOLUCION
-    assert s.periodo == "1995/96 a 2024/25"
+    assert s.periodo == "1996/97 a 2025/26"
 
 
 def test_30_campanas_en_orden_cronologico(s, clima):
     etiquetas = [c.campana for c in s.campanas]
     assert len(etiquetas) == 30
-    assert etiquetas[0] == "1995/96" and etiquetas[-1] == "2024/25"
+    assert etiquetas[0] == "1996/97" and etiquetas[-1] == "2025/26"
     assert etiquetas == [c.etiqueta for c in clima.campanas]
-    assert [int(e[:4]) for e in etiquetas] == list(range(1995, 2025))
+    assert [int(e[:4]) for e in etiquetas] == list(range(1996, 2026))
 
 
 def test_lluvia_y_balance_redondeados(s, clima):
@@ -79,7 +79,7 @@ def test_con_18_campanas_toma_las_ultimas_6():
     clima = ind.calcular(corta, LAT_DEMO, LON_DEMO)
     s = se.serie_anual(clima)
     assert s is not None and len(s.campanas) == 18
-    assert s.periodo == "2007/08 a 2024/25"
+    assert s.periodo == "2008/09 a 2025/26"
     lluvias = [sum(c.lluvia_mm) for c in clima.campanas]
     assert s.ultimas_10_mm == pytest.approx(sum(lluvias[12:]) / 6, abs=0.05)
     assert s.previas_20_mm == pytest.approx(sum(lluvias[:12]) / 12, abs=0.05)
