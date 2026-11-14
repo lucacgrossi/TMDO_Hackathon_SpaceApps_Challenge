@@ -15,6 +15,8 @@ import httpx
 import numpy as np
 from PIL import Image
 
+from app.satelite import red
+
 URL = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png"
 TIMEOUT = 10.0
 REINTENTOS = 1
@@ -24,7 +26,7 @@ ZOOM_MIN = 10
 MAX_TESELAS = 16              # si el lote necesita más, se baja el zoom (lotes grandes)
 CIRCUNFERENCIA_M = 2 * math.pi * 6378137
 
-_cliente = httpx.Client(timeout=TIMEOUT, headers={"User-Agent": "field-shift-backend"})
+_cliente = red.cliente(TIMEOUT)  # certificados del sistema + certifi (ver red.py)
 
 
 class ErrorTerrario(Exception):
