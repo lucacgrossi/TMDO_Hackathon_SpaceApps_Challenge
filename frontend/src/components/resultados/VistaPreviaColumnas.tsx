@@ -1,13 +1,12 @@
 import type { Salida } from "@/lib/contrato";
 import InsigniaEstrategia from "./InsigniaEstrategia";
-import type { VistaResultado } from "./InterruptorVista";
 import css from "./resultados.module.css";
 
 /**
- * Provisorio: las 4 columnas con su nombre y su resumen, mientras llegan la
- * tabla técnica (feature 3) y las tarjetas (feature 7). Se borra cuando estén.
+ * Provisorio: las 4 columnas con su nombre y su resumen, mientras llegan las
+ * tarjetas (feature 7). Se borra cuando estén.
  */
-export default function VistaPreviaColumnas({ salida, vista }: { salida: Salida; vista: VistaResultado }) {
+export default function VistaPreviaColumnas({ salida }: { salida: Salida }) {
   return (
     <>
       <div className={css.columnas}>
@@ -26,10 +25,7 @@ export default function VistaPreviaColumnas({ salida, vista }: { salida: Salida;
           </article>
         ))}
       </div>
-      <p className={css.aviso}>
-        {vista === "tabla" ? "La tabla técnica completa" : "Las tarjetas resumen"} se suman en las próximas
-        entregas.
-      </p>
+      <p className={css.aviso}>Las tarjetas resumen se suman en una próxima entrega.</p>
     </>
   );
 }

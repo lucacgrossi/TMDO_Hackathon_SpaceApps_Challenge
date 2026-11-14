@@ -6,6 +6,7 @@ import { metadatosHoja } from "@/lib/formato";
 import { useResultado } from "@/lib/resultado";
 import { useVista } from "@/lib/vista";
 import InterruptorVista, { type VistaResultado } from "./InterruptorVista";
+import TablaTecnica from "./TablaTecnica";
 import VistaPreviaColumnas from "./VistaPreviaColumnas";
 import css from "./resultados.module.css";
 
@@ -72,7 +73,8 @@ export default function HojaComparacion() {
             No se pudo armar la comparación: {resultado.mensaje}
           </p>
         )}
-        {resultado.estado === "listo" && <VistaPreviaColumnas salida={resultado.datos} vista={vista} />}
+        {resultado.estado === "listo" &&
+          (vista === "tabla" ? <TablaTecnica salida={resultado.datos} /> : <VistaPreviaColumnas salida={resultado.datos} />)}
       </div>
 
       <div className={`foot ${css.pie}`}>

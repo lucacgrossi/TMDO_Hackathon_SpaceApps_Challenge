@@ -3,7 +3,82 @@
  * Números con coma decimal y punto de miles (es-AR), y el signo menos tipográfico
  * (−), como el prototipo.
  */
-import type { Salida } from "./contrato";
+import { ORDEN_CAMPANIA, type CultivoMes, type Salida } from "./contrato";
+
+/** Índice 0 = enero, como los arrays del contrato. */
+export const MESES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+] as const;
+export const MESES_CORTOS = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dic"] as const;
+
+export const NOMBRE_CULTIVO: Record<CultivoMes, string> = {
+  soja: "Soja",
+  soja2: "Soja 2ª",
+  maiz: "Maíz",
+  girasol: "Girasol",
+  sorgo: "Sorgo",
+  mani: "Maní",
+  trigo: "Trigo",
+  cebada: "Cebada",
+  vicia: "Vicia",
+  centeno: "Centeno",
+  barbecho: "Barbecho (pelado)",
+};
+
+export interface Tramo {
+  cultivo: CultivoMes;
+  /** Primer y último mes del tramo (0 = enero). */
+  desde: number;
+  hasta: number;
+  meses: number;
+}
+
+/** Calendario en tramos, en el orden de la campaña (julio a junio). */
+export function tramosCalendario(calendario: readonly CultivoMes[]): Tramo[] {
+  const tramos: Tramo[] = [];
+  for (const m of ORDEN_CAMPANIA) {
+    const cultivo = calendario[m];
+    const ultimo = tramos[tramos.length - 1];
+    if (ultimo && ultimo.cultivo === cultivo) {
+      ultimo.hasta = m;
+      ultimo.meses++;
+    } else {
+      tramos.push({ cultivo, desde: m, hasta: m, meses: 1 });
+    }
+  }
+  return tramos;
+}
+
+/** "jul a oct" o "may" si es un solo mes. */
+export function rangoMeses(t: Pick<Tramo, "desde" | "hasta">): string {
+  return t.desde === t.hasta ? MESES_CORTOS[t.desde] : `${MESES_CORTOS[t.desde]} a ${MESES_CORTOS[t.hasta]}`;
+}
+
+/** Meses sueltos en el orden de la campaña: [0, 11] → "dic, ene". */
+export function listaMeses(meses: readonly number[]): string {
+  return ORDEN_CAMPANIA.filter((m) => meses.includes(m))
+    .map((m) => MESES_CORTOS[m])
+    .join(", ");
+}
+
+/**
+ * Meses con su conteo de años, en orden de campaña:
+ * "dic (18 de 30 años), ene (20 de 30 años)". Vacío si no hay meses.
+ */
+export function mesesConAnios(meses: readonly number[], anios: readonly number[], de: number): string {
+  return ORDEN_CAMPANIA.filter((m) => meses.includes(m))
+    .map((m) => `${MESES_CORTOS[m]} (${anios[m]} de ${de} años)`)
+    .join(", ");
+}
+
+/** Efecto de una regla, redondeado: { agua: 20.5 } → "agua 21". Las dimensiones van con su nombre. */
+export function textoEfecto(efecto: Record<string, number>): string {
+  const nombre: Record<string, string> = { erosion: "erosión" };
+  return Object.entries(efecto)
+    .map(([k, v]) => `${nombre[k] ?? k} ${v < 0 ? "−" : ""}${fmt(Math.abs(Math.round(v)))}`)
+    .join(" · ");
+}
 
 /** 1234.5 → "1.235"; con decimales: fmt(0.6, 1) → "0,6". */
 export function fmt(n: number, decimales = 0): string {
