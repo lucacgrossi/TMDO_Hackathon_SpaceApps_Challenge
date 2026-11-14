@@ -22,9 +22,10 @@ export default function TarjetasEstrategias({ salida }: { salida: Salida }) {
     <div className={css.contenedor}>
       <LeyendaLinea />
       <div className={`cards ${css.grilla}`}>
-        {salida.estrategias.map((e) => (
+        {salida.estrategias.map((e, i) => (
           <TarjetaEstrategia
             key={e.id}
+            orden={i}
             salida={salida}
             estrategia={e}
             actual={actual}

@@ -76,11 +76,12 @@
 }
 
 /* --- Grupos de filas: separan lo que cada bloque responde */
+/* El acento solo da 4,1:1 sobre blanco a 12 px: se lo lleva hacia la tinta (claro ≈ 5,8:1, oscuro ≈ 10:1) */
 .grupo th {
   text-align: left;
   font-size: 12px;
   font-weight: 700;
-  color: var(--accent);
+  color: color-mix(in srgb, var(--accent) 75%, var(--ink));
   padding: 16px 12px 6px;
   border-bottom: 1px solid var(--line);
 }
@@ -288,6 +289,37 @@
   margin-top: 6px;
   padding-top: 6px;
   border-top: 1px dashed var(--line);
+}
+
+/*
+ * Entrada de la hoja (clase `intro` del prototipo): las columnas llegan en
+ * orden (--k = 0 actual … 3 C), como las tarjetas. El encabezado fijo solo
+ * aparece (sin moverse) para no pelear con el sticky.
+ */
+:global(.intro) .tabla td {
+  animation: columnaEntra 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--k, 0) * 70ms + 80ms);
+}
+:global(.intro) .cabecera {
+  animation: columnaAparece 0.4s ease-out both;
+  animation-delay: calc(var(--k, 0) * 70ms + 80ms);
+}
+@keyframes columnaEntra {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+@keyframes columnaAparece {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  :global(.intro) .tabla td,
+  :global(.intro) .cabecera {
+    animation: none;
+  }
 }
 
 /* Contraste de la estación del productor bajo cada probabilidad (Probabilidad.contraste, MVP 4.3) */

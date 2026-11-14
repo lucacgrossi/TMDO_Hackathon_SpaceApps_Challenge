@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { DURACION_TWEEN_MS, pasoTween, salidaCubica } from "@/lib/animacion";
+import {
+  DURACION_ENTRADA_MS,
+  DURACION_TWEEN_MS,
+  PASO_BARRA_MS,
+  PASO_COLUMNA_MS,
+  VENTANA_ENTRADA_MS,
+  pasoTween,
+  salidaCubica,
+  sinMovimiento,
+} from "@/lib/animacion";
 
 describe("pasoTween (tween del prototipo)", () => {
   it("arranca en el valor de origen y termina exacto en el nuevo", () => {
@@ -22,5 +31,17 @@ describe("pasoTween (tween del prototipo)", () => {
 
   it("con duración 0 va directo al valor nuevo", () => {
     expect(pasoTween(10, 20, 0, 0)).toEqual({ valor: 20, fin: true });
+  });
+});
+
+describe("entrada de la hoja", () => {
+  it("la última columna y la última de 30 barras llegan antes de que se saque la clase intro", () => {
+    expect(3 * PASO_COLUMNA_MS + 80 + 500).toBeLessThanOrEqual(VENTANA_ENTRADA_MS);
+    expect(29 * PASO_BARRA_MS + 60 + 500).toBeLessThanOrEqual(VENTANA_ENTRADA_MS);
+    expect(DURACION_ENTRADA_MS).toBeLessThan(VENTANA_ENTRADA_MS);
+  });
+
+  it("sin ventana (servidor o tests) no falla al leer la preferencia", () => {
+    expect(sinMovimiento()).toBe(false);
   });
 });

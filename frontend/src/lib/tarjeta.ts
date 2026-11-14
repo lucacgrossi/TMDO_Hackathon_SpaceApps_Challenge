@@ -139,7 +139,7 @@ export function seccionesDetalle(e: EstrategiaDisponible, nAnios: number): Secci
       items: e.beneficios,
       vacio: e.id === "actual" ? "Es la base de la comparación" : "Sin valores a favor frente a la actual",
     },
-    { id: "vacios", titulo: "Información que falta", items: e.vacios, vacio: "Nada" },
+    { id: "vacios", titulo: "Información que falta", items: e.vacios, vacio: "Sin faltantes informados" },
     { id: "riesgos", titulo: "A revisar con el agrónomo", items: e.riesgos, vacio: "Sin alertas" },
     {
       id: "probabilidades",

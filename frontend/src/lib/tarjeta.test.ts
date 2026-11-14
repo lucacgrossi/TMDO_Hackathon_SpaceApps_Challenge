@@ -34,10 +34,11 @@ describe("métricas de la tarjeta", () => {
 
 describe("rango de cada tipo de año", () => {
   it("usa los umbrales de los terciles de balance y la cantidad de campañas", () => {
+    // Umbrales reales de POWER en el mock (−730,6 y −529,6 mm), redondeados
     const t = MOCK_BASE.tipos_de_anio;
-    expect(rangoTipoAnio(t, "seco")).toBe(`Años secos: balance de la campaña hasta −420 mm (${t.seco.length} campañas)`);
-    expect(rangoTipoAnio(t, "normal")).toContain("entre −420 mm y −240 mm");
-    expect(rangoTipoAnio(t, "humedo")).toContain("desde −240 mm");
+    expect(rangoTipoAnio(t, "seco")).toBe(`Años secos: balance de la campaña hasta −731 mm (${t.seco.length} campañas)`);
+    expect(rangoTipoAnio(t, "normal")).toContain("entre −731 mm y −530 mm");
+    expect(rangoTipoAnio(t, "humedo")).toContain("desde −530 mm");
   });
 });
 

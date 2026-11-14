@@ -42,13 +42,14 @@
   color: var(--warn);
 }
 
+/* Blanco sobre el acento tal cual da 4,1:1 a 13 px: el fondo se lleva hacia la tinta (claro ≈ 5,4:1, oscuro ≈ 9,8:1) */
 .boton {
   border: 0;
   border-radius: 10px;
   padding: 8px 14px;
   font-weight: 700;
   font-size: 13px;
-  background: var(--accent);
+  background: color-mix(in srgb, var(--accent) 80%, var(--ink));
   color: var(--accent-ink);
   cursor: pointer;
 }

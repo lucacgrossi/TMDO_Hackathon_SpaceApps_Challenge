@@ -7,6 +7,10 @@
 .linea {
   min-height: 0;
 }
+/* Helada frecuente: además del fondo azul del prototipo, una raya abajo del mes (forma, no solo color) */
+.linea :global(.mx span.fr) {
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--humedo) 80%, transparent);
+}
 
 /* Helada con cultivo sensible: anillo (forma), además del color */
 .conflicto {
@@ -22,6 +26,13 @@
 .calor.conflicto {
   box-shadow: inset 0 0 0 1.5px var(--bad), inset 0 3px 0 var(--warn);
 }
+/* El conflicto siempre cae en un mes con helada: el anillo manda sobre la raya de la helada */
+.linea :global(.mx span.fr).conflicto {
+  box-shadow: inset 0 0 0 1.5px var(--bad);
+}
+.linea :global(.mx span.fr).calor.conflicto {
+  box-shadow: inset 0 0 0 1.5px var(--bad), inset 0 3px 0 var(--warn);
+}
 
 /* Mes sin escena sin nubes: rayado, como el prototipo */
 .sinEscena {
@@ -34,6 +45,7 @@
 }
 .muestraHelada {
   background: color-mix(in srgb, var(--humedo) 35%, transparent);
+  box-shadow: inset 0 -2px 0 color-mix(in srgb, var(--humedo) 80%, transparent);
 }
 .muestraConflicto {
   box-shadow: inset 0 0 0 1.5px var(--bad);

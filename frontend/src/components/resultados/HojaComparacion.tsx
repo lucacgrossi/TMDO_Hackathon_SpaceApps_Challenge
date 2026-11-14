@@ -3,10 +3,12 @@
 import { useEffect, useRef, useState } from "react";
 import AvisoApoyo from "@/components/comunes/AvisoApoyo";
 import AvisoDesactualizado from "./AvisoDesactualizado";
+import { VENTANA_ENTRADA_MS, sinMovimiento } from "@/lib/animacion";
 import { metadatosHoja } from "@/lib/formato";
 import { useResultado } from "@/lib/resultado";
 import { useVista } from "@/lib/vista";
 import ChoqueObjetivos from "./ChoqueObjetivos";
+import { EntradaHoja } from "./EntradaHoja";
 import InterruptorVista, { type VistaResultado } from "./InterruptorVista";
 import MenuCompartir from "./MenuCompartir";
 import SerieCampanias from "./SerieCampanias";
@@ -21,6 +23,11 @@ import css from "./resultados.module.css";
  * Encabezado: título, metadatos (lote, período de clima, pendiente, fecha),
  * interruptor Tabla / Tarjetas, Compartir (`MenuCompartir`) y Cerrar.
  * Pie: el texto del prototipo y el aviso de apoyo, siempre visibles.
+ *
+ * Entrada: al abrir, la hoja lleva la clase `intro` del prototipo durante
+ * `VENTANA_ENTRADA_MS` (columnas o tarjetas en orden, rotación que se dibuja,
+ * barras de la serie una tras otra, números desde 0). Con
+ * `prefers-reduced-motion: reduce` no hay entrada.
  */
 export default function HojaComparacion() {
   const abierta = useVista((s) => s.hojaAbierta);
@@ -30,15 +37,25 @@ export default function HojaComparacion() {
   // La fecha se toma al abrir, en el cliente: así no difiere entre el servidor y el navegador
   const [fecha, setFecha] = useState<Date | null>(null);
   const titulo = useRef<HTMLHeadingElement>(null);
+  const [entrada, setEntrada] = useState(false);
 
   // body.sheet-open (subir los controles del mapa) lo pone ClaseBody de la persona 4, solo en compu
   useEffect(() => {
     if (!abierta) return;
     setFecha(new Date());
     titulo.current?.focus();
+    let fin: ReturnType<typeof setTimeout> | undefined;
+    if (!sinMovimiento()) {
+      setEntrada(true);
+      fin = setTimeout(() => setEntrada(false), VENTANA_ENTRADA_MS);
+    }
     const alEscape = (e: KeyboardEvent) => e.key === "Escape" && cerrarYVolver();
     window.addEventListener("keydown", alEscape);
-    return () => window.removeEventListener("keydown", alEscape);
+    return () => {
+      window.removeEventListener("keydown", alEscape);
+      clearTimeout(fin);
+      setEntrada(false);
+    };
     // cerrarYVolver solo usa el store y el DOM: no hace falta en las dependencias
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [abierta]);
@@ -50,7 +67,7 @@ export default function HojaComparacion() {
   }
 
   return (
-    <section className={`sheet${abierta ? " open" : ""}`} aria-labelledby="hoja-titulo" inert={!abierta}>
+    <section className={`sheet${abierta ? " open" : ""}${entrada ? " intro" : ""}`} aria-labelledby="hoja-titulo" inert={!abierta}>
       <header>
         <h2 id="hoja-titulo" ref={titulo} tabIndex={-1}>
           Rotación actual y 3 alternativas
@@ -69,18 +86,24 @@ export default function HojaComparacion() {
 
       <AvisoDesactualizado />
 
-      <div className={css.cuerpo}>
-        {resultado.estado === "cargando" && <p className={css.estado}>Trayendo los datos de NASA…</p>}
-        {resultado.estado === "error" && (
-          <p className={css.estado} role="alert">
-            No se pudo armar la comparación: {resultado.mensaje}
-          </p>
-        )}
-        {resultado.estado === "listo" && <ChoqueObjetivos estrategias={resultado.datos.estrategias} />}
-        {resultado.estado === "listo" && <SerieCampanias salida={resultado.datos} />}
-        {resultado.estado === "listo" &&
-          (vista === "tabla" ? <TablaTecnica salida={resultado.datos} /> : <TarjetasEstrategias salida={resultado.datos} />)}
-      </div>
+      <EntradaHoja.Provider value={entrada}>
+        <div className={css.cuerpo}>
+          {resultado.estado === "cargando" && (
+            <p className={css.estado} role="status">
+              Trayendo los datos de NASA…
+            </p>
+          )}
+          {resultado.estado === "error" && (
+            <p className={css.estado} role="alert">
+              No se pudo armar la comparación: {resultado.mensaje.replace(/[.\s]+$/, "")}. Para reintentar, cerrá la hoja y volvé a comparar.
+            </p>
+          )}
+          {resultado.estado === "listo" && <ChoqueObjetivos estrategias={resultado.datos.estrategias} />}
+          {resultado.estado === "listo" && <SerieCampanias salida={resultado.datos} />}
+          {resultado.estado === "listo" &&
+            (vista === "tabla" ? <TablaTecnica salida={resultado.datos} /> : <TarjetasEstrategias salida={resultado.datos} />)}
+        </div>
+      </EntradaHoja.Provider>
 
       <div className={`foot ${css.pie}`}>
         <div className={css.pieTextos}>

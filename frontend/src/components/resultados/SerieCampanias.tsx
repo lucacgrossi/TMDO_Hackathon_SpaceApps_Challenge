@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { useState, type CSSProperties, type KeyboardEvent } from "react";
+import { PASO_BARRA_MS } from "@/lib/animacion";
 import { TIPOS_DE_ANIO, type Salida } from "@/lib/contrato";
 import { fmt, conSigno } from "@/lib/formato";
 import { barrasSerie, conteoTercios, NOMBRE_TERCIO, textosSerie, type BarraSerie } from "@/lib/serie";
@@ -17,6 +18,8 @@ import css from "./serie.module.css";
  *
  * El tercio no queda solo en el color: va en la etiqueta de cada barra (mouse,
  * foco y lector de pantalla), en la leyenda con su conteo y en la tabla.
+ * Al abrir la hoja, las barras aparecen una tras otra (`--retraso`, clase
+ * `intro`); con `prefers-reduced-motion: reduce` están desde el principio.
  * Si el back no manda la serie (`serie_anual: null`), no se dibuja nada: lo
  * que falte lo dice "Información que falta", si el back lo manda.
  */
@@ -66,6 +69,7 @@ export default function SerieCampanias({ salida }: { salida: Salida }) {
         setActiva(i);
       }}
       onClick={() => setActiva(i)}
+      style={{ "--retraso": `${i * PASO_BARRA_MS + 60}ms` } as CSSProperties}
     >
       <i style={{ height: `${Math.max(b.alto * 100, 4)}%`, background: `var(--${b.tipo})` }} />
     </button>

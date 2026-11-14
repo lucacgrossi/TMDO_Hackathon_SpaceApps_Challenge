@@ -1,6 +1,6 @@
 "use client";
 
-import type { MouseEvent, ReactNode } from "react";
+import type { CSSProperties, MouseEvent, ReactNode } from "react";
 import { cercania, cercaniaPorTipo, esSensibleAlClima, type Pesos } from "@/lib/cercania";
 import { TIPOS_DE_ANIO, esDisponible, type Estrategia, type EstrategiaDisponible, type Salida, type TipoAnio } from "@/lib/contrato";
 import { metricasTarjeta, rangoTipoAnio, seccionesDetalle, textoProbabilidad } from "@/lib/tarjeta";
@@ -26,6 +26,8 @@ interface Props {
   pesos: Pesos;
   seleccionada: boolean;
   onSeleccionar: () => void;
+  /** Posición de la columna (0 = actual): ordena la entrada al abrir la hoja (`--k` del prototipo). */
+  orden: number;
 }
 
 /**
@@ -40,12 +42,13 @@ interface Props {
  * con el botón "Ver detalle" (teclado, `aria-pressed`). La cercanía va con
  * menos peso que en el prototipo para que no parezca un ranking.
  */
-export default function TarjetaEstrategia({ salida, estrategia: e, actual, pesos, seleccionada, onSeleccionar }: Props) {
+export default function TarjetaEstrategia({ salida, estrategia: e, actual, pesos, seleccionada, onSeleccionar, orden }: Props) {
   const idNombre = `tarjeta-${e.id}`;
+  const estilo = { "--k": orden } as CSSProperties;
 
   if (!esDisponible(e)) {
     return (
-      <article className={`card off ${css.tarjeta}`} aria-labelledby={idNombre}>
+      <article className={`card off ${css.tarjeta}`} style={estilo} aria-labelledby={idNombre}>
         <Cabecera e={e} idNombre={idNombre}>
           <b>Descartada.</b> {e.motivo_descarte}
         </Cabecera>
@@ -71,6 +74,7 @@ export default function TarjetaEstrategia({ salida, estrategia: e, actual, pesos
     <article
       className={`card ${css.tarjeta}`}
       data-seleccionada={seleccionada}
+      style={estilo}
       aria-labelledby={idNombre}
       onClick={alClic}
     >

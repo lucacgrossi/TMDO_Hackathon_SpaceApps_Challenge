@@ -14,6 +14,10 @@
   outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
+/* La opción con foco se marca también con fondo: el menú mueve el foco con las flechas aunque se haya abierto con el mouse */
+.raiz :global(.menu) :is(a, button):focus {
+  background: var(--soft);
+}
 .separador {
   border: 0;
   border-top: 1px solid var(--line);

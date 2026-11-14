@@ -9,6 +9,10 @@
   margin-top: 0;
   width: 220px;
 }
+/* La opción elegida va en acento: a 13 px da 4,1:1 en claro; llevada hacia la tinta, ≈ 5,8:1 (y ≈ 10:1 en oscuro) */
+.interruptor button[aria-checked="true"] {
+  color: color-mix(in srgb, var(--accent) 75%, var(--ink));
+}
 
 /* Cuerpo de la hoja: lo que queda entre el encabezado y el pie, con scroll propio */
 .cuerpo {
@@ -45,7 +49,12 @@
   color: var(--ink);
 }
 
-/* Badge de la estrategia. El blanco sobre --s-b no llega a 4,5:1 (DESIGN.md): la B va con tinta oscura */
+/*
+ * Badge de la estrategia, con el color de su columna. Contraste de la letra (13 px, 800):
+ * claro: actual 7,6:1 · A 5,6:1 (el --s-a tal cual da 4,25:1 con blanco y 4,4:1 con
+ * tinta oscura: se oscurece un 15 %) · B 5,6:1 con tinta oscura (el blanco da 3,1:1) · C 5,1:1.
+ * oscuro: los colores de estrategia son claros y la letra va oscura en todas (7,3:1 o más).
+ */
 .insignia {
   width: 26px;
   height: 26px;
@@ -57,60 +66,25 @@
   color: #fff;
   flex: none;
 }
+.insignia[data-id="actual"] {
+  background: var(--s-actual);
+}
+.insignia[data-id="A"] {
+  background: color-mix(in srgb, var(--s-a) 85%, #000);
+}
 .insignia[data-id="B"] {
+  background: var(--s-b);
   color: #1b1405;
 }
+.insignia[data-id="C"] {
+  background: var(--s-c);
+}
 @media (prefers-color-scheme: dark) {
+  .insignia[data-id="A"] {
+    background: var(--s-a);
+  }
   /* En oscuro los colores de estrategia son claros: el texto va oscuro en todas */
   .insignia {
     color: #0d1317;
-  }
-}
-
-/* Vista previa de las 4 columnas mientras llegan la tabla (feature 3) y las tarjetas (feature 7) */
-.columnas {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(200px, 1fr));
-  gap: 10px;
-}
-.columna {
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  padding: 12px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
-}
-.columna[data-disponible="false"] {
-  opacity: 0.6;
-  background: repeating-linear-gradient(135deg, transparent, transparent 8px, var(--soft) 8px, var(--soft) 16px);
-}
-.cabecera {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-.nombre {
-  font-weight: 700;
-  line-height: 1.2;
-}
-.detalle {
-  font-size: 12px;
-  color: var(--muted);
-}
-.resumen {
-  font-size: 12px;
-  line-height: 1.4;
-}
-.aviso {
-  font-size: 11px;
-  color: var(--muted);
-  margin-top: 10px;
-}
-
-@media (max-width: 900px) {
-  .columnas {
-    grid-template-columns: repeat(4, minmax(220px, 1fr));
   }
 }

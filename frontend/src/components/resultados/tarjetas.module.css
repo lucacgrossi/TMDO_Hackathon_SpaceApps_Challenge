@@ -87,6 +87,16 @@
   border-radius: 3px;
   transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
 }
+/* Entrada de la hoja: las barras crecen desde 0, después de que llega su tarjeta (--k) */
+:global(.intro) .barra i {
+  animation: metricaDesdeCero 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--k, 0) * 70ms + 200ms);
+}
+@keyframes metricaDesdeCero {
+  from {
+    width: 0;
+  }
+}
 /* Sin verde ni rojo: el signo dice la dirección, no un juicio */
 .diferencia {
   grid-area: diferencia;
@@ -158,12 +168,11 @@
 .detalle[hidden] {
   display: none;
 }
+/* Títulos del detalle en tipo oración (DESIGN.md): las mayúsculas quedan para las etiquetas de sección */
 .detalle h4 {
   margin: 0 0 2px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
   color: var(--ink);
 }
 .detalle ul {
@@ -192,6 +201,16 @@
   overflow: hidden;
   clip: rect(0 0 0 0);
   white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra i,
+  .chevron {
+    transition: none;
+  }
+  :global(.intro) .barra i {
+    animation: none;
+  }
 }
 
 @media (max-width: 900px) {
