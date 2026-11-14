@@ -278,6 +278,41 @@ def _capa_mes(r: dict, arr: np.ndarray | None, malla: tuple | None, etiqueta: st
         return None
 
 
+def _meses_bajos(meses: list, arrays: list, malla: tuple | None, etiqueta: str) -> tuple[dict | None, str | None]:
+    """CapaRaster con cuántos meses estuvo cada píxel bajo el umbral (base de la erosión por píxel).
+
+    Solo si todos los meses con dato tienen raster: si no, el conteo por píxel no sería comparable con
+    el del lote. Devuelve (capa | None, motivo | None). Nunca lanza.
+    """
+    if not malla:
+        return None, "Sin grilla del lote"
+    con_dato = [(r, a) for r, a in zip(meses, arrays) if r]
+    if not con_dato:
+        return None, "Sin NDVI en la campaña"
+    if any(a is None for _, a in con_dato):
+        return None, "Hay meses con NDVI del lote pero sin raster sobre la grilla"
+    try:
+        g, adentro = malla
+        pila = np.stack([a for _, a in con_dato])
+        con_valor = np.isfinite(pila)
+        conteo = np.where(con_valor.any(axis=0), (con_valor & (np.nan_to_num(pila, nan=1.0) < UMBRAL_NDVI_BAJO))
+                          .sum(axis=0).astype(float), np.nan)
+        n_modis = sum(1 for r, _ in con_dato if r["coleccion"] == MODIS_COLECCION)
+        nota = (f"Meses de la campaña {etiqueta} en que el píxel tuvo NDVI < {UMBRAL_TEXTO}, sobre "
+                f"{len(con_dato)} meses con dato. Un píxel sin dato en un mes no suma ese mes")
+        if n_modis:
+            nota += f". En {n_modis} {'mes' if n_modis == 1 else 'meses'} el dato es MODIS (bloques de 250 m)"
+        capa = raster.capa(
+            id="meses_bajos", titulo=f"Meses con cobertura baja · {etiqueta}", unidad="meses",
+            fuente=FUENTE_HLS if not n_modis else f"{FUENTE_HLS}; MODIS 250 m en {n_modis} de {len(con_dato)} meses",
+            resolucion_nativa=RESOLUCION_HLS if not n_modis else "30 m (250 m en los meses MODIS)", grilla=g,
+            array=conteo, mascara=adentro, escala=escalas.MESES_BAJOS, factor=1.0,
+            confianza="alta" if not n_modis and len(con_dato) == 12 else "media", nota=nota, campana=etiqueta)
+    except Exception as e:  # noqa: BLE001 — la capa nunca rompe el NDVI
+        return None, f"No se pudo armar la capa de meses bajos ({type(e).__name__})"
+    return capa, None if capa else "Sin píxeles con dato en el lote"
+
+
 def _sin_dato(campana: str, motivo: str, faltantes: list | None = None) -> dict:
     return {
         "visto_por_satelite": {
@@ -291,6 +326,8 @@ def _sin_dato(campana: str, motivo: str, faltantes: list | None = None) -> dict:
         },
         "mapas": [None] * 12,
         "grilla": None,
+        "meses_bajos_mapa": None,
+        "meses_bajos_motivo": motivo,
     }
 
 
@@ -301,7 +338,9 @@ def calcular(poligono: dict, *, campana: int | None = None, hoy: date | None = N
     campana: año de inicio (2025 → 2025/26). Por defecto, la última campaña completa a `hoy`.
 
     Devuelve {visto_por_satelite, meses_cobertura_baja, mapas: [CapaRaster | None] × 12 (índice 0 =
-    enero, como `meses`), grilla: {bounds, ancho, alto, paso} | None}.
+    enero, como `meses`), grilla: {bounds, ancho, alto, paso} | None, meses_bajos_mapa: CapaRaster |
+    None (meses bajo el umbral por píxel, siempre con `valores`: lo usa la erosión por píxel),
+    meses_bajos_motivo: str | None}.
     """
     inicio = campana if campana is not None else campana_inicio(hoy)
     etiqueta = _etiqueta_campana(inicio)
@@ -325,19 +364,21 @@ def calcular(poligono: dict, *, campana: int | None = None, hoy: date | None = N
         cf.wait(futuros, timeout=PLAZO_TOTAL)
         pool.shutdown(wait=False, cancel_futures=True)
 
-        meses, faltantes, mapas = [], [], []
+        meses, faltantes, mapas, arrays = [], [], [], []
         for (a, m), f in zip(meses_pedidos, futuros):
             if f.done():
                 r, motivo, arr = f.result()
             else:
                 r, motivo, arr = None, f"{_nombre_mes(a, m)}: Planetary Computer no respondió a tiempo", None
             meses.append(r)
+            arrays.append(arr if r else None)
             mapas.append(_capa_mes(r, arr, malla, etiqueta) if r else None)
             if r is None:
                 faltantes.append({"mes": f"{a}-{m:02d}", "motivo": motivo})
         resultado = _armar(etiqueta, meses, faltantes)
         resultado["mapas"] = mapas
         resultado["grilla"] = malla[0].a_dict() if malla else None
+        resultado["meses_bajos_mapa"], resultado["meses_bajos_motivo"] = _meses_bajos(meses, arrays, malla, etiqueta)
         return resultado
     except Exception as e:  # noqa: BLE001 — nunca propagar: va a "Información que falta"
         return _sin_dato(etiqueta, f"No se pudo calcular el NDVI del lote ({type(e).__name__})")
@@ -390,6 +431,9 @@ if __name__ == "__main__":
     resultado = calcular(poligono)
     resultado["mapas"] = [{"fecha": c["fecha"], "resumen": c["resumen"], "png": len(c["png"]),
                            "valores": len(c["valores"] or "")} if c else None for c in resultado["mapas"]]
+    if resultado["meses_bajos_mapa"]:
+        resultado["meses_bajos_mapa"] = {"resumen": resultado["meses_bajos_mapa"]["resumen"],
+                                         "nota": resultado["meses_bajos_mapa"]["nota"]}
     sys.stdout.reconfigure(encoding="utf-8")
     print(json.dumps(resultado, ensure_ascii=False, indent=2))
     print(f"Tiempo: {time.perf_counter() - t0:.1f} s", file=sys.stderr)
