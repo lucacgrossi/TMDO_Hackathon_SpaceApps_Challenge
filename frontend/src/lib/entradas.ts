@@ -1,3 +1,5 @@
+import type { ResultadoPlanilla } from "@/lib/planilla";
+
 /**
  * Tipos y valores iniciales de las ENTRADAS del productor (persona 4).
  *
@@ -51,14 +53,24 @@ export interface Entradas {
   verano: Verano;
   invierno: Invierno;
   pasada: Verano;
-  /** Barras de 0 a 5 (RF4). */
+  /** Barras de 1 a 5 (RF4 del MVP 4.3: el contrato rechaza un 0). */
   objetivos: Record<Objetivo, number>;
   restricciones: { sinRiego: boolean; sinHacienda: boolean; maquinariaLimitada: boolean };
   noSembrar: CultivoNoSembrar[];
   anegable: Anegable;
   textura: Textura;
   /** Mediciones propias (RF15). null = no cargó. */
-  mediciones: { lluviaAnualMm: number | null; materiaOrganicaPct: number | null };
+  mediciones: {
+    lluviaAnualMm: number | null;
+    /** Años de registro del pluviómetro (entero ≥ 1): el back decide con esto cuánto pesa la lluvia del productor. */
+    aniosRegistro: number | null;
+    materiaOrganicaPct: number | null;
+    /**
+     * Planilla CSV subida (RF26): nombre del archivo y lo que devolvió el
+     * parser. Sus `serie.meses` van en `mediciones_propias.serie_mensual`.
+     */
+    planilla: { nombre: string; resultado: ResultadoPlanilla } | null;
+  };
 }
 
 /** Lote de ejemplo: campo real cerca de Río Cuarto, ~95 ha (DEMO del prototipo). */
@@ -88,5 +100,5 @@ export const ENTRADAS_INICIALES: Entradas = {
   noSembrar: [],
   anegable: "no",
   textura: "franco",
-  mediciones: { lluviaAnualMm: null, materiaOrganicaPct: null },
+  mediciones: { lluviaAnualMm: null, aniosRegistro: null, materiaOrganicaPct: null, planilla: null },
 };

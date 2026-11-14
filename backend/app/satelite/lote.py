@@ -10,6 +10,8 @@ from __future__ import annotations
 import math
 import sys
 
+import numpy as np
+
 # Lote demo: campo cerca de Río Cuarto, ~95 ha, soja con barbecho invernal (CLAUDE.md).
 LOTE_EJEMPLO: dict = {
     "type": "Polygon",
@@ -86,6 +88,26 @@ def bbox(poligono: dict) -> list[float]:
     pts = _vertices(poligono)
     xs, ys = [p[0] for p in pts], [p[1] for p in pts]
     return [min(xs), min(ys), max(xs), max(ys)]
+
+
+def mascara(poligono: dict, lons: np.ndarray, lats: np.ndarray) -> np.ndarray:
+    """Matriz bool [len(lats), len(lons)]: True si el centro del píxel cae dentro del polígono.
+
+    lons y lats son los centros de las columnas y las filas de una grilla (arrays 1D).
+    Ray casting vectorizado (misma regla que `inPoly` del prototipo).
+    """
+    pts = _vertices(poligono)
+    x = np.asarray(lons, dtype=float)[None, :]
+    y = np.asarray(lats, dtype=float)[:, None]
+    dentro = np.zeros((y.shape[0], x.shape[1]), dtype=bool)
+    for i, (xi, yi) in enumerate(pts):
+        xj, yj = pts[i - 1]
+        if yi == yj:
+            continue
+        cruza = (yi > y) != (yj > y)
+        x_corte = (xj - xi) * (y - yi) / (yj - yi) + xi
+        dentro ^= cruza & (x < x_corte)
+    return dentro
 
 
 def _orientacion(a, b, c) -> float:

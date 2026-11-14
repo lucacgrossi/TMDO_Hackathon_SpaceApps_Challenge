@@ -4,7 +4,11 @@ import Toast from "@/components/comunes/Toast";
 import HojaComparacion from "@/components/resultados/HojaComparacion";
 import PanelEntradas from "@/components/entradas/PanelEntradas";
 import BarraDibujo from "@/components/mapa/BarraDibujo";
+import BuscadorMapa from "@/components/mapa/BuscadorMapa";
+import Leyenda from "@/components/mapa/Leyenda";
+import LineaTiempo from "@/components/mapa/LineaTiempo";
 import MapaDinamico from "@/components/mapa/MapaDinamico";
+import SelectorCapas from "@/components/mapa/SelectorCapas";
 
 /**
  * Pantalla única, como el prototipo: el mapa de fondo, el panel de entradas
@@ -20,6 +24,14 @@ export default function Inicio() {
       <MapaDinamico />
       <div className="onb-bg" aria-hidden="true" />
       <PanelEntradas />
+      {/* `.tools`: herramientas flotantes del mapa (paso 2), en el orden del
+          prototipo: buscador, línea de tiempo (solo con capas por mes) y capas. */}
+      <div className="tools">
+        <BuscadorMapa />
+        <LineaTiempo />
+        <SelectorCapas />
+      </div>
+      <Leyenda />
       <BarraDibujo />
       {/* Hoja de resultados (persona 5) */}
       <HojaComparacion />

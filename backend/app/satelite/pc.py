@@ -11,13 +11,18 @@ import io
 import httpx
 import numpy as np
 
+from app.satelite import red
+
 BASE = "https://planetarycomputer.microsoft.com/api"
 URL_BUSQUEDA = f"{BASE}/stac/v1/search"
 URL_DATOS = f"{BASE}/data/v1"
 TIMEOUT = 10.0  # segundos por pedido (PLAN.md §3: /analizar en menos de 30 s)
+# Un reintento ante timeout, falla de red o HTTP 5xx: el 14/11 vimos timeouts sueltos que al
+# reintentar respondían en ~1 s. Los pedidos son lecturas, así que repetirlos es seguro.
+REINTENTOS = 1
 
 # Un solo cliente para todo el proceso: reusa conexiones y es seguro entre hilos.
-_cliente = httpx.Client(timeout=TIMEOUT, headers={"User-Agent": "field-shift-backend"})
+_cliente = red.cliente(TIMEOUT)  # certificados del sistema + certifi (ver red.py)
 
 
 class ErrorPC(Exception):
@@ -29,15 +34,24 @@ def _feature(poligono: dict) -> dict:
 
 
 def _pedir(metodo: str, url: str, **kwargs) -> httpx.Response:
-    try:
-        r = _cliente.request(metodo, url, **kwargs)
-    except httpx.TimeoutException as e:
-        raise ErrorPC(f"Planetary Computer no respondió en {TIMEOUT:.0f} s") from e
-    except httpx.HTTPError as e:
-        raise ErrorPC(f"No se pudo conectar con Planetary Computer ({type(e).__name__})") from e
-    if r.status_code != 200:
-        raise ErrorPC(f"Planetary Computer respondió con error HTTP {r.status_code}")
-    return r
+    error: ErrorPC | None = None
+    for _ in range(REINTENTOS + 1):
+        try:
+            r = _cliente.request(metodo, url, **kwargs)
+        except httpx.TimeoutException as e:
+            error = ErrorPC(f"Planetary Computer no respondió en {TIMEOUT:.0f} s")
+            error.__cause__ = e
+            continue
+        except httpx.HTTPError as e:
+            error = ErrorPC(f"No se pudo conectar con Planetary Computer ({type(e).__name__})")
+            error.__cause__ = e
+            continue
+        if r.status_code == 200:
+            return r
+        error = ErrorPC(f"Planetary Computer respondió con error HTTP {r.status_code}")
+        if r.status_code < 500:  # 4xx: el pedido está mal, reintentar no cambia nada
+            break
+    raise error
 
 
 def buscar(coleccion: str, poligono: dict, fechas: str | None = None, limite: int = 50,
@@ -63,10 +77,11 @@ def buscar(coleccion: str, poligono: dict, fechas: str | None = None, limite: in
 
 
 def estadisticas(coleccion: str, item: str, poligono: dict, assets: str | None = None,
-                 expresion: str | None = None) -> dict:
+                 expresion: str | None = None, categorico: bool = False) -> dict:
     """Estadísticas (mean, min, max, count, …) del asset o la expresión sobre el polígono.
 
     Devuelve el dict de la primera banda, tal como lo arma la API de datos.
+    categorico=True: `histogram` = [[cantidad de píxeles…], [clase…]] (para mapas de clases).
     """
     params: dict = {"collection": coleccion, "item": item}
     if expresion:
@@ -74,6 +89,8 @@ def estadisticas(coleccion: str, item: str, poligono: dict, assets: str | None =
         params["asset_as_band"] = "true"
     elif assets:
         params["assets"] = assets
+    if categorico:
+        params["categorical"] = "true"
     r = _pedir("POST", f"{URL_DATOS}/item/statistics", params=params, json=_feature(poligono))
     try:
         bandas = r.json()["properties"]["statistics"]
@@ -101,3 +118,36 @@ def array_poligono(coleccion: str, item: str, poligono: dict, asset: str
     xs = [p[0] for p in poligono["coordinates"][0]]
     ys = [p[1] for p in poligono["coordinates"][0]]
     return arr[0], arr[1] > 0, [min(xs), min(ys), max(xs), max(ys)]
+
+
+def raster_en_grilla(coleccion: str, item: str, grilla, assets: str | None = None,
+                     expresion: str | None = None, resampling: str | None = None) -> np.ndarray:
+    """Valores del asset (o de la expresión) sobre la grilla común del lote (`grilla.Grilla`).
+
+    Devuelve un array float [alto, ancho] con NaN donde la fuente no tiene dato (fuera de la
+    tesela o enmascarado), con fila 0 = norte y columna 0 = oeste. No aplica la máscara del lote.
+    Usa `item/bbox/{bbox}/{W}x{H}.npy` con `dst_crs=epsg:4326`: anda para NASADEM, HLS, WorldCover
+    y MODIS (con `item/crop`, HLS da 404). El `.npy` trae las bandas y, al final, la máscara (0 = sin dato).
+    resampling: `nearest`, `bilinear`, `mode`, … (el del servidor de teselas).
+    """
+    oeste, sur, este, norte = grilla.bbox
+    params: dict = {"collection": coleccion, "item": item, "dst_crs": "epsg:4326"}
+    if expresion:
+        params["expression"] = expresion
+        params["asset_as_band"] = "true"
+    elif assets:
+        params["assets"] = assets
+    if resampling:
+        params["resampling"] = resampling
+    url = f"{URL_DATOS}/item/bbox/{oeste!r},{sur!r},{este!r},{norte!r}/{grilla.ancho}x{grilla.alto}.npy"
+    r = _pedir("GET", url, params=params)
+    try:
+        arr = np.load(io.BytesIO(r.content), allow_pickle=False)
+    except (ValueError, OSError) as e:
+        raise ErrorPC(f"No se pudo leer el raster de {coleccion}") from e
+    if arr.ndim != 3 or arr.shape[0] < 2 or arr.shape[1:] != (grilla.alto, grilla.ancho):
+        raise ErrorPC(f"Raster de {coleccion} con forma inesperada {arr.shape} "
+                      f"(se esperaba la grilla {grilla.alto} × {grilla.ancho})")
+    valores = arr[0].astype(float)
+    valores[(arr[-1] == 0) | ~np.isfinite(valores)] = np.nan
+    return valores
