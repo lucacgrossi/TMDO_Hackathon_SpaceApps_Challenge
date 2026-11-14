@@ -15,6 +15,9 @@ BASE = "https://planetarycomputer.microsoft.com/api"
 URL_BUSQUEDA = f"{BASE}/stac/v1/search"
 URL_DATOS = f"{BASE}/data/v1"
 TIMEOUT = 10.0  # segundos por pedido (PLAN.md §3: /analizar en menos de 30 s)
+# Un reintento ante timeout, falla de red o HTTP 5xx: el 14/11 vimos timeouts sueltos que al
+# reintentar respondían en ~1 s. Los pedidos son lecturas, así que repetirlos es seguro.
+REINTENTOS = 1
 
 # Un solo cliente para todo el proceso: reusa conexiones y es seguro entre hilos.
 _cliente = httpx.Client(timeout=TIMEOUT, headers={"User-Agent": "field-shift-backend"})
@@ -29,15 +32,24 @@ def _feature(poligono: dict) -> dict:
 
 
 def _pedir(metodo: str, url: str, **kwargs) -> httpx.Response:
-    try:
-        r = _cliente.request(metodo, url, **kwargs)
-    except httpx.TimeoutException as e:
-        raise ErrorPC(f"Planetary Computer no respondió en {TIMEOUT:.0f} s") from e
-    except httpx.HTTPError as e:
-        raise ErrorPC(f"No se pudo conectar con Planetary Computer ({type(e).__name__})") from e
-    if r.status_code != 200:
-        raise ErrorPC(f"Planetary Computer respondió con error HTTP {r.status_code}")
-    return r
+    error: ErrorPC | None = None
+    for _ in range(REINTENTOS + 1):
+        try:
+            r = _cliente.request(metodo, url, **kwargs)
+        except httpx.TimeoutException as e:
+            error = ErrorPC(f"Planetary Computer no respondió en {TIMEOUT:.0f} s")
+            error.__cause__ = e
+            continue
+        except httpx.HTTPError as e:
+            error = ErrorPC(f"No se pudo conectar con Planetary Computer ({type(e).__name__})")
+            error.__cause__ = e
+            continue
+        if r.status_code == 200:
+            return r
+        error = ErrorPC(f"Planetary Computer respondió con error HTTP {r.status_code}")
+        if r.status_code < 500:  # 4xx: el pedido está mal, reintentar no cambia nada
+            break
+    raise error
 
 
 def buscar(coleccion: str, poligono: dict, fechas: str | None = None, limite: int = 50,
@@ -63,10 +75,11 @@ def buscar(coleccion: str, poligono: dict, fechas: str | None = None, limite: in
 
 
 def estadisticas(coleccion: str, item: str, poligono: dict, assets: str | None = None,
-                 expresion: str | None = None) -> dict:
+                 expresion: str | None = None, categorico: bool = False) -> dict:
     """Estadísticas (mean, min, max, count, …) del asset o la expresión sobre el polígono.
 
     Devuelve el dict de la primera banda, tal como lo arma la API de datos.
+    categorico=True: `histogram` = [[cantidad de píxeles…], [clase…]] (para mapas de clases).
     """
     params: dict = {"collection": coleccion, "item": item}
     if expresion:
@@ -74,6 +87,8 @@ def estadisticas(coleccion: str, item: str, poligono: dict, assets: str | None =
         params["asset_as_band"] = "true"
     elif assets:
         params["assets"] = assets
+    if categorico:
+        params["categorical"] = "true"
     r = _pedir("POST", f"{URL_DATOS}/item/statistics", params=params, json=_feature(poligono))
     try:
         bandas = r.json()["properties"]["statistics"]

@@ -19,17 +19,39 @@ def _npy(arr):
 
 
 def test_timeout_es_error_pc(monkeypatch):
+    intentos = []
+
     def handler(request):
+        intentos.append(request)
         raise httpx.ReadTimeout("lento", request=request)
     monkeypatch.setattr(pc, "_cliente", _cliente(handler))
     with pytest.raises(pc.ErrorPC, match="no respondió"):
         pc.buscar("nasadem", LOTE_EJEMPLO)
+    assert len(intentos) == pc.REINTENTOS + 1
 
 
 def test_http_500_es_error_pc(monkeypatch):
     monkeypatch.setattr(pc, "_cliente", _cliente(lambda r: httpx.Response(500)))
     with pytest.raises(pc.ErrorPC, match="HTTP 500"):
         pc.estadisticas("nasadem", "x", LOTE_EJEMPLO, assets="elevation")
+
+
+def test_reintenta_una_vez_y_sigue(monkeypatch):
+    respuestas = iter([httpx.Response(503), httpx.Response(200, json={"features": [{"id": "a"}]})])
+    monkeypatch.setattr(pc, "_cliente", _cliente(lambda r: next(respuestas)))
+    assert pc.buscar("nasadem", LOTE_EJEMPLO) == [{"id": "a"}]
+
+
+def test_http_4xx_no_reintenta(monkeypatch):
+    intentos = []
+
+    def handler(request):
+        intentos.append(request)
+        return httpx.Response(404)
+    monkeypatch.setattr(pc, "_cliente", _cliente(handler))
+    with pytest.raises(pc.ErrorPC, match="HTTP 404"):
+        pc.buscar("nasadem", LOTE_EJEMPLO)
+    assert len(intentos) == 1
 
 
 def test_json_inesperado_es_error_pc(monkeypatch):
