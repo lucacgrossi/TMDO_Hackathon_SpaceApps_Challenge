@@ -61,13 +61,36 @@ export interface LoteEntrada {
   area_ha: number;
 }
 
-/** Barritas de 0 (nada) a 5 (mucho). Por defecto 3 (RF4). */
+/**
+ * Barritas de 1 (poco) a 5 (mucho). Por defecto 3 (RF4). Eligen las especies de
+ * A, B y C y pesan al cuadrado en la cercanía (una 5 pesa 25 veces una 1).
+ * Ya no hay 0: el back responde 422 (#57, decisión del 14/11 aprobada por la persona 3).
+ */
 export type Prioridades = Record<Objetivo, number>;
 
+/**
+ * Un mes de la planilla del productor. En temperaturas, `t_min_c` es la mínima
+ * más baja del mes y `t_max_c` la máxima más alta (como T2M_MIN / T2M_MAX de POWER).
+ */
+export interface MedicionMes {
+  /** AAAA-MM. */
+  mes: string;
+  lluvia_mm: number | null;
+  t_min_c: number | null;
+  t_max_c: number | null;
+}
+
+/**
+ * Mediciones del productor (RF15). Se contrastan al lado de NASA y, desde el
+ * MVP 4.3, la lluvia y las temperaturas también se mezclan con NASA en los
+ * puntajes del motor según los años de registro. La materia orgánica no puntúa.
+ */
 export interface MedicionesPropias {
   lluvia_anual_mm: number | null;
   anios_registro: number | null;
   materia_organica_pct: number | null;
+  /** Meses de la planilla (hasta 40 años). Si trae lluvia, manda sobre `lluvia_anual_mm`. */
+  serie_mensual?: MedicionMes[] | null;
 }
 
 export interface Entrada {
@@ -127,16 +150,70 @@ export interface CorregidoAlLado {
   nota: string;
 }
 
-/** RF15: medición del productor al lado de NASA. No cambia ningún puntaje. */
+/** Una campaña en común entre la planilla del productor y NASA POWER. */
+export interface DetalleCampana {
+  campana: string;
+  productor: number;
+  nasa: number;
+  /** % en lluvia; en helada y calor, productor − NASA (0 o 1). */
+  diferencia: number | null;
+}
+
+/**
+ * RF15: medición del productor al lado de NASA. El contraste en sí no cambia
+ * puntajes (la mezcla en los puntajes la hace el motor y la cuenta la evidencia).
+ * Sin `valor_nasa` la fila es "dato del productor": la materia orgánica (no hay
+ * fuente NASA) o la lluvia cuando NASA POWER no respondió.
+ */
 export interface ContrasteMedicion {
   indicador: string;
   valor_productor: number;
-  valor_nasa: number;
+  valor_nasa: number | null;
   unidad: string;
-  diferencia_pct: number;
-  confianza_resultante: "alta" | "baja";
+  /** (productor − NASA) / NASA · 100; null si no hay NASA. */
+  diferencia_pct: number | null;
+  /** Diferencia > 15 % → baja; null si no hay comparación. */
+  confianza_resultante: "alta" | "baja" | null;
   corregido_al_lado: CorregidoAlLado | null;
   texto: string;
+  /** Campañas en común con NASA (planilla), ej. ["2018/19", "2019/20"]. */
+  campanas_comparadas?: string[] | null;
+  /** Productor y NASA por campaña, para la mini tabla (planilla). */
+  detalle_campanas?: DetalleCampana[] | null;
+  /** Mes (0 = enero) en las filas "helada" y "calor". */
+  mes?: number | null;
+}
+
+// --- Planilla de mediciones (POST /mediciones/planilla, interfaz de la persona 4) ---
+
+export interface AvisoFila {
+  /** Número de fila del archivo; null si es del archivo entero. */
+  fila: number | null;
+  motivo: string;
+}
+
+export type VariablePlanilla = "lluvia_mm" | "t_min_c" | "t_max_c";
+
+export interface SeriePlanilla {
+  /** Cronológico. Es lo que el front manda en `mediciones_propias.serie_mensual`. */
+  meses: MedicionMes[];
+  variables: VariablePlanilla[];
+  granularidad: "diaria" | "mensual";
+  periodo: { desde: string; hasta: string };
+  /** Campañas julio–junio con los 12 meses, por variable. */
+  campanas_completas: Partial<Record<VariablePlanilla, string[]>>;
+  lluvia_media_campana_mm: number | null;
+  filas_leidas: number;
+  filas_usadas: number;
+  avisos: AvisoFila[];
+  formato: { codificacion: string; separador: string; decimal: string };
+}
+
+/** Respuesta de POST /mediciones/planilla: 200 si `ok`, 422 si no. */
+export interface ResultadoPlanilla {
+  ok: boolean;
+  serie: SeriePlanilla | null;
+  errores: AvisoFila[];
 }
 
 /** Celda de NASA POWER (0,5° × 0,625°), para dibujarla a la escala real del dato. */
@@ -150,8 +227,14 @@ export interface ClimaCelda {
 /** Climatología de las 30 campañas. Índice 0 = enero. */
 export interface ClimaMensual {
   lluvia_mm: number[];
+  /** Promedio de 30 años de la mínima más baja de cada mes (T2M_MIN es extremo del mes). */
   minima_media_c: number[];
+  /** Promedio de 30 años de la máxima más alta de cada mes (T2M_MAX es extremo del mes). */
   maxima_media_c: number[];
+  /** Temperatura media del mes (T2M), promedio de 30 años. */
+  t_media_c?: number[] | null;
+  /** Amplitud térmica diaria media (T2M_RANGE), la usa Hargreaves. */
+  amplitud_diaria_c?: number[] | null;
   et0_mm: (number | null)[];
   balance_mm: (number | null)[];
   anios_con_helada: number[];
@@ -216,8 +299,9 @@ export type PorTipo = Record<TipoAnio, number>;
 /**
  * Puntos de 0 a 100 por dimensión (RF13). Con esto el front recalcula la
  * cercanía al mover las barritas, sin volver a llamar a la API:
- *   cercania(tipo) = Σ prioridad[o] · valor[o] / Σ prioridad[o]
- * donde valor.agua = agua[tipo] y el resto no cambia con el tipo de año.
+ *   cercania(tipo) = round(Σ prioridad[o]² · valor[o] / Σ prioridad[o]²)
+ * con prioridades de 1 a 5, donde valor.agua = agua[tipo] y el resto no cambia
+ * con el tipo de año. Es la fórmula de `app/motor/reglas.py` (EXPONENTE_PRIORIDAD = 2).
  */
 export interface Puntos {
   agua: PorTipo;
@@ -274,6 +358,11 @@ export interface Probabilidad {
   pct: number;
   texto: string;
   fuente: string;
+  /**
+   * Línea del productor para el mismo mes y evento, ej. "Tu estación: helada en
+   * mayo en 4 de 6 campañas". No cambia la probabilidad (sale de NASA).
+   */
+  contraste?: string | null;
 }
 
 export interface Estrategia {

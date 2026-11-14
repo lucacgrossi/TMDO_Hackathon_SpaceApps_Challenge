@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { esDisponible, type Salida } from "@/lib/contrato";
-import { MOCK_BASE, MOCK_DESCARTADA, MOCK_PLUVIOMETRO, mockAnalizar } from "@/mocks/analizar";
+import { MOCK_BASE, MOCK_DESCARTADA, MOCK_PLUVIOMETRO, MOCK_SIN_MEZCLA, mockAnalizar } from "@/mocks/analizar";
 
 const puntos = (s: Salida) => s.estrategias.map((e) => ({ id: e.id, puntos: e.puntos, cercania: e.cercania }));
 
@@ -60,8 +60,11 @@ describe("mock de /analizar · variantes", () => {
     expect(MOCK_PLUVIOMETRO.estrategias[0].riesgos.some((r) => r.includes("difiere 19 %"))).toBe(true);
   });
 
-  it("el pluviómetro no cambia ningún puntaje", () => {
+  it("el mock no simula la mezcla en los puntajes y lo dice en lo que falta", () => {
+    // En el back la lluvia del productor sí mueve los puntos (MVP 4.3); el mock no lo imita
     expect(puntos(MOCK_PLUVIOMETRO)).toEqual(puntos(MOCK_BASE));
+    expect(MOCK_PLUVIOMETRO.informacion_falta).toContain(MOCK_SIN_MEZCLA);
+    expect(MOCK_BASE.informacion_falta).not.toContain(MOCK_SIN_MEZCLA);
   });
 
   it.each([
@@ -94,8 +97,17 @@ describe("mock de /analizar · variantes", () => {
     expect(MOCK_BASE.contraste_mediciones).toEqual([]);
   });
 
-  it("con materia orgánica cargada deja de figurar en lo que falta", () => {
+  it("la materia orgánica llega como dato del productor, sin NASA, y deja de figurar en lo que falta", () => {
     const s = mockAnalizar({ materiaOrganicaPct: 2.4 });
+    expect(s.contraste_mediciones).toEqual([
+      expect.objectContaining({
+        indicador: "materia_organica",
+        valor_productor: 2.4,
+        valor_nasa: null,
+        diferencia_pct: null,
+        confianza_resultante: null,
+      }),
+    ]);
     const textos = [...s.informacion_falta, ...s.estrategias.flatMap((e) => e.vacios)];
     expect(textos.some((v) => v.startsWith("Materia orgánica"))).toBe(false);
   });
