@@ -62,7 +62,7 @@ Las fuentes están verificadas contra el lote demo (ver "Datos que usamos" en `.
 | 4 | **Probabilidad climatológica** | `clima/probabilidad.py` | Para cada riesgo y mes: cantidad de años en que ocurrió sobre el total, y su porcentaje ("balance de julio negativo en 22 de 30 años → 73 %"). Cubre helada, calor > 35 °C, déficit de agua y lluvia extrema |
 | 5 | **Corrección con mediciones** | `clima/correccion.py` | Con la lluvia del pluviómetro y sus años de registro: factor = medición / POWER en el mismo período. Devuelve el valor NASA, la medición, el factor, el valor corregido y la confianza resultante. Sin mediciones, devuelve la serie tal cual |
 | 6 | Orquestación | `servicio.py` | `analizar()` llama a `clima/`, `satelite/` y `motor/` y arma la `Salida` completa, con "Información que falta" |
-| 7 | Deploy y merges | Cloud Run, `dev` | `/analizar` deployado y respondiendo en menos de 30 s |
+
 
 ### Back 2 · datos satelitales del lote
 | # | Tarea | Archivo | Hecho cuando |
@@ -74,6 +74,7 @@ Las fuentes están verificadas contra el lote demo (ver "Datos que usamos" en `.
 | 5 | ET satelital | `satelite/et.py` | ET real anual de MODIS (escala 0,1 → mm/año), para mostrarla al lado del balance de Back 1 |
 | 6 | Capas del mapa | `satelite/capas.py` | `ndvi_mensual[12]` y erosión (pendiente × meses de cobertura baja), con el formato que se acuerde con Front 1 |
 | 7 | Demo precalculada | `scripts/precalcular_demo.py`, `demo/rio_cuarto.json` | El JSON sale de `servicio.analizar()` para el lote demo y se regenera después de cada cambio de contrato |
+| 8 | Deploy y merges | Cloud Run, `dev` | `/analizar` deployado y respondiendo en menos de 30 s |
 
 ### Para acordar entre los dos (y con Lógica / Front)
 - **Orden de los meses** en todos los arrays de 12: campaña julio → junio o enero → diciembre. Tiene que ser el mismo en el clima, el NDVI, el motor y el front.
