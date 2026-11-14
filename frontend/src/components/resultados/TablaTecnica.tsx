@@ -15,6 +15,7 @@ import {
 import { conSigno, fmt, mesesConAnios, NOMBRE_CULTIVO, rangoMeses, textoEfecto, tramosCalendario } from "@/lib/formato";
 import { useEntradas } from "@/lib/store";
 import CeldaDato, { HuellaDato, type Origen } from "./CeldaDato";
+import ContrasteMediciones, { MateriaOrganicaProductor } from "./ContrasteMediciones";
 import InsigniaEstrategia from "./InsigniaEstrategia";
 import LeyendaLinea from "./LeyendaLinea";
 import LineaCampania from "./LineaCampania";
@@ -150,14 +151,18 @@ const GRUPOS: Grupo[] = [
         titulo: "Suelo",
         ayuda: "puntos de 0 a 100",
         celda: (e, { actual }) => (
-          <CeldaDato
-            valor={fmt(e.puntos.suelo)}
-            unidad="pts"
-            diferencia={frenteALaActual(e, e.puntos.suelo, actual?.puntos.suelo, "pts")}
-            origen={REGLA_FIJA}
-          >
-            Aporte de N {fmt(e.valores.aporte_n)} · rastrojo {fmt(e.valores.rastrojo)} (índices)
-          </CeldaDato>
+          <div className={css.celda}>
+            <CeldaDato
+              valor={fmt(e.puntos.suelo)}
+              unidad="pts"
+              diferencia={frenteALaActual(e, e.puntos.suelo, actual?.puntos.suelo, "pts")}
+              origen={REGLA_FIJA}
+            >
+              Aporte de N {fmt(e.valores.aporte_n)} · rastrojo {fmt(e.valores.rastrojo)} (índices)
+            </CeldaDato>
+            {/* Es del lote, no de la rotación: va una sola vez, en la actual, y no entra en los puntos */}
+            {e.id === "actual" && <MateriaOrganicaProductor />}
+          </div>
         ),
       },
       {
@@ -344,6 +349,7 @@ export default function TablaTecnica({ salida }: { salida: Salida }) {
   return (
     <div className={css.contenedor}>
       <LeyendaLinea />
+      <ContrasteMediciones salida={salida} />
       <table className={css.tabla}>
         <caption className={css.oculto}>
           Comparación técnica de la rotación actual con las alternativas A, B y C
