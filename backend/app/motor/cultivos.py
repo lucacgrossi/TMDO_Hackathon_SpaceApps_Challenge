@@ -8,7 +8,9 @@ Campos:
 - grupo: "verano", "invierno", "cobertura" o "barbecho".
 - tolera_helada: aguanta heladas en los meses que está en el lote.
 - sensible_calor: la floración sufre con máximas de 35 °C o más.
-- kc: coeficiente de cultivo medio del ciclo (FAO-56). Uso de agua del mes = kc × ET0.
+- kc: coeficiente de cultivo medio del ciclo (FAO-56). Uso de agua del mes = kc × ET0. La vicia va por
+  encima del centeno: en años secos consumió más agua que el centeno y afectó al maíz siguiente
+  (INTA Manfredi, ensayos de cultivos de cobertura).
 - meses: meses en el lote (índice 0 = enero).
 - floracion: meses de floración (para el riesgo de calor).
 - aporte_n: puntos de suelo por fijar nitrógeno.
@@ -50,7 +52,7 @@ C: dict[str, dict] = {
                "kc": 0.50, "meses": [5, 6, 7, 8, 9, 10], "floracion": [9],
                "aporte_n": 0, "rastrojo": 15, "comercial": True},
     "vicia": {"nombre": "Vicia", "grupo": "cobertura", "tolera_helada": True, "sensible_calor": False,
-              "kc": 0.55, "meses": [4, 5, 6, 7, 8], "floracion": [],
+              "kc": 0.65, "meses": [4, 5, 6, 7, 8], "floracion": [],
               "aporte_n": 30, "rastrojo": 15, "comercial": False},
     "centeno": {"nombre": "Centeno", "grupo": "cobertura", "tolera_helada": True, "sensible_calor": False,
                 "kc": 0.60, "meses": [4, 5, 6, 7, 8], "floracion": [],
