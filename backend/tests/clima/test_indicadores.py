@@ -138,3 +138,14 @@ def test_sin_et0_corta_por_lluvia(monkeypatch):
     assert r.terciles_motor["seco"]["et0"] is None
     assert r.indicadores["balance_anual"].confianza == "sin_dato"
     assert any("por lluvia" in f for f in r.faltantes)
+
+
+def test_serie_corta_de_power_va_a_falta():
+    """Con meses sin dato al final, POWER da menos de 30 campañas: se avisa, no se rellena."""
+    datos = json.loads(FIXTURE.read_text(encoding="utf-8"))
+    for valores in datos["properties"]["parameter"].values():
+        for clave in list(valores)[-30:]:  # los últimos ~2,5 años en −999
+            valores[clave] = -999.0
+    r = ind.calcular(armar_serie(datos), LAT_DEMO, LON_DEMO)
+    assert r.ok and r.n == 29
+    assert any("29 campañas completas" in f and "no 30" in f for f in r.faltantes)
