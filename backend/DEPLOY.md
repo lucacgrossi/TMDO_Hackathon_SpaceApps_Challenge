@@ -6,7 +6,7 @@ Dueño: Back 2. Servicio `field-shift-api`, región `southamerica-east1` (São P
 |---|---|
 | `requirements.txt` | Dependencias (incluye `fastapi` y `uvicorn`) |
 | `Procfile` | `web: uvicorn app.main:app --host 0.0.0.0 --port $PORT` (Cloud Run pone `PORT=8080`) |
-| `.python-version` | `3.12`, la misma versión que la CI |
+| `.python-version` | `3.13`: el builder `google-24` de Cloud Run no tiene 3.12 (va de 3.13 a 3.15). La CI sigue en 3.12 |
 | `.gcloudignore` | Deja afuera tests, cachés, `.venv`, scripts, datos pesados y `.env`. **Sí** sube `app/demo/` y `app/api/mock_rio_cuarto.json` |
 
 Todos los comandos van en Git Bash, **desde `backend/`**. Se deploya desde `main` después de probar en `dev`; desde otra branch, solo una prueba sin tráfico (paso 4).
@@ -26,6 +26,15 @@ gcloud config set run/region southamerica-east1
 gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregistry.googleapis.com
 ```
 El proyecto tiene que tener la facturación con los créditos de la hackathon: sin facturación, el build falla.
+
+Cloud Build construye con la cuenta de servicio de Compute, que en los proyectos nuevos no tiene roles. Sin roles, el build falla sin logs. Hay que darle `roles/run.builder` una vez:
+```bash
+NUM=$(gcloud projects describe <ID_DEL_PROYECTO> --format 'value(projectNumber)')
+gcloud projects add-iam-policy-binding <ID_DEL_PROYECTO> \
+  --member="serviceAccount:${NUM}-compute@developer.gserviceaccount.com" \
+  --role="roles/run.builder" --condition=None
+```
+En `nasa-space-app-fieldchange` ya está hecho (14/11). Servicio: https://field-shift-api-757348191517.southamerica-east1.run.app
 
 ## 2. Antes de deployar
 ```bash
