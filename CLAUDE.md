@@ -16,7 +16,7 @@ Responde al desafío *"Field Shift: Adapting Farms with NASA Data"*: comparar ro
 - **Compara, no recomienda.** La app nunca dice cuál es mejor ni qué hacer. Prohibido escribir "te recomendamos", "deberías" o "la mejor"; los textos describen datos ("5 meses más de cobertura, −60 mm de balance en años secos").
 - **Sin IA dentro de la app.** No hay LLM ni machine learning en tiempo de uso: todo sale de reglas fijas, estadística y plantillas de texto. Las predicciones son **estadísticas**: frecuencias observadas en 30 años, no un modelo entrenado.
 - **Trazable.** Cada valor y cada texto se puede rastrear hasta el dato y la regla que lo produjo.
-- **NASA es la base.** Todo parte de datos de NASA. Las mediciones del productor solo **corrigen** esos datos, y de forma explícita: siempre se muestran el valor NASA original, la medición y la corrección aplicada.
+- **NASA es la base.** Los puntajes salen solo de datos de NASA. Las mediciones del productor se muestran **al lado**, para contrastar y ajustar la confianza; **no cambian ningún puntaje**.
 - **Nada inventado.** Lo que falta o tiene baja confianza va a "Información que falta".
 - **Estandarizado.** Misma estructura de salida para todos: siempre 4 columnas (actual + A, B, C). Una alternativa descartada por restricción aparece en gris con el motivo.
 - **Técnico por defecto.** Cada valor muestra unidad, fuente, años, resolución y confianza. Cada capa del mapa se dibuja a la escala real del dato.
@@ -31,9 +31,13 @@ Responde al desafío *"Field Shift: Adapting Farms with NASA Data"*: comparar ro
 
 **Incertidumbre:** los 30 años se ordenan por balance de agua y se cortan en terciles (secos / normales / húmedos). Cada alternativa muestra sus valores por tipo de año y se marca "sensible al clima" si la diferencia es grande.
 
-**Predicción estadística (probabilidad climatológica):** la probabilidad de cada riesgo sale de la frecuencia con que ocurrió en los 30 años del punto. Ejemplos: "balance de julio negativo en 22 de 30 años → 73 %", "helada después del 15 de septiembre en 9 de 30 años → 30 %". Se aplica a los riesgos del calendario (helada, calor > 35 °C, déficit de agua, lluvia extrema) y siempre muestra el conteo de años, no solo el porcentaje.
+**Predicción estadística (probabilidad climatológica):** la probabilidad de cada evento sale de la frecuencia con que ocurrió en las 30 campañas del punto, según el calendario de cada estrategia: helada con cultivo sensible, siembra con menos de la mitad de la lluvia normal, máxima ≥ 35 °C. Ejemplo: "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)". Siempre muestra el conteo de años, no solo el porcentaje.
 
-**Corrección con mediciones propias:** si el productor carga sus mediciones (por ejemplo, la lluvia del pluviómetro y los años de registro), se calcula el sesgo frente a NASA en el mismo período y se corrige la serie con un factor. La tabla muestra el valor NASA, la medición, el factor y el valor corregido. La confianza del indicador sube o baja según la diferencia y la cantidad de años de registro. Sin mediciones, todo funciona solo con NASA.
+**Contraste con mediciones propias:** si el productor carga sus mediciones a mano (lluvia del pluviómetro y años de registro, materia orgánica), se muestran al lado de NASA ("Tu pluviómetro: 650 mm/año · NASA: 824 mm (−21 %)"). Si la diferencia pasa el 15 %, la confianza del agua baja y el punto va a "Revisar con el agrónomo". Puede mostrarse un valor "corregido con tu pluviómetro", solo informativo. **No cambia ningún puntaje.** Sin mediciones, todo funciona solo con NASA.
+
+**Clima:** un solo pedido mensual a NASA POWER con las **últimas 30 campañas completas de julio a junio**. Todo lo climático (lluvia, heladas, calor, terciles, serie por campaña) sale de ese mismo período.
+
+**Lote:** es un polígono que dibuja el usuario (de 1 a 20.000 ha) o el lote de ejemplo. Todo lo satelital se calcula sobre el polígono, no sobre un punto.
 
 **Lote de la demo:** zona de Río Cuarto (sur de Córdoba), lote de soja con barbecho invernal (≈ 33,2477° S, 64,2325° O). Sus datos y capas se precalculan para que la demo no dependa del WiFi. La app tiene que funcionar en cualquier punto.
 
@@ -44,23 +48,23 @@ Verificados el 14/11 contra el lote demo: todos funcionan sin login y responden 
 
 | Fuente | Aporta | Resolución | Acceso | Dueño |
 |---|---|---|---|---|
-| NASA POWER mensual | Lluvia, temperaturas, humedad del suelo, 1991–2024 | ~50 km | API REST, comunidad `AG` | Back 1 |
-| NASA POWER diario | Días de helada, días > 35 °C, lluvia extrema | ~50 km | API REST, comunidad `AG` | Back 1 |
+| NASA POWER mensual | Lluvia, temperaturas mínima y máxima, últimas 30 campañas (jul–jun) | ~50 km | API REST, comunidad `AG` | Back 1 |
 | Hargreaves (FAO-56) | ET de referencia → balance hídrico | ~50 km | Calculada con las temperaturas de POWER | Back 1 |
-| MODIS MOD13Q1 | NDVI cada 16 días desde el 2000 → meses de cobertura baja | 250 m | PC `modis-13Q1-061` | Back 2 |
-| HLS (Landsat + Sentinel-2) | NDVI del lote en la última campaña | 30 m | PC `hls2-s30` / `hls2-l30` | Back 2 |
+| HLS (Landsat + Sentinel-2) | NDVI del lote por mes en la última campaña → visto por satélite | 30 m | PC `hls2-s30` / `hls2-l30` | Back 2 |
+| MODIS MOD13Q1 | NDVI de respaldo cuando HLS no tiene escena limpia | 250 m | PC `modis-13Q1-061` | Back 2 |
 | NASADEM | Elevación → pendiente → erosión | 30 m | PC `nasadem` (AWS Terrain Tiles de respaldo) | Back 2 |
 | ESA WorldCover | ¿El punto es un lote agrícola? | 10 m | PC `esa-worldcover` | Back 2 |
 | MODIS MOD16A3GF | ET real anual, para contrastar Hargreaves | 500 m | PC `modis-16A3GF-061` | Back 2 |
 | NASA GIBS | NDVI como imagen (capa visual) | 250 m | Teselas WMTS | Front |
 | Esri World Imagery | Mapa base | — | Teselas | Front |
-| Mediciones del productor | Pluviómetro, materia orgánica | Su lote | Carga en la app | Corrección |
+| Esri World Geocoding | Buscar el lugar del lote | — | `suggest` / `findAddressCandidates`, sin cuenta | Front |
+| Mediciones del productor | Pluviómetro, materia orgánica | Su lote | Carga a mano en la app | Contraste (Back 1) |
 
 Todo se lleva a **escala mensual + climatología de 30 años**. Los datos gruesos se presentan como "contexto regional".
 
 **Detalles que importan:**
-- POWER mensual trae una clave `AAAA13` (total anual) que hay que descartar, y la lluvia viene en mm/día.
-- MODIS a 250 m mezcla el lote con los vecinos: en julio de 2024 dio NDVI 0,31, mientras HLS a 30 m dio 0,264. El umbral de "cobertura baja" se define por fuente.
+- POWER mensual trae una clave `AAAA13` (total anual) que hay que descartar. Con `PRECTOTCORR_SUM` la lluvia viene en mm/mes; con `PRECTOTCORR`, en mm/día. No mezclar con la climatología precalculada de POWER (otro período, extremos absolutos).
+- MODIS a 250 m mezcla el lote con los vecinos: en julio de 2024 dio NDVI 0,31, mientras HLS a 30 m dio 0,264. Por eso el lote se mide con HLS y el umbral de cobertura baja (0,3) está pensado para HLS.
 
 **Descartados:** ERA5 y GPM en PC (zarr pesado, solo hasta ~2021) · SMAP (desde 2015, pide Earthdata) · ECOSTRESS (pasadas irregulares) · GRACE (solo regional) · SoilGrids (recortado; no está en PC) · Meteomatics (no es de NASA, el acceso vence y no es trazable). **Solo si sobra tiempo:** FAO GAEZ.
 
