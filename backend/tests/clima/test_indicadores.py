@@ -44,7 +44,7 @@ def test_hargreaves_ecuacion_52():
 
 def test_resultado_ok_con_30_campanas(r):
     assert r.ok and r.motivo is None
-    assert r.n == 30 and r.periodo == "1995/96 a 2024/25"
+    assert r.n == 30 and r.periodo == "1996/97 a 2025/26"
     assert r.faltantes == []
 
 
@@ -57,7 +57,7 @@ def test_clima_mensual_valida_el_contrato_y_tiene_12_meses(r):
 
 
 def test_lluvia_media_del_lote_demo(r):
-    assert r.indicadores["lluvia_anual"].valor == 824
+    assert r.indicadores["lluvia_anual"].valor == 819
 
 
 def test_heladas_frecuentes_en_invierno(r):
