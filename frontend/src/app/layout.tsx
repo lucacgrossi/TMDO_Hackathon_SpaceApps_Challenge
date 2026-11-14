@@ -13,7 +13,10 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es-AR" className={inter.variable}>
-      <body className="onb">{children}</body>
+      {/* body.onb = paso 1; ClaseBody la saca al pasar al mapa */}
+      <body className="onb" suppressHydrationWarning>
+        {children}
+      </body>
     </html>
   );
 }

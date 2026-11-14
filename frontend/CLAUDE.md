@@ -37,13 +37,15 @@ Desde `frontend/` (Node 20 o más):
 - Variables: copiar `.env.example` a `.env.local`. Sin `.env.local`, se usa el mock.
 
 ## Estructura
-El front es, por ahora, **el prototipo v2 portado tal cual** (`../docs/prototipo/field-shift-prototipo.html`). Así la app anda desde el primer deploy, y cada tarea reemplaza una parte por componentes React y datos de `/analizar`.
-- `src/app/` · `layout.tsx` (fuente Inter, CSS de Leaflet y del prototipo) y `page.tsx` (monta los componentes y arranca la lógica).
-- `src/components/` · el HTML del prototipo partido en una pieza por archivo (`PanelEntradas`, `BarraCapas`, `HojaComparacion`…). **Conservan los ids y clases** que usa la lógica.
-- `src/prototipo/iniciar.ts` · el JavaScript del prototipo, sin tocar. Arriba tiene el mapa de secciones y qué tarea reemplaza cada una (comentarios `[port]`).
-- `public/img/` · foto e imagen de nubes de la intro (créditos en `CREDITOS.txt`).
-- Tailwind toma los colores de las variables CSS del prototipo (`bg-panel`, `text-muted`, `bg-accent`…). El reset de Tailwind está apagado para no cambiar el aspecto.
-- Cuando se porte una parte a React, se borra su sección de `iniciar.ts` en el mismo PR.
+Referencia visual y de comportamiento: `../docs/field-shift-prototipo (4).html` (prototipo final). Los componentes son React de verdad y **reusan las clases CSS del prototipo**, que está tal cual en `src/app/globals.css`.
+- `src/app/` · `layout.tsx` (Inter, CSS de Leaflet y del prototipo) y `page.tsx` (monta mapa, panel y, en el paso 2, la hoja de la persona 5).
+- `src/lib/entradas.ts` · tipos y valores iniciales de las entradas del productor. `src/lib/store.ts` · estado compartido (zustand): `useEntradas((s) => s.verano)` para leer, `cambiar({ … })` para escribir.
+- `src/components/entradas/` · persona 4: `PanelEntradas` y una sección por archivo (`ElegirLote`, `BuscadorLote`, `ResumenLote`, `SeccionRotacion`, `SeccionObjetivos`, `SeccionRestricciones`, `SeccionDatosLote`, `SeccionMediciones`).
+- `src/components/mapa/` · persona 4: `Mapa` (siempre vía `MapaDinamico`) y `BarraDibujo`.
+- `src/components/comunes/` · `ClaseBody` (sincroniza `body.onb` con el paso) y `AvisoApoyo`.
+- `public/img/` · imágenes de la intro (créditos en `CREDITOS.txt`).
+- El paso 1 / paso 2 lo maneja el CSS del prototipo con `body.onb`; el estado `paso` lo decide.
+- Sin conexión con el backend por ahora: la llamada a `/analizar` se arma en la auditoría.
 
 ## Fuera de alcance
 Lo del `CLAUDE.md` raíz, más: chat o IA, alfalfa y pasturas, guardar comparaciones.

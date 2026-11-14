@@ -1,45 +1,24 @@
-"use client";
-
-import { useEffect } from "react";
-import Intro from "@/components/Intro";
-import MapaFondo from "@/components/MapaFondo";
-import FondoInicio from "@/components/FondoInicio";
-import PanelEntradas from "@/components/PanelEntradas";
-import BarraCapas from "@/components/BarraCapas";
-import Leyenda from "@/components/Leyenda";
-import HojaComparacion from "@/components/HojaComparacion";
-import Toast from "@/components/Toast";
-import BarraDibujo from "@/components/BarraDibujo";
-import AvisoSinConexion from "@/components/AvisoSinConexion";
+import ClaseBody from "@/components/comunes/ClaseBody";
+import PanelEntradas from "@/components/entradas/PanelEntradas";
+import BarraDibujo from "@/components/mapa/BarraDibujo";
+import MapaDinamico from "@/components/mapa/MapaDinamico";
 
 /**
- * Port del prototipo v2 (docs/prototipo). Los componentes dibujan el mismo
- * HTML y, una vez montados, iniciarPrototipo() le agrega el mapa y la
- * lógica. Leaflet se importa adentro del efecto porque usa window.
+ * Pantalla única, como el prototipo: el mapa de fondo, el panel de entradas
+ * y, en el paso 2, la hoja de resultados.
+ *
+ * Dueños: todo lo de acá es de la persona 4, salvo la hoja de resultados
+ * (persona 5), que se monta en el lugar marcado abajo.
  */
 export default function Inicio() {
-  useEffect(() => {
-    let vivo = true;
-    Promise.all([import("leaflet"), import("@/prototipo/iniciar")]).then(([L, p]) => {
-      if (vivo) p.iniciarPrototipo(L.default);
-    });
-    return () => {
-      vivo = false;
-    };
-  }, []);
-
   return (
     <>
-      <Intro />
-      <MapaFondo />
-      <FondoInicio />
+      <ClaseBody />
+      <MapaDinamico />
+      <div className="onb-bg" aria-hidden="true" />
       <PanelEntradas />
-      <BarraCapas />
-      <Leyenda />
-      <HojaComparacion />
-      <Toast />
       <BarraDibujo />
-      <AvisoSinConexion />
+      {/* Hoja de resultados (persona 5): <HojaComparacion /> va acá. */}
     </>
   );
 }
