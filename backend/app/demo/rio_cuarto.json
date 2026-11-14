@@ -894,7 +894,8 @@
      "de": 30,
      "pct": 10,
      "texto": "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
-     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+     "contraste": null
     },
     {
      "evento": "calor",
@@ -904,7 +905,8 @@
      "de": 30,
      "pct": 97,
      "texto": "Máxima de 35 °C o más en enero con soja: 29 de 30 años (97 %)",
-     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+     "contraste": null
     }
    ],
    "por_que": [
@@ -1126,7 +1128,8 @@
      "de": 30,
      "pct": 47,
      "texto": "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)",
-     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+     "contraste": null
     },
     {
      "evento": "siembra_seca",
@@ -1136,7 +1139,8 @@
      "de": 30,
      "pct": 10,
      "texto": "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
-     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+     "contraste": null
     },
     {
      "evento": "calor",
@@ -1146,7 +1150,8 @@
      "de": 30,
      "pct": 97,
      "texto": "Máxima de 35 °C o más en enero con soja: 29 de 30 años (97 %)",
-     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+     "contraste": null
     }
    ],
    "por_que": [
@@ -1366,7 +1371,8 @@
      "de": 30,
      "pct": 10,
      "texto": "Siembra de soja de 2ª (diciembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
-     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+     "contraste": null
     },
     {
      "evento": "siembra_seca",
@@ -1376,7 +1382,8 @@
      "de": 30,
      "pct": 57,
      "texto": "Siembra de trigo (junio) con menos de la mitad de la lluvia normal: 17 de 30 años (57 %)",
-     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+     "contraste": null
     },
     {
      "evento": "calor",
@@ -1386,7 +1393,8 @@
      "de": 30,
      "pct": 97,
      "texto": "Máxima de 35 °C o más en enero con soja de 2ª: 29 de 30 años (97 %)",
-     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+     "contraste": null
     }
    ],
    "por_que": [
@@ -1586,7 +1594,8 @@
      "de": 30,
      "pct": 10,
      "texto": "Siembra de sorgo (noviembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
-     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+     "contraste": null
     },
     {
      "evento": "calor",
@@ -1596,7 +1605,8 @@
      "de": 30,
      "pct": 97,
      "texto": "Máxima de 35 °C o más en enero con sorgo: 29 de 30 años (97 %)",
-     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26"
+     "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+     "contraste": null
     }
    ],
    "por_que": [
