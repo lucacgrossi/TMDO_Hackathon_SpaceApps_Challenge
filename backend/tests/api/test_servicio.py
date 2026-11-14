@@ -610,9 +610,11 @@ def test_capa_de_erosion_por_pixel_sale_en_la_grilla_y_cierra_con_la_tabla(monke
     assert (c.erosion_mapa.bounds, c.erosion_mapa.ancho, c.erosion_mapa.alto) == (
         c.grilla.bounds, c.grilla.ancho, c.grilla.alto)
     assert "erosion_mapa" not in c.no_disponibles
-    # El número de la tabla es la media de la capa (pendiente del píxel × 4 meses).
+    # El mapa es pendiente del píxel × meses del píxel (4). El número de la tabla lo elige Back 2
+    # (satelite/capas.py, #73: pendiente general × meses medios por píxel) y servicio solo exige que
+    # cierre con el mapa: valor_lote == riesgo_erosion.
+    assert c.erosion_mapa.resumen.media == pytest.approx(c.pendiente_mapa.resumen.media * 4, abs=0.1)
     assert c.erosion_mapa.resumen.valor_lote == s.indicadores["riesgo_erosion"].valor
-    assert s.indicadores["riesgo_erosion"].valor == pytest.approx(c.pendiente_mapa.resumen.media * 4, abs=0.1)
     assert c.erosion["metodo"] == "por_pixel"
 
 
