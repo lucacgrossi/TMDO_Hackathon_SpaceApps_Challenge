@@ -83,12 +83,16 @@ class Lote(BaseModel):
 
 
 class Prioridades(BaseModel):
-    """Barritas de 0 (nada) a 5 (mucho). Por defecto 3 (RF4)."""
+    """Barritas de 1 (poco) a 5 (mucho). Por defecto 3 (RF4).
 
-    agua: int = Field(3, ge=0, le=5)
-    suelo: int = Field(3, ge=0, le=5)
-    ingreso: int = Field(3, ge=0, le=5)
-    erosion: int = Field(3, ge=0, le=5)
+    Eligen las especies de A, B y C y pesan al cuadrado en la cercanía (una 5 pesa 25 veces una 1).
+    Decisión 14/11 aprobada por la persona 3: ya no hay 0 (antes dejaba afuera el objetivo).
+    """
+
+    agua: int = Field(3, ge=1, le=5)
+    suelo: int = Field(3, ge=1, le=5)
+    ingreso: int = Field(3, ge=1, le=5)
+    erosion: int = Field(3, ge=1, le=5)
 
 
 class MedicionMes(BaseModel):
@@ -354,8 +358,9 @@ class Puntos(BaseModel):
     """
     Puntos de 0 a 100 por dimensión (RF13). Con esto el front recalcula la
     cercanía al mover las barritas, sin volver a llamar a la API:
-        cercania(tipo) = Σ prioridad[o] · valor[o] / Σ prioridad[o]
-    donde valor["agua"] = agua[tipo] y el resto no cambia con el tipo de año.
+        cercania(tipo) = round(Σ prioridad[o]² · valor[o] / Σ prioridad[o]²)
+    con prioridades de 1 a 5, donde valor["agua"] = agua[tipo] y el resto no cambia con el
+    tipo de año. Es la fórmula de `app/motor/reglas.py` (EXPONENTE_PRIORIDAD = 2).
     """
 
     agua: PorTipo

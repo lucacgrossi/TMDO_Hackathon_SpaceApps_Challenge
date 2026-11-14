@@ -40,22 +40,35 @@ def test_cada_indicador_es_trazable():
             assert ind[clave], clave
 
 
-def test_puntos_alcanzan_para_recalcular_la_cercania():
-    """RF13: el front recalcula la cercanía con `puntos` y las prioridades."""
-    cuerpo = cliente.post("/analizar", json=ENTRADA).json()
-    pesos = ENTRADA["prioridades"]
+@pytest.mark.parametrize("prioridades", [
+    {"agua": 3, "suelo": 3, "ingreso": 3, "erosion": 3},
+    {"agua": 5, "suelo": 1, "ingreso": 3, "erosion": 2},  # distintas: distingue p² de p
+])
+def test_puntos_alcanzan_para_recalcular_la_cercania(prioridades):
+    """RF13: el front recalcula la cercanía con `puntos` y las prioridades al cuadrado (de 1 a 5)."""
+    entrada = copy.deepcopy(ENTRADA)
+    entrada["prioridades"] = prioridades
+    cuerpo = cliente.post("/analizar", json=entrada).json()
+    pesos = prioridades
     for e in cuerpo["estrategias"]:
         if not e["disponible"] or e["puntos"] is None:  # descartada, o motor todavía no conectado
             continue
         p = e["puntos"]
         valores = {"agua": p["agua"]["normal"], "suelo": p["suelo"], "erosion": p["erosion"], "ingreso": p["ingreso"]}
-        esperada = round(sum(pesos[o] * valores[o] for o in valores) / sum(pesos.values()))
+        esperada = round(sum(pesos[o] ** 2 * valores[o] for o in valores) / sum(pesos[o] ** 2 for o in valores))
         assert e["cercania"] == esperada
 
 
 def test_sin_lenguaje_de_recomendacion():
     texto = json.dumps(cliente.post("/analizar", json=ENTRADA).json(), ensure_ascii=False).lower()
     assert not any(p in texto for p in PROHIBIDAS)
+
+
+@pytest.mark.parametrize("valor", [0, 6])
+def test_prioridades_fuera_de_1_a_5_dan_422(valor):
+    mala = copy.deepcopy(ENTRADA)
+    mala["prioridades"]["agua"] = valor
+    assert cliente.post("/analizar", json=mala).status_code == 422
 
 
 def test_entrada_invalida_da_422():
