@@ -18,6 +18,7 @@ import CeldaDato, { HuellaDato, type Origen } from "./CeldaDato";
 import InsigniaEstrategia from "./InsigniaEstrategia";
 import LeyendaLinea from "./LeyendaLinea";
 import LineaCampania from "./LineaCampania";
+import NumeroAnimado from "./NumeroAnimado";
 import css from "./tabla.module.css";
 
 const NOMBRE_OBJETIVO: Record<Objetivo, string> = { agua: "Agua", suelo: "Suelo", erosion: "Erosión", ingreso: "Ingreso" };
@@ -227,7 +228,7 @@ const GRUPOS: Grupo[] = [
         celda: (e, { pesos }) => {
           const total = cercania(e.puntos, pesos);
           return (
-            <CeldaDato valor={total == null ? "—" : fmt(total)} unidad="%">
+            <CeldaDato valor={<NumeroAnimado valor={total} />} unidad="%">
               <span className={css.objetivos}>
                 {OBJETIVOS.map((o) => (
                   <span key={o}>
@@ -252,7 +253,9 @@ const GRUPOS: Grupo[] = [
               <div className={css.trio}>
                 {TIPOS_DE_ANIO.map((tipo) => (
                   <div key={tipo}>
-                    <b className={css.numero}>{trio[tipo] == null ? "—" : fmt(trio[tipo]!)}</b>
+                    <b className={css.numero}>
+                      <NumeroAnimado valor={trio[tipo]} />
+                    </b>
                     <span>
                       <i className={css.punto} style={{ background: `var(--${tipo})` }} aria-hidden="true" />
                       {NOMBRE_TIPO[tipo]}
