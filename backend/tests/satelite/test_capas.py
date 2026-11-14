@@ -166,15 +166,18 @@ LOTE_L = {"type": "Polygon", "coordinates": [[
 
 
 def test_erosion_por_pixel_en_l():
-    """Pendiente 2 % y 3 meses pelados en todo un lote en L → 6 en cada píxel, y el valor del lote es 6."""
-    pend, bajos, g, pixeles = _capas_px(2.0, 3.0, LOTE_L)
+    """Pendiente por píxel 2 % y 4 meses pelados en todo un lote en L: el mapa vale 8 en cada píxel, pero
+    el valor del lote usa la pendiente general del plano (0,6 %): 0,6 × 4 = 2,4."""
+    pend, bajos, g, pixeles = _capas_px(2.0, 4.0, LOTE_L)
     elev = {**_pendiente(), "mapa": pend, "grilla": g}
     r = capas.armar({**_ndvi(MESES), "meses_bajos_mapa": bajos, "grilla": g}, elev)
     Capas(**r)
     ero, mapa = r["erosion"], r["erosion_mapa"]
-    assert ero["valor"] == mapa["resumen"]["media"] == mapa["resumen"]["valor_lote"] == 6.0
+    assert mapa["resumen"]["media"] == ero["media_por_pixel"] == 8.0
+    assert ero["valor"] == mapa["resumen"]["valor_lote"] == 2.4 and ero["meses_bajos_medio_pixel"] == 4.0
     assert mapa["resumen"]["pixeles"] == pixeles and mapa["bounds"] == g["bounds"]
     assert ero["metodo"] == "por_pixel" and ero["valor_con_pendiente_general"] == 1.8
+    assert "pendiente general 0,6 %" in ero["nota"] and "ruidosa" in ero["nota"]
     assert ero["confianza"] == "media" and "no es pérdida de suelo" in ero["nota"]
     assert ero["meses_bajos"] == [6, 8, 9] and r["erosion_motivo"] is None and r["no_disponibles"] == []
     assert mapa["id"] == "erosion" and mapa["escala"]["cortes"] == [0.0, 2.0, 5.0, 10.0, 20.0]
@@ -204,3 +207,24 @@ def test_erosion_sin_valores_de_pendiente_usa_el_lote():
     r = capas.armar({**_ndvi(MESES), "meses_bajos_mapa": bajos, "grilla": g},
                     {**_pendiente(), "mapa": {**pend, "valores": None}, "grilla": g})
     assert r["erosion"]["metodo"] == "lote" and r["erosion_mapa"] is None
+
+
+def test_erosion_del_lote_usa_la_media_de_meses_por_pixel():
+    """Mitad del lote con 2 meses bajos y mitad con 6: el lote suma 0,6 % × 4 meses de promedio = 2,4."""
+    import numpy as np
+
+    from app.satelite import escalas, grilla, raster
+    from app.satelite.lote import LOTE_EJEMPLO
+    pend, _, g, _ = _capas_px(1.5, 0.0)
+    gg = grilla.desde_dict(g)
+    m = grilla.mascara(gg, LOTE_EJEMPLO)
+    meses = np.where(np.arange(gg.ancho)[None, :] < 20, 2.0, 6.0) * np.ones((gg.alto, 1))
+    m[:, 40:] = False                     # 20 columnas con 2 meses y 20 con 6, todas dentro del lote
+    assert m[:, :20].sum() == m[:, 20:40].sum() > 0
+    bajos = raster.capa(id="meses_bajos", titulo="m", unidad="meses", fuente="x", resolucion_nativa="30 m",
+                        grilla=gg, array=meses, mascara=m, escala=escalas.MESES_BAJOS, factor=1.0,
+                        confianza="alta")
+    r = capas.armar({**_ndvi(MESES), "meses_bajos_mapa": bajos, "grilla": g},
+                    {**_pendiente(), "mapa": pend, "grilla": g})
+    assert r["erosion"]["meses_bajos_medio_pixel"] == 4.0 and r["erosion"]["valor"] == 2.4
+    assert r["erosion_mapa"]["resumen"]["media"] == 6.0   # 1,5 % × 4 meses de promedio
