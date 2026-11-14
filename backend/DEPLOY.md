@@ -6,7 +6,7 @@ Dueño: Back 2. Servicio `field-shift-api`, región `southamerica-east1` (São P
 |---|---|
 | `requirements.txt` | Dependencias (incluye `fastapi` y `uvicorn`) |
 | `Procfile` | `web: uvicorn app.main:app --host 0.0.0.0 --port $PORT` (Cloud Run pone `PORT=8080`) |
-| `.python-version` | `3.12`, la misma versión que la CI |
+| `.python-version` | `3.13`: el builder `google-24` de Cloud Run no tiene 3.12 (va de 3.13 a 3.15). La CI sigue en 3.12 |
 | `.gcloudignore` | Deja afuera tests, cachés, `.venv`, scripts, datos pesados y `.env`. **Sí** sube `app/demo/` y `app/api/mock_rio_cuarto.json` |
 
 Todos los comandos van en Git Bash, **desde `backend/`**. Se deploya desde `main` después de probar en `dev`; desde otra branch, solo una prueba sin tráfico (paso 4).
