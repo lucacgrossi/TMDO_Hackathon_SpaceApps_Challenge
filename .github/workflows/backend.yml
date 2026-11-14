@@ -1,18 +1,13 @@
 name: Backend
 
 # Lint (ruff), tests de pytest sin red y chequeo de que la app importe.
-# Solo corre si cambia el back (o este workflow).
+# El workflow se dispara siempre (así el check nunca queda "pendiente" si se exige en las reglas de
+# branch), pero el job pesado se saltea si el cambio no toca el back ni este workflow: lo decide `cambios`.
 on:
   pull_request:
     branches: [dev, main]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend.yml"
   push:
     branches: [dev]
-    paths:
-      - "backend/**"
-      - ".github/workflows/backend.yml"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -22,8 +17,25 @@ permissions:
   contents: read
 
 jobs:
+  cambios:
+    name: ¿Cambió el back?
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      corre: ${{ steps.detectar.outputs.corre }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: detectar
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: python3 .github/scripts/cambios.py '^backend/' '^\.github/workflows/backend\.yml$' '^\.github/scripts/cambios\.py$'
+
   backend:
     name: Lint, tests y build
+    needs: cambios
+    if: needs.cambios.outputs.corre == 'true'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     defaults:
