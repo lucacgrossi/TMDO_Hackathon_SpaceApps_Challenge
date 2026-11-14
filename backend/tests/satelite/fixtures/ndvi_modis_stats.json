@@ -1,0 +1,24 @@
+{
+ "type": "Feature",
+ "properties": {
+  "statistics": {
+   "250m_16_days_NDVI_b1": {
+    "min": 2736.0,
+    "max": 3693.0,
+    "mean": 3112.75,
+    "count": 48.0,
+    "sum": 149412.0,
+    "std": 295.3716232703022,
+    "median": 2979.0,
+    "majority": 2736.0,
+    "minority": 3038.0,
+    "unique": 23.0,
+    "valid_percent": 100.0,
+    "masked_pixels": 0.0,
+    "valid_pixels": 48.0,
+    "percentile_2": 2736.0,
+    "percentile_98": 3693.0
+   }
+  }
+ }
+}

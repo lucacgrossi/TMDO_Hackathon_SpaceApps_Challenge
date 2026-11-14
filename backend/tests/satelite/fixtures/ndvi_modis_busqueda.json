@@ -1,0 +1,56 @@
+[
+ {
+  "id": "MOD13Q1.A2024209.h12v12.061.2024228023339",
+  "collection": "modis-13Q1-061",
+  "properties": {
+   "datetime": null,
+   "start_datetime": "2024-07-27T00:00:00.000000Z",
+   "end_datetime": "2024-08-11T23:59:59.000000Z"
+  }
+ },
+ {
+  "id": "MYD13Q1.A2024201.h12v12.061.2024222003746",
+  "collection": "modis-13Q1-061",
+  "properties": {
+   "datetime": null,
+   "start_datetime": "2024-07-19T00:00:00.000000Z",
+   "end_datetime": "2024-08-03T23:59:59.000000Z"
+  }
+ },
+ {
+  "id": "MOD13Q1.A2024193.h12v12.061.2024212093225",
+  "collection": "modis-13Q1-061",
+  "properties": {
+   "datetime": null,
+   "start_datetime": "2024-07-11T00:00:00.000000Z",
+   "end_datetime": "2024-07-26T23:59:59.000000Z"
+  }
+ },
+ {
+  "id": "MYD13Q1.A2024185.h12v12.061.2024207134518",
+  "collection": "modis-13Q1-061",
+  "properties": {
+   "datetime": null,
+   "start_datetime": "2024-07-03T00:00:00.000000Z",
+   "end_datetime": "2024-07-18T23:59:59.000000Z"
+  }
+ },
+ {
+  "id": "MOD13Q1.A2024177.h12v12.061.2024195022435",
+  "collection": "modis-13Q1-061",
+  "properties": {
+   "datetime": null,
+   "start_datetime": "2024-06-25T00:00:00.000000Z",
+   "end_datetime": "2024-07-10T23:59:59.000000Z"
+  }
+ },
+ {
+  "id": "MYD13Q1.A2024169.h12v12.061.2024186003403",
+  "collection": "modis-13Q1-061",
+  "properties": {
+   "datetime": null,
+   "start_datetime": "2024-06-17T00:00:00.000000Z",
+   "end_datetime": "2024-07-02T23:59:59.000000Z"
+  }
+ }
+]

@@ -4,8 +4,9 @@ from pathlib import Path
 
 import httpx
 import numpy as np
+import pytest
 
-from app.satelite import elevacion, pc
+from app.satelite import elevacion, pc, terrario
 from app.satelite.lote import LOTE_EJEMPLO
 
 FIX = Path(__file__).parent / "fixtures"
@@ -20,15 +21,40 @@ def _servidor_fixtures(request):
     return httpx.Response(404)
 
 
+def _aws_fixture(request):
+    """Sirve la tesela terrarium real (zoom 12) que cubre el lote demo."""
+    if request.url.path.endswith("/terrarium/12/1317/2449.png"):
+        return httpx.Response(200, content=(FIX / "terrario_12_1317_2449.png").read_bytes())
+    return httpx.Response(404)
+
+
+@pytest.fixture
+def aws_fixture(monkeypatch):
+    monkeypatch.setattr(terrario, "ZOOM_MAX", 12)      # con zoom 12 el lote demo entra en 1 tesela
+    monkeypatch.setattr(terrario, "_cliente", httpx.Client(transport=httpx.MockTransport(_aws_fixture)))
+
+
+@pytest.fixture
+def aws_caido(monkeypatch):
+    monkeypatch.setattr(terrario, "_cliente", httpx.Client(transport=httpx.MockTransport(
+        lambda r: httpx.Response(503))))
+
+
+def _nasadem_falla(monkeypatch, motivo="Planetary Computer no respondió en 10 s"):
+    def explota(*a, **k):
+        raise pc.ErrorPC(motivo)
+    monkeypatch.setattr(pc, "buscar", explota)
+
+
 def test_lote_demo(monkeypatch):
     """Respuesta real de NASADEM del 14/11 (fixture): el prototipo da ~0,6 %."""
     monkeypatch.setattr(pc, "_cliente", httpx.Client(transport=httpx.MockTransport(_servidor_fixtures)))
     r = elevacion.calcular(LOTE_EJEMPLO)
     general, maxima = r["pendiente_general"], r["pendiente_maxima"]
     assert CLAVES <= general.keys() and CLAVES <= maxima.keys()
-    assert 0.4 <= general["valor"] <= 0.8
+    assert general["valor"] == 0.6 and maxima["valor"] == 2.4
     assert general["unidad"] == "%" and general["confianza"] == "alta"
-    assert maxima["valor"] >= general["valor"]
+    assert general["fuente"].startswith("NASADEM")
 
 
 def test_plano_sintetico_en_l(monkeypatch):
@@ -54,16 +80,34 @@ def test_plano_sintetico_en_l(monkeypatch):
     assert abs(r["pendiente_maxima"]["valor"] - 2.0) <= 0.1
 
 
-def test_falla_no_rompe(monkeypatch):
-    def explota(*a, **k):
-        raise pc.ErrorPC("Planetary Computer no respondió en 10 s")
-    monkeypatch.setattr(pc, "buscar", explota)
+def test_nasadem_falla_usa_aws(monkeypatch, aws_fixture):
+    """NASADEM no responde → SRTM vía AWS (tesela real): parecido a NASADEM (0,6 %)."""
+    _nasadem_falla(monkeypatch)
+    r = elevacion.calcular(LOTE_EJEMPLO)
+    general, maxima = r["pendiente_general"], r["pendiente_maxima"]
+    assert CLAVES <= general.keys()
+    assert 0.4 <= general["valor"] <= 0.8
+    assert general["fuente"] == "SRTM vía AWS Terrain Tiles" and general["resolucion"] == "~30 m"
+    assert general["confianza"] == "media"
+    assert "NASADEM falló" in general["nota"] and "no respondió" in general["nota"]
+    assert maxima["valor"] is not None and maxima["fuente"] == general["fuente"]
+
+
+def test_nasadem_sin_items_usa_aws(monkeypatch, aws_fixture):
+    monkeypatch.setattr(pc, "buscar", lambda *a, **k: [])
+    r = elevacion.calcular(LOTE_EJEMPLO)["pendiente_general"]
+    assert r["fuente"] == "SRTM vía AWS Terrain Tiles" and "sin datos" in r["nota"]
+
+
+def test_fallan_los_dos(monkeypatch, aws_caido):
+    _nasadem_falla(monkeypatch)
     r = elevacion.calcular(LOTE_EJEMPLO)
     for ind in r.values():
-        assert ind["valor"] is None and ind["confianza"] == "sin_dato" and "no respondió" in ind["motivo"]
+        assert ind["valor"] is None and ind["confianza"] == "sin_dato"
+        assert "NASADEM" in ind["motivo"] and "AWS Terrain Tiles" in ind["motivo"] and "HTTP 503" in ind["motivo"]
 
 
-def test_error_inesperado_no_rompe(monkeypatch):
+def test_error_inesperado_no_rompe(monkeypatch, aws_caido):
     monkeypatch.setattr(pc, "buscar", lambda *a, **k: [{"id": "x"}])
     monkeypatch.setattr(pc, "array_poligono", lambda *a, **k: 1 / 0)
     r = elevacion.calcular(LOTE_EJEMPLO)
@@ -71,13 +115,7 @@ def test_error_inesperado_no_rompe(monkeypatch):
     assert "ZeroDivisionError" in r["pendiente_general"]["motivo"]
 
 
-def test_sin_items(monkeypatch):
-    monkeypatch.setattr(pc, "buscar", lambda *a, **k: [])
-    r = elevacion.calcular(LOTE_EJEMPLO)
-    assert r["pendiente_general"]["valor"] is None and r["pendiente_general"]["motivo"]
-
-
-def test_lote_sin_pixeles(monkeypatch):
+def test_lote_sin_pixeles(monkeypatch, aws_caido):
     monkeypatch.setattr(pc, "buscar", lambda *a, **k: [{"id": "x"}])
     monkeypatch.setattr(pc, "array_poligono",
                         lambda *a, **k: (np.full((3, 3), 360), np.zeros((3, 3), dtype=bool),
@@ -85,3 +123,8 @@ def test_lote_sin_pixeles(monkeypatch):
     r = elevacion.calcular(LOTE_EJEMPLO)
     assert r["pendiente_general"]["confianza"] == "sin_dato"
     assert "pocos píxeles" in r["pendiente_general"]["motivo"]
+
+
+def test_poligono_roto_no_rompe():
+    r = elevacion.calcular({"type": "Point"})
+    assert r["pendiente_general"]["valor"] is None and r["pendiente_general"]["motivo"]
