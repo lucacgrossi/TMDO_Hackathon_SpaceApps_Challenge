@@ -58,7 +58,12 @@ export interface Entradas {
   anegable: Anegable;
   textura: Textura;
   /** Mediciones propias (RF15). null = no cargó. */
-  mediciones: { lluviaAnualMm: number | null; materiaOrganicaPct: number | null };
+  mediciones: {
+    lluviaAnualMm: number | null;
+    /** Años de registro del pluviómetro (entero ≥ 1): el back decide con esto cuánto pesa la lluvia del productor. */
+    aniosRegistro: number | null;
+    materiaOrganicaPct: number | null;
+  };
 }
 
 /** Lote de ejemplo: campo real cerca de Río Cuarto, ~95 ha (DEMO del prototipo). */
@@ -88,5 +93,5 @@ export const ENTRADAS_INICIALES: Entradas = {
   noSembrar: [],
   anegable: "no",
   textura: "franco",
-  mediciones: { lluviaAnualMm: null, materiaOrganicaPct: null },
+  mediciones: { lluviaAnualMm: null, aniosRegistro: null, materiaOrganicaPct: null },
 };

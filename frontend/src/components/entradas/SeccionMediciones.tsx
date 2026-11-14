@@ -1,7 +1,12 @@
 "use client";
 
 /**
- * F8 · Mediciones propias: pluviómetro (mm/año) y materia orgánica (%) (RF15).
+ * F8 · Mediciones propias: pluviómetro (mm/año), años de registro y materia
+ * orgánica (%) (RF15).
+ *
+ * "Años de registro" no está en el prototipo: lo pidió Back 2 en el PR #18
+ * (MVP 4.3, `mediciones_propias.anios_registro`). Con eso el back decide
+ * cuánto pesa la lluvia del pluviómetro frente a NASA. Es un entero ≥ 1.
  *
  * Sale del prototipo final: el acordeón `details data-a="mp"` con dos
  * `input type="number"` en `.sel3` (ids `lluvia` y `mo`, mismos min, max y
@@ -21,7 +26,7 @@ import { useState } from "react";
 import { useEntradas } from "@/lib/store";
 import "./mediciones.css";
 
-type Campo = "lluviaAnualMm" | "materiaOrganicaPct";
+type Campo = "lluviaAnualMm" | "aniosRegistro" | "materiaOrganicaPct";
 
 /** Los dos campos, con los mismos atributos que el prototipo. */
 const CAMPOS: {
@@ -33,9 +38,12 @@ const CAMPOS: {
   step: number;
   /** Unidad para el mensaje de fuera de rango. */
   u: string;
+  /** true = solo números enteros (años). */
+  entero?: boolean;
   placeholder: string;
 }[] = [
   { k: "lluviaAnualMm", id: "lluvia", n: "Pluviómetro (mm/año)", min: 0, max: 2000, step: 10, u: "mm/año", placeholder: "Ej. 820" },
+  { k: "aniosRegistro", id: "anios", n: "Años de registro", min: 1, max: 100, step: 1, u: "años", placeholder: "Ej. 8", entero: true },
   { k: "materiaOrganicaPct", id: "mo", n: "Materia orgánica (%)", min: 0, max: 10, step: 0.1, u: "%", placeholder: "Ej. 1,8" },
 ];
 
@@ -47,6 +55,7 @@ export default function SeccionMediciones() {
   // interfaz, no una entrada: por eso vive acá y no en el store.
   const [fuera, setFuera] = useState<Record<Campo, boolean>>({
     lluviaAnualMm: false,
+    aniosRegistro: false,
     materiaOrganicaPct: false,
   });
 
@@ -55,7 +64,9 @@ export default function SeccionMediciones() {
     // rangeUnderflow/rangeOverflow los calcula el navegador con min y max.
     // No miramos stepMismatch: el step solo define cuánto suben las flechitas,
     // y el prototipo acepta cualquier número (por ejemplo 825 mm).
-    const fueraDeRango = v.rangeUnderflow || v.rangeOverflow;
+    // Para los años, además, tiene que ser entero (3,5 años no es un registro válido).
+    const fueraDeRango =
+      v.rangeUnderflow || v.rangeOverflow || (!!c.entero && input.value !== "" && !Number.isInteger(input.valueAsNumber));
     // input.value llega "" tanto si el campo está vacío como si lo escrito no
     // es un número (badInput). En los dos casos no hay medición: null, no 0.
     const valor = input.value === "" || fueraDeRango ? null : input.valueAsNumber;
@@ -92,7 +103,7 @@ export default function SeccionMediciones() {
               // Aviso en texto (el color no es la única señal). Mientras está
               // fuera de rango, la medición queda en null: no se usa.
               <span className="err" id={`${c.id}-err`} role="alert">
-                Fuera de rango: de {c.min} a {c.max.toLocaleString("es-AR")} {c.u}
+                {c.entero ? "Número entero, " : "Fuera de rango: "}de {c.min} a {c.max.toLocaleString("es-AR")} {c.u}
               </span>
             )}
           </label>
