@@ -481,14 +481,41 @@ def analizar(entrada: Entrada) -> Salida:
 
 
 def _confianza_agua(indicadores: dict[str, Indicador], contraste: correccion.ResultadoContraste) -> dict:
-    """Con el pluviómetro a más de 15 % de NASA, los indicadores de agua pasan a confianza baja (RF15)."""
-    if contraste.confianza_agua != "baja":
-        return dict(indicadores)
+    """Con las mediciones del productor lejos de NASA, baja la confianza (RF15). El valor no cambia.
+
+    - Pluviómetro a más de 15 % de NASA → `INDICADORES_AGUA`.
+    - Estación con 2 campañas o más de diferencia en heladas → `INDICADORES_HELADA` (planilla, 5.4).
+    """
+    bajan = {}
+    if contraste.confianza_agua == "baja":
+        bajan |= {k: contraste.motivo_agua for k in correccion.INDICADORES_AGUA}
+    if contraste.confianza_helada == "baja":
+        bajan |= {k: contraste.motivo_helada for k in correccion.INDICADORES_HELADA}
     return {
-        k: ind.model_copy(update={"confianza": "baja", "motivo": contraste.motivo_agua})
-        if k in correccion.INDICADORES_AGUA and ind.confianza != "sin_dato"
+        k: ind.model_copy(update={"confianza": "baja", "motivo": bajan[k]})
+        if k in bajan and ind.confianza != "sin_dato"
         else ind
         for k, ind in indicadores.items()
+    }
+
+
+def _con_linea_del_productor(
+    probs: dict[str, list[Probabilidad]], contraste: correccion.ResultadoContraste
+) -> dict[str, list[Probabilidad]]:
+    """Suma en `Probabilidad.contraste` la línea de la estación del productor para el mismo evento y mes.
+
+    La probabilidad (anios, pct, texto) sigue saliendo de las 30 campañas de NASA: no cambia.
+    """
+    if not contraste.lineas_probabilidad:
+        return probs
+    return {
+        id_: [
+            p.model_copy(update={"contraste": contraste.lineas_probabilidad.get((p.evento, p.mes))})
+            if (p.evento, p.mes) in contraste.lineas_probabilidad
+            else p
+            for p in lista
+        ]
+        for id_, lista in probs.items()
     }
 
 
@@ -523,6 +550,7 @@ def _armar_salida(
     # RF15: las mediciones del productor van al lado de NASA; no cambian ningún puntaje.
     contraste = correccion.contrastar(entrada.mediciones_propias, clima)
     faltan += contraste.faltantes
+    probs = _con_linea_del_productor(probs, contraste)
 
     estrategias = [_estrategia(s, lista[0], vacios_back, contraste.riesgos, probs.get(s["id"])) for s in lista]
     ch = resultado.get("choque") or {}
