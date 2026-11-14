@@ -8,9 +8,12 @@ Planetary Computer.
   del lote, tal como los arman `elevacion.py` y `cobertura.py`. `grilla`: {bounds, ancho, alto, paso},
   la misma para todas las capas, para que el front verifique que todo coincide.
 
-- `ndvi_mensual[12]`: la escena HLS de cada mes (colección, item, fecha), para que el front pida
-  las teselas de Planetary Computer sin buscar de nuevo. Un mes sin escena HLS (MODIS de respaldo
-  o sin dato) va en `None`: el front muestra ahí la capa MODIS de GIBS, como el prototipo.
+- `ndvi_mensual[12]`: la escena de cada mes ({coleccion, item, fecha, mapa}). `mapa` es el
+  `CapaRaster` del NDVI de esa escena sobre la grilla común (paso 4): el front lo dibuja tal cual.
+  Un mes con escena HLS y sin raster lleva `mapa: None` (el front puede pedir las teselas de
+  Planetary Computer con ese `item`). Un mes con MODIS de respaldo aparece solo si tiene raster
+  (sus teselas de PC no sirven con la expresión de HLS). Un mes sin nada va en `None`: el front
+  muestra ahí la capa MODIS de GIBS de esa fecha, como el prototipo.
 - `erosion`: pendiente general del lote × meses con cobertura baja (NDVI < umbral). Es un valor
   del lote con forma de `Indicador` + el detalle para la línea de tiempo. **Formato propuesto,
   a acordar con Front 1 (PLAN.md §6).** Es un índice relativo: no es pérdida de suelo (t/ha).
@@ -34,14 +37,27 @@ def _numero(texto: float) -> str:
     return f"{texto:g}".replace(".", ",")
 
 
-def ndvi_mensual(visto_por_satelite: dict | None) -> list[dict | None]:
-    """12 escenas HLS ({coleccion, item, fecha}) en el mismo orden que `visto_por_satelite.meses`."""
+def ndvi_mensual(visto_por_satelite: dict | None, mapas: list | None = None,
+                 grilla: dict | None = None) -> list[dict | None]:
+    """12 escenas ({coleccion, item, fecha, mapa}) en el mismo orden que `visto_por_satelite.meses`.
+
+    mapas: los `CapaRaster` de `ndvi.calcular()["mapas"]` (índice 0 = enero). Un raster que no está en
+    la `grilla` común se descarta.
+    """
     meses = (visto_por_satelite or {}).get("meses") or []
+    mapas = mapas if isinstance(mapas, list) else []
     capas: list[dict | None] = []
     for i in range(12):
         m = meses[i] if i < len(meses) else None
-        if m and str(m.get("coleccion", "")).startswith("hls2-") and m.get("item") and m.get("fecha"):
-            capas.append({"coleccion": m["coleccion"], "item": m["item"], "fecha": m["fecha"]})
+        mapa = mapas[i] if i < len(mapas) else None
+        if mapa and not (grilla and _misma_grilla(mapa, grilla)):
+            mapa = None
+        if not (m and m.get("item") and m.get("fecha")):
+            capas.append(None)
+            continue
+        hls = str(m.get("coleccion", "")).startswith("hls2-")
+        if hls or mapa:
+            capas.append({"coleccion": m["coleccion"], "item": m["item"], "fecha": m["fecha"], "mapa": mapa})
         else:
             capas.append(None)
     return capas
@@ -86,10 +102,11 @@ def _misma_grilla(capa: dict, grilla: dict) -> bool:
             and capa.get("alto") == grilla.get("alto"))
 
 
-def rasters(resultado_elevacion: dict | None, resultado_cobertura: dict | None) -> dict:
+def rasters(resultado_elevacion: dict | None, resultado_cobertura: dict | None,
+            grilla_ndvi: dict | None = None) -> dict:
     """{pendiente_mapa, cultivo_mapa, grilla} y los que faltan. Una capa que no está en la grilla común se descarta."""
     elev, cob = resultado_elevacion or {}, resultado_cobertura or {}
-    grilla = elev.get("grilla") or cob.get("grilla")
+    grilla = elev.get("grilla") or cob.get("grilla") or grilla_ndvi
     salida: dict = {"pendiente_mapa": None, "cultivo_mapa": None, "grilla": grilla, "faltan": []}
     for clave, resultado, pasado in (("pendiente_mapa", elev, resultado_elevacion is not None),
                                      ("cultivo_mapa", cob, resultado_cobertura is not None)):
@@ -104,23 +121,25 @@ def rasters(resultado_elevacion: dict | None, resultado_cobertura: dict | None) 
 def armar(resultado_ndvi: dict | None, resultado_elevacion: dict | None,
           resultado_cobertura: dict | None = None) -> dict:
     """Capas del mapa a partir de lo que ya calcularon `ndvi`, `elevacion` y `cobertura`. Nunca lanza."""
+    resultado_ndvi = resultado_ndvi if isinstance(resultado_ndvi, dict) else {}
     try:
-        resultado_ndvi = resultado_ndvi or {}
+        r = rasters(resultado_elevacion, resultado_cobertura, resultado_ndvi.get("grilla"))
+    except Exception:  # noqa: BLE001
+        r = {"pendiente_mapa": None, "cultivo_mapa": None, "grilla": None, "faltan": ["pendiente_mapa"]}
+    try:
         visto = resultado_ndvi.get("visto_por_satelite")
         capas = {
-            "ndvi_mensual": ndvi_mensual(visto),
+            "ndvi_mensual": ndvi_mensual(visto, resultado_ndvi.get("mapas"), r["grilla"]),
             "erosion": erosion(visto, resultado_ndvi.get("meses_cobertura_baja"),
                                (resultado_elevacion or {}).get("pendiente_general")),
         }
     except Exception:  # noqa: BLE001 — nunca propagar
         capas = {"ndvi_mensual": [None] * 12, "erosion": None}
-    try:
-        r = rasters(resultado_elevacion, resultado_cobertura)
-    except Exception:  # noqa: BLE001
-        r = {"pendiente_mapa": None, "cultivo_mapa": None, "grilla": None, "faltan": ["pendiente_mapa"]}
     capas["no_disponibles"] = [] if capas["erosion"] else ["erosion"]
     if not any(capas["ndvi_mensual"]):
         capas["no_disponibles"].append("ndvi_mensual")
+    elif "mapas" in resultado_ndvi and not any(c and c.get("mapa") for c in capas["ndvi_mensual"]):
+        capas["no_disponibles"].append("ndvi_mapa")  # hay escenas pero ningún raster sobre la grilla
     capas["no_disponibles"] += r.pop("faltan")
     capas.update(r)
     return capas
@@ -152,6 +171,9 @@ if __name__ == "__main__":
     resultado = calcular(poligono)
     for clave in ("pendiente_mapa", "cultivo_mapa"):
         resultado[clave] = _corto(resultado.get(clave))
+    for mes in resultado["ndvi_mensual"]:
+        if mes and mes.get("mapa"):
+            mes["mapa"] = _corto(mes["mapa"])
     sys.stdout.reconfigure(encoding="utf-8")  # ″ y – en la consola de Windows
     print(json.dumps(resultado, ensure_ascii=False, indent=2))
     print(f"Tiempo: {time.perf_counter() - t0:.1f} s", file=sys.stderr)

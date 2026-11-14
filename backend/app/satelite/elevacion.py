@@ -32,7 +32,7 @@ FUENTE_AWS = "SRTM vía AWS Terrain Tiles"
 RESOLUCION_AWS = "~30 m"
 ANIOS_AWS = "2000 (misión SRTM)"
 UNIDAD = "%"
-FECHA_CAPA = "2000"           # la capa es estática: el año de la misión SRTM
+FECHA_CAPA = "estática"       # como en el contrato (#63); los años van en la fuente y en `anios`
 FACTOR_CAPA = 0.01            # valores de la capa: centésimos de %
 CONFIANZA_CAPA = "media"      # pendiente por píxel: ruidosa (ver PASO_M); el valor del lote es el plano
 

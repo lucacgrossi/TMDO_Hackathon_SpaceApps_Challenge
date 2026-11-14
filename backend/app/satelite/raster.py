@@ -83,11 +83,12 @@ def resumen(array: np.ndarray, mascara: np.ndarray, decimales: int = 2) -> dict 
 def capa(*, id: str, titulo: str, unidad: str, fuente: str, resolucion_nativa: str, grilla,
          array: np.ndarray, mascara: np.ndarray, escala: dict, factor: float, confianza: str,
          nota: str | None = None, fecha: str | None = None, campana: str | None = None,
-         decimales: int = 2, valor_lote: float | None = None) -> dict | None:
+         decimales: int = 2, valor_lote: float | None = None, con_valores: bool = True) -> dict | None:
     """El dict `CapaRaster` (plan §5) de un raster sobre la grilla común. None si no hay píxeles con dato.
 
     valor_lote: el número de la tabla para esta capa (por ejemplo, la pendiente general del plano),
     para que la leyenda muestre el mismo número que el panel. Va en `resumen.valor_lote`.
+    con_valores=False: `valores` va en None (solo el PNG y el resumen), para capas que pesarían demasiado.
     """
     if array.shape != (grilla.alto, grilla.ancho):
         raise ValueError(f"El raster {array.shape} no coincide con la grilla {grilla.alto} × {grilla.ancho}")
@@ -96,7 +97,7 @@ def capa(*, id: str, titulo: str, unidad: str, fuente: str, resolucion_nativa: s
         return None
     if valor_lote is not None:
         res["valor_lote"] = valor_lote
-    valores, factor, nodata = cuantizar(array, mascara, factor)
+    valores, factor, nodata = cuantizar(array, mascara, factor) if con_valores else (None, factor, NODATA)
     return {
         "id": id, "titulo": titulo, "unidad": unidad, "fuente": fuente, "fecha": fecha, "campana": campana,
         "resolucion_nativa": resolucion_nativa, "resolucion_grilla": grilla.resolucion,

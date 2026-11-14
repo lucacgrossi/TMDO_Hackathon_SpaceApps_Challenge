@@ -9,11 +9,11 @@ hay un color y una etiqueta por corte. Un valor va a la última clase cuyo corte
 """
 from __future__ import annotations
 
-from app.satelite.ndvi import UMBRAL_NDVI_BAJO
+# Lote "pelado" o casi: NDVI medio < 0,3 (regla del prototipo, la valida la persona 3). Es la única
+# definición: `ndvi.UMBRAL_NDVI_BAJO` la reexporta (así `ndvi` puede usar las escalas sin import circular).
+UMBRAL_NDVI = 0.3
 
 # NDVI: cortes y colores del MVP 4.2 ("Mapa interactivo") y del prototipo (NDVI_CL, NDVI_COLS).
-# 0,3 es el umbral de cobertura baja: sale de `ndvi.UMBRAL_NDVI_BAJO` (lo define la persona 3).
-UMBRAL_NDVI = UMBRAL_NDVI_BAJO
 NDVI = {
     "cortes": [0.0, 0.15, UMBRAL_NDVI, 0.45, 0.6, 0.75],
     "colores": ["#E6D8AE", "#CDBA86", "#94AF63", "#689C49", "#3F8139", "#1B5E2E"],

@@ -48,7 +48,7 @@ def test_lote_demo():
 
     nm = r["ndvi_mensual"]
     assert len(nm) == 12 and nm[2] is None  # MODIS → el front usa GIBS ese mes
-    assert nm[6] == {"coleccion": "hls2-l30", "item": "ITEM-2025-07", "fecha": "2025-07-15"}
+    assert nm[6] == {"coleccion": "hls2-l30", "item": "ITEM-2025-07", "fecha": "2025-07-15", "mapa": None}
 
     ero = r["erosion"]
     assert CLAVES <= ero.keys()
@@ -109,3 +109,30 @@ def test_sin_cobertura_no_figura_como_faltante():
     r = capas.armar(_ndvi(MESES), _pendiente())
     assert r["cultivo_mapa"] is None and r["pendiente_mapa"]["id"] == "pendiente" and r["grilla"] == GRILLA
     assert r["no_disponibles"] == []
+
+
+def test_ndvi_mensual_con_mapas():
+    """El raster de cada mes va en ndvi_mensual[mes].mapa; un mes MODIS aparece si tiene raster."""
+    mapas = [_mapa("ndvi", GRILLA, media=m["ndvi_medio"]) for m in MESES]
+    mapas[4] = None                             # mayo: HLS sin raster → teselas del item
+    mapas[7] = _mapa("ndvi", {**GRILLA, "alto": 31})  # agosto: fuera de la grilla → se descarta
+    ndvi_r = {**_ndvi(MESES), "mapas": mapas, "grilla": GRILLA}
+    r = capas.armar(ndvi_r, _pendiente())
+    Capas(**r)
+    nm = r["ndvi_mensual"]
+    assert nm[2]["coleccion"] == "modis-13Q1-061" and nm[2]["mapa"]["resumen"]["media"] == 0.69
+    assert nm[4]["mapa"] is None and nm[4]["item"] == "ITEM-2026-05"
+    assert nm[7]["mapa"] is None and nm[6]["mapa"]["resumen"]["media"] == 0.25
+    assert r["no_disponibles"] == []
+
+
+def test_sin_ningun_raster_de_ndvi():
+    r = capas.armar({**_ndvi(MESES), "mapas": [None] * 12, "grilla": GRILLA}, _pendiente())
+    assert r["ndvi_mensual"][2] is None          # MODIS sin raster: el front usa GIBS
+    assert r["no_disponibles"] == ["ndvi_mapa"]
+
+
+def test_grilla_sale_del_ndvi_si_faltan_las_otras():
+    mapas = [_mapa("ndvi", GRILLA) for _ in MESES]
+    r = capas.armar({**_ndvi(MESES), "mapas": mapas, "grilla": GRILLA}, None)
+    assert r["grilla"] == GRILLA and r["ndvi_mensual"][0]["mapa"]
