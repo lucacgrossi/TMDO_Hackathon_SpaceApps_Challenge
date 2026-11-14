@@ -1,7 +1,7 @@
 "use client";
 
 import AvisoApoyo from "@/components/comunes/AvisoApoyo";
-import { useEntradas } from "@/lib/store";
+import BotonPrincipal from "./BotonPrincipal";
 import ElegirLote from "./ElegirLote";
 import ResumenLote from "./ResumenLote";
 import SeccionDatosLote from "./SeccionDatosLote";
@@ -16,12 +16,9 @@ import SeccionRotacion from "./SeccionRotacion";
  * en el paso 2 queda a la derecha del mapa. Cada sección es su propio
  * archivo para que las ramas de cada feature no se pisen.
  *
- * F1 (paso 1 y paso al mapa) completa el botón: hoy solo cambia de paso.
+ * El botón de abajo (paso 1 → mapa → comparar) está en BotonPrincipal (F1).
  */
 export default function PanelEntradas() {
-  const paso = useEntradas((s) => s.paso);
-  const cambiar = useEntradas((s) => s.cambiar);
-
   return (
     <aside className="panel" aria-label="Datos del lote">
       <div className="scroll">
@@ -46,14 +43,7 @@ export default function PanelEntradas() {
         <SeccionMediciones />
       </div>
       <div className="cta">
-        <button
-          type="button"
-          className="btn"
-          id="comparar"
-          onClick={() => paso === "inicio" && cambiar({ paso: "mapa" })}
-        >
-          {paso === "inicio" ? "Ver mi lote en el mapa" : "Comparar alternativas"}
-        </button>
+        <BotonPrincipal />
         <AvisoApoyo />
       </div>
     </aside>
