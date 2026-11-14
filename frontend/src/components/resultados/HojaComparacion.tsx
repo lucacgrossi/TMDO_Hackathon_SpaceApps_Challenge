@@ -8,7 +8,7 @@ import { useVista } from "@/lib/vista";
 import ChoqueObjetivos from "./ChoqueObjetivos";
 import InterruptorVista, { type VistaResultado } from "./InterruptorVista";
 import TablaTecnica from "./TablaTecnica";
-import VistaPreviaColumnas from "./VistaPreviaColumnas";
+import TarjetasEstrategias from "./TarjetasEstrategias";
 import css from "./resultados.module.css";
 
 /**
@@ -75,7 +75,7 @@ export default function HojaComparacion() {
         )}
         {resultado.estado === "listo" && <ChoqueObjetivos estrategias={resultado.datos.estrategias} />}
         {resultado.estado === "listo" &&
-          (vista === "tabla" ? <TablaTecnica salida={resultado.datos} /> : <VistaPreviaColumnas salida={resultado.datos} />)}
+          (vista === "tabla" ? <TablaTecnica salida={resultado.datos} /> : <TarjetasEstrategias salida={resultado.datos} />)}
       </div>
 
       <div className={`foot ${css.pie}`}>
