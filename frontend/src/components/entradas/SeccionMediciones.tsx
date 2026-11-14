@@ -1,12 +1,103 @@
+"use client";
+
 /**
- * F8 · Pluviómetro (mm/año) y materia orgánica (%), con validación (RF15).
- * Pieza vacía creada en F0: la completa la rama de esa feature
- * (ver el plan de la persona 4). Mantener las clases del prototipo.
+ * F8 · Mediciones propias: pluviómetro (mm/año) y materia orgánica (%) (RF15).
+ *
+ * Sale del prototipo final: el acordeón `details data-a="mp"` con dos
+ * `input type="number"` en `.sel3` (ids `lluvia` y `mo`, mismos min, max y
+ * step) y el listener que guarda `S.lluvia`/`S.mo` (vacío = null).
+ *
+ * Por qué existen (CLAUDE.md): NASA es la base y las mediciones del
+ * productor se muestran AL LADO, para contrastar y ajustar la confianza
+ * ("Tu pluviómetro: 650 mm/año · NASA: 824 mm (−21 %)"); no cambian ningún
+ * puntaje. Ese contraste lo arma el backend. Acá solo se cargan en el
+ * store (`useEntradas.mediciones`): no cambian ningún cálculo del front ni
+ * se mandan a ningún lado todavía. Sin mediciones, todo funciona solo con NASA.
+ *
+ * Los campos usan el CSS del prototipo (`input[type=number]`, `.sel3`).
+ * `mediciones.css` solo agrega el aviso de fuera de rango (ver ahí por qué).
  */
+import { useState } from "react";
+import { useEntradas } from "@/lib/store";
+import "./mediciones.css";
+
+type Campo = "lluviaAnualMm" | "materiaOrganicaPct";
+
+/** Los dos campos, con los mismos atributos que el prototipo. */
+const CAMPOS: {
+  k: Campo;
+  id: string;
+  n: string;
+  min: number;
+  max: number;
+  step: number;
+  /** Unidad para el mensaje de fuera de rango. */
+  u: string;
+  placeholder: string;
+}[] = [
+  { k: "lluviaAnualMm", id: "lluvia", n: "Pluviómetro (mm/año)", min: 0, max: 2000, step: 10, u: "mm/año", placeholder: "Ej. 820" },
+  { k: "materiaOrganicaPct", id: "mo", n: "Materia orgánica (%)", min: 0, max: 10, step: 0.1, u: "%", placeholder: "Ej. 1,8" },
+];
+
 export default function SeccionMediciones() {
+  const mediciones = useEntradas((s) => s.mediciones);
+  const cambiar = useEntradas((s) => s.cambiar);
+
+  // Qué campo está fuera de rango, solo para mostrar el aviso. Es estado de
+  // interfaz, no una entrada: por eso vive acá y no en el store.
+  const [fuera, setFuera] = useState<Record<Campo, boolean>>({
+    lluviaAnualMm: false,
+    materiaOrganicaPct: false,
+  });
+
+  const escribir = (c: (typeof CAMPOS)[number], input: HTMLInputElement) => {
+    const v = input.validity;
+    // rangeUnderflow/rangeOverflow los calcula el navegador con min y max.
+    // No miramos stepMismatch: el step solo define cuánto suben las flechitas,
+    // y el prototipo acepta cualquier número (por ejemplo 825 mm).
+    const fueraDeRango = v.rangeUnderflow || v.rangeOverflow;
+    // input.value llega "" tanto si el campo está vacío como si lo escrito no
+    // es un número (badInput). En los dos casos no hay medición: null, no 0.
+    const valor = input.value === "" || fueraDeRango ? null : input.valueAsNumber;
+    setFuera((f) => ({ ...f, [c.k]: fueraDeRango }));
+    // getState() lee el valor más nuevo del store (no el de este render), así
+    // cambiar un campo nunca pisa el otro.
+    const actual = useEntradas.getState().mediciones;
+    cambiar({ mediciones: { ...actual, [c.k]: valor } });
+  };
+
   return (
     <details data-a="mp">
       <summary>Mediciones propias</summary>
+      <div className="sel3">
+        {CAMPOS.map((c) => (
+          <label key={c.k}>
+            {c.n}
+            <input
+              type="number"
+              id={c.id}
+              min={c.min}
+              max={c.max}
+              step={c.step}
+              placeholder={c.placeholder}
+              // Campo no controlado (defaultValue): si React le forzara el
+              // valor del store, un número a medio escribir como "1," (que
+              // el navegador todavía lee como vacío) se borraría solo.
+              defaultValue={mediciones[c.k] ?? ""}
+              onChange={(e) => escribir(c, e.currentTarget)}
+              aria-invalid={fuera[c.k]}
+              aria-describedby={fuera[c.k] ? `${c.id}-err` : undefined}
+            />
+            {fuera[c.k] && (
+              // Aviso en texto (el color no es la única señal). Mientras está
+              // fuera de rango, la medición queda en null: no se usa.
+              <span className="err" id={`${c.id}-err`} role="alert">
+                Fuera de rango: de {c.min} a {c.max.toLocaleString("es-AR")} {c.u}
+              </span>
+            )}
+          </label>
+        ))}
+      </div>
     </details>
   );
 }

@@ -1,0 +1,11 @@
+/*
+ * Aviso de "fuera de rango" en Mediciones propias (F8). Solo eso.
+ *
+ * Por qué hace falta: el prototipo no valida (guarda cualquier número),
+ * y en globals.css la clase .err solo existe dentro de la barra de dibujo
+ * (.drawbar .tx span.err), así que acá no pinta nada. Los campos en sí
+ * usan el estilo del prototipo (input[type=number] y .sel3) sin cambios.
+ */
+.sel3 .err{font-size:11px;color:var(--bad);font-weight:600}
+/* Borde rojo además del texto: el color nunca es la única señal. */
+.sel3 input[aria-invalid=true]{border-color:var(--bad)}
