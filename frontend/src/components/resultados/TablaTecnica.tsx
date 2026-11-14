@@ -280,7 +280,16 @@ const GRUPOS: Grupo[] = [
         ayuda: "frecuencia observada en las 30 campañas",
         celda: (e) => (
           <div className={css.celda}>
-            <Lista items={e.probabilidades.map((p) => p.texto)} vacio="Sin eventos para este calendario" />
+            <Lista
+              items={e.probabilidades.map((p) => (
+                <>
+                  {p.texto}
+                  {/* Lo que vio la estación del productor en ese mes: al lado, no cambia la probabilidad */}
+                  {p.contraste && <span className={css.contrasteProb}>{p.contraste}</span>}
+                </>
+              ))}
+              vacio="Sin eventos para este calendario"
+            />
             {e.probabilidades[0] && <HuellaDato origen={{ fuente: e.probabilidades[0].fuente }} />}
           </div>
         ),
