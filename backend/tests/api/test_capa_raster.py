@@ -22,7 +22,11 @@ def _valores(c: CapaRaster) -> np.ndarray:
 
 
 def test_el_mock_trae_grilla_y_capas_de_ejemplo(capas):
-    assert capas.grilla is not None and capas.grilla.paso == pytest.approx(1 / 3600)
+    g = capas.grilla
+    assert g is not None and g.paso == pytest.approx(1 / 3600)
+    # La grilla real del lote demo (satelite/grilla.py): 42 × 30, bordes en (j + ½)″ por NASADEM.
+    assert (g.ancho, g.alto) == (42, 30)
+    assert g.bounds[0][1] * 3600 % 1 == pytest.approx(0.5)
     assert {c.id for c in capas.capas_raster()} == {"pendiente", "cultivo"}
     assert capas.erosion_mapa is None
 
@@ -43,7 +47,6 @@ def test_valores_int16_little_endian_fila_0_norte(capas):
     # En el mock la pendiente crece hacia el sureste: la última fila (sur) es más empinada que la primera (norte).
     filas = [f[f != c.nodata] for f in v if (f != c.nodata).any()]  # los bordes de la grilla quedan fuera del lote
     assert filas[-1].mean() > filas[0].mean()
-    assert (v[0] == c.nodata).all()  # fila 0 = norte: la grilla se ajusta hacia afuera a múltiplos de 1″
 
 
 def test_png_tiene_el_tamano_de_la_grilla(capas):
@@ -69,3 +72,10 @@ def test_capas_sin_los_campos_nuevos_siguen_validando():
     """Aditivo: una respuesta de antes (sin grilla ni mapas) sigue siendo válida."""
     c = Capas(ndvi_mensual=[None] * 12)
     assert c.grilla is None and c.pendiente_mapa is None and c.capas_raster() == []
+
+
+def test_valor_lote_es_el_numero_de_la_tabla(capas):
+    """La pendiente del lote es el plano (0,6 %), no la media de las pendientes por píxel."""
+    p = capas.pendiente_mapa.resumen
+    assert p.valor_lote == 0.6 and p.valor_lote != p.media
+    assert capas.cultivo_mapa.resumen.valor_lote == pytest.approx(capas.cultivo_mapa.resumen.media * 100, abs=0.1)

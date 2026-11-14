@@ -365,6 +365,10 @@ class ResumenCapa(BaseModel):
     min: float | None
     max: float | None
     pixeles: int = Field(ge=0, description="Píxeles dentro del lote con dato")
+    valor_lote: float | None = Field(
+        None, description="El número de la tabla para esta capa (NDVI medio del mes, pendiente general del plano, "
+                          "% de cultivo). Puede no ser la media por píxel: la pendiente del plano (0,6 %) no es la "
+                          "media de las pendientes por píxel (1,3 %). La leyenda muestra este valor como el del lote")
 
 
 class CapaRaster(BaseModel):
