@@ -6,11 +6,13 @@
  * (findAddressCandidates). Acá no hay React ni DOM: son funciones que reciben
  * texto y devuelven datos, así se pueden probar con `npx tsx src/lib/buscador.test.ts`.
  *
- * El componente que las usa es `src/components/entradas/BuscadorLote.tsx`.
+ * Las usa el hook `src/lib/useBuscadorLugares.ts`, que comparten los dos
+ * buscadores: el del paso 1 (BuscadorLote) y el del mapa (BuscadorMapa).
  */
 
 /** Servicio de geocodificación de Esri (gratis, sin clave para suggest/find). */
-export const GEO = "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+export const GEO =
+  "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
 
 /** Lo que devuelve el parseo o la búsqueda: un punto con su texto. */
 export interface PuntoEncontrado {
@@ -31,10 +33,31 @@ export const MENSAJES = {
     "No encontré ese lugar. Probá con la localidad más cercana o pegá las coordenadas.",
   sinRed: "No pude buscar ahora. Pegá las coordenadas o usá tu ubicación.",
   noUbico: "No pude ubicar ese lugar. Probá de nuevo.",
-  sinGeo: "Este navegador no da la ubicación. Buscá el lugar o pegá las coordenadas.",
+  sinGeo:
+    "Este navegador no da la ubicación. Buscá el lugar o pegá las coordenadas.",
   gpsFallo:
     "No pude tomar tu ubicación (permiso denegado o sin GPS). Buscá el lugar o pegá las coordenadas.",
 } as const;
+
+/**
+ * Mensajes del buscador del mapa (`mSug` del prototipo): más cortos, porque la
+ * caja flotante es angosta y el productor ya está en el paso 2.
+ */
+export const MENSAJES_MAPA = {
+  sinResultados: "No encontré ese lugar.",
+  sinRed: "No pude buscar ahora.",
+  noUbico: "No pude ubicar ese lugar.",
+} as const;
+
+/** Los tres mensajes que necesita cualquier buscador de lugares. */
+export interface MensajesBusqueda {
+  sinResultados: string;
+  sinRed: string;
+  noUbico: string;
+}
+
+/** Centro de Córdoba: sesgo de la búsqueda del paso 1 (todavía no hay lote). */
+export const CENTRO_CORDOBA = { lat: -32.4, lng: -64.2 };
 
 /** Número con formato argentino (coma decimal), como `fmt` del prototipo. */
 export function fmt(n: number, decimales = 0): string {
@@ -66,7 +89,8 @@ const RE_ARROBA = /@(-?\d+\.\d+),\s*(-?\d+\.\d+)/;
  * de Google Maps). La coma puede venir codificada como "%2C" si el link se
  * copió de otra app. La "i" final ignora mayúsculas en el nombre del parámetro.
  */
-const RE_PARAMETRO = /[?&](?:q|ll|query|destination)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i;
+const RE_PARAMETRO =
+  /[?&](?:q|ll|query|destination)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i;
 
 /**
  * "lat, lng" suelto, como lo copia Google Maps al hacer clic derecho:
@@ -86,7 +110,11 @@ const RE_GMS =
   /(\d{1,2})[°º]\s*(\d{1,2})['’′]\s*([\d.,]+)?["”″]?\s*([NS])[\s,;]+(\d{1,3})[°º]\s*(\d{1,2})['’′]\s*([\d.,]+)?["”″]?\s*([EWO])/i;
 
 /** Pasa grados, minutos y segundos (texto) a grados decimales. */
-function gmsADecimal(grados: string, minutos: string, segundos?: string): number {
+function gmsADecimal(
+  grados: string,
+  minutos: string,
+  segundos?: string,
+): number {
   const seg = segundos ? Number(segundos.replace(",", ".")) / 3600 : 0;
   return Number(grados) + Number(minutos) / 60 + seg;
 }
@@ -138,15 +166,20 @@ export function etiquetaCoordenadas(lat: number, lng: number): string {
 /**
  * Pide sugerencias de lugares a Esri mientras el productor escribe.
  * - countryCode=ARG: solo Argentina (evita "Río Cuarto" de otro país).
- * - location=-64.2,-32.4: centro de Córdoba, para que ordene primero lo cercano.
+ * - location: punto de sesgo, para que Esri ordene primero lo cercano. En el
+ *   paso 1 es el centro de Córdoba; en el mapa, el lote o lugar actual (el
+ *   prototipo usa `map.getCenter()`). Esri lo pide como "lng,lat" (x,y).
  * - maxSuggestions=6: entran en la lista sin scroll.
  * Lanza un error si falla la red; el componente muestra MENSAJES.sinRed.
  */
 export async function buscarSugerencias(
   texto: string,
   signal?: AbortSignal,
+  centro: { lat: number; lng: number } = CENTRO_CORDOBA,
 ): Promise<Sugerencia[]> {
-  const url = `${GEO}/suggest?f=json&countryCode=ARG&maxSuggestions=6&location=-64.2,-32.4&text=${encodeURIComponent(texto)}`;
+  // 3 decimales (≈ 100 m) alcanzan para sesgar y no ensucian la URL.
+  const location = `${centro.lng.toFixed(3)},${centro.lat.toFixed(3)}`;
+  const url = `${GEO}/suggest?f=json&countryCode=ARG&maxSuggestions=6&location=${location}&text=${encodeURIComponent(texto)}`;
   const r = await fetch(url, { signal });
   if (!r.ok) throw new Error(`Esri suggest respondió ${r.status}`);
   const j = (await r.json()) as { suggestions?: Sugerencia[] };
@@ -158,13 +191,22 @@ export async function buscarSugerencias(
  * cuál de sus resultados era, así no vuelve a adivinar con el texto.
  * Devuelve null si Esri no encontró candidatos.
  */
-export async function ubicarSugerencia(s: Sugerencia): Promise<PuntoEncontrado | null> {
+export async function ubicarSugerencia(
+  s: Sugerencia,
+): Promise<PuntoEncontrado | null> {
   const url = `${GEO}/findAddressCandidates?f=json&maxLocations=1&magicKey=${encodeURIComponent(s.magicKey)}&SingleLine=${encodeURIComponent(s.text)}`;
   const r = await fetch(url);
-  if (!r.ok) throw new Error(`Esri findAddressCandidates respondió ${r.status}`);
-  const j = (await r.json()) as { candidates?: { location: { x: number; y: number } }[] };
+  if (!r.ok)
+    throw new Error(`Esri findAddressCandidates respondió ${r.status}`);
+  const j = (await r.json()) as {
+    candidates?: { location: { x: number; y: number } }[];
+  };
   const c = j.candidates?.[0];
   if (!c) return null;
   // Esri devuelve x = longitud, y = latitud.
-  return { lat: c.location.y, lng: c.location.x, etiqueta: limpiarTexto(s.text) };
+  return {
+    lat: c.location.y,
+    lng: c.location.x,
+    etiqueta: limpiarTexto(s.text),
+  };
 }

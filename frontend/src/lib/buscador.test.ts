@@ -2,8 +2,12 @@
  * Pruebas chicas del parseo de coordenadas del buscador (F4).
  * Se corren con vitest, el corredor del front:  npm test   (desde frontend/)
  */
-import { describe, expect, it } from "vitest";
-import { limpiarTexto, parsearCoordenadas } from "./buscador";
+import { afterEach, describe, expect, it, vi } from "vitest";
+import {
+  buscarSugerencias,
+  limpiarTexto,
+  parsearCoordenadas,
+} from "./buscador";
 
 /** Compara con 4 decimales (≈ 10 m): más precisión no cambia nada para un lote. */
 function cerca(texto: string, lat: number, lng: number) {
@@ -14,7 +18,8 @@ function cerca(texto: string, lat: number, lng: number) {
 }
 
 describe("parsearCoordenadas", () => {
-  it("lat, lng suelto con signo", () => cerca("-33.2477, -64.2325", -33.2477, -64.2325));
+  it("lat, lng suelto con signo", () =>
+    cerca("-33.2477, -64.2325", -33.2477, -64.2325));
 
   it("separado por espacio o punto y coma", () => {
     cerca("-33.2477 -64.2325", -33.2477, -64.2325);
@@ -25,7 +30,11 @@ describe("parsearCoordenadas", () => {
     cerca("33.2477, 64.2325", -33.2477, -64.2325));
 
   it("link de Google Maps con @", () =>
-    cerca("https://www.google.com/maps/@-33.2477,-64.2325,15z", -33.2477, -64.2325));
+    cerca(
+      "https://www.google.com/maps/@-33.2477,-64.2325,15z",
+      -33.2477,
+      -64.2325,
+    ));
 
   it("link con ?q= y coma codificada", () => {
     cerca("https://maps.google.com/?q=-33.2477,-64.2325", -33.2477, -64.2325);
@@ -51,11 +60,41 @@ describe("parsearCoordenadas", () => {
   });
 
   it("etiqueta con coma decimal y S/O", () => {
-    expect(parsearCoordenadas("-33.2477, -64.2325")?.etiqueta).toBe("33,2477° S · 64,2325° O");
+    expect(parsearCoordenadas("-33.2477, -64.2325")?.etiqueta).toBe(
+      "33,2477° S · 64,2325° O",
+    );
   });
 });
 
 describe("limpiarTexto", () => {
   it("saca ', ARG'", () =>
-    expect(limpiarTexto("Río Cuarto, Córdoba, ARG")).toBe("Río Cuarto, Córdoba"));
+    expect(limpiarTexto("Río Cuarto, Córdoba, ARG")).toBe(
+      "Río Cuarto, Córdoba",
+    ));
+});
+
+describe("buscarSugerencias · sesgo de la búsqueda", () => {
+  afterEach(() => vi.unstubAllGlobals());
+
+  /** Reemplaza fetch por uno falso y devuelve la URL que se pidió. */
+  async function urlPedida(centro?: { lat: number; lng: number }) {
+    const falso = vi.fn<(url: string) => Promise<Response>>(
+      async () => new Response(JSON.stringify({ suggestions: [] })),
+    );
+    vi.stubGlobal("fetch", falso);
+    await buscarSugerencias("Alcira", undefined, centro);
+    return new URL(String(falso.mock.calls[0][0]));
+  }
+
+  it("sin centro usa Córdoba (paso 1)", async () => {
+    expect((await urlPedida()).searchParams.get("location")).toBe(
+      "-64.200,-32.400",
+    );
+  });
+
+  it("con centro lo manda como lng,lat (mapa)", async () => {
+    const u = await urlPedida({ lat: -33.2477, lng: -64.2325 });
+    expect(u.searchParams.get("location")).toBe("-64.233,-33.248");
+    expect(u.searchParams.get("countryCode")).toBe("ARG");
+  });
 });
