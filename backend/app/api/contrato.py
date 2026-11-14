@@ -91,12 +91,35 @@ class Prioridades(BaseModel):
     erosion: int = Field(3, ge=0, le=5)
 
 
+class MedicionMes(BaseModel):
+    """Un mes de la planilla del productor (`docs/plan-planilla-lluvia.md`).
+
+    En temperaturas, `t_min_c` es la mínima MÁS BAJA del mes y `t_max_c` la máxima MÁS ALTA:
+    lo mismo que T2M_MIN / T2M_MAX de NASA POWER mensual (extremos del mes).
+    """
+
+    mes: str = Field(pattern=r"^\d{4}-(0[1-9]|1[0-2])$", description="AAAA-MM")
+    lluvia_mm: float | None = Field(None, ge=0, le=1000)
+    t_min_c: float | None = Field(None, ge=-20, le=40)
+    t_max_c: float | None = Field(None, ge=-10, le=50)
+
+    @model_validator(mode="after")
+    def _al_menos_una_variable(self):
+        if self.lluvia_mm is None and self.t_min_c is None and self.t_max_c is None:
+            raise ValueError(f"El mes {self.mes} no trae lluvia ni temperaturas")
+        return self
+
+
 class MedicionesPropias(BaseModel):
     """Mediciones del productor (RF15). Se muestran al lado de NASA; no cambian puntajes."""
 
     lluvia_anual_mm: float | None = Field(None, gt=0)
     anios_registro: int | None = Field(None, ge=1)
     materia_organica_pct: float | None = Field(None, ge=0, le=100)
+    serie_mensual: list[MedicionMes] | None = Field(
+        None, max_length=480,
+        description="Meses de la planilla (`SeriePlanilla.meses`), hasta 40 años. Si trae lluvia, manda sobre "
+                    "`lluvia_anual_mm`")
 
 
 class Entrada(BaseModel):
@@ -167,6 +190,15 @@ class CorregidoAlLado(BaseModel):
     nota: str
 
 
+class DetalleCampana(BaseModel):
+    """Una campaña en común entre la planilla del productor y NASA POWER."""
+
+    campana: str
+    productor: float
+    nasa: float
+    diferencia: int | None = Field(None, description="% en lluvia; en helada y calor, productor − NASA (0 o 1)")
+
+
 class ContrasteMedicion(BaseModel):
     """RF15: medición del productor al lado de NASA. No cambia ningún puntaje.
 
@@ -183,6 +215,53 @@ class ContrasteMedicion(BaseModel):
         None, description="Diferencia > 15 % o pocos años de registro → baja; None si no hay comparación")
     corregido_al_lado: CorregidoAlLado | None = None
     texto: str
+    campanas_comparadas: list[str] | None = Field(
+        None, description='Campañas en común con NASA (planilla), ej. ["2018/19", "2019/20"]')
+    detalle_campanas: list[DetalleCampana] | None = Field(
+        None, description="Productor y NASA por campaña, para la mini tabla del front (planilla)")
+    mes: int | None = Field(None, ge=0, le=11, description='Mes (0 = enero) en las filas "helada" y "calor"')
+
+
+# --- Planilla de mediciones (POST /mediciones/planilla) ---------------------
+
+class AvisoFila(BaseModel):
+    fila: int | None = Field(None, description="Número de fila del archivo; None si es del archivo entero")
+    motivo: str
+
+
+class PeriodoPlanilla(BaseModel):
+    desde: str = Field(description="AAAA-MM")
+    hasta: str = Field(description="AAAA-MM")
+
+
+class FormatoPlanilla(BaseModel):
+    codificacion: str
+    separador: str
+    decimal: str
+
+
+class SeriePlanilla(BaseModel):
+    """Lo que el parser (`app/mediciones/planilla.py`, Back 2) leyó de la planilla."""
+
+    meses: list[MedicionMes] = Field(description="Cronológico. Es lo que el front manda en `serie_mensual`")
+    variables: list[Literal["lluvia_mm", "t_min_c", "t_max_c"]]
+    granularidad: Literal["diaria", "mensual"]
+    periodo: PeriodoPlanilla
+    campanas_completas: dict[Literal["lluvia_mm", "t_min_c", "t_max_c"], list[str]] = Field(
+        description="Campañas julio–junio con los 12 meses, por variable")
+    lluvia_media_campana_mm: float | None = None
+    filas_leidas: int
+    filas_usadas: int
+    avisos: list[AvisoFila] = []
+    formato: FormatoPlanilla
+
+
+class ResultadoPlanilla(BaseModel):
+    """Respuesta de POST /mediciones/planilla: 200 si `ok`, 422 si no."""
+
+    ok: bool
+    serie: SeriePlanilla | None = None
+    errores: list[AvisoFila] = []
 
 
 class ClimaCelda(BaseModel):
@@ -332,6 +411,9 @@ class Probabilidad(BaseModel):
     pct: int
     texto: str
     fuente: str
+    contraste: str | None = Field(
+        None, description='Línea del productor para el mismo mes y evento, ej. "Tu estación: helada en mayo en '
+                          '4 de 6 campañas". No cambia la probabilidad (sale de NASA)')
 
 
 class Estrategia(BaseModel):

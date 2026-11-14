@@ -13,9 +13,16 @@ import json
 from functools import cache
 from pathlib import Path
 
-from app.api.contrato import Entrada, Salida
+from app.api.contrato import Entrada, ResultadoPlanilla, Salida
 
 _ARCHIVO = Path(__file__).with_name("mock_rio_cuarto.json")
+# Ejemplo de POST /mediciones/planilla (una campaña mensual con lluvia y temperaturas, valores
+# ILUSTRATIVOS), para que el front arme la vista previa sin esperar al parser de Back 2.
+_ARCHIVO_PLANILLA = Path(__file__).with_name("mock_planilla.json")
+
+
+def planilla_mock() -> ResultadoPlanilla:
+    return ResultadoPlanilla.model_validate(json.loads(_ARCHIVO_PLANILLA.read_text(encoding="utf-8")))
 
 
 @cache
