@@ -58,9 +58,14 @@ def test_prioridades_cambian_la_cercania_al_cuadrado(ind):
     assert a_suelo["cercania"] == esperado
 
 
-def test_prioridad_cero_deja_afuera_el_objetivo(ind):
-    r = _correr(ind, pesos={"agua": 0, "suelo": 0, "ingreso": 5, "erosion": 0})
-    assert _col(r, "actual")["cercania"] == _col(r, "actual")["ingreso"]
+def test_prioridades_van_de_1_a_5(ind):
+    # Un 0 (o un valor fuera de rango) se lleva a 1: ningún objetivo queda afuera.
+    cero = _correr(ind, pesos={"agua": 0, "suelo": 0, "ingreso": 5, "erosion": 0})
+    uno = _correr(ind, pesos={"agua": 1, "suelo": 1, "ingreso": 5, "erosion": 1})
+    assert _col(cero, "actual")["cercania"] == _col(uno, "actual")["cercania"]
+    v = reglas.valores(_col(uno, "actual"))
+    assert _col(uno, "actual")["cercania"] == round((v["agua"] + v["suelo"] + 25 * v["ingreso"] + v["erosion"]) / 28)
+    assert reglas.prioridad({"agua": 9}, "agua") == 5 and reglas.prioridad({}, "agua") == 3
 
 
 def test_lluvia_del_productor_cambia_agua_y_erosion(ind):

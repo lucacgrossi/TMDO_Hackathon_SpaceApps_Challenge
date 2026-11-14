@@ -11,7 +11,7 @@ Arma las 4 columnas de `/analizar` (actual, A, B y C) con puntajes de 0 a 100 en
 | `plantillas.py` | `armar(resultado, entradas, indicadores)`: resumen, por qué, evidencia, beneficios, información que falta y a revisar con el agrónomo |
 
 **Qué cambia los puntajes:**
-- Prioridades (0–5): eligen especies y pesan al cuadrado en la cercanía (una prioridad 5 pesa 25 veces más que una 1). El front repite la cuenta en `cercania.ts`.
+- Prioridades (1 a 5): eligen especies y pesan al cuadrado en la cercanía (una prioridad 5 pesa 25 veces más que una 1). El front repite la cuenta en `cercania.ts`.
 - Lluvia del productor: agua (los 3 tipos de año) y erosión (lluvia en los meses pelados).
 - Mínimas y máximas del productor: riesgo de helada y de calor en el ingreso, y los meses de helada/calor.
 - Textura y anegamiento: lluvia efectiva, erosión y agua en años húmedos.

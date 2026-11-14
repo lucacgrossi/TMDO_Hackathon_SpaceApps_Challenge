@@ -1,7 +1,7 @@
 """Motor de reglas de Field Shift: puntajes de 0 a 100 de las 4 columnas.
 
 Entrada (la arma `app/servicio.py`):
-    entradas = {verano, invierno, pasada, pesos{agua, suelo, ingreso, erosion} (0 a 5),
+    entradas = {verano, invierno, pasada, pesos{agua, suelo, ingreso, erosion} (1 a 5),
                 no_sembrar, maquinaria_limitada, anegable, textura,
                 mediciones?: {lluvia_anual_mm?, anios_registro?, serie_mensual?}}
     indicadores = {terciles{seco|normal|humedo: {pp[12], et0[12] | None, n}},
@@ -50,6 +50,7 @@ HELADA_FRECUENTE = 1 / 3       # helada en 1 de cada 3 años
 CALOR_FRECUENTE = 1 / 2        # 35 °C en la mitad de los años
 UMBRAL_SENSIBLE = 15           # cercanía húmedo − seco para "sensible al clima"
 EXPONENTE_PRIORIDAD = 2        # cercanía = Σ p²·v / Σ p²
+PRIORIDAD_MIN, PRIORIDAD_MAX = 1, 5   # barritas de 1 (poco) a 5 (mucho)
 
 
 def _clamp(x: float, a: float = 0, b: float = 100) -> int:
@@ -209,23 +210,31 @@ def evaluar(s: dict, entradas: dict, clima: dict, pendiente: float) -> dict:
     return s
 
 
+def prioridad(pesos: dict, objetivo: str) -> int:
+    """Prioridad de 1 a 5; un valor fuera de rango o faltante se lleva al borde (por defecto, 3)."""
+    try:
+        p = int(pesos.get(objetivo, 3))
+    except (TypeError, ValueError):
+        p = 3
+    return max(PRIORIDAD_MIN, min(PRIORIDAD_MAX, p))
+
+
 def valores(s: dict, tipo: str = "normal") -> dict:
     return {"agua": s["agua_por_tipo"][tipo], "suelo": s["suelo"], "erosion": s["erosion"], "ingreso": s["ingreso"]}
 
 
 def cercania(s: dict, pesos: dict, tipo: str = "normal") -> int | None:
-    """Promedio de las 4 dimensiones pesado por las prioridades al cuadrado (0 deja afuera el objetivo)."""
+    """Promedio de las 4 dimensiones pesado por las prioridades al cuadrado (de 1 a 5)."""
     v = valores(s, tipo)
-    w = {o: max(0, pesos.get(o, 0)) ** EXPONENTE_PRIORIDAD for o in OBJETIVOS}
-    total = sum(w.values())
-    return round(sum(w[o] * v[o] for o in OBJETIVOS) / total) if total else None
+    w = {o: prioridad(pesos, o) ** EXPONENTE_PRIORIDAD for o in OBJETIVOS}
+    return round(sum(w[o] * v[o] for o in OBJETIVOS) / sum(w.values()))
 
 
 def choque(lista: list[dict], pesos: dict) -> dict:
     """Si los 2 objetivos más pesados (el segundo con 4 o más) quedan más altos en columnas distintas."""
     activas = [s for s in lista[1:] if s["on"] and "agua_por_tipo" in s]
-    orden = sorted(OBJETIVOS, key=lambda o: -pesos.get(o, 0))
-    if len(activas) < 2 or pesos.get(orden[1], 0) < 4:
+    orden = sorted(OBJETIVOS, key=lambda o: -prioridad(pesos, o))
+    if len(activas) < 2 or prioridad(pesos, orden[1]) < 4:
         return {"hay": False, "objetivos": [], "arriba": {}}
     arriba = {o: max(activas, key=lambda s: valores(s)[o]) for o in orden[:2]}
     if arriba[orden[0]]["id"] == arriba[orden[1]]["id"]:
