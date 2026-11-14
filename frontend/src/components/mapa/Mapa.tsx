@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import { useEntradas } from "@/lib/store";
 import AvisoSinConexion from "./AvisoSinConexion";
+import CapaDibujo from "./CapaDibujo";
 import CapaLote from "./CapaLote";
 import Encuadre from "./Encuadre";
 import MarcaUbicacion from "./MarcaUbicacion";
@@ -18,7 +19,7 @@ import MarcaUbicacion from "./MarcaUbicacion";
  * está cargado y solo hay que volar al lote.
  *
  * Lo que va adentro del mapa son piezas chicas, una por archivo:
- * CapaLote (el polígono del lote), Encuadre (cámara) y MarcaUbicacion
+ * CapaLote (el polígono del lote), CapaDibujo (marcar las esquinas), Encuadre (cámara) y MarcaUbicacion
  * (lo que eligió el buscador).
  */
 
@@ -116,6 +117,7 @@ export default function Mapa() {
           />
           <ZoomControl position="topleft" />
           <CapaLote />
+          <CapaDibujo />
           <Encuadre />
           <MarcaUbicacion />
         </MapContainer>

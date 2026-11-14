@@ -3,6 +3,7 @@
 import L from "leaflet";
 import { useCallback, useEffect, useState } from "react";
 import { Marker, Polygon, Tooltip, useMap, useMapEvents } from "react-leaflet";
+import { useDibujo } from "@/lib/dibujo";
 import { useEncuadre } from "@/lib/encuadre";
 import { areaHa, centro, formatoNumero, moverPoligono } from "@/lib/geo";
 import { useMapa } from "@/lib/mapa";
@@ -45,6 +46,8 @@ export default function CapaLote() {
   const paso = useEntradas((s) => s.paso);
   const cambiar = useEntradas((s) => s.cambiar);
   const loteVisible = useMapa((s) => s.loteVisible);
+  // Mientras se dibuja, el lote anterior queda de fondo, tenue (startDraw del prototipo).
+  const dibujando = useDibujo((s) => s.dibujando);
 
   // Opacidad actual del borde (0 a 1). El relleno va en proporción.
   const [opacidad, setOpacidad] = useState(0);
@@ -74,7 +77,9 @@ export default function CapaLote() {
     return () => cancelAnimationFrame(cuadro);
   }, [loteVisible]);
 
-  const visibleDelTodo = opacidad >= 1;
+  // Etiqueta y pin solo con el lote entero a la vista y sin dibujo en curso
+  // (lotePin del prototipo saca el pin si DRAW.on).
+  const visibleDelTodo = opacidad >= 1 && !dibujando;
 
   // lotePin(): ¿el lote se ve como un punto en pantalla? Se mide su recuadro
   // en píxeles de la pantalla; si el lado más corto mide menos de 28 px, pin.
@@ -94,6 +99,8 @@ export default function CapaLote() {
     // paso 2: en el paso 1 el mapa está tapado por el formulario.
     click: (e) => {
       if (useEntradas.getState().paso !== "mapa") return;
+      // Dibujando, el toque marca una esquina (lo atiende CapaDibujo), no mueve el lote.
+      if (useDibujo.getState().dibujando) return;
       cambiar({ poligono: moverPoligono(poligono, [e.latlng.lat, e.latlng.lng]) });
     },
   });
@@ -105,7 +112,11 @@ export default function CapaLote() {
     <>
       <Polygon
         positions={poligono}
-        pathOptions={{ color: "#fff", weight: 3, fillColor: "#fff", opacity: opacidad, fillOpacity: RELLENO * opacidad }}
+        pathOptions={
+          dibujando
+            ? { color: "#fff", weight: 3, fillColor: "#fff", opacity: 0.25, fillOpacity: 0 }
+            : { color: "#fff", weight: 3, fillColor: "#fff", opacity: opacidad, fillOpacity: RELLENO * opacidad }
+        }
       >
         {/* La etiqueta aparece recién cuando terminó el fundido (openTooltip en showLote).
             `key` con la superficie: Leaflet no reacomoda una etiqueta permanente al

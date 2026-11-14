@@ -2,7 +2,8 @@
 
 import { useEncuadre } from "@/lib/encuadre";
 import { CIUDAD_REFERENCIA, LOTE_DEMO, type LatLng } from "@/lib/entradas";
-import { areaHa, centro, distanciaKm, formatoNumero } from "@/lib/geo";
+import { useDibujo } from "@/lib/dibujo";
+import { areaHa, centro, distanciaKm, formatoNumero, mismoPoligono } from "@/lib/geo";
 import { useMapa } from "@/lib/mapa";
 import { useEntradas } from "@/lib/store";
 
@@ -17,6 +18,9 @@ import { useEntradas } from "@/lib/store";
  * vuelve a calcular todo cuando cambia `poligono` en el estado.
  *
  * En el paso 1 este bloque no se ve (el CSS tiene `body.onb .lote{display:none}`).
+ *
+ * "Dibujar mi lote" arranca el dibujo (lib/dibujo.ts); la barra y las esquinas
+ * las muestran BarraDibujo y CapaDibujo.
  *
  * Pendiente y lluvia/año quedan en "—": son datos de NASA (NASADEM y POWER)
  * que calcula el backend; el front no calcula datos de NASA (frontend/CLAUDE.md).
@@ -34,7 +38,8 @@ export default function ResumenLote() {
   const poligono = useEntradas((s) => s.poligono);
   const modoLote = useEntradas((s) => s.modoLote);
   const cambiar = useEntradas((s) => s.cambiar);
-  const pedirDibujo = useMapa((s) => s.pedirDibujo);
+  // Mientras se dibuja, el selector queda deshabilitado (startDraw del prototipo).
+  const dibujando = useDibujo((s) => s.dibujando);
 
   const c = centro(poligono);
   const km = distanciaKm(c, CIUDAD_REFERENCIA.punto);
@@ -46,10 +51,14 @@ export default function ResumenLote() {
     useEncuadre.getState().pedirEncuadre(0.3);
   };
 
-  /** "Dibujar mi lote": pasa a modo dibujo y pide arrancar el dibujo (lo atiende BarraDibujo, F5). */
+  /**
+   * "Dibujar mi lote": arranca el dibujo. Si ya había un lote propio dibujado,
+   * arranca con sus esquinas para poder corregirlo (en vez de empezar de cero),
+   * como el prototipo. "Propio" = modo dibujo y distinto del de ejemplo.
+   */
   const dibujar = () => {
-    cambiar({ modoLote: "dibujo" });
-    pedirDibujo();
+    const propio = modoLote === "dibujo" && !mismoPoligono(poligono, LOTE_DEMO);
+    useDibujo.getState().iniciar(propio ? poligono : null);
   };
 
   return (
@@ -60,10 +69,10 @@ export default function ResumenLote() {
       </h2>
       <p>{coordenadas(c)} · tocá el mapa para moverlo o dibujalo</p>
       <div className="seg2" role="radiogroup" aria-label="Cómo marcar el lote">
-        <button type="button" role="radio" aria-checked={modoLote === "demo"} onClick={usarEjemplo}>
+        <button type="button" role="radio" aria-checked={modoLote === "demo"} onClick={usarEjemplo} disabled={dibujando}>
           Lote de ejemplo
         </button>
-        <button type="button" role="radio" aria-checked={modoLote === "dibujo"} onClick={dibujar}>
+        <button type="button" role="radio" aria-checked={modoLote === "dibujo"} onClick={dibujar} disabled={dibujando}>
           Dibujar mi lote
         </button>
       </div>
