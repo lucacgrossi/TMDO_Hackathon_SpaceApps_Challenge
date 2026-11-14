@@ -1,0 +1,111 @@
+/*
+ * CSS propio de la hoja de resultados (persona 5). Lo que ya existe en el
+ * prototipo (.sheet, .ghost, .seg2, .foot, .card…) se usa desde globals.css;
+ * acá va solo lo nuevo, para no editar el archivo compartido.
+ */
+
+/* Interruptor Tabla / Tarjetas: reusa .seg2 del prototipo, más angosto y sin margen */
+.interruptor {
+  margin-top: 0;
+  width: 220px;
+}
+
+/* Cuerpo de la hoja: lo que queda entre el encabezado y el pie, con scroll propio */
+.cuerpo {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 2px 18px 12px;
+}
+
+.estado {
+  padding: 24px 18px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+/* Pie: el texto del prototipo y el aviso de apoyo (RF22) */
+.pie {
+  align-items: flex-end;
+}
+.pieTextos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.pieTextos :global(.note) {
+  margin: 0;
+  text-align: left;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+/* Badge de la estrategia. El blanco sobre --s-b no llega a 4,5:1 (DESIGN.md): la B va con tinta oscura */
+.insignia {
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  font-size: 13px;
+  color: #fff;
+  flex: none;
+}
+.insignia[data-id="B"] {
+  color: #1b1405;
+}
+@media (prefers-color-scheme: dark) {
+  /* En oscuro los colores de estrategia son claros: el texto va oscuro en todas */
+  .insignia {
+    color: #0d1317;
+  }
+}
+
+/* Vista previa de las 4 columnas mientras llegan la tabla (feature 3) y las tarjetas (feature 7) */
+.columnas {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(200px, 1fr));
+  gap: 10px;
+}
+.columna {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+.columna[data-disponible="false"] {
+  opacity: 0.6;
+  background: repeating-linear-gradient(135deg, transparent, transparent 8px, var(--soft) 8px, var(--soft) 16px);
+}
+.cabecera {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+}
+.nombre {
+  font-weight: 700;
+  line-height: 1.2;
+}
+.detalle {
+  font-size: 12px;
+  color: var(--muted);
+}
+.resumen {
+  font-size: 12px;
+  line-height: 1.4;
+}
+.aviso {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+  .columnas {
+    grid-template-columns: repeat(4, minmax(220px, 1fr));
+  }
+}

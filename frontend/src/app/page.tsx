@@ -2,6 +2,7 @@ import ClaseBody from "@/components/comunes/ClaseBody";
 import Toast from "@/components/comunes/Toast";
 import PanelEntradas from "@/components/entradas/PanelEntradas";
 import BarraDibujo from "@/components/mapa/BarraDibujo";
+import HojaComparacion from "@/components/resultados/HojaComparacion";
 import MapaDinamico from "@/components/mapa/MapaDinamico";
 
 /**
@@ -19,7 +20,8 @@ export default function Inicio() {
       <div className="onb-bg" aria-hidden="true" />
       <PanelEntradas />
       <BarraDibujo />
-      {/* Hoja de resultados (persona 5): <HojaComparacion /> va acá. */}
+      {/* Hoja de resultados (persona 5) */}
+      <HojaComparacion />
       <Toast />
     </>
   );
