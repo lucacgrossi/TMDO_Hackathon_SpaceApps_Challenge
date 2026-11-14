@@ -51,7 +51,7 @@ export interface Entradas {
   verano: Verano;
   invierno: Invierno;
   pasada: Verano;
-  /** Barras de 0 a 5 (RF4). */
+  /** Barras de 1 a 5 (RF4 del MVP 4.3: el contrato rechaza un 0). */
   objetivos: Record<Objetivo, number>;
   restricciones: { sinRiego: boolean; sinHacienda: boolean; maquinariaLimitada: boolean };
   noSembrar: CultivoNoSembrar[];

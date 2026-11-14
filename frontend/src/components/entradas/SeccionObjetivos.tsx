@@ -1,7 +1,11 @@
 "use client";
 
 /**
- * F7 · Objetivos: 4 barras de 0 a 5, por defecto 3 (RF4).
+ * F7 · Objetivos: 4 barras de 1 a 5, por defecto 3 (RF4 del MVP 4.3).
+ *
+ * Por qué desde 1 y no desde 0 (como el prototipo): desde el #57 el motor pesa
+ * las prioridades al cuadrado en la cercanía y el contrato rechaza un 0 con
+ * error 422. Pedido de Back 2 en el PR #12.
  *
  * Sale del prototipo final: `OBJ` y el armado de `#sliders` (un `.sl` por
  * objetivo con label, input range y output). Las barras solo cargan cuánto
@@ -26,7 +30,7 @@ export default function SeccionObjetivos() {
   return (
     <div className="blk" data-a="obj">
       <h3>Objetivos</h3>
-      <p className="hint">Cuánto te importa cada uno: 0 nada, 5 mucho.</p>
+      <p className="hint">Cuánto te importa cada uno: 1 poco, 5 mucho.</p>
       <div id="sliders">
         {OBJETIVOS.map((o) => (
           <div className="sl" key={o.k}>
@@ -34,7 +38,7 @@ export default function SeccionObjetivos() {
             <input
               type="range"
               id={`w-${o.k}`}
-              min={0}
+              min={1}
               max={5}
               step={1}
               value={objetivos[o.k]}
