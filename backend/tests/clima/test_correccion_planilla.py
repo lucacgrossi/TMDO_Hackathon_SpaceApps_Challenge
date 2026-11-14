@@ -61,14 +61,14 @@ def test_planilla_que_coincide_da_confianza_alta(clima):
     assert r.confianza_agua == "alta" and r.riesgos == []
 
 
-def test_menos_de_5_campanas_en_comun_confianza_baja_en_la_fila(clima):
-    r = corr.contrastar(MedicionesPropias(serie_mensual=_meses_de(clima, SEIS[:3], 1.0)), clima)
+def test_una_campana_en_comun_alcanza(clima):
+    """Decidido 14/11: alcanza 1 campaña en común; la confianza la decide solo la diferencia."""
+    r = corr.contrastar(MedicionesPropias(serie_mensual=_meses_de(clima, SEIS[:1], 1.0)), clima)
     c = r.contraste[0]
-    assert c.diferencia_pct == 0
-    assert c.confianza_resultante == "baja"
-    assert r.confianza_agua == "alta"  # pocos años no empeora el dato de NASA
-    assert "pocos años en común con NASA (3" in c.texto
-    assert any("3 campañas en común" in x for x in r.riesgos)
+    assert c.diferencia_pct == 0 and c.campanas_comparadas == SEIS[:1]
+    assert c.confianza_resultante == "alta" and r.confianza_agua == "alta"
+    assert c.texto.startswith("Tu pluviómetro (2018/19, 1 campaña):")
+    assert "pocos años" not in c.texto and r.riesgos == []
 
 
 def test_sin_campanas_en_comun_fila_sin_comparar(clima):
