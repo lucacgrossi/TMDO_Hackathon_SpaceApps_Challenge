@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { esDisponible, type Estrategia, type EstrategiaDisponible, type Probabilidad } from "@/lib/contrato";
+import { conSigno } from "@/lib/formato";
 import { metricasTarjeta, rangoTipoAnio, seccionesDetalle, textoProbabilidad } from "@/lib/tarjeta";
 import { MOCK_BASE } from "@/mocks/analizar";
 
@@ -34,11 +35,14 @@ describe("métricas de la tarjeta", () => {
 
 describe("rango de cada tipo de año", () => {
   it("usa los umbrales de los terciles de balance y la cantidad de campañas", () => {
-    // Umbrales reales de POWER en el mock (−730,6 y −529,6 mm), redondeados
+    // Los cortes salen del mock (con el del back pasan a −730,6 / −529,6): se redondean al mm con signo
     const t = MOCK_BASE.tipos_de_anio;
-    expect(rangoTipoAnio(t, "seco")).toBe(`Años secos: balance de la campaña hasta −731 mm (${t.seco.length} campañas)`);
-    expect(rangoTipoAnio(t, "normal")).toContain("entre −731 mm y −530 mm");
-    expect(rangoTipoAnio(t, "humedo")).toContain("desde −530 mm");
+    const seco = `${conSigno(t.umbral_seco_mm)} mm`;
+    const humedo = `${conSigno(t.umbral_humedo_mm)} mm`;
+    expect(rangoTipoAnio(t, "seco")).toBe(`Años secos: balance de la campaña hasta ${seco} (${t.seco.length} campañas)`);
+    expect(rangoTipoAnio(t, "normal")).toContain(`entre ${seco} y ${humedo}`);
+    expect(rangoTipoAnio(t, "humedo")).toContain(`desde ${humedo}`);
+    expect(rangoTipoAnio(t, "humedo")).toMatch(/^Años húmedos: balance de la campaña desde [−+]?\d[\d.]* mm \(\d+ campañas\)$/);
   });
 });
 
