@@ -1,0 +1,41 @@
+{
+  "type": "Feature",
+  "geometry": null,
+  "properties": {
+    "statistics": {
+      "map_b1": {
+        "min": 10.0,
+        "max": 60.0,
+        "mean": 38.879040667361835,
+        "count": 13426.0,
+        "sum": 521990.0,
+        "std": 5.251244325194988,
+        "median": 40.0,
+        "majority": 40.0,
+        "minority": 50.0,
+        "unique": 5.0,
+        "histogram": [
+          [
+            371,
+            439,
+            12592,
+            1,
+            23
+          ],
+          [
+            10,
+            30,
+            40,
+            50,
+            60
+          ]
+        ],
+        "valid_percent": 100.0,
+        "masked_pixels": 0.0,
+        "valid_pixels": 13426.0,
+        "percentile_2": 10.0,
+        "percentile_98": 40.0
+      }
+    }
+  }
+}

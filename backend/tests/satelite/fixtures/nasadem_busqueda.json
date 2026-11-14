@@ -1,0 +1,16 @@
+[
+  {
+    "type": "Feature",
+    "id": "NASADEM_HGT_s34w065",
+    "collection": "nasadem",
+    "bbox": [
+      -65.000139,
+      -34.000139,
+      -63.999861,
+      -32.999861
+    ],
+    "properties": {
+      "datetime": "2000-02-20T00:00:00Z"
+    }
+  }
+]

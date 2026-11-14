@@ -1,0 +1,4 @@
+# Archivos que lee el buildpack de Cloud Run: siempre con LF, aunque se deploye desde Windows
+# (un "\r" al final del Procfile o de .python-version rompe el arranque o la versión).
+Procfile text eol=lf
+.python-version text eol=lf
