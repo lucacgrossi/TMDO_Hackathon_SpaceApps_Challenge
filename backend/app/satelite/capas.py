@@ -14,10 +14,17 @@ Planetary Computer.
   Planetary Computer con ese `item`). Un mes con MODIS de respaldo aparece solo si tiene raster
   (sus teselas de PC no sirven con la expresión de HLS). Un mes sin nada va en `None`: el front
   muestra ahí la capa MODIS de GIBS de esa fecha, como el prototipo.
-- `erosion` y `erosion_mapa` (paso 5): por píxel, pendiente del píxel × meses con cobertura baja
-  (NDVI < umbral) del píxel, sobre la grilla común. El valor del lote es la **media de la capa dentro
-  del lote**: se ve dónde está el riesgo y el número cierra con el mapa. Si falta alguno de los dos
-  rasters, el valor sale como antes (pendiente general × meses bajos del lote) y no hay capa. Es un
+- `erosion` y `erosion_mapa` (paso 5):
+  - **Mapa (dónde):** por píxel, pendiente del píxel × meses con cobertura baja (NDVI < umbral) del
+    píxel, sobre la grilla común.
+  - **Valor del lote (cuánto):** pendiente general (plano) × media de los meses bajos por píxel. La
+    pendiente por píxel de NASADEM es ruidosa y siempre sesgada hacia arriba en terreno llano (1 m de
+    cuantización y ~1,5 m de error contra ~1 m de desnivel real en 180 m; el ruido suma en módulo y no
+    se compensa), así que su media inflaría el índice (5,5 contra 2,6 en el lote demo). El plano usa
+    todos los píxeles juntos y el ruido se promedia. `resumen.valor_lote` de la capa es este valor;
+    `resumen.media` sigue siendo la media por píxel.
+  - Si falta alguno de los dos rasters, el valor sale como antes (pendiente general × meses bajos del
+    lote) y no hay capa. Es un
   valor con forma de `Indicador` + el detalle para la línea de tiempo. Es un índice relativo: no es
   pérdida de suelo (t/ha).
 """
@@ -113,7 +120,8 @@ def _decodificar(capa: dict) -> np.ndarray:
 
 def erosion_por_pixel(base: dict | None, pendiente_mapa: dict | None, meses_bajos_mapa: dict | None,
                       grilla_lote: dict | None) -> tuple[dict | None, dict | None, str | None]:
-    """(erosion, erosion_mapa, motivo): pendiente del píxel × meses bajos del píxel, y su media.
+    """(erosion, erosion_mapa, motivo): pendiente del píxel × meses bajos del píxel (mapa) y, para el
+    lote, pendiente general × media de los meses bajos por píxel (ver el docstring del módulo).
 
     base: el `erosion()` del lote (para la fuente, los años y la línea de tiempo). Si falta algo,
     devuelve (base, None, motivo). Nunca lanza.
@@ -127,7 +135,8 @@ def erosion_por_pixel(base: dict | None, pendiente_mapa: dict | None, meses_bajo
         return base, None, "La pendiente y los meses bajos por píxel no están en la misma grilla"
     try:
         g = grilla.desde_dict(grilla_lote)
-        ero = _decodificar(pendiente_mapa) * _decodificar(meses_bajos_mapa)
+        meses_px = _decodificar(meses_bajos_mapa)
+        ero = _decodificar(pendiente_mapa) * meses_px
         validos = np.isfinite(ero)          # fuera del lote los dos rasters vienen en nodata
         orden = ORDEN_CONFIANZA
         confianza = min((base["confianza"], pendiente_mapa.get("confianza", "sin_dato"),
@@ -136,23 +145,31 @@ def erosion_por_pixel(base: dict | None, pendiente_mapa: dict | None, meses_bajo
         res = raster.resumen(ero, validos, decimales=1)
         if res is None:
             return base, None, "Sin píxeles con pendiente y NDVI a la vez"
-        nota = (f"Media dentro del lote de pendiente del píxel × meses con NDVI < "
-                f"{_numero(ndvi.UMBRAL_NDVI_BAJO)} del píxel ({res['pixeles']} píxeles de la grilla de "
-                f"{g.resolucion}, campaña {base.get('anios')}). Índice relativo para comparar lotes, "
-                "zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases propuesta, a "
-                "validar por la persona 3")
+        meses_medio = float(meses_px[validos].mean())
+        pendiente_general = base["pendiente_pct"]
+        valor = round(pendiente_general * meses_medio, 1)
+        umbral = _numero(ndvi.UMBRAL_NDVI_BAJO)
+        nota = (f"Valor del lote: pendiente general {_numero(pendiente_general)} % (plano) × "
+                f"{_numero(round(meses_medio, 1))} meses con NDVI < {umbral} en promedio por píxel "
+                f"({res['pixeles']} píxeles de la grilla de {g.resolucion}, campaña {base.get('anios')}). "
+                f"El mapa muestra dónde: pendiente del píxel × meses del píxel (media {_numero(res['media'])}); "
+                "la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor "
+                "del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es "
+                "pérdida de suelo (t/ha). Escala de clases propuesta, a validar por la persona 3")
         mapa = raster.capa(
             id="erosion", titulo="Riesgo de erosión (índice)", unidad=UNIDAD_EROSION, fuente=base["fuente"],
             resolucion_nativa="30 m (pendiente NASADEM × NDVI HLS)", grilla=g, array=ero, mascara=validos,
             escala=escalas.EROSION, factor=FACTOR_EROSION, confianza=confianza, nota=nota,
-            campana=base.get("anios"), decimales=1, valor_lote=res["media"])
+            campana=base.get("anios"), decimales=1, valor_lote=valor)
     except Exception as e:  # noqa: BLE001 — nunca propagar: queda el valor del lote
         return base, None, f"No se pudo armar la erosión por píxel ({type(e).__name__})"
     if mapa is None:
         return base, None, "Sin píxeles con pendiente y NDVI a la vez"
-    por_pixel = {**base, "valor": res["media"], "confianza": confianza,
-                 "resolucion": f"media por píxel en la grilla de {g.resolucion}; pendiente y NDVI a 30 m",
-                 "nota": nota, "metodo": "por_pixel", "valor_con_pendiente_general": base["valor"]}
+    por_pixel = {**base, "valor": valor, "confianza": confianza,
+                 "resolucion": (f"pendiente del plano × meses bajos por píxel en la grilla de {g.resolucion}; "
+                                "pendiente y NDVI a 30 m"),
+                 "nota": nota, "metodo": "por_pixel", "valor_con_pendiente_general": base["valor"],
+                 "meses_bajos_medio_pixel": round(meses_medio, 2), "media_por_pixel": res["media"]}
     return por_pixel, mapa, None
 
 
