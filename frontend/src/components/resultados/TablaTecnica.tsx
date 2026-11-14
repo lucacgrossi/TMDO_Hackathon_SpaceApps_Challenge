@@ -12,7 +12,16 @@ import {
   type Salida,
   type TipoAnio,
 } from "@/lib/contrato";
-import { conSigno, fmt, mesesConAnios, NOMBRE_CULTIVO, rangoMeses, textoEfecto, tramosCalendario } from "@/lib/formato";
+import {
+  conSigno,
+  fmt,
+  informacionQueFalta,
+  mesesConAnios,
+  NOMBRE_CULTIVO,
+  rangoMeses,
+  textoEfecto,
+  tramosCalendario,
+} from "@/lib/formato";
 import { useEntradas } from "@/lib/store";
 import CeldaDato, { HuellaDato, type Origen } from "./CeldaDato";
 import ContrasteMediciones, { MateriaOrganicaProductor } from "./ContrasteMediciones";
@@ -359,6 +368,7 @@ export default function TablaTecnica({ salida }: { salida: Salida }) {
   const pesos = useEntradas((s) => s.objetivos);
   const actual = esDisponible(salida.estrategias[0]) ? salida.estrategias[0] : null;
   const ctx: Contexto = { salida, actual, pesos };
+  const falta = informacionQueFalta(salida);
 
   return (
     <div className={css.contenedor}>
@@ -422,9 +432,9 @@ export default function TablaTecnica({ salida }: { salida: Salida }) {
           </tbody>
         ))}
       </table>
-      {salida.informacion_falta.length > 0 && (
+      {falta.length > 0 && (
         <p className={css.faltaGlobal}>
-          <b>Información que falta en todo el análisis:</b> {salida.informacion_falta.join(" · ")}.
+          <b>Información que falta en todo el análisis:</b> {falta.join(" · ")}.
         </p>
       )}
     </div>

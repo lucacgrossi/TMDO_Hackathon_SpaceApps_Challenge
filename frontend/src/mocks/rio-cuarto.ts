@@ -268,17 +268,17 @@ export const RIO_CUARTO: Salida = {
         {
           regla: "agua",
           efecto: { agua: 20.506515130214723 },
-          dato: "Años secos: lluvia 569 mm, uso estimado 840 mm (kc × ET0), balance -413 mm · NASA POWER, 10 campañas",
+          dato: "Años secos: lluvia 569 mm, uso estimado 840 mm (kc × ET0), balance −413 mm · NASA POWER, 10 campañas",
         },
         {
           regla: "agua",
           efecto: { agua: 53.202210663198954 },
-          dato: "Años normals: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance -224 mm · NASA POWER, 10 campañas",
+          dato: "Años normales: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance −224 mm · NASA POWER, 10 campañas",
         },
         {
           regla: "agua",
           efecto: { agua: 72.40444454765002 },
-          dato: "Años humedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance -34 mm · NASA POWER, 10 campañas",
+          dato: "Años húmedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance −34 mm · NASA POWER, 10 campañas",
         },
         { regla: "suelo_base", efecto: {suelo: 20}, dato: "Base de la regla" },
         {
@@ -347,8 +347,8 @@ export const RIO_CUARTO: Salida = {
       ],
       por_que: ["6 meses con el lote pelado"],
       evidencia: [
-        "Años humedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance -34 mm · NASA POWER, 10 campañas",
-        "Años normals: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance -224 mm · NASA POWER, 10 campañas",
+        "Años húmedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance −34 mm · NASA POWER, 10 campañas",
+        "Años normales: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance −224 mm · NASA POWER, 10 campañas",
         "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM",
         "Cultivos que se venden: Soja · sin precios",
       ],
@@ -408,17 +408,17 @@ export const RIO_CUARTO: Salida = {
         {
           regla: "agua",
           efecto: { agua: 4.176954099743412 },
-          dato: "Años secos: lluvia 569 mm, uso estimado 964 mm (kc × ET0), balance -537 mm · NASA POWER, 10 campañas",
+          dato: "Años secos: lluvia 569 mm, uso estimado 964 mm (kc × ET0), balance −537 mm · NASA POWER, 10 campañas",
         },
         {
           regla: "agua",
           efecto: { agua: 41.69375812743823 },
-          dato: "Años normals: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance -342 mm · NASA POWER, 10 campañas",
+          dato: "Años normales: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance −342 mm · NASA POWER, 10 campañas",
         },
         {
           regla: "agua",
           efecto: { agua: 63.727436683385974 },
-          dato: "Años humedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance -146 mm · NASA POWER, 10 campañas",
+          dato: "Años húmedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance −146 mm · NASA POWER, 10 campañas",
         },
         { regla: "suelo_base", efecto: {suelo: 20}, dato: "Base de la regla" },
         {
@@ -500,9 +500,9 @@ export const RIO_CUARTO: Salida = {
         "La vicia fija nitrógeno",
       ],
       evidencia: [
-        "Años humedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance -146 mm · NASA POWER, 10 campañas",
+        "Años húmedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance −146 mm · NASA POWER, 10 campañas",
         "Cultivos que se venden: Soja · sin precios",
-        "Años normals: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance -342 mm · NASA POWER, 10 campañas",
+        "Años normales: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance −342 mm · NASA POWER, 10 campañas",
         "Vicia fija nitrógeno · tabla de cultivos",
       ],
       beneficios: [
@@ -567,17 +567,17 @@ export const RIO_CUARTO: Salida = {
         {
           regla: "agua",
           efecto: { agua: 13.587209608828573 },
-          dato: "Años secos: lluvia 569 mm, uso estimado 893 mm (kc × ET0), balance -466 mm · NASA POWER, 10 campañas",
+          dato: "Años secos: lluvia 569 mm, uso estimado 893 mm (kc × ET0), balance −466 mm · NASA POWER, 10 campañas",
         },
         {
           regla: "agua",
           efecto: { agua: 48.325747724317296 },
-          dato: "Años normals: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance -274 mm · NASA POWER, 10 campañas",
+          dato: "Años normales: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance −274 mm · NASA POWER, 10 campañas",
         },
         {
           regla: "agua",
           efecto: { agua: 68.7277463000805 },
-          dato: "Años humedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance -81 mm · NASA POWER, 10 campañas",
+          dato: "Años húmedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance −81 mm · NASA POWER, 10 campañas",
         },
         { regla: "suelo_base", efecto: {suelo: 20}, dato: "Base de la regla" },
         {
@@ -652,8 +652,8 @@ export const RIO_CUARTO: Salida = {
       por_que: ["Suma un cultivo que se vende en invierno"],
       evidencia: [
         "Cultivos que se venden: Soja 2ª, Trigo · sin precios",
-        "Años humedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance -81 mm · NASA POWER, 10 campañas",
-        "Años normals: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance -274 mm · NASA POWER, 10 campañas",
+        "Años húmedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance −81 mm · NASA POWER, 10 campañas",
+        "Años normales: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance −274 mm · NASA POWER, 10 campañas",
         "11 meses con cultivo vivo · calendario",
       ],
       beneficios: [
@@ -717,17 +717,17 @@ export const RIO_CUARTO: Salida = {
         {
           regla: "agua",
           efecto: { agua: 48.87566776789792 },
-          dato: "Años secos: lluvia 569 mm, uso estimado 625 mm (kc × ET0), balance -198 mm · NASA POWER, 10 campañas",
+          dato: "Años secos: lluvia 569 mm, uso estimado 625 mm (kc × ET0), balance −198 mm · NASA POWER, 10 campañas",
         },
         {
           regla: "agua",
           efecto: { agua: 73.19570871261378 },
-          dato: "Años normals: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance -18 mm · NASA POWER, 10 campañas",
+          dato: "Años normales: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance −18 mm · NASA POWER, 10 campañas",
         },
         {
           regla: "agua",
           efecto: { agua: 87.478907362685 },
-          dato: "Años humedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas",
+          dato: "Años húmedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas",
         },
         { regla: "suelo_base", efecto: {suelo: 20}, dato: "Base de la regla" },
         {
@@ -781,8 +781,8 @@ export const RIO_CUARTO: Salida = {
       ],
       por_que: ["Sorgo corta el ciclo de plagas y tolera la sequía"],
       evidencia: [
-        "Años humedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas",
-        "Años normals: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance -18 mm · NASA POWER, 10 campañas",
+        "Años húmedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas",
+        "Años normales: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance −18 mm · NASA POWER, 10 campañas",
         "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM",
         "Cultivos que se venden: Sorgo · sin precios",
       ],

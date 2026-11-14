@@ -10,7 +10,7 @@ import {
 } from "@/lib/compartir";
 import { cercaniaPorTipo, type Pesos } from "@/lib/cercania";
 import { esDisponible, type Salida } from "@/lib/contrato";
-import { fmt, metadatosHoja } from "@/lib/formato";
+import { AVISO_PRECALCULADO, fmt, metadatosHoja } from "@/lib/formato";
 import { MOCK_BASE, MOCK_DESCARTADA, MOCK_PLUVIOMETRO, mockAnalizar } from "@/mocks/analizar";
 
 const PESOS: Pesos = { agua: 3, suelo: 3, erosion: 3, ingreso: 3 };
@@ -70,7 +70,7 @@ describe("resumen para compartir", () => {
         `en ${s.meses_ndvi_bajo} de ${s.meses_con_dato} meses con escena sin nubes`,
     );
     expect(texto).toContain("Información que falta:\n- ");
-    expect(texto).toContain("Datos de prueba");
+    expect(texto).toContain(AVISO_PRECALCULADO);
   });
 
   it("termina con el aviso de apoyo", () => {
@@ -123,7 +123,7 @@ describe("resumen corto para el mail", () => {
 
   it("lleva el pluviómetro, los datos de prueba, el aviso y adónde está el resto", () => {
     expect(corto).toContain(lineaPluviometro(completo));
-    expect(corto).toContain("Datos de prueba");
+    expect(corto).toContain(AVISO_PRECALCULADO);
     expect(corto).toContain(AVISO_APOYO);
     expect(corto.endsWith(CIERRE_MAIL)).toBe(true);
   });

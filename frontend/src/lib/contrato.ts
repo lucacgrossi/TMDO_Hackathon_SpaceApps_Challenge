@@ -42,6 +42,8 @@ export interface Indicador {
   confianza: Confianza;
   /** Por qué falta o por qué la confianza es baja. */
   motivo: string | null;
+  /** Cómo se calculó (ej. píxeles usados), para trazabilidad. */
+  nota?: string | null;
 }
 
 // --- Entrada -----------------------------------------------------------------
@@ -118,17 +120,34 @@ export interface LoteSalida {
   localidad_aprox: string | null;
   area_ha: number;
   pendiente_pct: Indicador;
+  /** Percentil 95 por píxel; ruidoso. Puede no venir. */
+  pendiente_maxima_pct?: Indicador | null;
   cobertura_agricola_pct: Indicador;
 }
 
 export interface MesSatelite {
+  /** AAAA-MM. */
+  mes?: string | null;
   /** Fecha de la escena, AAAA-MM-DD. */
   fecha: string;
   ndvi_medio: number;
-  /** % de nubes de la escena. */
-  nubes_escena: number;
+  /** % de nubes de la escena HLS; null en MODIS (compuesto de 16 días). */
+  nubes_escena: number | null;
+  /** "hls2-s30", "hls2-l30" o "modis-13Q1-061". */
+  coleccion?: string | null;
+  /** Id del item STAC. */
+  item?: string | null;
+  /** Píxeles del lote que entraron en la media. */
+  pixeles?: number | null;
   /** "NASA HLS 30 m" o "MODIS 250 m" si cayó al respaldo. */
   fuente: string;
+}
+
+/** Un mes sin escena utilizable: va a "Información que falta". */
+export interface Faltante {
+  /** AAAA-MM. */
+  mes: string;
+  motivo: string;
 }
 
 /** RF14: NDVI medio del lote en cada mes de la última campaña. */
@@ -143,6 +162,9 @@ export interface VistoPorSatelite {
   umbral: number;
   confianza: Confianza;
   motivo: string | null;
+  /** Meses sin dato, para "Información que falta". */
+  faltantes?: Faltante[];
+  orden_meses?: string | null;
 }
 
 export interface CorregidoAlLado {

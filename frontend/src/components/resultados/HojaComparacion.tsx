@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import AvisoApoyo from "@/components/comunes/AvisoApoyo";
 import AvisoDesactualizado from "./AvisoDesactualizado";
 import { VENTANA_ENTRADA_MS, sinMovimiento } from "@/lib/animacion";
-import { metadatosHoja } from "@/lib/formato";
+import { AVISO_PRECALCULADO, metadatosHoja } from "@/lib/formato";
 import { useResultado } from "@/lib/resultado";
 import { useVista } from "@/lib/vista";
 import ChoqueObjetivos from "./ChoqueObjetivos";
@@ -111,7 +111,7 @@ export default function HojaComparacion() {
           <span>Compara datos: no indica qué hacer. Decide el productor con su agrónomo.</span>
         </div>
         {resultado.estado === "listo" && resultado.datos.es_mock && (
-          <span>Datos de prueba: valores ilustrativos, no son datos de NASA.</span>
+          <span>{AVISO_PRECALCULADO}</span>
         )}
       </div>
     </section>
