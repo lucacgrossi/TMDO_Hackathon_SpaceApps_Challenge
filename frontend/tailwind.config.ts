@@ -1,37 +1,21 @@
 import type { Config } from "tailwindcss";
 
-// Los colores son variables CSS (src/app/globals.css), así el modo oscuro
-// cambia solo con prefers-color-scheme. Valores: frontend/DESIGN.md.
+// Los colores son las variables CSS del prototipo (src/app/globals.css),
+// así el modo oscuro cambia solo con prefers-color-scheme.
 const v = (n: string) => `var(--${n})`;
 
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
+  // Sin el reset de Tailwind: el prototipo trae el suyo y se tiene que ver igual.
+  corePlugins: { preflight: false },
   theme: {
     extend: {
-      colors: {
-        ink: v("ink"),
-        muted: v("muted"),
-        line: v("line"),
-        soft: v("soft"),
-        panel: v("panel"),
-        accent: v("accent"),
-        "accent-ink": v("accent-ink"),
-        good: v("good"),
-        bad: v("bad"),
-        warn: v("warn"),
-        mapa: "#0d120f",
-        "s-actual": v("s-actual"),
-        "s-a": v("s-a"),
-        "s-b": v("s-b"),
-        "s-c": v("s-c"),
-      },
-      fontFamily: { sans: ["var(--font-inter)", "system-ui", "sans-serif"] },
-      borderRadius: { panel: "16px", tarjeta: "14px" },
-      boxShadow: {
-        panel: "0 10px 40px rgba(0,0,0,.35)",
-        flotante: "0 6px 24px rgba(0,0,0,.3)",
-      },
-      transitionTimingFunction: { suave: "cubic-bezier(.22,1,.36,1)" },
+      colors: Object.fromEntries(
+        ["ink", "muted", "line", "panel", "soft", "accent", "accent-ink", "accent-soft", "bg",
+         "good", "bad", "warn", "s-actual", "s-a", "s-b", "s-c",
+         "verano", "invierno", "cobertura", "barbecho", "seco", "normal", "humedo"].map((n) => [n, v(n)]),
+      ),
+      fontFamily: { sans: ["var(--f)"] },
     },
   },
   plugins: [],

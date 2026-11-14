@@ -1,25 +1,45 @@
 "use client";
 
-import { useState } from "react";
-import HojaResultados from "@/components/HojaResultados";
-import MapaDinamico from "@/components/MapaDinamico";
-import PanelIzquierdo from "@/components/PanelIzquierdo";
+import { useEffect } from "react";
+import Intro from "@/components/Intro";
+import MapaFondo from "@/components/MapaFondo";
+import FondoInicio from "@/components/FondoInicio";
+import PanelEntradas from "@/components/PanelEntradas";
+import BarraCapas from "@/components/BarraCapas";
+import Leyenda from "@/components/Leyenda";
+import HojaComparacion from "@/components/HojaComparacion";
+import Toast from "@/components/Toast";
+import BarraDibujo from "@/components/BarraDibujo";
+import AvisoSinConexion from "@/components/AvisoSinConexion";
 
 /**
- * Layout base (DESIGN.md): mapa a pantalla completa, panel izquierdo fijo
- * y hoja de resultados desde abajo. En pantallas de 900 px o menos, el mapa
- * ocupa 52vh y el panel y la hoja se apilan debajo.
+ * Port del prototipo v2 (docs/prototipo). Los componentes dibujan el mismo
+ * HTML y, una vez montados, iniciarPrototipo() le agrega el mapa y la
+ * lógica. Leaflet se importa adentro del efecto porque usa window.
  */
 export default function Inicio() {
-  const [hojaAbierta, setHojaAbierta] = useState(false);
+  useEffect(() => {
+    let vivo = true;
+    Promise.all([import("leaflet"), import("@/prototipo/iniciar")]).then(([L, p]) => {
+      if (vivo) p.iniciarPrototipo(L.default);
+    });
+    return () => {
+      vivo = false;
+    };
+  }, []);
 
   return (
-    <main className="relative min-h-screen min-[901px]:h-screen min-[901px]:overflow-hidden">
-      <div className="h-[52vh] min-[901px]:absolute min-[901px]:inset-0 min-[901px]:h-full">
-        <MapaDinamico />
-      </div>
-      <PanelIzquierdo onComparar={() => setHojaAbierta(true)} />
-      <HojaResultados abierta={hojaAbierta} onCerrar={() => setHojaAbierta(false)} />
-    </main>
+    <>
+      <Intro />
+      <MapaFondo />
+      <FondoInicio />
+      <PanelEntradas />
+      <BarraCapas />
+      <Leyenda />
+      <HojaComparacion />
+      <Toast />
+      <BarraDibujo />
+      <AvisoSinConexion />
+    </>
   );
 }

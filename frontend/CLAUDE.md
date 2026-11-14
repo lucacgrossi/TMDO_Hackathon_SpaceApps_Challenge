@@ -37,10 +37,13 @@ Desde `frontend/` (Node 20 o más):
 - Variables: copiar `.env.example` a `.env.local`. Sin `.env.local`, se usa el mock.
 
 ## Estructura
-- `src/app/` · `layout.tsx` (fuente Inter, tokens) y `page.tsx` (mapa + panel + hoja).
-- `src/components/` · una pieza por archivo. `Mapa.tsx` se importa siempre con `MapaDinamico.tsx`.
-- `src/lib/` · `mapa.ts` (lote demo y límites de zoom). Acá van `contrato.ts` y `cercania.ts`.
-- Tailwind toma los colores de las variables CSS de `globals.css` (`bg-panel`, `text-muted`, `bg-accent`…).
+El front es, por ahora, **el prototipo v2 portado tal cual** (`../docs/prototipo/field-shift-prototipo.html`). Así la app anda desde el primer deploy, y cada tarea reemplaza una parte por componentes React y datos de `/analizar`.
+- `src/app/` · `layout.tsx` (fuente Inter, CSS de Leaflet y del prototipo) y `page.tsx` (monta los componentes y arranca la lógica).
+- `src/components/` · el HTML del prototipo partido en una pieza por archivo (`PanelEntradas`, `BarraCapas`, `HojaComparacion`…). **Conservan los ids y clases** que usa la lógica.
+- `src/prototipo/iniciar.ts` · el JavaScript del prototipo, sin tocar. Arriba tiene el mapa de secciones y qué tarea reemplaza cada una (comentarios `[port]`).
+- `public/img/` · foto e imagen de nubes de la intro (créditos en `CREDITOS.txt`).
+- Tailwind toma los colores de las variables CSS del prototipo (`bg-panel`, `text-muted`, `bg-accent`…). El reset de Tailwind está apagado para no cambiar el aspecto.
+- Cuando se porte una parte a React, se borra su sección de `iniciar.ts` en el mismo PR.
 
 ## Fuera de alcance
 Lo del `CLAUDE.md` raíz, más: chat o IA, alfalfa y pasturas, guardar comparaciones.
