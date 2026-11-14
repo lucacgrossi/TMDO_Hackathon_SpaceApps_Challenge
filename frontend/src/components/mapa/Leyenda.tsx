@@ -3,7 +3,6 @@
 import type { ReactNode } from "react";
 import { MESES, useCapas } from "@/lib/capas";
 import type { CapaRaster } from "@/lib/capaRaster";
-import { CLIMA_ILUSTRATIVO } from "@/lib/datosDemo";
 import { centro, formatoNumero } from "@/lib/geo";
 import { useMapa } from "@/lib/mapa";
 import { anioCampania, formatoFecha, HLS_SENSOR, NDVI_COLORES, NDVI_CORTES, NDVI_MAX, UMBRAL_PELADO } from "@/lib/ndvi";
@@ -17,7 +16,7 @@ import { posicionEnCelda } from "@/lib/zonaClima";
  * (prototipo-app.js ~líneas 345-355). Los textos son los del prototipo.
  *
  * Cada leyenda dice de dónde sale el dato, a qué resolución y si es real o
- * ilustrativo (principio "trazable" y "nada inventado"). Con "Vista aérea"
+ * si todavía no hay dato (principio "trazable" y "nada inventado"). Con "Vista aérea"
  * no hay leyenda.
  *
  * Con la hoja de resultados abierta (compu) la leyenda sube para no quedar
@@ -146,36 +145,41 @@ function LeyendaRaster({ capa }: { capa: CapaRaster }) {
 
 function LeyendaClima({ mes }: { mes: number }) {
   const poligono = useEntradas((s) => s.poligono);
-  // TODO(auditoría): reemplazar por la climatología real de NASA POWER que mande el backend.
-  const clima = CLIMA_ILUSTRATIVO;
+  // Climatología real de NASA POWER que manda el backend (`clima_mensual`).
+  // Sin conexión es null: no se muestra ningún número (nada inventado).
+  const clima = useCapas((s) => s.clima);
   const fila = (k: string, v: ReactNode) => (
     <div className="row">
       <span>{k}</span>
       <b className="num">{v}</b>
     </div>
   );
+  const zona = (
+    <>
+      El recuadro punteado es la zona del dato (~50 km): toda la zona tiene un solo valor. Tu lote está adentro,{" "}
+      {posicionEnCelda(centro(poligono))}.
+    </>
+  );
+  if (!clima)
+    return (
+      <>
+        <b>Lluvia y heladas · {MESES[mes].toLowerCase()} · sin dato</b>
+        <div className="src">
+          Lluvia, temperaturas y heladas salen de NASA POWER (últimas 30 campañas) y las manda el backend. Llegan
+          cuando se conecte la app con el backend. {zona}
+        </div>
+      </>
+    );
   return (
     <>
       <b>Lluvia y heladas · {MESES[mes].toLowerCase()}</b>
       {fila("Lluvia media", `${fmt(clima.lluvia[mes])} mm`)}
-      {clima.real ? (
-        <>
-          {fila("Mínima del mes", `${fmt(clima.tmin[mes], 1)} °C`)}
-          {fila("Máxima del mes", `${fmt(clima.tmax[mes], 1)} °C`)}
-          {clima.heladas && fila("Años con helada", `${clima.heladas[mes]} de ${clima.anios}`)}
-        </>
-      ) : (
-        <>
-          {fila("Mínima media", `${fmt(clima.tmin[mes], 1)} °C`)}
-          {fila("Máxima media", `${fmt(clima.tmax[mes], 1)} °C`)}
-        </>
-      )}
+      {fila("Mínima del mes", `${fmt(clima.tmin[mes], 1)} °C`)}
+      {fila("Máxima del mes", `${fmt(clima.tmax[mes], 1)} °C`)}
+      {fila("Años con helada", `${clima.heladas[mes]} de ${clima.anios}`)}
+      {fila("Años con 35 °C o más", `${clima.calor[mes]} de ${clima.anios}`)}
       <div className="src">
-        {clima.real
-          ? `NASA POWER mensual, campañas ${clima.periodo}. Mínima y máxima: el extremo de cada mes, promediado. Dato real.`
-          : "Sin conexión a NASA POWER: valores ilustrativos."}{" "}
-        El recuadro punteado es la zona del dato (~50 km): toda la zona tiene un solo valor. Tu lote está adentro,{" "}
-        {posicionEnCelda(centro(poligono))}.
+        NASA POWER mensual, campañas {clima.periodo}. Mínima y máxima: el extremo de cada mes, promediado. {zona}
       </div>
     </>
   );
