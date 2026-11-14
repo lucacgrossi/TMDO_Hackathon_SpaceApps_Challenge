@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /*
- * Estilos del prototipo final (docs/field-shift-prototipo (4).html), tal cual.
+ * Estilos del prototipo final (docs/prototipo/field-shift-prototipo.html), tal cual.
  * Por qué: los componentes reusan las mismas clases (.panel, .blk, .chip,
  * .opts, .drawbar…), así el front real se ve igual que el prototipo sin
  * rediseñar. Si una clase cambia acá, revisar el componente que la usa.
@@ -89,7 +89,14 @@ details .sel3{margin-top:10px}
 .note{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}
 /* Paso 1: primero el caso del productor, sin mapa. Paso 2: el mapa aparece detrás y la caja se va a la derecha. */
 .entry{display:none}
-.where{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.where{display:flex;flex-direction:column;gap:8px}
+.where label{font-size:16px!important}
+.qrow{position:relative}
+.qrow .qic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:18px;pointer-events:none}
+.qrow input{padding-left:40px!important;font-size:15px}
+.or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:14px 0 10px}
+.or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+.opts.one{grid-template-columns:1fr}
 .where label{font-size:13px;font-weight:700}
 .qrow{display:flex;gap:8px}
 .qrow input{flex:1;background:var(--soft);border:1.5px solid transparent;border-radius:12px;padding:12px 14px;font-weight:600;color:var(--ink);min-width:0}
@@ -201,6 +208,12 @@ body.onb #map{transform:scale(1.08);filter:saturate(.6)}
 .layers{display:flex;background:var(--panel);border-radius:14px;padding:4px;box-shadow:var(--shadow);margin-left:auto}
 .layers button{border:0;background:transparent;border-radius:9px;padding:8px 12px;font-weight:600;cursor:pointer;color:var(--muted);white-space:nowrap}
 .layers button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+.msearch{position:relative;background:var(--panel);border-radius:14px;box-shadow:var(--shadow);padding:4px;width:min(340px,100%)}
+.msearch .qic{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:17px;pointer-events:none}
+.msearch input{width:100%;border:0;background:transparent;padding:9px 10px 9px 36px;font-weight:600;color:var(--ink);border-radius:10px}
+.msearch input:focus{outline:2px solid var(--accent);outline-offset:0}
+.msearch .sug{position:absolute;left:0;right:0;top:calc(100% + 6px);box-shadow:var(--shadow);z-index:5}
+.tools{gap:10px}
 .timeline{display:flex;align-items:center;gap:2px;background:var(--panel);border-radius:14px;padding:4px;box-shadow:var(--shadow)}
 .timeline .play{border:0;background:transparent;border-radius:8px;width:34px;height:34px;cursor:pointer;color:var(--ink);font-size:13px}
 .timeline .play:hover{background:var(--soft)}

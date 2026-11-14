@@ -37,7 +37,7 @@ Desde `frontend/` (Node 20 o más):
 - Variables: copiar `.env.example` a `.env.local`. Sin `.env.local`, se usa el mock.
 
 ## Estructura
-Referencia visual y de comportamiento: `../docs/field-shift-prototipo (4).html` (prototipo final). Los componentes son React de verdad y **reusan las clases CSS del prototipo**, que está tal cual en `src/app/globals.css`.
+Referencia visual y de comportamiento: `../docs/prototipo/field-shift-prototipo.html` (prototipo final). Los componentes son React de verdad y **reusan las clases CSS del prototipo**, que está tal cual en `src/app/globals.css`.
 - `src/app/` · `layout.tsx` (Inter, CSS de Leaflet y del prototipo) y `page.tsx` (monta mapa, panel y, en el paso 2, la hoja de la persona 5).
 - `src/lib/entradas.ts` · tipos y valores iniciales de las entradas del productor. `src/lib/store.ts` · estado compartido (zustand): `useEntradas((s) => s.verano)` para leer, `cambiar({ … })` para escribir.
 - `src/components/entradas/` · persona 4: `PanelEntradas` y una sección por archivo (`ElegirLote`, `BuscadorLote`, `ResumenLote`, `SeccionRotacion`, `SeccionObjetivos`, `SeccionRestricciones`, `SeccionDatosLote`, `SeccionMediciones`).
