@@ -101,3 +101,31 @@ export function choqueObjetivos(estrategias: readonly Estrategia[], pesos: Pesos
   if (e1.id === e2.id) return null;
   return { objetivos: [o1, o2], masCerca: [e1.id, e2.id] };
 }
+
+/** Nombre de cada objetivo en minúscula, para armar frases. */
+const NOMBRE_OBJETIVO: Record<Objetivo, string> = { agua: "agua", suelo: "suelo", erosion: "erosión", ingreso: "ingreso" };
+
+/** "y" o "e": antes de una palabra que suena /i/ ("ingreso", "hidrología") va "e". */
+function conjuncion(siguiente: string): string {
+  return /^h?i(?![aeiouáéó])/i.test(siguiente) ? "e" : "y";
+}
+
+const mayuscula = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
+
+/**
+ * Texto fijo del aviso de choque, como el `clash()` del prototipo. Describe
+ * qué alternativa queda más cerca en cada objetivo; no dice cuál elegir.
+ *   titulo:  "Agua e ingreso chocan en este lote."
+ *   detalle: "En agua queda más cerca C; en ingreso, B. Ninguna cumple las dos."
+ */
+export function textoChoque({ objetivos: [o1, o2], masCerca: [e1, e2] }: ChoqueObjetivos): {
+  titulo: string;
+  detalle: string;
+} {
+  const n1 = NOMBRE_OBJETIVO[o1];
+  const n2 = NOMBRE_OBJETIVO[o2];
+  return {
+    titulo: `${mayuscula(n1)} ${conjuncion(n2)} ${n2} chocan en este lote.`,
+    detalle: `En ${n1} queda más cerca ${e1}; en ${n2}, ${e2}. Ninguna cumple las dos.`,
+  };
+}

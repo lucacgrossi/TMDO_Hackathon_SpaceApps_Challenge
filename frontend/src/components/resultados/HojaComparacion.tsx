@@ -5,6 +5,7 @@ import AvisoApoyo from "@/components/comunes/AvisoApoyo";
 import { metadatosHoja } from "@/lib/formato";
 import { useResultado } from "@/lib/resultado";
 import { useVista } from "@/lib/vista";
+import ChoqueObjetivos from "./ChoqueObjetivos";
 import InterruptorVista, { type VistaResultado } from "./InterruptorVista";
 import TablaTecnica from "./TablaTecnica";
 import VistaPreviaColumnas from "./VistaPreviaColumnas";
@@ -72,6 +73,7 @@ export default function HojaComparacion() {
             No se pudo armar la comparación: {resultado.mensaje}
           </p>
         )}
+        {resultado.estado === "listo" && <ChoqueObjetivos estrategias={resultado.datos.estrategias} />}
         {resultado.estado === "listo" &&
           (vista === "tabla" ? <TablaTecnica salida={resultado.datos} /> : <VistaPreviaColumnas salida={resultado.datos} />)}
       </div>

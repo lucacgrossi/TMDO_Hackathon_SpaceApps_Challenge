@@ -5,6 +5,7 @@ import {
   choqueObjetivos,
   esSensibleAlClima,
   redondearComoBackend,
+  textoChoque,
   type Pesos,
 } from "@/lib/cercania";
 import { esDisponible, TIPOS_DE_ANIO, type Puntos } from "@/lib/contrato";
@@ -83,5 +84,42 @@ describe("choque de objetivos", () => {
   it("ignora las descartadas: sin B, C queda más cerca en los dos y no hay choque", () => {
     const pesos = { agua: 5, suelo: 1, erosion: 1, ingreso: 4 };
     expect(choqueObjetivos(MOCK_DESCARTADA.estrategias, pesos)).toBeNull();
+  });
+});
+
+describe("texto del choque (clash del prototipo)", () => {
+  it("arma el texto de agua e ingreso con el mock", () => {
+    const choque = choqueObjetivos(MOCK_BASE.estrategias, { agua: 5, suelo: 1, erosion: 1, ingreso: 4 })!;
+    expect(textoChoque(choque)).toEqual({
+      titulo: "Agua e ingreso chocan en este lote.",
+      detalle: "En agua queda más cerca C; en ingreso, B. Ninguna cumple las dos.",
+    });
+  });
+
+  it("usa \"y\" salvo antes de ingreso, y lleva las tildes", () => {
+    expect(textoChoque({ objetivos: ["suelo", "erosion"], masCerca: ["A", "B"] }).titulo).toBe(
+      "Suelo y erosión chocan en este lote.",
+    );
+    expect(textoChoque({ objetivos: ["erosion", "agua"], masCerca: ["A", "C"] })).toEqual({
+      titulo: "Erosión y agua chocan en este lote.",
+      detalle: "En erosión queda más cerca A; en agua, C. Ninguna cumple las dos.",
+    });
+  });
+
+  it("describe, no recomienda", () => {
+    const { titulo, detalle } = textoChoque({ objetivos: ["agua", "ingreso"], masCerca: ["C", "B"] });
+    expect(`${titulo} ${detalle}`).not.toMatch(/recomend|deber[ií]a|la mejor|eleg/i);
+  });
+});
+
+describe("sensible al clima cambia con las barras", () => {
+  it("con agua en 0 ninguna es sensible: lo único que cambia por tipo de año es el agua", () => {
+    const sinAgua = { agua: 0, suelo: 3, erosion: 3, ingreso: 3 };
+    for (const e of disponibles) expect(esSensibleAlClima(cercaniaPorTipo(e.puntos, sinAgua))).toBe(false);
+  });
+
+  it("con solo agua aparece alguna sensible al clima", () => {
+    const soloAgua = { agua: 5, suelo: 0, erosion: 0, ingreso: 0 };
+    expect(disponibles.some((e) => esSensibleAlClima(cercaniaPorTipo(e.puntos, soloAgua)))).toBe(true);
   });
 });
