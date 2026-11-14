@@ -113,7 +113,7 @@ def test_salida_valida_con_4_columnas():
     assert s.es_mock is False
     assert s.serie_anual is None
     assert s.contraste_mediciones == []
-    assert s.periodo_clima == "1995/96 a 2024/25"
+    assert s.periodo_clima == "1996/97 a 2025/26"
     assert s.clima_mensual.n_anios == 30
     assert s.lote.pendiente_pct.valor == 0.6
     assert s.lote.cobertura_agricola_pct.valor == 98.0
@@ -133,10 +133,10 @@ def test_visto_por_satelite_y_capas():
     v = s.visto_por_satelite
     assert v.meses_con_dato == 11 and v.meses_ndvi_bajo == 4
     assert v.confianza == "baja" and v.motivo.startswith("NDVI < 0,3")
-    assert v.meses[0].fecha.startswith("2025-01")  # índice 0 = enero
+    assert v.meses[0].fecha.startswith("2026-01")  # índice 0 = enero
     assert s.capas.ndvi_mensual[10] is None
-    assert s.capas.ndvi_mensual[0].item == "HLS-TEST-2025-01-15"
-    assert "NDVI del lote · Noviembre 2024: sin escena HLS con < 30 % de nubes" in s.informacion_falta
+    assert s.capas.ndvi_mensual[0].item == "HLS-TEST-2026-01-15"
+    assert "NDVI del lote · Noviembre 2025: sin escena HLS con < 30 % de nubes" in s.informacion_falta
     assert {"lluvia_anual", "balance_anual", "et_real_anual", "meses_cobertura_baja"} <= set(s.indicadores)
 
 
@@ -283,7 +283,7 @@ def test_traduce_el_motor_al_contrato(monkeypatch):
     assert ind["anios_con_calor"] == s.clima_mensual.anios_con_35c
     assert ind["anios_con_helada"] == s.clima_mensual.anios_con_helada
     assert ind["pendiente_pct"] == 0.6
-    assert ind["visto_satelite"] == {"meses_pelados": 4, "meses_con_dato": 11, "campania": "2024/25"}
+    assert ind["visto_satelite"] == {"meses_pelados": 4, "meses_con_dato": 11, "campania": "2025/26"}
 
     # Lo que sale en el contrato
     actual, a, c = s.estrategias[0], s.estrategias[1], s.estrategias[3]
@@ -298,7 +298,7 @@ def test_traduce_el_motor_al_contrato(monkeypatch):
     assert a.sensible_clima is True
     assert a.riesgos == ["Secado ~30 días antes de la siembra"]
     assert a.reglas_aplicadas[1].regla == "nitrogeno"
-    assert "Precios" in a.vacios and any("Noviembre 2024" in v for v in a.vacios)
+    assert "Precios" in a.vacios and any("Noviembre 2025" in v for v in a.vacios)
     assert not c.disponible and c.motivo_descarte == "No sembrar sorgo ni girasol"
     assert c.valores is None and c.puntos is None and c.resumen.startswith("Descartada")
     assert servicio.MOTOR_PENDIENTE not in s.informacion_falta
@@ -308,15 +308,15 @@ def test_traduce_el_motor_al_contrato(monkeypatch):
 
 
 def test_ndvi_se_pide_de_nuevo_si_power_termina_en_otra_campana(monkeypatch):
-    monkeypatch.setattr(ndvi, "campana_inicio", lambda hoy=None: 2025)  # el fixture de POWER termina en 2024/25
+    monkeypatch.setattr(ndvi, "campana_inicio", lambda hoy=None: 2024)  # el fixture de POWER termina en 2025/26
     s = servicio.analizar(Entrada.model_validate(ENTRADA))
-    assert CAMPANAS_NDVI_PEDIDAS[-1] == 2024
-    assert s.visto_por_satelite.campana == "2024/25"
-    assert s.periodo_clima.endswith("2024/25")
+    assert CAMPANAS_NDVI_PEDIDAS[-1] == 2025
+    assert s.visto_por_satelite.campana == "2025/26"
+    assert s.periodo_clima.endswith("2025/26")
 
 
 def test_ndvi_se_pide_una_sola_vez_si_coincide_con_power(monkeypatch):
-    monkeypatch.setattr(ndvi, "campana_inicio", lambda hoy=None: 2024)
+    monkeypatch.setattr(ndvi, "campana_inicio", lambda hoy=None: 2025)
     s = servicio.analizar(Entrada.model_validate(ENTRADA))
-    assert CAMPANAS_NDVI_PEDIDAS == [2024]
-    assert s.visto_por_satelite.campana == "2024/25"
+    assert CAMPANAS_NDVI_PEDIDAS == [2025]
+    assert s.visto_por_satelite.campana == "2025/26"

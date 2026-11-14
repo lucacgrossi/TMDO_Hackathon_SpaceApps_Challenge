@@ -45,7 +45,7 @@ def elevacion_ok(poligono):
 
 
 def _mes(i):
-    anio = 2025 if i < 6 else 2024
+    anio = 2026 if i < 6 else 2025
     fecha = f"{anio}-{i + 1:02d}-15"
     return {
         "mes": fecha[:7],
@@ -67,13 +67,13 @@ def ndvi_ok(poligono, campana=None):
     meses = [None if i == 10 else _mes(i) for i in range(12)]
     return {
         "visto_por_satelite": {
-            "campana": f"{campana}/{str(campana + 1)[2:]}" if campana else "2024/25",
+            "campana": f"{campana}/{str(campana + 1)[2:]}" if campana else "2025/26",
             "fuente": "NASA HLS 30 m",
             "meses": meses,
             "meses_ndvi_bajo": 4,
             "umbral": 0.3,
             "orden_meses": "índice 0 = enero",
-            "faltantes": [{"mes": "2024-11", "motivo": "Noviembre 2024: sin escena HLS con < 30 % de nubes"}],
+            "faltantes": [{"mes": "2025-11", "motivo": "Noviembre 2025: sin escena HLS con < 30 % de nubes"}],
         },
         "meses_cobertura_baja": ind(
             4,
@@ -81,14 +81,14 @@ def ndvi_ok(poligono, campana=None):
             "NASA HLS 30 m",
             "30 m",
             confianza="baja",
-            anios="2024/25",
+            anios="2025/26",
             nota="NDVI < 0,3 en 4 de 11 meses con dato",
         ),
     }
 
 
 def et_ok(poligono):
-    return {"et_real_anual": ind(720, "mm/año", "NASA MODIS MOD16A2", "500 m", confianza="media", anios="2024")}
+    return {"et_real_anual": ind(720, "mm/año", "NASA MODIS MOD16A2", "500 m", confianza="media", anios="2025")}
 
 
 @pytest.fixture(scope="session")
