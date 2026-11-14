@@ -5,7 +5,8 @@ import { create } from "zustand";
 /**
  * Estado de lo que se VE en el mapa (no son entradas del productor, por eso
  * no van en entradas.ts): si el lote está a la vista, si el mapa está volando,
- * si se muestra la marca del lugar elegido y cuándo arrancar el dibujo.
+ * si se muestra la marca del lugar elegido, cuándo arrancar el dibujo y qué
+ * capa se ve (Vista aérea, Vegetación, Pendiente o Lluvia y heladas).
  *
  * Sale de `hideLote()`, `showLote()`, `showTarget()` y del final de `goMap()`
  * del prototipo (prototipo-app.js ~líneas 375-383 y 150).
@@ -29,8 +30,28 @@ interface EstadoMapa {
    * igual se atiendan; lo escucha el modo dibujo (F5).
    */
   pedidoDibujo: number;
-  cambiarMapa: (parcial: Partial<Omit<EstadoMapa, "cambiarMapa" | "pedirDibujo">>) => void;
+  /**
+   * Capa elegida en la barra `.layers` (`S.layer` del prototipo). La cambia
+   * SelectorCapas y la leen las capas del mapa, la leyenda y la línea de tiempo.
+   */
+  capa: Capa;
+  cambiarMapa: (parcial: Partial<Omit<EstadoMapa, "cambiarMapa" | "pedirDibujo" | "cambiarCapa">>) => void;
   pedirDibujo: () => void;
+  cambiarCapa: (capa: Capa) => void;
+}
+
+/**
+ * Las 4 capas del prototipo, con los mismos códigos (`data-ly`):
+ * - "sat": solo la imagen satelital de fondo.
+ * - "ndvi": vegetación (NDVI de NASA HLS a 30 m, o MODIS a 250 m de respaldo).
+ * - "slope": pendiente del lote (elevación de AWS Terrain Tiles).
+ * - "clima": lluvia y heladas del mes, con la zona del dato de NASA POWER (~50 km).
+ */
+export type Capa = "sat" | "ndvi" | "slope" | "clima";
+
+/** Capas que cambian según el mes: con ellas se muestra la línea de tiempo (setLayer del prototipo). */
+export function capaUsaMes(capa: Capa): boolean {
+  return capa === "ndvi" || capa === "clima";
 }
 
 export const useMapa = create<EstadoMapa>()((set, get) => ({
@@ -38,6 +59,9 @@ export const useMapa = create<EstadoMapa>()((set, get) => ({
   volando: false,
   marcaVisible: false,
   pedidoDibujo: 0,
+  // El prototipo arranca en "Vista aérea" (`layer: "sat"`).
+  capa: "sat",
   cambiarMapa: (parcial) => set(parcial),
   pedirDibujo: () => set({ pedidoDibujo: get().pedidoDibujo + 1 }),
+  cambiarCapa: (capa) => set({ capa }),
 }));

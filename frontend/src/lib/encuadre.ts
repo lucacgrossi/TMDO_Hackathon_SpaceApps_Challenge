@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { useVista } from "./vista";
 
 /**
  * Encuadre del mapa: cuánto margen dejar para que el lote no quede tapado
@@ -31,15 +32,15 @@ export interface Margenes {
  * - Celu: el mapa ocupa todo el ancho; arriba se dejan 90 px para la barra de capas.
  * - Compu: el panel mide 340 px + 16 de margen + aire (392) a la derecha,
  *   y 90 px arriba para la barra de capas.
- * La hoja de resultados (persona 5) suma alto abajo cuando está abierta; ese
- * dato todavía no está en el estado, así que por ahora se toma cerrada.
- * TODO(auditoría): sumar `Math.min(innerHeight * .62, 620) + 32` si la hoja está abierta.
+ * - Con la hoja de resultados abierta (persona 5, `useVista.hojaAbierta`) se
+ *   suma abajo su alto: 62 % de la ventana, hasta 620 px, + 32 de aire.
  */
 export function margenes(): Margenes {
   if (window.innerWidth <= ANCHO_CELU) {
     return { paddingTopLeft: [24, 90], paddingBottomRight: [24, 24] };
   }
-  const altoHoja = 0;
+  // Se lee en el momento (getState) porque margenes() se llama al encuadrar, fuera del render.
+  const altoHoja = useVista.getState().hojaAbierta ? Math.min(window.innerHeight * 0.62, 620) + 32 : 0;
   return { paddingTopLeft: [60, 90], paddingBottomRight: [392 + 60, altoHoja + 40] };
 }
 

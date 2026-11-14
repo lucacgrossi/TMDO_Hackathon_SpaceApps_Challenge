@@ -46,6 +46,7 @@ export default function CapaLote() {
   const paso = useEntradas((s) => s.paso);
   const cambiar = useEntradas((s) => s.cambiar);
   const loteVisible = useMapa((s) => s.loteVisible);
+  const capa = useMapa((s) => s.capa);
   // Mientras se dibuja, el lote anterior queda de fondo, tenue (startDraw del prototipo).
   const dibujando = useDibujo((s) => s.dibujando);
 
@@ -108,6 +109,9 @@ export default function CapaLote() {
   if (paso !== "mapa") return null;
 
   const ha = areaHa(poligono);
+  // Con "Lluvia y heladas" el rótulo dice "Tu lote": al lado de la zona de
+  // ~50 km tiene que quedar claro cuál es el lote (drawClima del prototipo).
+  const rotulo = capa === "clima" ? "Tu lote" : "Lote";
   return (
     <>
       <Polygon
@@ -122,8 +126,8 @@ export default function CapaLote() {
             `key` con la superficie: Leaflet no reacomoda una etiqueta permanente al
             cambiar el texto, así que se vuelve a crear. */}
         {visibleDelTodo && (
-          <Tooltip key={ha.toFixed(0)} permanent direction="top" className="lotelabel" offset={[0, -6]}>
-            Lote · {formatoNumero(ha)} ha
+          <Tooltip key={`${rotulo}-${ha.toFixed(0)}`} permanent direction="top" className="lotelabel" offset={[0, -6]}>
+            {rotulo} · {formatoNumero(ha)} ha
           </Tooltip>
         )}
       </Polygon>

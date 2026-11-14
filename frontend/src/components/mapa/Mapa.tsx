@@ -4,9 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, ZoomControl } from "react-leaflet";
 import { useEntradas } from "@/lib/store";
 import AvisoSinConexion from "./AvisoSinConexion";
+import CapaClima from "./CapaClima";
 import CapaDibujo from "./CapaDibujo";
 import CapaLote from "./CapaLote";
+import CapaNdvi from "./CapaNdvi";
+import CapaPendiente from "./CapaPendiente";
 import Encuadre from "./Encuadre";
+import EncuadreCapa from "./EncuadreCapa";
 import MarcaUbicacion from "./MarcaUbicacion";
 
 /**
@@ -20,7 +24,9 @@ import MarcaUbicacion from "./MarcaUbicacion";
  *
  * Lo que va adentro del mapa son piezas chicas, una por archivo:
  * CapaLote (el polígono del lote), CapaDibujo (marcar las esquinas), Encuadre (cámara) y MarcaUbicacion
- * (lo que eligió el buscador).
+ * (lo que eligió el buscador). Las capas de datos (CapaNdvi, CapaPendiente,
+ * CapaClima) van ANTES del lote, para que el lote quede dibujado encima.
+ * EncuadreCapa mueve la cámara al cambiar de capa.
  */
 
 /** Centro inicial: el lote de ejemplo de Río Cuarto (setView del prototipo). */
@@ -116,9 +122,13 @@ export default function Mapa() {
             opacity={0.85}
           />
           <ZoomControl position="topleft" />
+          <CapaNdvi />
+          <CapaPendiente />
+          <CapaClima />
           <CapaLote />
           <CapaDibujo />
           <Encuadre />
+          <EncuadreCapa />
           <MarcaUbicacion />
         </MapContainer>
       </div>
