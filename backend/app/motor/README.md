@@ -5,7 +5,7 @@ Arma las 4 columnas de `/analizar` (actual, A, B y C) con puntajes de 0 a 100 en
 | Archivo | Qué hace |
 |---|---|
 | `cultivos.py` | Catálogo de cultivos (kc, meses, nitrógeno, rastrojo, helada, calor). Valores orientativos para la zona centro, a validar con un agrónomo |
-| `mezcla.py` | Clima del lote: mezcla las mediciones del productor (lluvia, mínimas y máximas, opcionales) con NASA POWER. El productor pesa más según sus años de registro: 1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10 o más 75 % |
+| `mezcla.py` | Clima del lote: mezcla las mediciones del productor (lluvia, mínimas y máximas, opcionales) con NASA POWER. El productor pesa más según sus años de registro: 1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10 o más 75 %. La diferencia productor/NASA se calcula contra NASA **del mismo período** que cubre el registro (campañas en común con la planilla, o las últimas `anios_registro` con la lluvia anual), igual que el contraste de `clima/correccion.py`; después se aplica sobre los terciles de las 30 campañas. Sin `campanas_nasa`, contra el promedio de las 30, y la evidencia lo dice |
 | `estrategias.py` | Las 4 columnas y su calendario. Las prioridades eligen la especie (vicia o centeno, trigo o cebada, sorgo o girasol); `no_sembrar` descarta una columna |
 | `reglas.py` | `analizar(entradas, indicadores)`: puntajes, aportes trazables `{regla, efecto, dato}`, cercanía con las prioridades al cuadrado y choque de objetivos |
 | `plantillas.py` | `armar(resultado, entradas, indicadores)`: resumen, por qué, evidencia, beneficios, información que falta y a revisar con el agrónomo |
