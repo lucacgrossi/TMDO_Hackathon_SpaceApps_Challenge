@@ -25,10 +25,21 @@ export const HLS_EXPR: Record<string, string> = {
 export const HLS_SENSOR: Record<string, string> = { "hls2-s30": "Sentinel-2", "hls2-l30": "Landsat" };
 
 /**
- * Primer año de la última campaña completa (julio a junio). Es la misma con
- * la que termina la serie de lluvia del prototipo: año actual − 2.
+ * Primer año de la última campaña completa (julio a junio), ESTIMADA con la
+ * fecha: si ya pasó junio, es la que terminó este junio; si no, la anterior.
+ * Ej.: noviembre de 2026 → 2025 (campaña 2025/26).
+ *
+ * MVP 4.4: la campaña la da la API (`visto_por_satelite.campana`, la misma
+ * que confirma NASA POWER), el front no la calcula. Esto es solo el respaldo
+ * mientras no hay respuesta del back (se conecta en la auditoría), igual que
+ * el prototipo final. Antes era "año − 2", que en noviembre daba una campaña
+ * vieja (2024/25).
  */
-export const CAMP0 = new Date().getFullYear() - 2;
+export function campanaEstimada(hoy: Date = new Date()): number {
+  return hoy.getMonth() >= 6 ? hoy.getFullYear() - 1 : hoy.getFullYear() - 2;
+}
+
+export const CAMP0 = campanaEstimada();
 
 /** Año calendario del mes m (0 = enero) dentro de la campaña: julio a diciembre caen en CAMP0. */
 export function anioCampania(m: number, camp0 = CAMP0): number {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { anioCampania, colormapHls, formatoFecha, geoLote, urlTeselasModis } from "./ndvi";
+import { anioCampania, campanaEstimada, colormapHls, formatoFecha, geoLote, urlTeselasModis } from "./ndvi";
 
 describe("ndvi", () => {
   it("julio a diciembre caen en el primer año de la campaña", () => {
@@ -34,5 +34,16 @@ describe("ndvi", () => {
     expect(cm[0][0][0]).toBe(0);
     expect(cm.at(-1)![0][1]).toBe(256);
     for (let i = 1; i < cm.length; i++) expect(cm[i][0][0]).toBe(cm[i - 1][0][1]);
+  });
+});
+
+describe("campanaEstimada", () => {
+  it("después de junio es la campaña que terminó este junio", () => {
+    expect(campanaEstimada(new Date(2026, 10, 14))).toBe(2025); // nov 2026 → 2025/26
+    expect(campanaEstimada(new Date(2026, 6, 1))).toBe(2025); // 1 de julio
+  });
+  it("hasta junio es la anterior (la de este año todavía no terminó)", () => {
+    expect(campanaEstimada(new Date(2026, 5, 30))).toBe(2024); // 30 de junio → 2024/25
+    expect(campanaEstimada(new Date(2026, 0, 10))).toBe(2024);
   });
 });
