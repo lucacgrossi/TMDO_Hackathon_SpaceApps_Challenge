@@ -306,6 +306,10 @@ def test_traduce_el_motor_al_contrato(monkeypatch):
     assert ent["textura"] == "franco" and "materia_organica_pct" not in ent
     assert ent["mediciones"] == {"lluvia_anual_mm": None, "anios_registro": None, "serie_mensual": None}
     assert set(ind["terciles"]) == {"seco", "normal", "humedo"} and ind["n_anios"] == 30
+    # NASA campaña por campaña, para mezclar con el mismo período del registro del productor (#64).
+    cn = ind["campanas_nasa"]
+    assert len(cn) == 30 and cn[0]["campana"] == "1996/97" and cn[-1]["campana"] == "2025/26"
+    assert all(len(c[k]) == 12 for c in cn for k in ("lluvia_mm", "t_min_c", "t_max_c"))
     assert ind["anios_con_calor"] == s.clima_mensual.anios_con_35c
     assert ind["anios_con_helada"] == s.clima_mensual.anios_con_helada
     assert ind["pendiente_pct"] == 0.6

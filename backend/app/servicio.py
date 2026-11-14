@@ -255,6 +255,14 @@ def _indicadores_motor(clima: clima_indicadores.ResultadoClima, pendiente: Any, 
         "n_anios": m.n_anios,
         "pendiente_pct": pendiente,
         "visto_satelite": visto,
+        # NASA campaña por campaña (índice 0 = enero), para que el motor pueda mezclar las mediciones
+        # del productor con NASA **del mismo período** que cubre su registro, como hace el contraste
+        # (#64). El motor que no lo usa lo ignora.
+        "campanas_nasa": [
+            {"campana": c.etiqueta, "lluvia_mm": list(c.lluvia_mm), "t_min_c": list(c.t_min_c),
+             "t_max_c": list(c.t_max_c)}
+            for c in clima.campanas
+        ],
     }
 
 
