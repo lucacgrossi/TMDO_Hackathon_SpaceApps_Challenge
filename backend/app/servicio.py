@@ -42,6 +42,7 @@ from app.api.contrato import (
     Faltante,
     Indicador,
     LoteSalida,
+    MedicionesPropias,
     MesSatelite,
     Probabilidad,
     Salida,
@@ -227,7 +228,18 @@ def _entradas_motor(entrada: Entrada) -> dict:
         "maquinaria_limitada": "maquinaria_limitada" in entrada.restricciones,
         "anegable": entrada.anegable,
         "textura": entrada.textura_suelo,
-        "materia_organica_pct": entrada.mediciones_propias.materia_organica_pct,
+        # El motor (app/motor/mezcla.py, #53) mezcla lluvia y temperaturas del productor con NASA,
+        # con más peso cuantos más años de registro. La materia orgánica no la usa: no se pasa.
+        "mediciones": _mediciones_motor(entrada.mediciones_propias),
+    }
+
+
+def _mediciones_motor(m: MedicionesPropias) -> dict:
+    serie = m.serie_mensual or []
+    return {
+        "lluvia_anual_mm": m.lluvia_anual_mm,
+        "anios_registro": m.anios_registro,
+        "serie_mensual": [x.model_dump() for x in serie] or None,
     }
 
 

@@ -1,7 +1,8 @@
 """Contraste de las mediciones del productor con NASA (RF15, CU4) (dueño: Back 1).
 
-Las mediciones del productor se muestran **al lado** de NASA y **no cambian ningún puntaje**:
-NASA sigue siendo la base. Lo único que cambia es la confianza de los indicadores de agua.
+Este módulo arma el contraste que se muestra **al lado** de NASA y ajusta la confianza de los
+indicadores de agua. No puntúa: el peso de las mediciones en los puntajes lo pone el motor de
+reglas (`app/motor/mezcla.py`, persona 3), que las mezcla con NASA según los años de registro.
 
 - Lluvia del pluviómetro contra la lluvia media por campaña julio–junio de NASA POWER
   (`indicadores["lluvia_anual"]`):
@@ -12,12 +13,15 @@ NASA sigue siendo la base. Lo único que cambia es la confianza de los indicador
   productor / NASA. Si los tipos de año se cortaron por balance (lluvia − ET0), el umbral de
   balance no se puede escalar por la lluvia: se usa la lluvia de la campaña seca más lluviosa
   y se dice en la nota.
-- Pocos años de registro (< `MIN_ANIOS_REGISTRO`): la fila se muestra igual, con confianza
-  "baja" y la nota "pocos años de registro". La confianza del agua la sigue decidiendo solo la
-  diferencia con NASA: un registro corto no empeora el dato de NASA.
+- Años de registro: alcanza con `MIN_ANIOS_REGISTRO` (1 año), igual que el motor, que le da más
+  peso a la medición cuantos más años tenga. La confianza la decide la diferencia con NASA.
 - Materia orgánica: fila "dato del productor", sin valor de NASA (no hay producto de NASA de
   materia orgánica). Va a la fila Suelo.
 - NASA POWER caído: la lluvia se muestra sin comparar y la fila lo dice.
+- Planilla (`serie_mensual`, docs/plan-planilla-lluvia.md 5.3): se arman las campañas julio–junio
+  completas del productor y se comparan con NASA **en las mismas campañas**, no contra las 30.
+  Misma regla del 15 %; alcanza con 1 campaña en común. Sin campañas en común, la fila va sin comparar. Si llegan planilla y lluvia anual, manda
+  la planilla.
 
 Textos de plantilla fija, sin IA. Nunca lanza.
 
@@ -29,11 +33,11 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Literal
 
-from app.api.contrato import ContrasteMedicion, CorregidoAlLado, MedicionesPropias
+from app.api.contrato import ContrasteMedicion, CorregidoAlLado, DetalleCampana, MedicionesPropias, MedicionMes
 from app.clima.indicadores import ResultadoClima
 
 UMBRAL_DIFERENCIA_PCT = 15  # RF15: más de 15 % de diferencia → confianza baja en agua
-MIN_ANIOS_REGISTRO = 5  # propuesta: con menos años, el contraste tiene confianza baja
+MIN_ANIOS_REGISTRO = 1  # decidido 14/11: como el motor, alcanza 1 año; más años pesan más en el motor
 # Indicadores de `ResultadoClima.indicadores` que dependen de la lluvia: a estos les baja la confianza.
 # La ET0 sale de las temperaturas, no de la lluvia: no se toca.
 INDICADORES_AGUA = ("lluvia_anual", "balance_anual")
@@ -105,7 +109,7 @@ def _corregido(clima: ResultadoClima, factor: float) -> CorregidoAlLado | None:
             ". Los tipos de año se cortan por balance (lluvia − ET0); se escala la lluvia de la campaña "
             "seca más lluviosa"
         )
-    nota += ". Solo informativo: no cambia ningún puntaje."
+    nota += ". Solo informativo."
     return CorregidoAlLado(umbral_seco_mm=round(corregido, 1), nota=nota)
 
 
@@ -162,12 +166,101 @@ def _lluvia(mm: float, anios: int | None, clima: ResultadoClima, salida: Resulta
     if difieren:
         salida.motivo_agua = (
             f"Tu pluviómetro difiere {abs(d)} % de NASA POWER ({_mm(mm)} contra {_mm(nasa)} "
-            "mm/año): confianza baja en agua. No cambia ningún puntaje"
+            "mm/año): confianza baja en agua"
         )
         salida.riesgos.append(
             f"Tu pluviómetro difiere {abs(d)} % de NASA POWER ({_mm(mm)} contra {_mm(nasa)} mm/año): "
             "el dato de agua tiene confianza baja"
         )
+
+
+# --- Lluvia de la planilla (serie mensual) -----------------------------------
+
+
+def _campanas_productor(meses: list[MedicionMes], variable: str) -> dict[str, list[float]]:
+    """Campañas julio–junio del productor con los 12 meses de `variable`. Índice 0 = enero.
+
+    Mismas reglas que NASA POWER (`power.armar_serie`): julio a diciembre son del año de inicio y
+    enero a junio del siguiente; una campaña entra solo si tiene los 12 meses con dato.
+    """
+    por_mes = {m.mes: getattr(m, variable) for m in meses if getattr(m, variable) is not None}
+    if not por_mes:
+        return {}
+    anios = sorted({int(k[:4]) for k in por_mes})
+    campanas = {}
+    for y in range(anios[0] - 1, anios[-1] + 1):
+        claves = [f"{y + 1 if m < 6 else y}-{m + 1:02d}" for m in range(12)]
+        if all(k in por_mes for k in claves):
+            campanas[f"{y}/{str(y + 1)[2:]}"] = [por_mes[k] for k in claves]
+    return campanas
+
+
+def _rango(campanas: list[str]) -> str:
+    return campanas[0] if len(campanas) == 1 else f"{campanas[0]} a {campanas[-1]}"
+
+
+def _lluvia_planilla(meses: list[MedicionMes], pisa_manual: bool, clima: ResultadoClima,
+                     salida: ResultadoContraste) -> None:
+    """Contrasta la lluvia de la planilla con NASA **en las mismas campañas** (no contra las 30)."""
+    nota_manual = " · se usó la planilla en lugar de la lluvia anual cargada a mano" if pisa_manual else ""
+    prod = {c: sum(v) for c, v in _campanas_productor(meses, "lluvia_mm").items()}
+    con_lluvia = [m.lluvia_mm for m in meses if m.lluvia_mm is not None]
+    media_registro = sum(con_lluvia) / len(con_lluvia) * 12
+
+    def sin_comparar(motivo: str, valor: float) -> None:
+        salida.contraste.append(ContrasteMedicion(
+            indicador="lluvia_anual", valor_productor=round(valor, 1), valor_nasa=None, unidad="mm/año",
+            diferencia_pct=None, confianza_resultante=None, corregido_al_lado=None,
+            texto=f"Tu pluviómetro: {_mm(valor)} mm/año · {motivo}{nota_manual}",
+            campanas_comparadas=[],
+        ))
+
+    if not prod:
+        sin_comparar("tu planilla no tiene campañas completas de julio a junio: no se pudo comparar con NASA",
+                     media_registro)
+        return
+    media_prod_total = sum(prod.values()) / len(prod)
+    if not clima.ok or not clima.campanas:
+        sin_comparar("NASA POWER sin dato: no se pudo comparar", media_prod_total)
+        return
+    nasa = {c.etiqueta: c.lluvia_total_mm for c in clima.campanas}
+    comunes = [c for c in sorted(prod) if c in nasa]
+    if not comunes:
+        sin_comparar(f"tu registro ({_rango(sorted(prod))}) no coincide con el período de NASA ({clima.periodo})",
+                     media_prod_total)
+        return
+
+    n = len(comunes)
+    vp = sum(prod[c] for c in comunes) / n
+    vn = sum(nasa[c] for c in comunes) / n
+    d = round((vp - vn) / vn * 100)
+    difieren = abs(d) > UMBRAL_DIFERENCIA_PCT
+    pocos = n < MIN_ANIOS_REGISTRO
+    salida.confianza_agua = "baja" if difieren else "alta"
+    estado = (f"difieren más de {UMBRAL_DIFERENCIA_PCT} %: confianza baja en agua" if difieren
+              else "coinciden: confianza alta")
+    nota_pocos = (f" · pocos años en común con NASA ({n}, menos de {MIN_ANIOS_REGISTRO}): contraste con confianza "
+                  "baja" if pocos else "")
+    periodo = f"{_rango(comunes)}, {n} {'campaña' if n == 1 else 'campañas'}"
+    salida.contraste.append(ContrasteMedicion(
+        indicador="lluvia_anual", valor_productor=round(vp, 1), valor_nasa=round(vn, 1), unidad="mm/año",
+        diferencia_pct=d, confianza_resultante="baja" if difieren or pocos else "alta",
+        corregido_al_lado=_corregido(clima, vp / vn),
+        texto=(f"Tu pluviómetro ({periodo}): {_mm(vp)} mm/año · NASA en las mismas campañas: {_mm(vn)} mm "
+               f"({_pct(d)}) · {estado}{nota_pocos}{nota_manual}"),
+        campanas_comparadas=comunes,
+        detalle_campanas=[DetalleCampana(campana=c, productor=round(prod[c], 1), nasa=round(nasa[c], 1),
+                                         diferencia=round((prod[c] - nasa[c]) / nasa[c] * 100) if nasa[c] else None)
+                          for c in comunes],
+    ))
+    if pocos:
+        salida.riesgos.append(f"Tu planilla tiene {n} {'campaña' if n == 1 else 'campañas'} en común con NASA "
+                              f"(menos de {MIN_ANIOS_REGISTRO}): el contraste de lluvia tiene confianza baja")
+    if difieren:
+        salida.motivo_agua = (f"Tu pluviómetro difiere {abs(d)} % de NASA POWER en las mismas campañas ({periodo}: "
+                              f"{_mm(vp)} contra {_mm(vn)} mm/año): confianza baja en agua")
+        salida.riesgos.append(f"Tu pluviómetro difiere {abs(d)} % de NASA POWER en las mismas campañas ({periodo}): "
+                              "el dato de agua tiene confianza baja")
 
 
 # --- Materia orgánica --------------------------------------------------------
@@ -198,7 +291,11 @@ def contrastar(mediciones: MedicionesPropias | None, clima: ResultadoClima) -> R
     if mediciones is None:
         return salida
     try:
-        if mediciones.lluvia_anual_mm is not None:
+        serie = mediciones.serie_mensual or []
+        if any(m.lluvia_mm is not None for m in serie):
+            # Manda la planilla: compara en las mismas campañas que NASA.
+            _lluvia_planilla(serie, mediciones.lluvia_anual_mm is not None, clima, salida)
+        elif mediciones.lluvia_anual_mm is not None:
             _lluvia(mediciones.lluvia_anual_mm, mediciones.anios_registro, clima, salida)
         if mediciones.materia_organica_pct is not None:
             _materia_organica(mediciones.materia_organica_pct, salida)

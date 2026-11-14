@@ -303,7 +303,8 @@ def test_traduce_el_motor_al_contrato(monkeypatch):
     ent, ind = recibido["entradas"], recibido["indicadores"]
     assert ent["verano"] == "soja" and ent["pasada"] == "soja" and ent["maquinaria_limitada"] is True
     assert ent["pesos"] == {"agua": 3, "suelo": 3, "ingreso": 3, "erosion": 3}
-    assert ent["textura"] == "franco" and ent["materia_organica_pct"] is None
+    assert ent["textura"] == "franco" and "materia_organica_pct" not in ent
+    assert ent["mediciones"] == {"lluvia_anual_mm": None, "anios_registro": None, "serie_mensual": None}
     assert set(ind["terciles"]) == {"seco", "normal", "humedo"} and ind["n_anios"] == 30
     assert ind["anios_con_calor"] == s.clima_mensual.anios_con_35c
     assert ind["anios_con_helada"] == s.clima_mensual.anios_con_helada
@@ -409,8 +410,9 @@ def test_ndvi_se_pide_una_sola_vez_si_coincide_con_power(monkeypatch):
 # --- Contraste con las mediciones del productor (RF15) ----------------------
 
 
-def test_pluviometro_que_difiere_baja_la_confianza_del_agua_sin_cambiar_puntajes(monkeypatch):
-    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado({}))
+def test_pluviometro_que_difiere_baja_la_confianza_del_agua_y_llega_al_motor(monkeypatch):
+    recibido = {}
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado(recibido))
     sin = servicio.analizar(Entrada.model_validate(ENTRADA))
     entrada = copy.deepcopy(ENTRADA)
     entrada["mediciones_propias"] = {"lluvia_anual_mm": 650, "anios_registro": 10, "materia_organica_pct": 2.8}
@@ -426,8 +428,9 @@ def test_pluviometro_que_difiere_baja_la_confianza_del_agua_sin_cambiar_puntajes
     a, c = s.estrategias[1], s.estrategias[3]
     assert any("difiere 21 %" in r for r in a.riesgos) and a.riesgos[0] == "Secado ~30 días antes de la siembra"
     assert c.riesgos == []  # descartada: solo el motivo
-    for e_sin, e_con in zip(sin.estrategias, s.estrategias):  # ningún puntaje cambia
-        assert e_con.puntos == e_sin.puntos and e_con.cercania == e_sin.cercania
+    # El peso de la medición en los puntajes lo pone el motor (mezcla.py): acá solo se verifica que le llegue.
+    assert recibido["entradas"]["mediciones"] == {"lluvia_anual_mm": 650, "anios_registro": 10, "serie_mensual": None}
+    assert "materia_organica_pct" not in recibido["entradas"]
     assert not any("en preparación" in f and "Contraste" in f for f in s.informacion_falta)
 
 
@@ -437,3 +440,42 @@ def test_pluviometro_que_coincide_no_toca_la_confianza():
     s = servicio.analizar(Entrada.model_validate(entrada))
     assert s.contraste_mediciones[0].confianza_resultante == "alta"
     assert s.indicadores["lluvia_anual"].confianza == "media"
+
+
+def _planilla_desde_power(campanas: list[str], factor: float) -> list[dict]:
+    """Planilla mensual que copia la lluvia de POWER (fixture) en esas campañas, por `factor`."""
+    serie = power.armar_serie(json.loads((Path(__file__).parents[1] / "clima" / "fixtures" / "power_rio_cuarto.json")
+                                         .read_text(encoding="utf-8")))
+    meses = []
+    for c in serie.campanas:
+        if c.etiqueta in campanas:
+            for m in (6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5):
+                anio = c.anio_inicio + 1 if m < 6 else c.anio_inicio
+                meses.append({"mes": f"{anio}-{m + 1:02d}", "lluvia_mm": round(c.lluvia_mm[m] * factor, 1)})
+    return meses
+
+
+def test_planilla_compara_en_las_mismas_campanas_y_llega_al_motor(monkeypatch):
+    """Planilla (5.3 y 5.5): mismas campañas que NASA, confianza baja en agua y la serie llega al motor."""
+    recibido = {}
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado(recibido))
+    sin = servicio.analizar(Entrada.model_validate(ENTRADA))
+    seis = ["2018/19", "2019/20", "2020/21", "2021/22", "2022/23", "2023/24"]
+    entrada = copy.deepcopy(ENTRADA)
+    entrada["mediciones_propias"] = {"lluvia_anual_mm": 900, "serie_mensual": _planilla_desde_power(seis, 0.8)}
+    s = servicio.analizar(Entrada.model_validate(entrada))
+
+    (lluvia,) = s.contraste_mediciones
+    assert lluvia.campanas_comparadas == seis and lluvia.diferencia_pct == -20
+    assert "se usó la planilla" in lluvia.texto
+    for k in ("lluvia_anual", "balance_anual"):
+        assert s.indicadores[k].confianza == "baja" and "mismas campañas" in s.indicadores[k].motivo
+        assert s.indicadores[k].valor == sin.indicadores[k].valor
+    assert any("difiere 20 %" in r for r in s.estrategias[1].riesgos)
+    med = recibido["entradas"]["mediciones"]
+    assert med["lluvia_anual_mm"] == 900 and len(med["serie_mensual"]) == 72
+    assert med["serie_mensual"][0] == {"mes": "2018-07", "lluvia_mm": med["serie_mensual"][0]["lluvia_mm"],
+                                       "t_min_c": None, "t_max_c": None}
+    # Las probabilidades salen de las 30 campañas de NASA: la planilla no las cambia.
+    for e_sin, e_con in zip(sin.estrategias, s.estrategias):
+        assert e_con.probabilidades == e_sin.probabilidades

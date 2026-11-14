@@ -45,7 +45,7 @@ def test_corregido_al_lado_usa_la_lluvia_del_tercio_seco_si_el_corte_es_por_bala
     lluvia_seca = max(x.lluvia_total_mm for x in clima.campanas if x.tipo == "seco")
     assert c.corregido_al_lado.umbral_seco_mm == pytest.approx(lluvia_seca * 650 / 819, abs=0.1)
     assert "balance" in c.corregido_al_lado.nota
-    assert "no cambia ningún puntaje" in c.corregido_al_lado.nota
+    assert c.corregido_al_lado.nota.endswith("Solo informativo.")
 
 
 def test_corregido_al_lado_escala_el_umbral_si_el_corte_es_por_lluvia(clima):
@@ -67,14 +67,13 @@ def test_800_mm_coincide_con_nasa(clima):
     assert r.riesgos == []
 
 
-def test_pocos_anios_se_muestra_con_confianza_baja(clima):
-    r = corr.contrastar(MedicionesPropias(lluvia_anual_mm=800, anios_registro=3), clima)
+def test_un_anio_de_registro_alcanza_y_la_confianza_la_decide_la_diferencia(clima):
+    """Decidido 14/11: como el motor, alcanza 1 año; más años pesan más en el motor, no acá."""
+    r = corr.contrastar(MedicionesPropias(lluvia_anual_mm=800, anios_registro=1), clima)
     c = r.contraste[0]
     assert c.valor_productor == 800 and c.valor_nasa == 819
-    assert c.confianza_resultante == "baja"
-    assert "pocos años de registro" in c.texto
-    assert r.confianza_agua == "alta"  # un registro corto no empeora el dato de NASA
-    assert any("3 años de registro" in x for x in r.riesgos)
+    assert c.confianza_resultante == "alta" and r.confianza_agua == "alta"
+    assert "pocos años" not in c.texto and r.riesgos == []
 
 
 def test_solo_materia_organica_es_dato_del_productor(clima):
