@@ -24,10 +24,16 @@ describe("cercania (fórmula del contrato, sc del prototipo)", () => {
     expect(cercania(puntos(53, 32, 48, 50), IGUALES)).toBe(46);
   });
 
-  it("pondera por las barras", () => {
+  it("pondera por las barras al cuadrado (MVP 4.3): una 5 pesa 25 veces una 1", () => {
     const p = puntos(100, 0, 0, 0);
-    expect(cercania(p, { agua: 5, suelo: 0, erosion: 0, ingreso: 0 })).toBe(100);
+    expect(cercania(p, { agua: 5, suelo: 1, erosion: 1, ingreso: 1 })).toBe(89); // 25·100 / 28
     expect(cercania(p, { agua: 1, suelo: 1, erosion: 1, ingreso: 1 })).toBe(25);
+  });
+
+  it("con barras distintas da p² y no p (el ejemplo del #57 del back)", () => {
+    const pesos = { agua: 5, suelo: 1, erosion: 2, ingreso: 3 };
+    // (25·53 + 1·32 + 4·48 + 9·50) / 39 = 51,3; con p lineal daría 49
+    expect(cercania(puntos(53, 32, 48, 50), pesos)).toBe(51);
   });
 
   it("redondea los ,5 al par, como el round() de Python del backend", () => {
