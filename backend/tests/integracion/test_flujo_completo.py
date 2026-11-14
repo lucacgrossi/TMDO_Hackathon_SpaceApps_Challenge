@@ -68,11 +68,12 @@ def test_analizar_recorre_todos_los_servicios(cliente, entrada_demo):
     assert s["es_mock"] is False
     # Cada servicio externo se consultó, y ninguno respondió "no encontrado".
     assert RED["nasa_power"] == 1
-    assert RED["pc_recorte:nasadem"] == 1
-    assert RED["pc_estadisticas:esa-worldcover"] == 1
+    assert RED["pc_grilla:nasadem"] == 1          # pendiente sobre la grilla común
+    assert RED["pc_grilla:esa-worldcover"] == 1   # cultivo sobre la grilla común
     assert RED["pc_recorte:modis-16A3GF-061"] >= 1
     assert RED["pc_busqueda:hls2-s30"] == 12
     assert RED["pc_404"] == 0
+    assert RED["aws_terrain"] == 0                # con NASADEM respondiendo, no hace falta el respaldo
     assert s["informacion_falta"] == []
 
 
@@ -100,6 +101,29 @@ def test_capas_del_mapa_salen_de_lo_que_vio_el_satelite(cliente, entrada_demo):
         assert mes is not None
         assert (capa["coleccion"], capa["item"], capa["fecha"]) == (mes["coleccion"], mes["item"], mes["fecha"])
     assert s["indicadores"]["riesgo_erosion"]["valor"] is not None
+
+
+def test_capas_armonizadas_coinciden_con_la_tabla(cliente, entrada_demo):
+    """El back calcula y el front dibuja: todas las capas en la misma grilla, y el número de la
+    tabla es el `valor_lote` de su capa (docs/plan-armonizacion-capas.md)."""
+    s = _analizar(cliente, entrada_demo)
+    capas = s["capas"]
+    grilla = capas["grilla"]
+    assert grilla is not None
+
+    rasters = [capas["pendiente_mapa"], capas["cultivo_mapa"]]
+    rasters += [m["mapa"] for m in capas["ndvi_mensual"] if m and m.get("mapa")]
+    assert capas["pendiente_mapa"] and capas["cultivo_mapa"] and len(rasters) > 2
+    for r in rasters:
+        assert (r["bounds"], r["ancho"], r["alto"]) == (grilla["bounds"], grilla["ancho"], grilla["alto"]), r["id"]
+        assert r["png"] and r["escala"]["cortes"]
+
+    assert capas["pendiente_mapa"]["resumen"]["valor_lote"] == pytest.approx(s["lote"]["pendiente_pct"]["valor"])
+    assert capas["cultivo_mapa"]["resumen"]["valor_lote"] == pytest.approx(
+        s["lote"]["cobertura_agricola_pct"]["valor"], abs=0.1)
+    for mes, capa in zip(s["visto_por_satelite"]["meses"], capas["ndvi_mensual"], strict=True):
+        if mes and capa and capa.get("mapa"):
+            assert capa["mapa"]["resumen"]["valor_lote"] == pytest.approx(mes["ndvi_medio"], abs=0.001)
 
 
 def test_valores_del_lote_con_datos_reales(cliente, entrada_demo):

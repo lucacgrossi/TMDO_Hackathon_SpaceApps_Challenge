@@ -10,11 +10,13 @@ guardadas del lote de ejemplo (las mismas fixtures que usan los tests de cada do
 
 from __future__ import annotations
 
+import io
 import json
 from collections import Counter
 from pathlib import Path
 
 import httpx
+import numpy as np
 import pytest
 from fastapi.testclient import TestClient
 
@@ -32,6 +34,15 @@ RED: Counter = Counter()
 
 def _leer(nombre: str):
     return json.loads((FIX_SAT / nombre).read_text(encoding="utf-8"))
+
+
+def _hls_grilla() -> bytes:
+    """HLS S30 real sobre la grilla del lote. La fixture guarda NDVI × 10000 en int16;
+    Planetary Computer lo manda en float64 (banda + máscara), como en `tests/satelite/test_ndvi.py`."""
+    a = np.load(FIX_SAT / "grilla_hls_s30_2024209.npy")
+    buf = io.BytesIO()
+    np.save(buf, np.stack([a[0] / 10000, a[1].astype(float)]))
+    return buf.getvalue()
 
 
 BUSQUEDAS = {
@@ -55,6 +66,19 @@ def planetary_computer(estado: dict):
             RED["pc_caido"] += 1
             return httpx.Response(503)
         ruta, p = request.url.path, request.url.params
+        if "/item/bbox/" in ruta:  # rasters sobre la grilla común del lote (armonización)
+            coleccion = p.get("collection", "")
+            RED[f"pc_grilla:{coleccion}"] += 1
+            if coleccion == "nasadem":
+                return httpx.Response(200, content=(FIX_SAT / "grilla_nasadem.npy").read_bytes())
+            if coleccion == "esa-worldcover":
+                return httpx.Response(200, content=(FIX_SAT / "grilla_worldcover.npy").read_bytes())
+            if coleccion.startswith("hls2-"):
+                return httpx.Response(200, content=_hls_grilla())
+            if p.get("assets") == ndvi.MODIS_FIABILIDAD:
+                return httpx.Response(200, content=(FIX_SAT / "grilla_modis_fiabilidad_2024209.npy").read_bytes())
+            if p.get("assets") == ndvi.MODIS_ASSET:
+                return httpx.Response(200, content=(FIX_SAT / "grilla_modis_ndvi_2024209.npy").read_bytes())
         if ruta.endswith("/stac/v1/search"):
             cuerpo = json.loads(request.content)
             coleccion = cuerpo["collections"][0]
