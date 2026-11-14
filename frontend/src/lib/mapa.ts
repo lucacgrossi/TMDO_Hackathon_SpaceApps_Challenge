@@ -44,7 +44,7 @@ interface EstadoMapa {
  * Las 4 capas del prototipo, con los mismos códigos (`data-ly`):
  * - "sat": solo la imagen satelital de fondo.
  * - "ndvi": vegetación (NDVI de NASA HLS a 30 m, o MODIS a 250 m de respaldo).
- * - "slope": pendiente del lote (elevación de AWS Terrain Tiles).
+ * - "slope": pendiente del lote (NASADEM 30 m, la calcula el backend).
  * - "clima": lluvia y heladas del mes, con la zona del dato de NASA POWER (~50 km).
  */
 export type Capa = "sat" | "ndvi" | "slope" | "clima";

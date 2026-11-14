@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import type { CapaRaster } from "@/lib/capaRaster";
 
 /**
  * Lo que las capas del mapa ya cargaron, para que la leyenda lo muestre.
@@ -47,23 +48,14 @@ export type FuenteNdvi =
       anio: number;
     };
 
-/** Resultado de la capa de pendiente (`S.slope`, `S.slopeReal` y `slopeOverlay` del prototipo). */
-export interface ResultadoPendiente {
-  /** Pendiente general del lote, %. */
-  media: number;
-  /** true = calculada con elevación real; false = valor ilustrativo (falló la descarga). */
-  real: boolean;
-  /** Imagen coloreada de la pendiente (data URL). null si no hay elevación. */
-  imagen: string | null;
-  /** Esquinas de la imagen: [[sur, oeste], [norte, este]]. */
-  limites: [[number, number], [number, number]] | null;
-}
-
 interface EstadoCapas {
   /** null = todavía no se pidió nada para este mes/lote. */
   ndvi: FuenteNdvi | null;
-  /** null = calculando (la leyenda muestra el título sin valor). */
-  pendiente: ResultadoPendiente | null;
+  /**
+   * Capa raster de pendiente que manda el backend (NASADEM 30 m).
+   * null = todavía no hay dato: hasta la auditoría de conexión siempre es null.
+   */
+  pendiente: CapaRaster | null;
   cambiarCapas: (parcial: Partial<Omit<EstadoCapas, "cambiarCapas">>) => void;
 }
 

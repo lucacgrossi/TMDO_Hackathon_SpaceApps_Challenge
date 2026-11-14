@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { MESES, useCapas } from "@/lib/capas";
+import type { CapaRaster } from "@/lib/capaRaster";
 import { CLIMA_ILUSTRATIVO } from "@/lib/datosDemo";
 import { centro, formatoNumero } from "@/lib/geo";
 import { useMapa } from "@/lib/mapa";
@@ -101,23 +102,43 @@ function LeyendaNdvi({ mes }: { mes: number }) {
 }
 
 function LeyendaPendiente() {
-  const pendiente = useCapas((s) => s.pendiente);
+  const capa = useCapas((s) => s.pendiente);
+  // Sin dato del backend no se muestra ningún número (nada inventado).
+  if (!capa)
+    return (
+      <>
+        <b>Pendiente del lote · sin dato</b>
+        <div className="src">
+          La calcula el backend con NASADEM (30 m), la misma que usa la tabla. Llega cuando se conecte la app con el
+          backend.
+        </div>
+      </>
+    );
+  return <LeyendaRaster capa={capa} />;
+}
+
+/**
+ * Leyenda genérica de una capa raster del backend: título con la media del
+ * lote, la escala que viene en la capa (no se repite en el front) y la fuente
+ * con resolución, fecha o campaña y confianza (principio "técnico por defecto").
+ */
+function LeyendaRaster({ capa }: { capa: CapaRaster }) {
+  const { cortes, colores, etiquetas } = capa.escala;
+  const cuando = capa.fecha ? formatoFecha(capa.fecha) : capa.campana;
   return (
     <>
-      <b>Pendiente del lote{pendiente ? ` · media ${fmt(pendiente.media, 1)} %` : ""}</b>
-      <div className="ramp" style={{ background: "linear-gradient(90deg,#2e7d32,#7cb342,#fdd835,#f57c00,#c62828)" }} />
+      <b>
+        {capa.titulo} · media {fmt(capa.resumen.media, 1)} {capa.unidad}
+      </b>
+      <div className="ramp" style={{ background: `linear-gradient(90deg,${colores.join(",")})` }} />
       <div className="row">
-        <span>0 %</span>
-        <span>2,5 %</span>
-        <span>6 %+</span>
+        {(etiquetas.length ? etiquetas : cortes.map((c) => fmt(c, 1))).map((t, i) => (
+          <span key={i}>{t}</span>
+        ))}
       </div>
       <div className="src">
-        {/* Mientras calcula (pendiente null) no se afirma nada. */}
-        {pendiente == null
-          ? "Calculando con la elevación de AWS Terrain Tiles…"
-          : pendiente.real
-            ? "Elevación real: AWS Terrain Tiles (incluye SRTM) · ~8 m"
-            : "No se pudo leer la elevación: valor ilustrativo"}
+        {capa.fuente} · píxel de {capa.resolucion_nativa}
+        {cuando ? ` · ${cuando}` : ""} · confianza {capa.confianza}.{capa.nota ? ` ${capa.nota}` : ""}
       </div>
     </>
   );

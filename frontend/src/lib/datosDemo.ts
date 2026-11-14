@@ -43,9 +43,3 @@ export const CLIMA_ILUSTRATIVO: ClimaMensual = {
   periodo: "",
 };
 
-/**
- * Pendiente media (%) que el prototipo usa cuando no se pudo leer la
- * elevación (`S.slope = 1.6` en el catch de `loadSlope`, ~línea 253).
- * La leyenda la acompaña con "No se pudo leer la elevación: valor ilustrativo".
- */
-export const PENDIENTE_ILUSTRATIVA = 1.6;

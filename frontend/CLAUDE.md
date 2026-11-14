@@ -22,7 +22,7 @@ El MVP y el `CLAUDE.md` raíz dicen que el stack y el contrato de la API los def
 - **Compu primero.** En celular, la tabla hace scroll horizontal.
 - **Una pieza por archivo** (`TarjetaEstrategia`, `CalendarioMeses`, `BarraObjetivo`…) para evitar conflictos de merge.
 - Accesibilidad básica: foco visible, `aria-pressed`, `prefers-reduced-motion`, modo oscuro por `prefers-color-scheme`.
-- Leaflet se carga solo en el cliente (`dynamic` con `ssr: false`). Mapa base Esri con su atribución; NDVI de NASA GIBS (`MODIS_Terra_L3_NDVI_16Day`, nivel 9) y pendiente de AWS Terrain Tiles, como en el prototipo.
+- Leaflet se carga solo en el cliente (`dynamic` con `ssr: false`). Mapa base Esri con su atribución; NDVI de NASA GIBS (`MODIS_Terra_L3_NDVI_16Day`, nivel 9). La pendiente (y después NDVI, erosión y cultivo por píxel) la calcula el backend y llega como capa raster (`src/lib/capaRaster.ts`): el front solo la dibuja.
 - **Límites de zoom del mapa.** Esri no tiene imagen en todas las zonas a todos los zooms: en el lote de la demo llega a 18 y en 19 muestra "Map data not yet available" (el prototipo deja llegar a 19). Reglas:
   - Capa Esri con `maxNativeZoom: 17`, para que Leaflet agrande las teselas existentes en vez de pedir las que no hay. Vale para cualquier zona.
   - Mapa con `maxZoom: 18` y `minZoom: 5`.
