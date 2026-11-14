@@ -2,6 +2,7 @@ import ClaseBody from "@/components/comunes/ClaseBody";
 import Toast from "@/components/comunes/Toast";
 import PanelEntradas from "@/components/entradas/PanelEntradas";
 import BarraDibujo from "@/components/mapa/BarraDibujo";
+import BuscadorMapa from "@/components/mapa/BuscadorMapa";
 import MapaDinamico from "@/components/mapa/MapaDinamico";
 
 /**
@@ -18,6 +19,11 @@ export default function Inicio() {
       <MapaDinamico />
       <div className="onb-bg" aria-hidden="true" />
       <PanelEntradas />
+      {/* `.tools`: herramientas flotantes del mapa (paso 2). El buscador va
+          primero; la línea de tiempo y las capas se suman después, en este orden. */}
+      <div className="tools">
+        <BuscadorMapa />
+      </div>
       <BarraDibujo />
       {/* Hoja de resultados (persona 5): <HojaComparacion /> va acá. */}
       <Toast />
