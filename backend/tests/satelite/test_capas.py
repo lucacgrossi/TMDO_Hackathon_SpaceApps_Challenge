@@ -6,8 +6,13 @@ CLAVES = {"valor", "unidad", "fuente", "anios", "resolucion", "confianza"}
 
 
 def _mapa(id_: str, grilla: dict, **resumen) -> dict:
-    return {"id": id_, "bounds": grilla["bounds"], "ancho": grilla["ancho"], "alto": grilla["alto"],
-            "resumen": resumen}
+    # Con el contrato de #63, `Capas` valida cada `CapaRaster` completa: los campos que el test no mira
+    # van con valores mínimos válidos.
+    return {"id": id_, "titulo": id_, "unidad": "", "fuente": "test", "resolucion_nativa": "30 m",
+            "resolucion_grilla": "1″ (~30 m)", "bounds": grilla["bounds"], "ancho": grilla["ancho"],
+            "alto": grilla["alto"], "png": "", "escala": {"cortes": [0], "colores": ["#000000"], "etiquetas": ["x"]},
+            "confianza": "media",
+            "resumen": {"media": None, "min": None, "max": None, "pixeles": 0, **resumen}}
 
 
 GRILLA = {"bounds": [[-33.2518, -64.2382], [-33.2435, -64.2265]], "ancho": 42, "alto": 30, "paso": 1 / 3600}

@@ -512,3 +512,69 @@ def test_planilla_con_heladas_baja_la_confianza_y_suma_la_linea_sin_cambiar_prob
             assert (p_con.anios, p_con.de, p_con.pct, p_con.texto) == (p_sin.anios, p_sin.de, p_sin.pct, p_sin.texto)
             if p_con.evento in ("helada", "calor") and p_con.contraste:
                 assert p_con.contraste.startswith("Tu estación:")
+
+
+# --- Capas armonizadas sobre la grilla del lote (plan-armonizacion-capas.md) -----
+
+from app.api.mock import salida_mock  # noqa: E402
+from tests.api.conftest import elevacion_ok, ndvi_ok  # noqa: E402
+
+_EJEMPLO = salida_mock().capas  # grilla y CapaRaster válidas del mock (42 × 30)
+_GRILLA = _EJEMPLO.grilla.model_dump()
+_PEND = _EJEMPLO.pendiente_mapa.model_dump()
+_CULT = _EJEMPLO.cultivo_mapa.model_dump()
+
+
+def _con_capas(monkeypatch, pend=_PEND, cult=_CULT, grilla=_GRILLA, motivo_pend=None):
+    monkeypatch.setattr(elevacion, "calcular", lambda pol: {**elevacion_ok(pol), "mapa": pend, "grilla": grilla,
+                                                             "mapa_motivo": motivo_pend})
+    monkeypatch.setattr(cobertura, "calcular", lambda pol: {**cobertura_ok(pol), "mapa": cult, "grilla": grilla,
+                                                             "mapa_motivo": None})
+
+
+def test_capas_de_pendiente_y_cultivo_salen_en_la_grilla(monkeypatch):
+    _con_capas(monkeypatch)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    c = s.capas
+    assert c.grilla is not None and (c.grilla.ancho, c.grilla.alto) == (42, 30)
+    assert c.pendiente_mapa.id == "pendiente" and c.cultivo_mapa.id == "cultivo"
+    assert all((x.bounds, x.ancho, x.alto) == (c.grilla.bounds, 42, 30) for x in c.capas_raster())
+    assert "pendiente_mapa" not in c.no_disponibles and "cultivo_mapa" not in c.no_disponibles
+
+
+def test_capa_que_falta_va_a_no_disponibles_con_el_motivo(monkeypatch):
+    _con_capas(monkeypatch, pend=None, motivo_pend="NASADEM no respondió")
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.pendiente_mapa is None and "pendiente_mapa" in s.capas.no_disponibles
+    assert "Capa de pendiente: NASADEM no respondió" in s.informacion_falta
+    assert s.capas.cultivo_mapa is not None
+
+
+def test_capa_mal_armada_no_rompe_analizar(monkeypatch):
+    _con_capas(monkeypatch, cult={**_CULT, "escala": {"cortes": [0, 1], "colores": ["#000"], "etiquetas": []}})
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.cultivo_mapa is None and "cultivo_mapa" in s.capas.no_disponibles
+    assert any(f.startswith("Capa de cultivo: no se pudo leer") for f in s.informacion_falta)
+    assert s.capas.pendiente_mapa is not None
+
+
+def test_ndvi_del_mes_trae_su_mapa(monkeypatch):
+    mapa = {**_PEND, "id": "ndvi", "titulo": "NDVI", "unidad": "NDVI", "fecha": "2026-01-15"}
+
+    def ndvi_con_mapas(poligono, campana=None):
+        r = ndvi_ok(poligono, campana)
+        return {**r, "mapas": [mapa] * 12, "grilla": _GRILLA}
+
+    _con_capas(monkeypatch)
+    monkeypatch.setattr(ndvi, "calcular", ndvi_con_mapas)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    con_mapa = [m for m in s.capas.ndvi_mensual if m and m.mapa]
+    assert con_mapa and all(m.mapa.id == "ndvi" for m in con_mapa)
+    assert "ndvi_mapa" not in s.capas.no_disponibles
+
+
+def test_sin_capas_nuevas_la_salida_es_la_de_antes():
+    """Con las fuentes de siempre (sin grilla ni mapas), las capas nuevas van vacías y no rompen nada."""
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.grilla is None and s.capas.capas_raster() == []
+    assert any(s.capas.ndvi_mensual)
