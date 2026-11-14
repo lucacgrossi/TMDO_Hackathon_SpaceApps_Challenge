@@ -11,6 +11,8 @@ import io
 import httpx
 import numpy as np
 
+from app.satelite import red
+
 BASE = "https://planetarycomputer.microsoft.com/api"
 URL_BUSQUEDA = f"{BASE}/stac/v1/search"
 URL_DATOS = f"{BASE}/data/v1"
@@ -20,7 +22,7 @@ TIMEOUT = 10.0  # segundos por pedido (PLAN.md §3: /analizar en menos de 30 s)
 REINTENTOS = 1
 
 # Un solo cliente para todo el proceso: reusa conexiones y es seguro entre hilos.
-_cliente = httpx.Client(timeout=TIMEOUT, headers={"User-Agent": "field-shift-backend"})
+_cliente = red.cliente(TIMEOUT)  # certificados del sistema + certifi (ver red.py)
 
 
 class ErrorPC(Exception):
