@@ -1,4 +1,4 @@
-"""Tests de la API con el mock. Correr desde backend/: py -m pytest tests/api"""
+"""Tests de la API con las fuentes simuladas de conftest.py. Correr desde backend/: py -m pytest tests/api"""
 
 import copy
 import json
@@ -30,7 +30,7 @@ def test_analizar_devuelve_4_columnas_con_el_contrato():
     assert [e["id"] for e in cuerpo["estrategias"]] == ["actual", "A", "B", "C"]
     assert len(cuerpo["clima_mensual"]["lluvia_mm"]) == 12
     assert cuerpo["aviso"].startswith("Herramienta de apoyo")
-    assert cuerpo["es_mock"] is True
+    assert cuerpo["es_mock"] is False
 
 
 def test_cada_indicador_es_trazable():
@@ -45,7 +45,7 @@ def test_puntos_alcanzan_para_recalcular_la_cercania():
     cuerpo = cliente.post("/analizar", json=ENTRADA).json()
     pesos = ENTRADA["prioridades"]
     for e in cuerpo["estrategias"]:
-        if not e["disponible"]:
+        if not e["disponible"] or e["puntos"] is None:  # descartada, o motor todavía no conectado
             continue
         p = e["puntos"]
         valores = {"agua": p["agua"]["normal"], "suelo": p["suelo"], "erosion": p["erosion"], "ingreso": p["ingreso"]}
