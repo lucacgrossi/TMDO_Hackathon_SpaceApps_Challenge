@@ -1,0 +1,221 @@
+/*
+ * Tarjetas de estrategia (persona 5). La base es del prototipo en globals.css
+ * (.cards, .card, .card.off, .hd, .nm, .spc, .yrs, .dot, .tagw, .prob, .more);
+ * acá va lo nuevo: métricas con el valor y su unidad al frente, la cercanía
+ * con menos peso que el número grande del prototipo, el botón del detalle y
+ * la selección sin `aria-pressed` en la tarjeta (la tarjeta es un article).
+ */
+
+.contenedor {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 12px;
+}
+
+/* .cards del prototipo trae su propio scroll y margen: acá scrollea el cuerpo de la hoja */
+.grilla {
+  flex: none;
+  overflow: visible;
+  padding: 0 0 4px;
+}
+
+.tarjeta {
+  position: relative;
+  color: var(--ink);
+}
+.tarjeta[data-seleccionada="true"] {
+  background: var(--soft);
+  border-color: transparent;
+}
+.tarjeta:global(.off) {
+  cursor: default;
+}
+
+.nombre {
+  font-size: 14px;
+  margin: 0;
+}
+
+/* --- Métricas: valor con unidad al frente, barra de 0 a 100 y diferencia frente a la actual */
+.metricas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.metrica {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    "etiqueta valor"
+    "barra diferencia";
+  column-gap: 10px;
+  row-gap: 3px;
+  align-items: center;
+}
+.etiqueta {
+  grid-area: etiqueta;
+  font-size: 12px;
+  color: var(--muted);
+}
+.valor {
+  grid-area: valor;
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  line-height: 1.1;
+}
+.valor small {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.barra {
+  grid-area: barra;
+  height: 6px;
+  background: color-mix(in srgb, var(--ink) 8%, transparent);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.barra i {
+  display: block;
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+/* Entrada de la hoja: las barras crecen desde 0, después de que llega su tarjeta (--k) */
+:global(.intro) .barra i {
+  animation: metricaDesdeCero 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--k, 0) * 70ms + 200ms);
+}
+@keyframes metricaDesdeCero {
+  from {
+    width: 0;
+  }
+}
+/* Sin verde ni rojo: el signo dice la dirección, no un juicio */
+.diferencia {
+  grid-area: diferencia;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  min-width: 52px;
+}
+
+/* --- Cercanía: una línea, no el número de 40 px del prototipo */
+.cercania {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cercaniaTotal {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+.cercaniaTotal b {
+  font-size: 16px;
+  font-weight: 800;
+  color: var(--ink);
+}
+.suave {
+  font-size: 11px;
+}
+.cercania :global(.yrs) b {
+  font-variant-numeric: tabular-nums;
+}
+.cercania :global(.yrs) span {
+  white-space: nowrap;
+}
+/* La tarjeta seleccionada ya tiene fondo --soft: las cajitas del trío pasan al del panel */
+.tarjeta[data-seleccionada="true"] :global(.yrs) div {
+  background: var(--panel);
+}
+
+/* --- Detalle */
+/* Pegado al contenido: si otra tarjeta abre su detalle, la grilla estira esta y el botón no se va al fondo */
+.botonDetalle {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 5px 10px;
+  color: var(--ink);
+}
+.botonDetalle[aria-pressed="true"] {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+.chevron {
+  display: inline-block;
+  transition: transform 0.2s;
+}
+.botonDetalle[aria-pressed="true"] .chevron {
+  transform: rotate(180deg);
+}
+
+.detalle {
+  cursor: auto;
+  gap: 10px;
+}
+.detalle[hidden] {
+  display: none;
+}
+/* Títulos del detalle en tipo oración (DESIGN.md): las mayúsculas quedan para las etiquetas de sección */
+.detalle h4 {
+  margin: 0 0 2px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+}
+.detalle ul {
+  margin: 0;
+  padding-left: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.detalle p {
+  margin: 0;
+}
+/* Contraste de la estación del productor bajo cada probabilidad (Probabilidad.contraste), como en la tabla */
+.contrasteProb {
+  display: block;
+  font-style: italic;
+}
+.fuente {
+  font-size: 11px;
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .barra i,
+  .chevron {
+    transition: none;
+  }
+  :global(.intro) .barra i {
+    animation: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .grilla {
+    grid-template-columns: repeat(4, minmax(240px, 1fr));
+    overflow-x: auto;
+  }
+}

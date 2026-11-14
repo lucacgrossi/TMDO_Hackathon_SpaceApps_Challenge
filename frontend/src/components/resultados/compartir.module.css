@@ -1,0 +1,89 @@
+/*
+ * Menú Compartir y hoja de impresión (persona 5, RF20). El menú reusa .menu
+ * del prototipo (globals.css); acá va solo lo nuevo.
+ */
+
+/* El menú se ubica debajo del botón Compartir */
+.raiz {
+  position: relative;
+}
+.raiz :global(.menu) {
+  top: 38px;
+}
+.raiz :global(.menu) :is(a, button):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+/* La opción con foco se marca también con fondo: el menú mueve el foco con las flechas aunque se haya abierto con el mouse */
+.raiz :global(.menu) :is(a, button):focus {
+  background: var(--soft);
+}
+.separador {
+  border: 0;
+  border-top: 1px solid var(--line);
+  margin: 4px 6px;
+}
+
+/*
+ * Guardar PDF (window.print): solo la hoja, a lo ancho, sin mapa, panel ni
+ * botones, con la tabla completa y el aviso de apoyo. Los selectores pasan por
+ * `:has(.raiz)` porque un CSS module necesita una clase propia en cada regla y
+ * así no hace falta tocar globals.css. Solo aplica con la hoja abierta.
+ */
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
+
+  :global(body):has(:global(.sheet.open) .raiz) {
+    background: #fff;
+    height: auto;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  /* Todo lo que no es la hoja: mapa, panel, controles, aviso flotante */
+  :global(body):has(:global(.sheet.open) .raiz) > :global(*:not(.sheet)) {
+    display: none !important;
+  }
+
+  /* La hoja deja de ser un panel fijo y ocupa el ancho de la página */
+  :global(.sheet.open):has(.raiz) {
+    position: static;
+    display: block;
+    height: auto;
+    transform: none;
+    background: #fff;
+    box-shadow: none;
+    border-radius: 0;
+  }
+  :global(.sheet.open):has(.raiz) :global(header) {
+    padding: 0 0 8px;
+  }
+  /* Interruptor, Compartir y Cerrar no sirven en papel */
+  :global(.sheet.open):has(.raiz) :global(header .sp) {
+    display: none;
+  }
+  /* Cuerpo sin scroll: la tabla entra entera */
+  :global(.sheet.open):has(.raiz) > :global(div) {
+    overflow: visible;
+    height: auto;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  /* Encabezado y primera columna dejan de ser fijos; el encabezado se repite en cada página */
+  :global(.sheet.open):has(.raiz) :global(th) {
+    position: static !important;
+  }
+  :global(.sheet.open):has(.raiz) :global(table) {
+    min-width: 0;
+  }
+  :global(.sheet.open):has(.raiz) :global(tr) {
+    break-inside: avoid;
+  }
+  /* El pie con el aviso de apoyo va al final, siempre */
+  :global(.sheet.open):has(.raiz) :global(.foot) {
+    padding: 10px 0 0;
+    break-inside: avoid;
+  }
+}

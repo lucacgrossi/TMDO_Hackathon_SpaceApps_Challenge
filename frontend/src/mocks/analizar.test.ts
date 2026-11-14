@@ -67,6 +67,23 @@ describe("mock de /analizar · variantes", () => {
     expect(MOCK_BASE.informacion_falta).not.toContain(MOCK_SIN_MEZCLA);
   });
 
+  it.each([
+    ["pluviómetro que coincide", { lluviaAnualMm: 760 }],
+    ["materia orgánica", { materiaOrganicaPct: 2.4 }],
+    ["pluviómetro que no coincide + materia orgánica", { lluviaAnualMm: 620, materiaOrganicaPct: 2.4 }],
+    // El mock no simula la mezcla del motor (MVP 4.3): en el back la lluvia sí mueve los puntos
+  ])("%s: el mock deja los puntos y los valores como estaban", (_, opciones) => {
+    const s = mockAnalizar(opciones);
+    expect(puntos(s)).toEqual(puntos(MOCK_BASE));
+    expect(s.estrategias.map((e) => e.valores)).toEqual(MOCK_BASE.estrategias.map((e) => e.valores));
+  });
+
+  it("la nota para el agrónomo va solo en la actual", () => {
+    for (const e of MOCK_PLUVIOMETRO.estrategias.slice(1)) {
+      expect(e.riesgos.some((r) => r.includes("pluviómetro"))).toBe(false);
+    }
+  });
+
   it("decide con la diferencia exacta: 650 mm es −15,5 %, pasa el 15 % y baja la confianza", () => {
     expect(mockAnalizar({ lluviaAnualMm: 650 }).contraste_mediciones[0].confianza_resultante).toBe("baja");
   });

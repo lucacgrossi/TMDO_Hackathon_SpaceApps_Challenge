@@ -1,5 +1,7 @@
 import ClaseBody from "@/components/comunes/ClaseBody";
 import Toast from "@/components/comunes/Toast";
+// Persona 5: la hoja de resultados. El import va acá, lejos de los de la persona 4, para no chocar en los merges
+import HojaComparacion from "@/components/resultados/HojaComparacion";
 import PanelEntradas from "@/components/entradas/PanelEntradas";
 import BarraDibujo from "@/components/mapa/BarraDibujo";
 import BuscadorMapa from "@/components/mapa/BuscadorMapa";
@@ -31,7 +33,8 @@ export default function Inicio() {
       </div>
       <Leyenda />
       <BarraDibujo />
-      {/* Hoja de resultados (persona 5): <HojaComparacion /> va acá. */}
+      {/* Hoja de resultados (persona 5) */}
+      <HojaComparacion />
       <Toast />
     </>
   );
