@@ -9,7 +9,7 @@ import { useVista } from "@/lib/vista";
  * Sale de `ctaOnb()`, `goMap()` y el click de `#comparar` del prototipo final.
  *
  * Paso 1 (inicio):
- *   - Lote de ejemplo → "Ver mi lote en el mapa".
+ *   - Lote de ejemplo → "Ver el lote de ejemplo en el mapa".
  *   - Marcar mi lote sin ubicación → deshabilitado, "Elegí dónde está tu lote".
  *     Por qué: sin saber dónde está el lote, el mapa abriría en cualquier lado.
  *   - Marcar mi lote con ubicación → "Ir al mapa y marcar mi lote".
@@ -37,7 +37,7 @@ export default function BotonPrincipal() {
   let texto = "Comparar alternativas";
   if (enInicio || !textoMapa) {
     if (modoLote === "dibujo") texto = ubicacion ? "Ir al mapa y marcar mi lote" : "Elegí dónde está tu lote";
-    else texto = "Ver mi lote en el mapa";
+    else texto = "Ver el lote de ejemplo en el mapa";
   }
 
   function irAlMapa() {
