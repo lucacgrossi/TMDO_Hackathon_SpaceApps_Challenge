@@ -1,11 +1,12 @@
 "use client";
 
 import { useEncuadre } from "@/lib/encuadre";
-import { CIUDAD_REFERENCIA, LOTE_DEMO, type LatLng } from "@/lib/entradas";
+import { LOTE_DEMO, type LatLng } from "@/lib/entradas";
 import { useDibujo } from "@/lib/dibujo";
-import { areaHa, centro, distanciaKm, formatoNumero, mismoPoligono } from "@/lib/geo";
+import { areaHa, centro, formatoNumero, mismoPoligono } from "@/lib/geo";
 import { useMapa } from "@/lib/mapa";
 import { useEntradas } from "@/lib/store";
+import { useZona } from "@/lib/zona";
 
 /**
  * F3 · Bloque `.lote` del panel en el paso 2: dónde está el lote, el selector
@@ -42,7 +43,8 @@ export default function ResumenLote() {
   const dibujando = useDibujo((s) => s.dibujando);
 
   const c = centro(poligono);
-  const km = distanciaKm(c, CIUDAD_REFERENCIA.punto);
+  // Zona real del lote (geocodificación inversa de Esri), ver lib/zona.ts
+  const zona = useZona(poligono);
 
   /** "Lote de ejemplo": vuelve el rectángulo de Río Cuarto y lo encuadra (con 30 % de aire). */
   const usarEjemplo = () => {
@@ -63,10 +65,9 @@ export default function ResumenLote() {
 
   return (
     <div className="lote">
-      {/* onLoteChange: la distancia a la ciudad de referencia, redondeada a km. */}
-      <h2>
-        Lote a {formatoNumero(km)} km de {CIUDAD_REFERENCIA.nombre}
-      </h2>
+      {/* Decisión del equipo: en vez de "a N km de Río Cuarto" (del prototipo), la zona
+          real donde está el lote. Sin respuesta de Esri queda "Lote marcado". */}
+      <h2>{zona ?? "Lote marcado"}</h2>
       <p>{coordenadas(c)} · tocá el mapa para moverlo o dibujalo</p>
       <div className="seg2" role="radiogroup" aria-label="Cómo marcar el lote">
         <button type="button" role="radio" aria-checked={modoLote === "demo"} onClick={usarEjemplo} disabled={dibujando}>
