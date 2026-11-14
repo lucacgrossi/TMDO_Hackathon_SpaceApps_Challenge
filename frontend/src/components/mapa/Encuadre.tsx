@@ -149,12 +149,14 @@ export default function Encuadre() {
     };
   }, [paso, mapa]);
 
-  // Si el lugar elegido cambia estando ya en el mapa, se va hasta ahí.
-  // (En el paso 1 no hace falta: el vuelo de arriba ya lo usa al pasar al mapa.)
+  // Contrato con el buscador del mapa (F4): el buscador solo escribe
+  // `useEntradas.ubicacion` (y el aviso); acá se mueve el mapa. Es `mGo()` +
+  // `showTarget()` del prototipo (~líneas 140 y 150): vuela al punto a zoom
+  // 15,5 en 1,4 s y muestra la marca `.tmark` enseguida (no espera a llegar).
+  // En el paso 1 no hace nada: el vuelo de goMap ya usa la ubicación al pasar al mapa.
   useEffect(() => {
     if (!ubicacion || useEntradas.getState().paso !== "mapa") return;
-    const destino = L.latLng(ubicacion.lat, ubicacion.lng).toBounds(METROS_UBICACION);
-    mapa.flyToBounds(destino, { ...margenes(), maxZoom: 16.5, duration: 1.2 });
+    mapa.flyTo([ubicacion.lat, ubicacion.lng], 15.5, { duration: 1.4 });
     useMapa.getState().cambiarMapa({ marcaVisible: true });
   }, [ubicacion, mapa]);
 
