@@ -29,7 +29,24 @@ El MVP y el `CLAUDE.md` raíz dicen que el stack y el contrato de la API los def
   - Capas de datos con `maxNativeZoom` igual a su resolución real (NDVI GIBS: 9). Se ven los píxeles grandes a propósito: es la escala real del dato.
 
 ## Comandos
-Se completan cuando exista `package.json`.
+Desde `frontend/` (Node 20 o más):
+- `npm install` · instala las dependencias (versiones fijas en `package.json`).
+- `npm run dev` · servidor local en http://localhost:3000.
+- `npm run build` · build de producción (es lo que corre Vercel).
+- `npm run lint` y `npm run typecheck` · revisar antes de abrir un PR.
+- `npm test` · tests de lógica pura con vitest (`src/**/*.test.ts`).
+- Variables: copiar `.env.example` a `.env.local`. Sin `.env.local`, se usa el mock.
+
+## Estructura
+Referencia visual y de comportamiento: `../docs/prototipo/field-shift-prototipo.html` (prototipo final). Los componentes son React de verdad y **reusan las clases CSS del prototipo**, que está tal cual en `src/app/globals.css`.
+- `src/app/` · `layout.tsx` (Inter, CSS de Leaflet y del prototipo) y `page.tsx` (monta mapa, panel y, en el paso 2, la hoja de la persona 5).
+- `src/lib/entradas.ts` · tipos y valores iniciales de las entradas del productor. `src/lib/store.ts` · estado compartido (zustand): `useEntradas((s) => s.verano)` para leer, `cambiar({ … })` para escribir.
+- `src/components/entradas/` · persona 4: `PanelEntradas` y una sección por archivo (`ElegirLote`, `BuscadorLote`, `ResumenLote`, `SeccionRotacion`, `SeccionObjetivos`, `SeccionRestricciones`, `SeccionDatosLote`, `SeccionMediciones`).
+- `src/components/mapa/` · persona 4: `Mapa` (siempre vía `MapaDinamico`) y `BarraDibujo`.
+- `src/components/comunes/` · `ClaseBody` (sincroniza `body.onb` con el paso) y `AvisoApoyo`.
+- `public/img/` · imágenes de la intro (créditos en `CREDITOS.txt`).
+- El paso 1 / paso 2 lo maneja el CSS del prototipo con `body.onb`; el estado `paso` lo decide.
+- Sin conexión con el backend por ahora: la llamada a `/analizar` se arma en la auditoría.
 
 ## Fuera de alcance
 Lo del `CLAUDE.md` raíz, más: chat o IA, alfalfa y pasturas, guardar comparaciones.
