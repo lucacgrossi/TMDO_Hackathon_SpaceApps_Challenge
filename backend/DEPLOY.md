@@ -27,6 +27,15 @@ gcloud services enable run.googleapis.com cloudbuild.googleapis.com artifactregi
 ```
 El proyecto tiene que tener la facturación con los créditos de la hackathon: sin facturación, el build falla.
 
+Cloud Build construye con la cuenta de servicio de Compute, que en los proyectos nuevos no tiene roles. Sin roles, el build falla sin logs. Hay que darle `roles/run.builder` una vez:
+```bash
+NUM=$(gcloud projects describe <ID_DEL_PROYECTO> --format 'value(projectNumber)')
+gcloud projects add-iam-policy-binding <ID_DEL_PROYECTO> \
+  --member="serviceAccount:${NUM}-compute@developer.gserviceaccount.com" \
+  --role="roles/run.builder" --condition=None
+```
+En `nasa-space-app-fieldchange` ya está hecho (14/11). Servicio: https://field-shift-api-757348191517.southamerica-east1.run.app
+
 ## 2. Antes de deployar
 ```bash
 py -m pip install -r requirements.txt
