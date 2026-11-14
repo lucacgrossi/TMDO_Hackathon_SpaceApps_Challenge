@@ -276,20 +276,108 @@ export interface SerieAnual {
   secos_en_ultimas_10: number;
 }
 
-/** Escena HLS del mes, para armar las teselas sin repetir la búsqueda. */
+// --- Capas del mapa sobre la grilla común del lote (#63, docs/plan-armonizacion-capas.md) ---
+
+/** [[sur, oeste], [norte, este]], como `L.latLngBounds` de Leaflet. */
+export type Bounds = [[number, number], [number, number]];
+
+/** Escala de clases de la capa: la usa la leyenda del front (no la repite). Una entrada por clase. */
+export interface EscalaCapa {
+  /** Límite inferior de cada clase (cada corte es el piso de su clase). */
+  cortes: number[];
+  /** Hex, uno por clase. */
+  colores: string[];
+  /** Una por clase. */
+  etiquetas: string[];
+}
+
+/** Resumen del raster dentro de la máscara del lote: el número del lote sale de acá. */
+export interface ResumenCapa {
+  media: number | null;
+  min: number | null;
+  max: number | null;
+  /** Píxeles dentro del lote con dato. */
+  pixeles: number;
+  /**
+   * El número de la tabla para esta capa (NDVI medio del mes, pendiente general
+   * del plano, % de cultivo). Puede no ser la media por píxel: la pendiente del
+   * plano (0,6 %) no es la media de las pendientes por píxel (1,3 %). La leyenda
+   * lo muestra como el valor del lote.
+   */
+  valor_lote?: number | null;
+}
+
+/**
+ * Una capa del mapa ya calculada por el back sobre la grilla del lote; el front
+ * solo la dibuja. `png` (base64) se superpone con `bounds` (transparente fuera
+ * del lote). `valores` (base64) son `ancho × alto` enteros int16 little-endian
+ * por filas, fila 0 = norte y columna 0 = oeste; valor real = entero × `factor`,
+ * y `nodata` no tiene valor (RF18: tocar un píxel).
+ */
+export interface CapaRaster {
+  /** "pendiente" | "cultivo" | "ndvi" | "erosion". */
+  id: string;
+  titulo: string;
+  unidad: string;
+  fuente: string;
+  /** Fecha de la escena (NDVI) o "estática". */
+  fecha: string | null;
+  campana: string | null;
+  /** "30 m", "250 m (MODIS, respaldo)", … */
+  resolucion_nativa: string;
+  /** "1″ (~30 m)" o "2″ (~60 m)" en lotes grandes. */
+  resolucion_grilla: string;
+  /** Iguales para todas las capas del lote. */
+  bounds: Bounds;
+  ancho: number;
+  alto: number;
+  /** PNG en base64, pintado con `escala`; transparente fuera del lote. */
+  png: string;
+  /** Base64 de int16 little-endian por filas. null en NDVI de lotes de más de ~3.000 ha (#65). */
+  valores: string | null;
+  /** Valor real = entero × factor. */
+  factor: number;
+  nodata: number;
+  escala: EscalaCapa;
+  resumen: ResumenCapa;
+  confianza: Confianza;
+  nota: string | null;
+}
+
+/** Grilla común del lote (EPSG:4326, paso de 1″ o 2″): todas las capas la comparten. */
+export interface GrillaLote {
+  bounds: Bounds;
+  ancho: number;
+  alto: number;
+  /** Grados: 1/3600 (1″, ~30 m) o 2/3600 (2″, ~60 m). */
+  paso: number;
+}
+
+/**
+ * Escena del mes, para armar las teselas sin repetir la búsqueda. Puede ser un
+ * mes MODIS (`coleccion: "modis-13Q1-061"`), pero solo cuando trae `mapa` (#65).
+ */
 export interface CapaNdviMes {
   coleccion: string;
   item: string;
   fecha: string;
+  /** Raster del mes sobre la grilla del lote. */
+  mapa?: CapaRaster | null;
 }
 
 export interface Capas {
-  /** Formato a acordar entre Back 2 y Front 1. */
+  /** Índice de erosión del lote (`satelite/capas.py`). */
   erosion: Record<string, unknown> | null;
   ndvi_mensual: (CapaNdviMes | null)[];
   agua_regional_mensual: number[] | null;
   heladas_regional_mensual: number[] | null;
+  /** Puede traer "pendiente_mapa", "cultivo_mapa" o "ndvi_mapa" (hay escenas, pero ningún raster). */
   no_disponibles: string[];
+  // Capas armonizadas: todas opcionales; sin ellas el front sigue con lo de hoy.
+  grilla?: GrillaLote | null;
+  pendiente_mapa?: CapaRaster | null;
+  cultivo_mapa?: CapaRaster | null;
+  erosion_mapa?: CapaRaster | null;
 }
 
 // --- Salida: las 4 estrategias ----------------------------------------------
