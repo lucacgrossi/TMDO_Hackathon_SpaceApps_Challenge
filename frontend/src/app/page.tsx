@@ -1,4 +1,5 @@
 import ClaseBody from "@/components/comunes/ClaseBody";
+import Toast from "@/components/comunes/Toast";
 import PanelEntradas from "@/components/entradas/PanelEntradas";
 import BarraDibujo from "@/components/mapa/BarraDibujo";
 import MapaDinamico from "@/components/mapa/MapaDinamico";
@@ -19,6 +20,7 @@ export default function Inicio() {
       <PanelEntradas />
       <BarraDibujo />
       {/* Hoja de resultados (persona 5): <HojaComparacion /> va acá. */}
+      <Toast />
     </>
   );
 }
