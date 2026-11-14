@@ -15,6 +15,8 @@ MESES_VERANO = (10, 11, 0, 1, 2)
 LLUVIA_INVIERNO_SECO_MM = 100   # B: cebada en vez de trigo
 LLUVIA_VERANO_SECO_MM = 400     # C: sorgo en vez de girasol
 PENDIENTE_VICIA_MAX = 3.0       # A: con más pendiente, centeno (más rastrojo)
+# A también pasa a centeno si el invierno de los años secos es corto de lluvia (LLUVIA_INVIERNO_SECO_MM):
+# en años secos la vicia consume más agua que el centeno (INTA Manfredi).
 
 
 def calendario(verano: str, invierno: str | None) -> list[str]:
@@ -53,10 +55,12 @@ def armar(entradas: dict, clima: dict, pendiente: float) -> list[dict]:
               "especies": f"{nombre(ver)} + {nombre(inv).lower()}",
               "calendario": calendario(ver, inv), "on": True, "motivo": "", "eleccion": ""}]
 
-    # A · cobertura de invierno: vicia (nitrógeno) si el suelo pesa al menos como la erosión y el
-    # lote es plano; si no, centeno (más rastrojo). Si ya hace esa cobertura, se prueba la otra.
+    # A · cobertura de invierno: vicia (nitrógeno) si el suelo pesa al menos como la erosión, el
+    # lote es plano y el invierno de los años secos no es corto de lluvia; si no, centeno (más
+    # rastrojo y gasta menos agua). Si ya hace esa cobertura, se prueba la otra.
+    invierno_corto = lluvia_inv_seco < LLUVIA_INVIERNO_SECO_MM
     opciones = ["vicia", "centeno"] if w["suelo"] >= w["erosion"] and pendiente <= PENDIENTE_VICIA_MAX \
-        else ["centeno", "vicia"]
+        and not invierno_corto else ["centeno", "vicia"]
     if inv in opciones:
         opciones = [x for x in opciones if x != inv] + [inv]
     cob = _elegir(opciones, no)
@@ -65,7 +69,8 @@ def armar(entradas: dict, clima: dict, pendiente: float) -> list[dict]:
                   "calendario": calendario(ver, cob) if cob else None, "on": bool(cob),
                   "motivo": "" if cob else _ni(["vicia", "centeno"]),
                   "eleccion": (f"{nombre(cob)}: prioridad suelo {w['suelo']} y erosión {w['erosion']}, "
-                               f"pendiente {dec(pendiente)} %") if cob else ""})
+                               f"pendiente {dec(pendiente)} %, lluvia de invierno en años secos "
+                               f"{lluvia_inv_seco:.0f} mm") if cob else ""})
 
     # B · cultivo de invierno comercial: cebada (gasta menos agua) si el agua pesa 4 o más o si el
     # invierno de los años secos es corto de lluvia; si no, trigo.

@@ -94,6 +94,12 @@ CapaRaster:
   resumen: {media, min, max, pixeles}
   confianza, nota
 ```
+**Formato de `valores` y del PNG** (confirmado con Front 1 en #25, 14/11):
+- int16 **little-endian** (`<i2`, como los `.npy` de Planetary Computer), `ancho × alto` valores en **orden por filas**, en base64.
+- **Fila 0 = norte** (borde superior de `bounds`) y **columna 0 = oeste**. El PNG usa la misma orientación.
+- El píxel `[f][c]` cubre desde `norte − f·paso_lat` hacia el sur y desde `oeste + c·paso_lon` hacia el este, con `paso_lat = (norte − sur) / alto` y `paso_lon = (este − oeste) / ancho`.
+- Valor real = entero × `factor`. `nodata` (y todo píxel fuera de la máscara del lote) no tiene valor.
+
 En `Capas`, solo se **agregan** campos opcionales:
 - `CapaNdviMes.mapa: CapaRaster | None`: el raster de ese mes. Los campos de hoy (colección, item, fecha) se mantienen.
 - `pendiente_mapa`, `erosion_mapa` y `cultivo_mapa: CapaRaster | None`.

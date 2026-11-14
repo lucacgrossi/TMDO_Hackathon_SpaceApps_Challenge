@@ -20,6 +20,45 @@ MESES_RF14 = 2            # diferencia entre lo que vio el satélite y el calend
 MIN_MESES_SATELITE = 8
 EVIDENCIAS = 4
 
+# Ensayos del INTA en la región: solo texto, no mueven puntajes. Son de otros lotes y campañas, así
+# que cada línea dice de dónde sale. Van a la evidencia o a "Revisar con el agrónomo".
+INTA = {
+    "soja_continua": ("Soja continua (soja + barbecho) durante 15 años: infiltración de 73 mm/h contra ~106 mm/h y "
+                      "materia orgánica de 2,5 % contra 3,4 a 3,9 % con trigo/soja o cobertura/soja · INTA Marcos "
+                      "Juárez (Gudelj et al., 2024)"),
+    "vicia_n": ("Vicia como antecesor: ~110 a 130 kg N/ha disponibles para el cultivo siguiente · ensayos INTA "
+                "Marcos Juárez y General Villegas"),
+    "vicia_agua": "En años secos la vicia consumió más agua que el centeno y afectó al maíz siguiente · INTA Manfredi",
+    "centeno_biomasa": ("Biomasa del centeno en el sur de Córdoba: de 1,2 a 8 t/ha según la fecha de secado y el "
+                        "nitrógeno; con secado a fines de agosto y sin N, 1,9 t/ha aérea y 2,2 t/ha de raíces · INTA "
+                        "Río Cuarto (Boccolini et al., 2024)"),
+    "centeno_n": ("Centeno con relación C/N de 35 a 38 y 19 a 25 kg N/ha en la parte aérea: deja poco nitrógeno al "
+                  "cultivo siguiente · INTA Río Cuarto (Boccolini et al., 2024)"),
+    "malezas": ("Con cultivos de cobertura, el uso de herbicidas en 6 años de soja y maíz bajó de 31 a 13 kg/ha de "
+                "principio activo · INTA Marcos Juárez"),
+    "soja2": ("Soja de 2ª: efecto secante del trigo antecesor; en el centro-oeste y sur de Córdoba depende de las "
+              "lluvias de diciembre a febrero · INTA Manfredi"),
+}
+
+
+def _inta(s: dict) -> tuple[list[str], list[str]]:
+    """(evidencia, revisar) de los ensayos del INTA que corresponden a los cultivos de la columna."""
+    cult = _cultivos(s)
+    evidencia, revisar = [], []
+    if cult == ["soja"] and s.get("repite"):
+        evidencia.append(INTA["soja_continua"])
+    if "vicia" in cult:
+        evidencia.append(INTA["vicia_n"])
+        revisar.append(INTA["vicia_agua"])
+    if "centeno" in cult:
+        evidencia.append(INTA["centeno_biomasa"])
+        revisar.append(INTA["centeno_n"])
+    if any(C[x]["grupo"] == "cobertura" for x in cult):
+        evidencia.append(INTA["malezas"])
+    if "soja2" in cult:
+        revisar.append(INTA["soja2"])
+    return evidencia, revisar
+
 
 def _signo(x: float) -> str:
     return f"+{x:.0f}" if x > 0 else f"{x:.0f}".replace("-", "−")
@@ -176,8 +215,9 @@ def armar(resultado: dict, entradas: dict, ind: dict) -> dict:
             s.update(resumen=f"Descartada: {s['motivo']}.", por_que=[], evidencia=[], beneficios=[],
                      revisar=[], falta=[])
             continue
+        inta_evidencia, inta_revisar = _inta(s)
         s.update(resumen=_resumen(s, actual), por_que=_por_que(s, actual, entradas),
-                 evidencia=_evidencia(s, clima), beneficios=_beneficios(s, lista),
-                 revisar=_revisar(s, entradas, ind, clima), falta=list(falta))
+                 evidencia=_evidencia(s, clima) + inta_evidencia, beneficios=_beneficios(s, lista),
+                 revisar=_revisar(s, entradas, ind, clima) + inta_revisar, falta=list(falta))
     resultado["choque"]["texto"] = _texto_choque(resultado["choque"], lista)
     return resultado

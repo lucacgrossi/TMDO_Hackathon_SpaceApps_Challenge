@@ -306,6 +306,10 @@ def test_traduce_el_motor_al_contrato(monkeypatch):
     assert ent["textura"] == "franco" and "materia_organica_pct" not in ent
     assert ent["mediciones"] == {"lluvia_anual_mm": None, "anios_registro": None, "serie_mensual": None}
     assert set(ind["terciles"]) == {"seco", "normal", "humedo"} and ind["n_anios"] == 30
+    # NASA campaña por campaña, para mezclar con el mismo período del registro del productor (#64).
+    cn = ind["campanas_nasa"]
+    assert len(cn) == 30 and cn[0]["campana"] == "1996/97" and cn[-1]["campana"] == "2025/26"
+    assert all(len(c[k]) == 12 for c in cn for k in ("lluvia_mm", "t_min_c", "t_max_c"))
     assert ind["anios_con_calor"] == s.clima_mensual.anios_con_35c
     assert ind["anios_con_helada"] == s.clima_mensual.anios_con_helada
     assert ind["pendiente_pct"] == 0.6
@@ -512,3 +516,111 @@ def test_planilla_con_heladas_baja_la_confianza_y_suma_la_linea_sin_cambiar_prob
             assert (p_con.anios, p_con.de, p_con.pct, p_con.texto) == (p_sin.anios, p_sin.de, p_sin.pct, p_sin.texto)
             if p_con.evento in ("helada", "calor") and p_con.contraste:
                 assert p_con.contraste.startswith("Tu estación:")
+
+
+# --- Capas armonizadas sobre la grilla del lote (plan-armonizacion-capas.md) -----
+
+from app.api.mock import salida_mock  # noqa: E402
+from tests.api.conftest import elevacion_ok, ndvi_ok  # noqa: E402
+
+_EJEMPLO = salida_mock().capas  # grilla y CapaRaster válidas del mock (42 × 30)
+_GRILLA = _EJEMPLO.grilla.model_dump()
+_PEND = _EJEMPLO.pendiente_mapa.model_dump()
+_CULT = _EJEMPLO.cultivo_mapa.model_dump()
+
+
+def _con_capas(monkeypatch, pend=_PEND, cult=_CULT, grilla=_GRILLA, motivo_pend=None):
+    monkeypatch.setattr(elevacion, "calcular", lambda pol: {**elevacion_ok(pol), "mapa": pend, "grilla": grilla,
+                                                             "mapa_motivo": motivo_pend})
+    monkeypatch.setattr(cobertura, "calcular", lambda pol: {**cobertura_ok(pol), "mapa": cult, "grilla": grilla,
+                                                             "mapa_motivo": None})
+
+
+def test_capas_de_pendiente_y_cultivo_salen_en_la_grilla(monkeypatch):
+    _con_capas(monkeypatch)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    c = s.capas
+    assert c.grilla is not None and (c.grilla.ancho, c.grilla.alto) == (42, 30)
+    assert c.pendiente_mapa.id == "pendiente" and c.cultivo_mapa.id == "cultivo"
+    assert all((x.bounds, x.ancho, x.alto) == (c.grilla.bounds, 42, 30) for x in c.capas_raster())
+    assert "pendiente_mapa" not in c.no_disponibles and "cultivo_mapa" not in c.no_disponibles
+
+
+def test_capa_que_falta_va_a_no_disponibles_con_el_motivo(monkeypatch):
+    _con_capas(monkeypatch, pend=None, motivo_pend="NASADEM no respondió")
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.pendiente_mapa is None and "pendiente_mapa" in s.capas.no_disponibles
+    assert "Capa de pendiente: NASADEM no respondió" in s.informacion_falta
+    assert s.capas.cultivo_mapa is not None
+
+
+def test_capa_mal_armada_no_rompe_analizar(monkeypatch):
+    _con_capas(monkeypatch, cult={**_CULT, "escala": {"cortes": [0, 1], "colores": ["#000"], "etiquetas": []}})
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.cultivo_mapa is None and "cultivo_mapa" in s.capas.no_disponibles
+    assert any(f.startswith("Capa de cultivo: no se pudo leer") for f in s.informacion_falta)
+    assert s.capas.pendiente_mapa is not None
+
+
+def test_ndvi_del_mes_trae_su_mapa(monkeypatch):
+    mapa = {**_PEND, "id": "ndvi", "titulo": "NDVI", "unidad": "NDVI", "fecha": "2026-01-15"}
+
+    def ndvi_con_mapas(poligono, campana=None):
+        r = ndvi_ok(poligono, campana)
+        return {**r, "mapas": [mapa] * 12, "grilla": _GRILLA}
+
+    _con_capas(monkeypatch)
+    monkeypatch.setattr(ndvi, "calcular", ndvi_con_mapas)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    con_mapa = [m for m in s.capas.ndvi_mensual if m and m.mapa]
+    assert con_mapa and all(m.mapa.id == "ndvi" for m in con_mapa)
+    assert "ndvi_mapa" not in s.capas.no_disponibles
+
+
+def test_sin_capas_nuevas_la_salida_es_la_de_antes():
+    """Con las fuentes de siempre (sin grilla ni mapas), las capas nuevas van vacías y no rompen nada."""
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.grilla is None and s.capas.capas_raster() == []
+    assert any(s.capas.ndvi_mensual)
+
+
+def _meses_bajos(meses: int) -> dict:
+    """`meses_bajos_mapa` de ndvi.py sobre la misma grilla: `meses` en cada píxel del lote, nodata afuera."""
+    import base64
+
+    import numpy as np
+
+    pend = np.frombuffer(base64.b64decode(_PEND["valores"]), dtype="<i2")
+    q = np.where(pend == _PEND["nodata"], _PEND["nodata"], meses).astype("<i2")
+    return {**_PEND, "id": "meses_bajos", "titulo": "Meses con NDVI bajo", "unidad": "meses", "factor": 1.0,
+            "valores": base64.b64encode(q.tobytes()).decode(), "confianza": "alta"}
+
+
+def _con_erosion_por_pixel(monkeypatch, meses_bajos):
+    _con_capas(monkeypatch)
+    monkeypatch.setattr(ndvi, "calcular", lambda pol, campana=None: {**ndvi_ok(pol, campana),
+                                                                      "meses_bajos_mapa": meses_bajos})
+
+
+def test_capa_de_erosion_por_pixel_sale_en_la_grilla_y_cierra_con_la_tabla(monkeypatch):
+    _con_erosion_por_pixel(monkeypatch, _meses_bajos(4))
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    c = s.capas
+    assert c.erosion_mapa is not None and c.erosion_mapa.id == "erosion"
+    assert (c.erosion_mapa.bounds, c.erosion_mapa.ancho, c.erosion_mapa.alto) == (
+        c.grilla.bounds, c.grilla.ancho, c.grilla.alto)
+    assert "erosion_mapa" not in c.no_disponibles
+    # El mapa es pendiente del píxel × meses del píxel (4). El número de la tabla lo elige Back 2
+    # (satelite/capas.py, #73: pendiente general × meses medios por píxel) y servicio solo exige que
+    # cierre con el mapa: valor_lote == riesgo_erosion.
+    assert c.erosion_mapa.resumen.media == pytest.approx(c.pendiente_mapa.resumen.media * 4, abs=0.1)
+    assert c.erosion_mapa.resumen.valor_lote == s.indicadores["riesgo_erosion"].valor
+    assert c.erosion["metodo"] == "por_pixel"
+
+
+def test_sin_meses_bajos_por_pixel_la_erosion_queda_del_lote_y_dice_por_que(monkeypatch):
+    _con_erosion_por_pixel(monkeypatch, None)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.erosion_mapa is None and "erosion_mapa" in s.capas.no_disponibles
+    assert s.capas.erosion["metodo"] == "lote" and "riesgo_erosion" in s.indicadores
+    assert any(f.startswith("Capa de erosión por píxel: ") for f in s.informacion_falta)

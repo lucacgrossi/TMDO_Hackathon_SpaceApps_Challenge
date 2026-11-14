@@ -83,12 +83,16 @@ class Lote(BaseModel):
 
 
 class Prioridades(BaseModel):
-    """Barritas de 0 (nada) a 5 (mucho). Por defecto 3 (RF4)."""
+    """Barritas de 1 (poco) a 5 (mucho). Por defecto 3 (RF4).
 
-    agua: int = Field(3, ge=0, le=5)
-    suelo: int = Field(3, ge=0, le=5)
-    ingreso: int = Field(3, ge=0, le=5)
-    erosion: int = Field(3, ge=0, le=5)
+    Eligen las especies de A, B y C y pesan al cuadrado en la cercanía (una 5 pesa 25 veces una 1).
+    Decisión 14/11 aprobada por la persona 3: ya no hay 0 (antes dejaba afuera el objetivo).
+    """
+
+    agua: int = Field(3, ge=1, le=5)
+    suelo: int = Field(3, ge=1, le=5)
+    ingreso: int = Field(3, ge=1, le=5)
+    erosion: int = Field(3, ge=1, le=5)
 
 
 class MedicionMes(BaseModel):
@@ -326,20 +330,120 @@ class SerieAnual(BaseModel):
     secos_en_ultimas_10: int
 
 
+# --- Capas del mapa sobre la grilla común del lote (docs/plan-armonizacion-capas.md, 5) ---
+
+Bounds = list[list[float]]  # [[sur, oeste], [norte, este]], como `L.latLngBounds` de Leaflet
+
+
+def _validar_bounds(bounds: Bounds) -> Bounds:
+    if len(bounds) != 2 or any(len(p) != 2 for p in bounds):
+        raise ValueError("bounds va como [[sur, oeste], [norte, este]]")
+    (sur, oeste), (norte, este) = bounds
+    if not (sur < norte and oeste < este):
+        raise ValueError("bounds: sur < norte y oeste < este")
+    return bounds
+
+
+class EscalaCapa(BaseModel):
+    """Escala de clases de la capa: la usa la leyenda del front (no la repite)."""
+
+    cortes: list[float] = Field(min_length=1, description="Límite inferior de cada clase")
+    colores: list[str] = Field(min_length=1, description="Hex, uno por clase")
+    etiquetas: list[str] = Field(min_length=1, description="Una por clase")
+
+    @model_validator(mode="after")
+    def _una_por_clase(self):
+        if not len(self.cortes) == len(self.colores) == len(self.etiquetas):
+            raise ValueError("cortes, colores y etiquetas tienen que tener el mismo largo (una entrada por clase)")
+        return self
+
+
+class ResumenCapa(BaseModel):
+    """Resumen del raster dentro de la máscara del lote: el número del lote sale de acá."""
+
+    media: float | None
+    min: float | None
+    max: float | None
+    pixeles: int = Field(ge=0, description="Píxeles dentro del lote con dato")
+    valor_lote: float | None = Field(
+        None, description="El número de la tabla para esta capa (NDVI medio del mes, pendiente general del plano, "
+                          "% de cultivo). Puede no ser la media por píxel: la pendiente del plano (0,6 %) no es la "
+                          "media de las pendientes por píxel (1,3 %). La leyenda muestra este valor como el del lote")
+
+
+class CapaRaster(BaseModel):
+    """Una capa del mapa ya calculada por el back sobre la grilla del lote. El front solo la dibuja.
+
+    `png` (base64) se superpone con `bounds` (transparente fuera del lote). `valores` (base64) son
+    `ancho × alto` enteros int16 little-endian (`<i2`) por filas, **fila 0 = norte** y **columna 0 =
+    oeste**; valor real = entero × `factor`, y `nodata` no tiene valor (RF18: tocar un píxel).
+    """
+
+    id: str = Field(description='"pendiente" | "cultivo" | "ndvi" | "erosion"')
+    titulo: str
+    unidad: str
+    fuente: str
+    fecha: str | None = Field(None, description='Fecha de la escena (NDVI) o "estática"')
+    campana: str | None = None
+    resolucion_nativa: str = Field(description='"30 m", "250 m (MODIS, respaldo)", …')
+    resolucion_grilla: str = Field(description='"1″ (~30 m)" o "2″ (~60 m)" en lotes grandes')
+    bounds: Bounds = Field(description="[[sur, oeste], [norte, este]]; iguales para todas las capas del lote")
+    ancho: int = Field(ge=1)
+    alto: int = Field(ge=1)
+    png: str = Field(description="PNG en base64, pintado con `escala`; transparente fuera del lote")
+    valores: str | None = Field(None, description="Base64 de int16 little-endian por filas (fila 0 = norte)")
+    factor: float = Field(1.0, gt=0, description="Valor real = entero × factor")
+    nodata: int = -32768
+    escala: EscalaCapa
+    resumen: ResumenCapa
+    confianza: Confianza
+    nota: str | None = None
+
+    @model_validator(mode="after")
+    def _forma(self):
+        _validar_bounds(self.bounds)
+        return self
+
+
+class GrillaLote(BaseModel):
+    """Grilla común del lote (EPSG:4326, paso de 1″ o 2″): todas las capas la comparten."""
+
+    bounds: Bounds
+    ancho: int = Field(ge=1)
+    alto: int = Field(ge=1)
+    paso: float = Field(gt=0, description="Grados: 1/3600 (1″, ~30 m) o 2/3600 (2″, ~60 m)")
+
+    @model_validator(mode="after")
+    def _forma(self):
+        _validar_bounds(self.bounds)
+        return self
+
+
 class CapaNdviMes(BaseModel):
     """Escena HLS del mes, para que el front arme las teselas sin repetir la búsqueda."""
 
     coleccion: str
     item: str
     fecha: str
+    mapa: CapaRaster | None = Field(None, description="Raster del mes sobre la grilla del lote (paso 4)")
 
 
 class Capas(BaseModel):
-    erosion: dict | None = Field(None, description="Formato a acordar entre Back 2 y Front 1")
+    erosion: dict | None = Field(None, description="Índice de erosión del lote (satelite/capas.py)")
     ndvi_mensual: list[CapaNdviMes | None] = _doce()
     agua_regional_mensual: list[float] | None = None
     heladas_regional_mensual: list[int] | None = None
     no_disponibles: list[str] = []
+    # Capas armonizadas (todas opcionales: sin ellas el front sigue con lo de hoy).
+    grilla: GrillaLote | None = None
+    pendiente_mapa: CapaRaster | None = None
+    cultivo_mapa: CapaRaster | None = None
+    erosion_mapa: CapaRaster | None = None
+
+    def capas_raster(self) -> list[CapaRaster]:
+        """Todas las `CapaRaster` presentes (para chequear que coinciden con `grilla`)."""
+        return [c for c in (self.pendiente_mapa, self.cultivo_mapa, self.erosion_mapa,
+                            *(m.mapa for m in self.ndvi_mensual if m is not None)) if c is not None]
 
 
 # --- Salida: las 4 estrategias ----------------------------------------------
@@ -354,8 +458,9 @@ class Puntos(BaseModel):
     """
     Puntos de 0 a 100 por dimensión (RF13). Con esto el front recalcula la
     cercanía al mover las barritas, sin volver a llamar a la API:
-        cercania(tipo) = Σ prioridad[o] · valor[o] / Σ prioridad[o]
-    donde valor["agua"] = agua[tipo] y el resto no cambia con el tipo de año.
+        cercania(tipo) = round(Σ prioridad[o]² · valor[o] / Σ prioridad[o]²)
+    con prioridades de 1 a 5, donde valor["agua"] = agua[tipo] y el resto no cambia con el
+    tipo de año. Es la fórmula de `app/motor/reglas.py` (EXPONENTE_PRIORIDAD = 2).
     """
 
     agua: PorTipo

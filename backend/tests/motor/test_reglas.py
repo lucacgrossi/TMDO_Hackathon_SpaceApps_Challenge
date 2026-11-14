@@ -80,11 +80,13 @@ def test_lluvia_del_productor_cambia_agua_y_erosion(ind):
 
 
 def test_temperaturas_del_productor_cambian_el_ingreso(ind):
-    filas = [{"mes": f"{a}-{m:02d}", "t_min_c": 5.0, "t_max_c": 38.0 if m in (1, 2) else 30.0}
+    # En 2016/17–2024/25 NASA marca 35 °C o más en enero y febrero todas las campañas; una estación más
+    # fresca en esas mismas campañas (máxima de 33 °C) baja el riesgo de calor y sube el ingreso.
+    filas = [{"mes": f"{a}-{m:02d}", "t_min_c": 5.0, "t_max_c": 33.0}
              for a in range(2016, 2026) for m in range(1, 13)]
     nasa = _correr(ind)
     prod = _correr(ind, mediciones={"serie_mensual": filas})
-    assert _col(prod, "actual")["ingreso"] < _col(nasa, "actual")["ingreso"]
+    assert _col(prod, "actual")["ingreso"] > _col(nasa, "actual")["ingreso"]
 
 
 def test_sin_et0_no_lanza_y_lo_dice(ind):
@@ -132,3 +134,34 @@ def test_textos_sin_lenguaje_prohibido(ind):
         for s in r["estrategias"]:
             textos += [s["resumen"], *s["por_que"], *s["evidencia"], *s["beneficios"], *s["revisar"], *s["falta"]]
         assert not [t for t in textos if prohibido.search(t)]
+
+
+def test_vicia_gasta_mas_agua_que_el_centeno():
+    """INTA Manfredi: en años secos la vicia consumió más agua que el centeno."""
+    from app.motor.cultivos import C
+
+    assert C["vicia"]["kc"] > C["centeno"]["kc"]
+
+
+def test_invierno_seco_corto_de_lluvia_elige_centeno_en_A(ind):
+    assert _col(_correr(ind), "A")["especies"].endswith("vicia")  # Río Cuarto: 123 mm de mayo a octubre
+    for m in range(4, 10):  # invierno de los años secos con menos de 100 mm
+        ind["terciles"]["seco"]["pp"][m] = 10
+    a = _col(_correr(ind), "A")
+    assert a["especies"].endswith("centeno")
+    assert "lluvia de invierno en años secos 60 mm" in a["eleccion"]
+
+
+def test_textos_del_inta_segun_los_cultivos(ind):
+    r = _correr(ind)
+    actual, a, b, c = (_col(r, i) for i in ("actual", "A", "B", "C"))
+    assert any("Gudelj" in x for x in actual["evidencia"])      # soja + barbecho y repite soja
+    assert any("110 a 130 kg N/ha" in x for x in a["evidencia"])
+    assert any("herbicidas" in x for x in a["evidencia"])
+    assert any("vicia consumió más agua" in x for x in a["revisar"])
+    assert any("efecto secante" in x for x in b["revisar"])
+    assert not any("INTA" in x for x in c["evidencia"] + c["revisar"])
+    # Sin repetir soja no hay línea de soja continua; con centeno, su biomasa y su nitrógeno.
+    assert not any("Gudelj" in x for x in _col(_correr(ind, pasada="maiz"), "actual")["evidencia"])
+    cen = _col(_correr(ind, pesos={"agua": 1, "suelo": 3, "ingreso": 3, "erosion": 5}), "A")
+    assert any("Boccolini" in x for x in cen["evidencia"]) and any("C/N" in x for x in cen["revisar"])

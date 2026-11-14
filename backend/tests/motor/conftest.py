@@ -2,8 +2,14 @@
 
 Salen de `clima.indicadores.calcular` con el fixture `tests/clima/fixtures/power_rio_cuarto.json`;
 se fijan acá para que los tests del motor no dependan del dominio clima.
+
+`fixtures/campanas_rio_cuarto.json` es `indicadores["campanas_nasa"]` (lo que arma `servicio.py`): las 30
+campañas de ese mismo fixture, con lluvia, mínima y máxima redondeadas a 1 decimal (índice 0 = enero).
+Se generó una vez con `[{campana: c.etiqueta, lluvia_mm, t_min_c, t_max_c} for c in calcular(...).campanas]`.
 """
 import copy
+import json
+from pathlib import Path
 
 import pytest
 
@@ -21,6 +27,8 @@ IND = {
     "n_anios": 30,
     "pendiente_pct": 0.6,
     "visto_satelite": {"meses_pelados": 3, "meses_con_dato": 12, "campania": "2025/26"},
+    "campanas_nasa": json.loads((Path(__file__).parent / "fixtures" / "campanas_rio_cuarto.json")
+                                .read_text(encoding="utf-8")),
 }
 
 
@@ -36,3 +44,11 @@ def entradas(**cambios) -> dict:
 @pytest.fixture
 def ind():
     return copy.deepcopy(IND)
+
+
+@pytest.fixture
+def ind_sin_campanas():
+    """Como `ind`, pero sin NASA campaña por campaña (servicio.py anterior a #68)."""
+    d = copy.deepcopy(IND)
+    del d["campanas_nasa"]
+    return d
