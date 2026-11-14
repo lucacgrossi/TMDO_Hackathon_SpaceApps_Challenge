@@ -85,9 +85,27 @@ details .sel3{margin-top:10px}
 .cta{padding:14px 20px 18px;border-top:1px solid var(--line)}
 .btn{width:100%;border:0;border-radius:14px;padding:15px;font-weight:700;font-size:15px;background:var(--accent);color:var(--accent-ink);cursor:pointer}
 .btn:hover{filter:brightness(1.08)}
+.btn:disabled{opacity:.5;cursor:not-allowed;filter:none}
 .note{font-size:11px;color:var(--muted);margin-top:8px;text-align:center}
 /* Paso 1: primero el caso del productor, sin mapa. Paso 2: el mapa aparece detrás y la caja se va a la derecha. */
 .entry{display:none}
+.where{margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.where label{font-size:13px;font-weight:700}
+.qrow{display:flex;gap:8px}
+.qrow input{flex:1;background:var(--soft);border:1.5px solid transparent;border-radius:12px;padding:12px 14px;font-weight:600;color:var(--ink);min-width:0}
+.qrow input:focus{outline:none;border-color:var(--accent);background:var(--panel)}
+.qrow .sm{white-space:nowrap}
+.sug{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--panel)}
+.sug button{border:0;background:transparent;text-align:left;padding:10px 14px;font-size:14px;cursor:pointer;color:var(--ink)}
+.sug button+button{border-top:1px solid var(--line)}
+.sug button:hover,.sug button.on{background:var(--accent-soft)}
+.sug .msg{padding:10px 14px;font-size:13px;color:var(--muted)}
+.picked{display:flex;align-items:center;gap:10px;background:var(--accent-soft);color:var(--ink);border-radius:12px;padding:10px 14px;font-size:14px}
+.picked b{color:var(--accent)}
+.picked small{color:var(--muted)}
+.wsrc{font-size:11px;color:var(--muted)}
+.tmark{width:22px;height:22px;border-radius:50%;background:var(--accent);border:3px solid #fff;box-shadow:0 0 0 0 color-mix(in srgb,var(--accent) 60%,transparent);animation:pulse 1.6s ease-out infinite}
+@keyframes pulse{to{box-shadow:0 0 0 18px transparent}}
 body.onb .entry{display:block;grid-area:ent}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .opt{display:grid;grid-template-columns:40px 1fr;grid-template-rows:auto auto;column-gap:12px;align-items:center;text-align:left;border:1.5px solid var(--line);background:var(--panel);border-radius:18px;padding:16px 18px;cursor:pointer;transition:border-color .2s,background .2s,box-shadow .2s}
@@ -110,8 +128,10 @@ body.onb .entry{display:block;grid-area:ent}
 .drawbar .tx b{font-size:14px}
 .drawbar .tx span{color:var(--muted)}
 .drawbar .tx span.err{color:var(--bad);font-weight:600}
-.vx{width:14px;height:14px;border-radius:50%;background:#fff;border:3px solid var(--accent);box-shadow:0 1px 6px rgba(0,0,0,.4)}
-.vx.first{width:18px;height:18px;background:var(--accent);border-color:#fff;cursor:pointer}
+.vx{width:16px;height:16px;border-radius:50%;background:#fff;border:3px solid var(--accent);box-shadow:0 1px 6px rgba(0,0,0,.4)}
+.vx{cursor:grab}
+.vx.first{width:20px;height:20px;background:var(--accent);border-color:#fff;cursor:pointer}
+.leaflet-marker-dragging .vx{cursor:grabbing;transform:scale(1.25)}
 .leaflet-container.drawing{cursor:crosshair}
 .onb-bg{position:fixed;inset:0;z-index:1001;background:radial-gradient(1100px 620px at 78% -8%,color-mix(in srgb,var(--accent) 22%,transparent),transparent 70%),radial-gradient(900px 500px at 0% 110%,color-mix(in srgb,var(--accent) 12%,transparent),transparent 70%),var(--bg);transition:opacity .9s ease .1s}
 body:not(.onb) .onb-bg{opacity:0;pointer-events:none}
@@ -282,6 +302,10 @@ body.onb #map{transform:scale(1.08);filter:saturate(.6)}
 .yrs div{background:var(--soft);border-radius:8px;padding:5px 2px}
 .yrs b{display:block;font-size:15px}
 .yrs span{color:var(--muted)}
+.prob{font-size:12px;color:var(--muted);border-left:2px solid var(--accent);padding-left:8px;line-height:1.35}
+.own{color:var(--ink);font-weight:600}
+.own.bad{color:var(--warn)}
+.own2{display:block;font-size:11px;font-weight:600;color:var(--muted);margin-top:2px}
 .tagw{font-size:11px;font-weight:700;color:var(--warn)}
 .more{font-size:12px;color:var(--muted);display:flex;flex-direction:column;gap:6px;border-top:1px solid var(--line);padding-top:10px}
 .more b{color:var(--ink);font-weight:600}
@@ -341,7 +365,14 @@ body.onb #map{transform:scale(1.08);filter:saturate(.6)}
       <h3>¿Cómo marcás tu lote?</h3>
       <div class="opts" role="radiogroup">
         <button type="button" class="opt" role="radio" data-e="demo" aria-checked="true"><span class="ic" aria-hidden="true">◎</span><b>Usar el lote de ejemplo</b><span>Campo real cerca de Río Cuarto · 95 ha</span></button>
-        <button type="button" class="opt" role="radio" data-e="draw" aria-checked="false"><span class="ic" aria-hidden="true">✎</span><b>Dibujar mi lote</b><span>Marcás las esquinas en el mapa · cualquier forma · mínimo 1 ha</span></button>
+        <button type="button" class="opt" role="radio" data-e="draw" aria-checked="false"><span class="ic" aria-hidden="true">✎</span><b>Marcar mi lote</b><span>Buscás dónde está y marcás las esquinas en el mapa</span></button>
+      </div>
+      <div class="where" id="where" hidden>
+        <label for="q">¿Dónde está tu lote?</label>
+        <div class="qrow"><input id="q" type="search" autocomplete="off" spellcheck="false" placeholder="Localidad, paraje o ruta · o pegá coordenadas o un link de Google Maps"><button type="button" class="sm" id="geo">Usar mi ubicación</button></div>
+        <div class="sug" id="sug" role="listbox" hidden></div>
+        <div class="picked" id="picked" hidden></div>
+        <small class="wsrc">Si estás en el campo, «Usar mi ubicación» toma el GPS del celu. Búsqueda de lugares: Esri.</small>
       </div>
     </div>
 
@@ -501,7 +532,7 @@ const loteLayer=L.polygon(S.poly,{color:"#fff",weight:3,fillColor:"#fff",fillOpa
 loteLayer.bindTooltip("",{permanent:true,direction:"top",className:"lotelabel",offset:[0,-6]});
 const pin=L.marker(center(S.poly),{icon:L.divIcon({className:"",html:'<div class="pin"></div>',iconSize:[18,18],iconAnchor:[9,9]}),keyboard:false,bubblingMouseEvents:false,title:"Ir al lote"});
 pin.on("click",()=>focus());
-function lotePin(){const b=loteLayer.getBounds(),a=map.latLngToContainerPoint(b.getNorthWest()),z=map.latLngToContainerPoint(b.getSouthEast());
+function lotePin(){if(typeof DRAW!=="undefined"&&DRAW.on){if(map.hasLayer(pin))map.removeLayer(pin);return}const b=loteLayer.getBounds(),a=map.latLngToContainerPoint(b.getNorthWest()),z=map.latLngToContainerPoint(b.getSouthEast());
   pin.setLatLng(center(S.poly));const small=Math.min(Math.abs(z.x-a.x),Math.abs(z.y-a.y))<28;
   if(small&&!map.hasLayer(pin))pin.addTo(map);else if(!small&&map.hasLayer(pin))map.removeLayer(pin)}
 map.on("zoomend moveend",lotePin);
@@ -519,39 +550,72 @@ map.on("click",e=>{if(DRAW.on){addVertex(e.latlng);return}const{lat,lng}=e.latln
 /* ---------- Dibujar el lote por puntos ----------
    Cada toque marca una esquina. Se cierra tocando el primer punto o con "Listo".
    Mínimo 1 ha y sin líneas que se crucen; puede ser cóncavo (una L, por ejemplo). */
-const MIN_HA=1;
-const DRAW={on:false,pts:[],marks:[],line:null,ghost:null};
+const MIN_HA=1,MAX_HA=20000;
+var DRAW={on:false,pts:[],marks:[],line:null,ghost:null,dragging:false};
 function segX(p1,p2,p3,p4){const d=(a,b,c)=>(b[1]-a[1])*(c[0]-b[0])-(b[0]-a[0])*(c[1]-b[1]);
   const o1=d(p1,p2,p3),o2=d(p1,p2,p4),o3=d(p3,p4,p1),o4=d(p3,p4,p2);return o1*o2<0&&o3*o4<0}
 function selfX(pts,closed){const n=pts.length,segs=[];for(let i=0;i<n-1;i++)segs.push([pts[i],pts[i+1]]);if(closed&&n>2)segs.push([pts[n-1],pts[0]]);
   for(let i=0;i<segs.length;i++)for(let j=i+1;j<segs.length;j++){if(j===i+1||(closed&&i===0&&j===segs.length-1))continue;if(segX(segs[i][0],segs[i][1],segs[j][0],segs[j][1]))return true}return false}
-function drawUI(){const n=DRAW.pts.length,ha=n>=3?areaHa(DRAW.pts):0,x=n>=3&&selfX(DRAW.pts,true),ok=n>=3&&ha>=MIN_HA&&!x;
+function drawUI(){const n=DRAW.pts.length,ha=n>=3?areaHa(DRAW.pts):0,x=n>=3&&selfX(DRAW.pts,true),ok=n>=3&&ha>=MIN_HA&&ha<=MAX_HA&&!x;
   $("#dw-a").textContent=n<3?`Marcá las esquinas del lote · ${n} punto${n===1?"":"s"}`:x?`${n} puntos`:`${fmt(ha,ha<10?1:0)} ha · ${n} puntos`;
   const h=$("#dw-h");h.classList.toggle("err",n>=3&&!ok);
-  h.textContent=n<3?"Tocá el mapa en cada esquina. Puede tener cualquier forma, por ejemplo una L.":x?"Las líneas se cruzan: deshacé el último punto.":ha<MIN_HA?`Muy chico: el mínimo es ${MIN_HA} ha.`:"Tocá el primer punto o «Listo» para cerrarlo.";
+  h.textContent=n<3?"Tocá el mapa en cada esquina. Podés arrastrar cada punto para acomodarlo.":x?"Las líneas se cruzan: arrastrá o deshacé un punto.":ha<MIN_HA?`Muy chico: el mínimo es ${MIN_HA} ha.`:ha>MAX_HA?`Muy grande: el máximo es ${fmt(MAX_HA)} ha. Acercá el mapa y marcá el lote.`:"Arrastrá los puntos para ajustar. Tocá el primero o «Listo» para cerrar.";
   $("#dw-ok").disabled=!ok;$("#dw-undo").disabled=!n;
   if(DRAW.line)DRAW.line.setLatLngs(DRAW.pts);if(DRAW.ghost)DRAW.ghost.setLatLngs(n>=3?DRAW.pts:[])}
 function addVertex(ll){if(DRAW.pts.length>=3){const f=map.latLngToContainerPoint(DRAW.pts[0]),p=map.latLngToContainerPoint(ll);if(f.distanceTo(p)<14){finishDraw();return}}
-  DRAW.pts.push([ll.lat,ll.lng]);const first=DRAW.pts.length===1;
-  const m=L.marker(ll,{icon:L.divIcon({className:"",html:`<div class="vx${first?" first":""}"></div>`,iconSize:first?[18,18]:[14,14],iconAnchor:first?[9,9]:[7,7]}),keyboard:false,bubblingMouseEvents:false}).addTo(map);
-  if(first)m.on("click",()=>finishDraw());DRAW.marks.push(m);drawUI()}
-function startDraw(){if(DRAW.on)return;DRAW.on=true;DRAW.pts=[];DRAW.marks=[];
+  DRAW.pts.push([ll.lat,ll.lng]);vertexMark(DRAW.pts.length-1);drawUI()}
+/* Cada esquina se puede arrastrar con el mouse (o el dedo) para acomodarla */
+function vertexMark(i){const first=i===0,ll=L.latLng(DRAW.pts[i]);
+  const m=L.marker(ll,{draggable:true,autoPan:true,icon:L.divIcon({className:"",html:`<div class="vx${first?" first":""}"></div>`,iconSize:first?[20,20]:[16,16],iconAnchor:first?[10,10]:[8,8]}),keyboard:false,bubblingMouseEvents:false,title:first?"Tocá para cerrar · arrastrá para mover":"Arrastrá para mover"}).addTo(map);
+  m.on("drag",e=>{const p=e.target.getLatLng();DRAW.pts[i]=[p.lat,p.lng];drawUI()});
+  m.on("dragstart",()=>{DRAW.dragging=true});m.on("dragend",()=>{setTimeout(()=>DRAW.dragging=false,50)});
+  if(first)m.on("click",()=>{if(!DRAW.dragging)finishDraw()});DRAW.marks[i]=m}
+function startDraw(pre){if(DRAW.on)return;DRAW.on=true;DRAW.pts=(pre||[]).map(p=>p.slice());DRAW.marks=[];
   loteLayer.setStyle({opacity:.25,fillOpacity:0});loteLayer.closeTooltip();if(map.hasLayer(pin))map.removeLayer(pin);
   DRAW.ghost=L.polygon([],{stroke:false,fillColor:css("--accent"),fillOpacity:.18,interactive:false}).addTo(map);
   DRAW.line=L.polyline([],{color:css("--accent"),weight:3,dashArray:"6 6",interactive:false}).addTo(map);
-  map.getContainer().classList.add("drawing");$("#drawbar").hidden=false;$$(".seg2 button").forEach(b=>b.disabled=true);setEntry("draw");drawUI()}
-function endDraw(){DRAW.on=false;$$(".seg2 button").forEach(b=>b.disabled=false);DRAW.marks.forEach(m=>map.removeLayer(m));[DRAW.line,DRAW.ghost].forEach(l=>l&&map.removeLayer(l));DRAW.line=DRAW.ghost=null;DRAW.marks=[];
+  DRAW.pts.forEach((_,i)=>vertexMark(i));map.getContainer().classList.add("drawing");$("#drawbar").hidden=false;$$(".seg2 button").forEach(b=>b.disabled=true);setEntry("draw");drawUI()}
+function endDraw(){DRAW.on=false;if(tmark){map.removeLayer(tmark);tmark=null}$$(".seg2 button").forEach(b=>b.disabled=false);DRAW.marks.forEach(m=>map.removeLayer(m));[DRAW.line,DRAW.ghost].forEach(l=>l&&map.removeLayer(l));DRAW.line=DRAW.ghost=null;DRAW.marks=[];
   map.getContainer().classList.remove("drawing");$("#drawbar").hidden=true;
   loteLayer.setStyle({opacity:1,fillOpacity:.08});loteLayer.openTooltip();lotePin()}
-function finishDraw(){const n=DRAW.pts.length;if(n<3||areaHa(DRAW.pts)<MIN_HA||selfX(DRAW.pts,true)){drawUI();return}
+function finishDraw(){const n=DRAW.pts.length,ha=n>=3?areaHa(DRAW.pts):0;if(n<3||ha<MIN_HA||ha>MAX_HA||selfX(DRAW.pts,true)){drawUI();return}
   S.poly=DRAW.pts.map(p=>p.slice());endDraw();loteLayer.setLatLngs(S.poly);onLoteChange();focus(loteLayer.getBounds().pad(.3));toast(`Lote dibujado: ${fmt(areaHa(S.poly),1)} ha`)}
 const DEMO_POLY=DEMO.map(p=>p.slice());S.entry="demo";
+S.target=null;
 function setEntry(e){S.entry=e;$$("[data-e]").forEach(b=>b.setAttribute("aria-checked",b.dataset.e===e));
-  if(document.body.classList.contains("onb"))$("#comparar").textContent=e==="draw"?"Ir al mapa y dibujar mi lote":"Ver mi lote en el mapa"}
+  if(document.body.classList.contains("onb")){$("#where").hidden=e!=="draw";ctaOnb()}}
+function ctaOnb(){const b=$("#comparar");if(!document.body.classList.contains("onb"))return;
+  if(S.entry==="draw"){b.disabled=!S.target;b.textContent=S.target?"Ir al mapa y marcar mi lote":"Elegí dónde está tu lote"}else{b.disabled=false;b.textContent="Ver mi lote en el mapa"}}
+/* ---------- Ubicar el lote: buscador (Esri), coordenadas, link de Google Maps o GPS ---------- */
+const GEO="https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer";
+function parseCoords(t){t=t.trim();let m=t.match(/@(-?\d+\.\d+),\s*(-?\d+\.\d+)/)||t.match(/[?&](?:q|ll|query|destination)=(-?\d+\.\d+)(?:,|%2C)\s*(-?\d+\.\d+)/i)||t.match(/^(-?\d{1,2}\.\d+)\s*[,; ]\s*(-?\d{1,3}\.\d+)$/);
+  let lat,lng;if(m){lat=+m[1];lng=+m[2]}else{const d=t.match(/(\d{1,2})[°º]\s*(\d{1,2})['’′]\s*([\d.,]+)?["”″]?\s*([NS])[\s,;]+(\d{1,3})[°º]\s*(\d{1,2})['’′]\s*([\d.,]+)?["”″]?\s*([EWO])/i);if(!d)return null;
+    const v=(g,mi,se)=>+g+(+mi)/60+(se?+String(se).replace(",",".")/3600:0);lat=v(d[1],d[2],d[3])*(/s/i.test(d[4])?-1:1);lng=v(d[5],d[6],d[7])*(/[wo]/i.test(d[8])?-1:1)}
+  /* En Argentina, si pegaron las coordenadas sin signo, van al sur y al oeste */
+  if(lat>20&&lat<56&&lng>52&&lng<75){lat=-lat;lng=-lng}
+  if(Math.abs(lat)>90||Math.abs(lng)>180)return null;return{lat,lng,label:`${fmt(Math.abs(lat),4)}° ${lat<0?"S":"N"} · ${fmt(Math.abs(lng),4)}° ${lng<0?"O":"E"}`}}
+function setTarget(t){S.target=t;$("#sug").hidden=true;const p=$("#picked");p.hidden=!t;if(t)p.innerHTML=`<span><b>Tu lote está acá:</b> ${t.label}${t.acc?` <small>(± ${fmt(t.acc)} m)</small>`:""}</span>`;ctaOnb()}
+let sugT=null,sugTok=0,SUG=[];
+function showSug(list,msg){const el=$("#sug");SUG=list;el.hidden=!list.length&&!msg;el.innerHTML=list.length?list.map((x,i)=>`<button type="button" role="option" data-i="${i}">${x.text.replace(/, ARG$/,"")}</button>`).join(""):`<div class="msg">${msg||""}</div>`}
+$("#q").addEventListener("input",e=>{const t=e.target.value;clearTimeout(sugT);const c=parseCoords(t);if(c){showSug([],"");setTarget(c);return}
+  if(t.trim().length<3){showSug([]);return}
+  sugT=setTimeout(async()=>{const tok=++sugTok;try{const r=await fetch(`${GEO}/suggest?f=json&countryCode=ARG&maxSuggestions=6&location=-64.2,-32.4&text=${encodeURIComponent(t)}`);const j=await r.json();if(tok!==sugTok)return;
+    showSug(j.suggestions||[],"No encontré ese lugar. Probá con la localidad más cercana o pegá las coordenadas.")}catch(err){showSug([],"No pude buscar ahora. Pegá las coordenadas o usá tu ubicación.")}},280)});
+async function pickSug(i){const x=SUG[i];if(!x)return;$("#q").value=x.text.replace(/, ARG$/,"");
+  try{const r=await fetch(`${GEO}/findAddressCandidates?f=json&maxLocations=1&magicKey=${encodeURIComponent(x.magicKey)}&SingleLine=${encodeURIComponent(x.text)}`);const c=(await r.json()).candidates[0];
+    if(c)setTarget({lat:c.location.y,lng:c.location.x,label:x.text.replace(/, ARG$/,"")})}catch(err){showSug([],"No pude ubicar ese lugar. Probá de nuevo.")}}
+$("#sug").addEventListener("click",e=>{const b=e.target.closest("[data-i]");if(b)pickSug(+b.dataset.i)});
+$("#q").addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();if(SUG.length)pickSug(0)}});
+$("#geo").addEventListener("click",()=>{if(!navigator.geolocation){showSug([],"Este navegador no da la ubicación. Buscá el lugar o pegá las coordenadas.");return}
+  $("#geo").textContent="Buscando…";navigator.geolocation.getCurrentPosition(p=>{$("#geo").textContent="Usar mi ubicación";setTarget({lat:p.coords.latitude,lng:p.coords.longitude,label:"tu ubicación actual",acc:p.coords.accuracy})},
+    ()=>{$("#geo").textContent="Usar mi ubicación";showSug([],"No pude tomar tu ubicación (permiso denegado o sin GPS). Buscá el lugar o pegá las coordenadas.")},{enableHighAccuracy:true,timeout:12000})});
+let tmark=null;
+function showTarget(){if(tmark)map.removeLayer(tmark);if(!S.target)return;
+  tmark=L.marker([S.target.lat,S.target.lng],{interactive:false,keyboard:false,icon:L.divIcon({className:"",html:'<div class="tmark"></div>',iconSize:[22,22],iconAnchor:[11,11]})}).addTo(map)}
 $$(".opt").forEach(b=>b.addEventListener("click",()=>setEntry(b.dataset.e)));
 $$(".seg2 button").forEach(b=>b.addEventListener("click",()=>{if(DRAW.on)return;
   if(b.dataset.e==="demo"){setEntry("demo");S.poly=DEMO_POLY.map(p=>p.slice());loteLayer.setLatLngs(S.poly);onLoteChange();focus(loteLayer.getBounds().pad(.3))}
-  else{setEntry("draw");startDraw()}}));
+  else{const own=S.entry==="draw"&&!(S.poly.length===DEMO_POLY.length&&S.poly.every((p,i)=>p[0]===DEMO_POLY[i][0]&&p[1]===DEMO_POLY[i][1]));setEntry("draw");startDraw(own?S.poly:null)}}));
 $("#dw-undo").addEventListener("click",()=>{if(!DRAW.pts.length)return;DRAW.pts.pop();map.removeLayer(DRAW.marks.pop());drawUI()});
 $("#dw-cancel").addEventListener("click",()=>{endDraw();if(S.poly.length===DEMO_POLY.length&&S.poly.every((p,i)=>p[0]===DEMO_POLY[i][0]&&p[1]===DEMO_POLY[i][1]))setEntry("demo")});
 $("#dw-ok").addEventListener("click",()=>finishDraw());
@@ -677,7 +741,8 @@ async function loadPower(){const tok=++powerToken,[lat,lng]=center(S.poly),end=n
       tmin:MK.map((_,m)=>avgOf(per(m).map(k=>TN[k]))),
       tmax:MK.map((_,m)=>avgOf(per(m).map(k=>TX[k]))),
       fr:MK.map((_,m)=>per(m).filter(k=>TN[k]<0).length),
-      hot:MK.map((_,m)=>per(m).filter(k=>TX[k]>=35).length)});
+      hot:MK.map((_,m)=>per(m).filter(k=>TX[k]>=35).length),
+      yr:{pp:MK.map((_,m)=>per(m).map(k=>PP[k]))}});
     /* Terciles: las campañas se ordenan por lluvia y se cortan en tres grupos iguales */
     [...c].sort((a,b)=>a.mm-b.mm).forEach((x,i)=>x.tipo=i<Math.round(n/3)?"seco":i<Math.round(2*n/3)?"normal":"humedo");
     const g=t=>c.filter(x=>x.tipo===t);
@@ -685,10 +750,26 @@ async function loadPower(){const tok=++powerToken,[lat,lng]=center(S.poly),end=n
       n:{seco:g("seco").length,normal:g("normal").length,humedo:g("humedo").length},
       maxSeco:Math.max(...g("seco").map(x=>x.mm)),maxNormal:Math.max(...g("normal").map(x=>x.mm))}}
   catch(e){if(tok!==powerToken)return;Object.assign(CLIMA,JSON.parse(JSON.stringify(CLIMA0)));SERIE={real:false,c:[]}}
-  $("#f-pp").textContent=`${fmt(CLIMA.pp.reduce((a,b)=>a+b,0))} mm`;if(S.layer==="clima")drawClima();legend();if(S.open)render()}
+  updOwn();if(S.layer==="clima")drawClima();legend();if(S.open)render()}
 /* Helada frecuente: el mes tuvo helada (mínima < 0 °C) en al menos 1 de cada 3 años */
 const helada=m=>CLIMA.real?CLIMA.fr[m]>=CLIMA.n/3:CLIMA.tmin[m]<=3;
 const calor=m=>CLIMA.real?CLIMA.hot[m]>=CLIMA.n/2:CLIMA.tmax[m]>=30;
+/* Probabilidad climatológica: frecuencia observada en las 30 campañas, para los meses que importan en cada alternativa */
+function probs(s){if(!CLIMA.real||!CLIMA.yr)return[];const n=CLIMA.n,pc=k=>Math.round(k/n*100),out=[];
+  const fm=s.cal.map((x,m)=>({x,m})).filter(o=>o.x!=="barbecho"&&!C[o.x].fr&&CLIMA.fr[o.m]>0).sort((a,b)=>CLIMA.fr[b.m]-CLIMA.fr[a.m])[0];
+  if(fm)out.push(`Helada en ${MES[fm.m].toLowerCase()} con ${C[fm.x].n.toLowerCase()} en el lote: ${CLIMA.fr[fm.m]} de ${n} años (${pc(CLIMA.fr[fm.m])} %)`);
+  const sow=[];ORD.forEach((m,i)=>{const x=s.cal[m],prev=s.cal[ORD[(i+11)%12]];if(x!=="barbecho"&&x!==prev&&!sow.some(o=>o.x===x))sow.push({x,m})});
+  /* primero el cultivo que distingue a esta alternativa de lo que hacés hoy */
+  const base=new Set((LIST[0]&&LIST[0].cal)||[]);sow.sort((a,b)=>(base.has(a.x)?1:0)-(base.has(b.x)?1:0));
+  sow.slice(0,2).forEach(o=>{const k=CLIMA.yr.pp[o.m].filter(v=>v<CLIMA.pp[o.m]*.5).length;out.push(`Siembra de ${C[o.x].n.toLowerCase()} (${MES[o.m].toLowerCase()}) con menos de la mitad de la lluvia normal: ${k} de ${n} años (${pc(k)} %)`)});
+  const hm=s.cal.map((x,m)=>({x,m})).filter(o=>C[o.x].g==="verano").sort((a,b)=>CLIMA.hot[b.m]-CLIMA.hot[a.m])[0];
+  if(hm&&CLIMA.hot[hm.m])out.push(`Máxima de 35 °C o más en ${MES[hm.m].toLowerCase()} con ${C[hm.x].n.toLowerCase()}: ${CLIMA.hot[hm.m]} de ${n} años (${pc(CLIMA.hot[hm.m])} %)`);
+  return out}
+/* Mediciones propias: se muestran al lado de NASA. NASA sigue siendo la base; si difieren más de 15 %, baja la confianza. */
+function ownRain(){if(!S.lluvia||!SERIE.real)return null;const nasa=avgOf(SERIE.c.map(x=>x.mm)),d=Math.round((S.lluvia-nasa)/nasa*100);return{nasa,d,f:S.lluvia/nasa}}
+function ownLine(){const o=ownRain();if(!o)return"";const ok=Math.abs(o.d)<=15;
+  return`<span class="own ${ok?"":"bad"}">Tu pluviómetro: ${fmt(S.lluvia)} mm/año · NASA: ${fmt(o.nasa)} mm (${o.d>0?"+":o.d<0?"−":""}${Math.abs(o.d)} %) · ${ok?"coinciden: confianza alta":"difieren más de 15 %: confianza baja en agua"}</span><span>Corregido con tu pluviómetro, al lado de NASA: año seco hasta ${fmt(SERIE.maxSeco*o.f)} mm (NASA: ${fmt(SERIE.maxSeco)} mm)</span>`}
+function updOwn(){const nasa=CLIMA.pp.reduce((a,b)=>a+b,0);$("#f-pp").innerHTML=`${fmt(nasa)} mm${S.lluvia?`<small class="own2">tu pluviómetro: ${fmt(S.lluvia)}</small>`:""}`}
 function serieHTML(){if(!SERIE.real)return`<div class="serie off">Serie de campañas: sin conexión a NASA POWER. Años seco, normal y húmedo ilustrativos.</div>`;
   const c=SERIE.c,n=c.length,k=Math.min(10,Math.floor(n/3)),a=c.slice(0,n-k),b=c.slice(n-k),ma=avgOf(a.map(x=>x.mm)),mb=avgOf(b.map(x=>x.mm)),max=Math.max(...c.map(x=>x.mm)),sec=b.filter(x=>x.tipo==="seco").length;
   SERIE.def=`Últimas ${k}: ${fmt(mb)} mm · ${n-k} previas: ${fmt(ma)} mm`;SERIE.sec=`${sec} de las últimas ${k}, en el tercio seco`;
@@ -696,7 +777,7 @@ function serieHTML(){if(!SERIE.real)return`<div class="serie off">Serie de campa
   /* Divergente: gris = cerca del promedio; marrón = más seca; azul = más húmeda. 4 pasos por brazo. */
   const tone=mm=>{const a=(mm-mean)/mean,k=Math.abs(a)<.04?0:Math.abs(a)<.10?1:Math.abs(a)<.18?2:Math.abs(a)<.27?3:4;return k?`var(--${a<0?"dry":"wet"}${k})`:"var(--mid)"};
   const grp=(arr,off)=>`<div class="g" style="flex:${arr.length}">${arr.map((x,j)=>`<i data-i="${off+j}" style="--j:${off+j};background:${tone(x.mm)}"></i>`).join("")}</div>`;
-  return`<div class="serie"><div class="t"><b>Lluvia por campaña · ${n} campañas</b><span class="r num" id="serie-r">${SERIE.def}</span><span>${SERIE.sec}</span><span class="src">NASA POWER · celda ~50 km · julio a junio</span></div>
+  return`<div class="serie"><div class="t"><b>Lluvia por campaña · ${n} campañas</b><span class="r num" id="serie-r">${SERIE.def}</span><span>${SERIE.sec}</span>${ownLine()}<span class="src">NASA POWER · celda ~50 km · julio a junio</span></div>
     <div><div class="bars" id="bars" role="img" aria-label="Lluvia de cada campaña. ${SERIE.def}. ${SERIE.sec}">${grp(a,0)}${grp(b,n-k)}</div><div class="ax"><span style="flex:${n-k}">${c[0].lab}</span><span style="flex:${k}">últimas ${k} · ${c[n-1].lab}</span></div>
     <div class="dscale"><span>Más seca</span><span class="rp">${[4,3,2,1].map(i=>`<i style="background:var(--dry${i})"></i>`).join("")}<i style="background:var(--mid)"></i>${[1,2,3,4].map(i=>`<i style="background:var(--wet${i})"></i>`).join("")}</span><span>Más húmeda</span><span>· gris: cerca del promedio (${fmt(mean)} mm)</span></div></div></div>`}
 function serieOn(i){const r=$("#serie-r");if(!r)return;$$("#bars i").forEach(x=>x.classList.toggle("on",x.dataset.i===String(i)));
@@ -748,16 +829,18 @@ function setMonth(m){S.month=m;timeline();if(S.layer==="ndvi")setNdvi();legend()
 $("#sliders").innerHTML=OBJ.map(o=>`<div class="sl"><label for="w-${o.k}">${o.n}</label><input type="range" id="w-${o.k}" min="0" max="5" value="${S.w[o.k]}"><output id="o-${o.k}" class="num">${S.w[o.k]}</output></div>`).join("");
 OBJ.forEach(o=>$("#w-"+o.k).addEventListener("input",e=>{S.w[o.k]=+e.target.value;$("#o-"+o.k).textContent=e.target.value;if(S.open)render()}));
 ["verano","invierno","pasada","anegable","textura"].forEach(id=>$("#"+id).addEventListener("change",e=>{S[id]=e.target.value;if(S.open)render()}));
-["lluvia","mo"].forEach(id=>$("#"+id).addEventListener("input",e=>{S[id]=e.target.value===""?null:+e.target.value;if(S.open)render()}));
+["lluvia","mo"].forEach(id=>$("#"+id).addEventListener("input",e=>{S[id]=e.target.value===""?null:+e.target.value;updOwn();if(S.open)render()}));
 $$("[data-r]").forEach(b=>b.addEventListener("click",()=>{const k=b.dataset.r;S.r[k]=!S.r[k];b.setAttribute("aria-pressed",S.r[k]);if(S.open)render()}));
 $("#nos").innerHTML=NOS.map(k=>`<button class="chip no" aria-pressed="false" data-no="${k}">${C[k].n}</button>`).join("");
 $("#nos").addEventListener("click",e=>{const b=e.target.closest("[data-no]");if(!b)return;const k=b.dataset.no;S.no.has(k)?S.no.delete(k):S.no.add(k);b.setAttribute("aria-pressed",S.no.has(k));if(S.open)render()});
 /* Paso 1 → paso 2: la caja se va a la derecha, el mapa aparece detrás y vuela hasta el lote */
 function goMap(){const pn=$(".panel");pn.classList.add("morph");setTimeout(()=>pn.classList.remove("morph"),950);
   setTimeout(()=>{$("#comparar").textContent="Comparar alternativas"},300);document.body.classList.remove("onb");
-  if(innerWidth<=900){scrollTo({top:0,behavior:"smooth"});setTimeout(()=>{map.invalidateSize();focus(S.entry==="draw"?loteLayer.getBounds().pad(1.2):null);if(S.entry==="draw")setTimeout(startDraw,300)},60);return}
-  setTimeout(()=>{map.invalidateSize();map.flyToBounds(loteLayer.getBounds().pad(S.entry==="draw"?1.2:.3),{...pads(),maxZoom:17,duration:1.6,easeLinearity:.2});
-    if(S.entry==="draw")map.once("moveend",()=>setTimeout(startDraw,150))},350)}
+  const draw=S.entry==="draw"&&S.target;
+  if(innerWidth<=900){scrollTo({top:0,behavior:"smooth"});setTimeout(()=>{map.invalidateSize();if(draw){map.setView([S.target.lat,S.target.lng],16);showTarget();setTimeout(startDraw,300)}else focus()},60);return}
+  setTimeout(()=>{map.invalidateSize();
+    if(draw){const c=L.latLng(S.target.lat,S.target.lng);map.flyToBounds(c.toBounds(900),{...pads(),maxZoom:16.5,duration:1.8,easeLinearity:.2});showTarget();map.once("moveend",()=>setTimeout(startDraw,150))}
+    else map.flyToBounds(loteLayer.getBounds().pad(.3),{...pads(),maxZoom:17,duration:1.6,easeLinearity:.2})},350)}
 $("#comparar").addEventListener("click",()=>{if(document.body.classList.contains("onb")){goMap();return}const first=!S.open;S.open=true;if(first){INTRO=true;Object.keys(NUM).forEach(k=>delete NUM[k]);Object.keys(BW).forEach(k=>delete BW[k]);$("#sheet").classList.add("intro");setTimeout(()=>{$("#sheet").classList.remove("intro");INTRO=false;introDrawn=false;if(introPending){introPending=false;render()}},1500)}$("#sheet").classList.add("open");render();placeLegend();
   if(innerWidth<=900)$("#sheet").scrollIntoView({behavior:"smooth"});else focus()});
 $("#close").addEventListener("click",()=>{S.open=false;$("#sheet").classList.remove("open");$("#menu").hidden=true;placeLegend();focus()});
@@ -822,6 +905,7 @@ function render(){/* Durante la entrada no se redibuja: se espera a que termine 
     const rev=[];if(s.ag.seco<40)rev.push("Poca reserva de agua en años secos");if(s.rep)rev.push("Repite el cultivo de la campaña pasada");if(s.cov==="vicia"&&S.anegable!=="no"&&S.anegable!=="no_se")rev.push("Lote que se encharca: riesgo de mala implantación");if(s.cov)rev.push("Secado ~30 días antes de la siembra");if(S.r.maq&&(s.id==="B"||s.id==="C"))rev.push("Requiere maquinaria para un cultivo nuevo");if(s.conf.length)rev.push("Cultivo sensible en meses con helada");
     const seenOk=SEEN.m.filter(v=>v).length,seenBare=SEEN.m.filter(v=>v&&v.mean<BAJO).length,seenDone=SEEN.m.every(v=>v!==undefined);
     if(s.id==="actual"&&seenDone&&seenOk>=8&&Math.abs(seenBare-s.bare)>=2)rev.push(`Lo que vio el satélite no coincide con la rotación cargada: ${seenBare} meses con el lote pelado en ${CAMP_LAB}, contra ${s.bare} según el calendario`);
+    const P=probs(s),own=ownRain();if(own&&Math.abs(own.d)>15&&s.id==="actual")rev.push(`Tu pluviómetro difiere ${Math.abs(own.d)} % de NASA: el dato de agua tiene confianza baja`);
     const falta=["Precios"];if(!S.mo)falta.push("Materia orgánica");if(S.textura==="no_se")falta.push("Textura");
     return`<button class="card" aria-pressed="${S.sel===s.id}" data-s="${s.id}" style="--k:${LIST.indexOf(s)}">
       <div class="hd"><span class="badge" style="background:${col}">${s.k}</span><div><div class="nm">${s.name}</div><div class="spc">${s.sp}</div></div></div>
@@ -830,7 +914,8 @@ function render(){/* Durante la entrada no se redibuja: se espera a que termine 
       <div class="mets">${met("Agua",s.ag.normal,act.ag.normal,true," pts",css("--s-a"))}${met("Suelo",s.suelo,act.suelo,true," pts","#8a5c33")}${met("Erosión",s.ero,act.ero,true," pts","#c0531c")}${met("Ingreso",s.ing,act.ing,true," pts",css("--s-b"))}</div>
       <div class="yrs">${[["seco","Seco"],["normal","Normal"],["humedo","Húmedo"]].map(([t,l])=>`<div title="${tipoTitle(t)}"><b class="num">${ys[t]??"—"}</b><span><i class="dot" style="background:var(--${t})"></i>${l}</span></div>`).join("")}</div>
       ${sens?'<span class="tagw">Sensible al clima</span>':""}
-      ${S.sel===s.id?`<div class="more"><div><b>Por qué aparece.</b> ${why.join(". ")}.</div><div><b>Revisar con el agrónomo.</b> ${rev.length?rev.join(". ")+".":"Sin alertas."}</div><div><b>Falta.</b> ${falta.join(", ")}.</div></div>`:""}
+      ${P[0]?`<div class="prob">${P[0]}</div>`:""}
+      ${S.sel===s.id?`<div class="more"><div><b>Por qué aparece.</b> ${why.join(". ")}.</div><div><b>Revisar con el agrónomo.</b> ${rev.length?rev.join(". ")+".":"Sin alertas."}</div>${P.length?`<div><b>En las últimas ${CLIMA.n} campañas.</b> ${P.join(". ")}.</div>`:""}<div><b>Falta.</b> ${falta.join(", ")}.</div></div>`:""}
     </button>`}).join("");
   $("#lgd").innerHTML=`<span><i style="background:var(--cover)"></i>Con cultivo o cobertura</span><span><i style="background:var(--barbecho)"></i>Pelado</span><span><i style="background:color-mix(in srgb,var(--humedo) 35%,transparent)"></i>Mes con helada frecuente</span><span><i style="background:color-mix(in srgb,var(--ink) 18%,transparent)"></i>Mes del mapa</span><span>Fila fina: lo que vio el satélite (misma escala que el NDVI del mapa)</span>`;
   $$("#cards .seg").forEach(e=>e.classList.toggle("hide",e.scrollWidth>e.clientWidth+1));
@@ -851,6 +936,7 @@ function buildMail(){const c=center(S.poly);const L2=[`Field Shift · comparaci�
   {const ok=SEEN.m.filter(v=>v);if(ok.length)L2.push("",`Visto por satélite (NASA HLS, 30 m, campaña ${CAMP_LAB}): NDVI del lote menor a ${fmt(BAJO,1)} en ${ok.filter(v=>v.mean<BAJO).length} de ${ok.length} meses con escena sin nubes`)}
   if(SERIE.real){const c=SERIE.c,n=c.length,k=Math.min(10,Math.floor(n/3)),av=a=>fmt(avgOf(a.map(x=>x.mm)));
     L2.push("",`Lluvia por campaña (NASA POWER, ${CLIMA.per}): últimas ${k} ${av(c.slice(n-k))} mm de promedio · ${n-k} anteriores ${av(c.slice(0,n-k))} mm · año seco = hasta ${fmt(SERIE.maxSeco)} mm`)}
+  {const o=ownRain();if(o)L2.push(`Pluviómetro del productor: ${fmt(S.lluvia)} mm/año contra ${fmt(o.nasa)} mm de NASA (${o.d>0?"+":""}${o.d} %): ${Math.abs(o.d)<=15?"confianza alta":"confianza baja en agua"}`)}
   L2.push("","Herramienta de apoyo: no reemplaza el criterio del productor ni del agrónomo.");S.mail=L2.join("\n");
   $("#mailto").href="mailto:?subject="+encodeURIComponent("Comparación de rotaciones · Field Shift")+"&body="+encodeURIComponent(S.mail)}
 $("#share").addEventListener("click",()=>{$("#menu").hidden=!$("#menu").hidden});
