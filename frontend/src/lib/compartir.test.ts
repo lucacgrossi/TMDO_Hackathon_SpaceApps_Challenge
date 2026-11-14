@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { ASUNTO_MAIL, AVISO_APOYO, linkMail, resumenComparacion } from "@/lib/compartir";
+import {
+  ASUNTO_MAIL,
+  AVISO_APOYO,
+  CIERRE_MAIL,
+  LARGO_MAX_MAILTO,
+  linkMail,
+  resumenComparacion,
+  resumenMail,
+} from "@/lib/compartir";
 import type { Pesos } from "@/lib/cercania";
-import { MOCK_BASE, MOCK_DESCARTADA, MOCK_PLUVIOMETRO } from "@/mocks/analizar";
+import { MOCK_BASE, MOCK_DESCARTADA, MOCK_PLUVIOMETRO, mockAnalizar } from "@/mocks/analizar";
 
 const PESOS: Pesos = { agua: 3, suelo: 3, erosion: 3, ingreso: 3 };
 const FECHA = new Date(2026, 10, 14);
@@ -66,6 +74,49 @@ describe("resumen para compartir", () => {
   it("nunca recomienda ni elige", () => {
     for (const salida of [MOCK_BASE, MOCK_DESCARTADA, MOCK_PLUVIOMETRO]) {
       const t = resumenComparacion(salida, PESOS, FECHA).toLowerCase();
+      expect(t).not.toContain("recomend");
+      expect(t).not.toContain("deberías");
+      expect(t).not.toContain("la mejor");
+    }
+  });
+});
+
+describe("resumen corto para el mail", () => {
+  // El caso más largo: B descartada, pluviómetro que no coincide y materia orgánica
+  const completo = mockAnalizar({ noSembrar: ["trigo", "cebada"], lluviaAnualMm: 620, materiaOrganicaPct: 2.5 });
+  const corto = resumenMail(completo, PESOS);
+
+  it(`el mailto codificado queda por debajo de ${LARGO_MAX_MAILTO} caracteres`, () => {
+    expect(linkMail(corto).length).toBeLessThan(LARGO_MAX_MAILTO);
+    // El completo no entraría: por eso el mail usa el corto
+    expect(linkMail(resumenComparacion(completo, PESOS, FECHA)).length).toBeGreaterThan(LARGO_MAX_MAILTO);
+  });
+
+  it("una línea por columna con la cercanía y el trío; la descartada con su motivo", () => {
+    expect(corto).toContain("Actual, Lo que hacés hoy: 46 (38 / 46 / 50)");
+    expect(corto).toContain("B, Cultivo de invierno: descartada (No sembrar trigo ni cebada)");
+    expect(corto).toMatch(/^A, Cobertura de invierno: \d+ \(\d+ \/ \d+ \/ \d+\)$/m);
+    expect(corto).toMatch(/^C, Diversificar el verano: \d+ \(\d+ \/ \d+ \/ \d+\)$/m);
+  });
+
+  it("lleva el pluviómetro, los datos de prueba, el aviso y adónde está el resto", () => {
+    expect(corto).toContain("Tu pluviómetro: 620 mm/año · NASA: 769 mm (−19 %): confianza baja en agua");
+    expect(corto).toContain("Datos de prueba");
+    expect(corto).toContain(AVISO_APOYO);
+    expect(corto.endsWith(CIERRE_MAIL)).toBe(true);
+  });
+
+  it("la materia orgánica no se presenta como confianza del agua", () => {
+    for (const t of [corto, resumenComparacion(completo, PESOS, FECHA)]) {
+      const linea = t.split("\n").find((l) => l.startsWith("Materia orgánica"));
+      expect(linea).toBeDefined();
+      expect(linea).not.toContain("en agua");
+    }
+  });
+
+  it("nunca recomienda ni elige", () => {
+    for (const salida of [MOCK_BASE, MOCK_DESCARTADA, MOCK_PLUVIOMETRO, completo]) {
+      const t = resumenMail(salida, PESOS).toLowerCase();
       expect(t).not.toContain("recomend");
       expect(t).not.toContain("deberías");
       expect(t).not.toContain("la mejor");

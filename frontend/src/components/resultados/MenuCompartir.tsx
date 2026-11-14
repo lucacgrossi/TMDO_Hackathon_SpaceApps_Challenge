@@ -1,24 +1,13 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
-import { linkMail, resumenComparacion } from "@/lib/compartir";
+import { linkMail, resumenComparacion, resumenMail } from "@/lib/compartir";
 import type { Salida } from "@/lib/contrato";
 import { useEntradas } from "@/lib/store";
 import { useToast } from "@/lib/toast";
 import { useVista } from "@/lib/vista";
 import css from "./compartir.module.css";
 
-/**
- * Menú Compartir del encabezado de la hoja (RF20, CU5): el `.menu` del prototipo.
- * - Enviar por mail: `mailto:` con el resumen de plantilla fija (`compartir.ts`).
- * - Copiar resumen: al portapapeles, con aviso.
- * - Guardar PDF: `window.print()`; la hoja de impresión está en compartir.module.css.
- * - Nueva comparación: vuelve al paso 1 con las entradas iniciales.
- *
- * Teclado: Enter o flecha abajo abre y enfoca la primera opción; flechas,
- * Inicio y Fin recorren; Escape cierra y devuelve el foco al botón.
- * Sin `salida` (cargando o error) solo queda "Nueva comparación".
- */
 /**
  * Respaldo para cuando el navegador bloquea la API del portapapeles (permiso
  * denegado, página embebida o sin HTTPS): el método viejo, con un textarea oculto.
@@ -40,6 +29,18 @@ function copiarConTextarea(texto: string): boolean {
   }
 }
 
+/**
+ * Menú Compartir del encabezado de la hoja (RF20, CU5): el `.menu` del prototipo.
+ * - Enviar por mail: `mailto:` con la versión corta (`resumenMail`), para que
+ *   el link no pase de `LARGO_MAX_MAILTO` y Outlook no lo corte.
+ * - Copiar resumen: el resumen completo al portapapeles, con aviso.
+ * - Guardar PDF: `window.print()`; la hoja de impresión está en compartir.module.css.
+ * - Nueva comparación: vuelve al paso 1 con las entradas iniciales.
+ *
+ * Teclado: Enter o flecha abajo abre y enfoca la primera opción; flechas,
+ * Inicio y Fin recorren; Escape cierra y devuelve el foco al botón.
+ * Sin `salida` (cargando o error) solo queda "Nueva comparación".
+ */
 export default function MenuCompartir({ salida }: { salida: Salida | null }) {
   const [abierto, setAbierto] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
@@ -52,6 +53,7 @@ export default function MenuCompartir({ salida }: { salida: Salida | null }) {
 
   // El texto se arma con las barras actuales: si se mueven, el resumen cambia (RF13)
   const resumen = salida && abierto ? resumenComparacion(salida, objetivos, new Date()) : "";
+  const mail = salida && abierto ? linkMail(resumenMail(salida, objetivos)) : "";
 
   const opciones = () => Array.from(menu.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ?? []);
 
@@ -141,7 +143,7 @@ export default function MenuCompartir({ salida }: { salida: Salida | null }) {
         <div ref={menu} id={idMenu} className="menu" role="menu" aria-label="Compartir la comparación" onKeyDown={alTeclaMenu}>
           {salida && (
             <>
-              <a role="menuitem" tabIndex={-1} href={linkMail(resumen)} onClick={() => cerrar()}>
+              <a role="menuitem" tabIndex={-1} href={mail} onClick={() => cerrar()}>
                 Enviar por mail
               </a>
               <button role="menuitem" tabIndex={-1} type="button" onClick={copiar}>

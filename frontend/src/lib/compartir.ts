@@ -8,7 +8,7 @@
  * hacer ni elige una alternativa.
  */
 import { cercania, cercaniaPorTipo, esSensibleAlClima, type Pesos } from "./cercania";
-import { esDisponible, type Estrategia, type Salida } from "./contrato";
+import { esDisponible, type ContrasteMedicion, type Estrategia, type Salida } from "./contrato";
 import { fmt, metadatosHoja } from "./formato";
 
 export const ASUNTO_MAIL = "Comparación de rotaciones · Field Shift";
@@ -37,6 +37,17 @@ function lineaEstrategia(e: Estrategia, pesos: Pesos): string[] {
   return lineas;
 }
 
+/**
+ * Medición del productor al lado de NASA (RF15). La confianza solo se nombra
+ * cuando el contraste la cambia: la materia orgánica no tiene dato de NASA y
+ * llega con `confianza_resultante: null`.
+ */
+function textoContraste(c: ContrasteMedicion): string {
+  if (c.confianza_resultante == null) return c.texto;
+  if (c.confianza_resultante === "alta") return `${c.texto}: confianza alta`;
+  return `${c.texto}: confianza baja${c.indicador === "lluvia_anual" ? " en agua" : ""}`;
+}
+
 function lineaSatelite(salida: Salida): string | null {
   const s = salida.visto_por_satelite;
   if (s.meses_ndvi_bajo == null || s.meses_con_dato === 0) return null;
@@ -63,9 +74,7 @@ export function resumenComparacion(salida: Salida, pesos: Pesos, fecha: Date): s
   for (const e of salida.estrategias) L.push(...lineaEstrategia(e, pesos));
 
   const satelite = lineaSatelite(salida);
-  const contrastes = salida.contraste_mediciones.map(
-    (c) => `${c.texto}: ${c.confianza_resultante === "alta" ? "confianza alta" : "confianza baja en agua"}`,
-  );
+  const contrastes = salida.contraste_mediciones.map(textoContraste);
   if (satelite || contrastes.length) L.push("");
   if (satelite) L.push(satelite);
   L.push(...contrastes);
@@ -76,6 +85,45 @@ export function resumenComparacion(salida: Salida, pesos: Pesos, fecha: Date): s
   if (salida.es_mock) L.push("", "Datos de prueba: valores ilustrativos, no son datos de NASA.");
 
   L.push("", AVISO_APOYO);
+  return L.join("\n");
+}
+
+/**
+ * Largo máximo del link `mailto:` ya codificado. Outlook y el manejador de
+ * Windows cortan o rechazan los links de más de ~2.000 caracteres; con este
+ * margen el mail sale entero.
+ */
+export const LARGO_MAX_MAILTO = 1800;
+
+export const CIERRE_MAIL =
+  "El resumen completo, con probabilidades e información que falta, se copia con «Copiar resumen» en Field Shift.";
+
+/**
+ * Versión corta para "Enviar por mail" (el link `mailto:` tiene que entrar en
+ * `LARGO_MAX_MAILTO`). Una línea por columna con la cercanía y el trío; el
+ * resto queda en el resumen completo, que se copia o se guarda en PDF.
+ */
+export function resumenMail(salida: Salida, pesos: Pesos): string {
+  const L: string[] = [
+    "Field Shift: comparación de rotaciones",
+    `Lote: ${fmt(salida.lote.area_ha)} ha${salida.lote.localidad_aprox ? `, ${salida.lote.localidad_aprox}` : ""}`,
+    `Objetivos (0 a 5): agua ${pesos.agua}, suelo ${pesos.suelo}, erosión ${pesos.erosion}, ingreso ${pesos.ingreso}`,
+    "",
+    "Cercanía % (seco / normal / húmedo):",
+  ];
+  for (const e of salida.estrategias) {
+    const titulo = `${ETIQUETA[e.id]}, ${e.nombre}`;
+    if (!esDisponible(e)) {
+      L.push(`${titulo}: descartada (${e.motivo_descarte ?? "sin motivo informado"})`);
+      continue;
+    }
+    const t = cercaniaPorTipo(e.puntos, pesos);
+    L.push(`${titulo}: ${numero(t.normal)} (${numero(t.seco)} / ${numero(t.normal)} / ${numero(t.humedo)})`);
+  }
+  const contrastes = salida.contraste_mediciones.map(textoContraste);
+  if (contrastes.length) L.push("", ...contrastes);
+  if (salida.es_mock) L.push("", "Datos de prueba: valores ilustrativos, no son datos de NASA.");
+  L.push("", AVISO_APOYO, CIERRE_MAIL);
   return L.join("\n");
 }
 
