@@ -17,7 +17,7 @@ from app.api import rutas
 from app.api.contrato import Entrada, Salida
 from app.clima import power
 from app.main import app
-from app.satelite import cobertura, et, ndvi
+from app.satelite import cobertura, elevacion, et, ndvi
 from tests.api.conftest import CAMPANAS_NDVI_PEDIDAS, cobertura_ok
 
 # TestClient no sale a internet, pero el event loop abre un socketpair local (ver test_rutas.py).
@@ -140,6 +140,29 @@ def test_visto_por_satelite_y_capas():
     assert s.capas.ndvi_mensual[0].item == "HLS-TEST-2026-01-15"
     assert "NDVI del lote · Noviembre 2025: sin escena HLS con < 30 % de nubes" in s.informacion_falta
     assert {"lluvia_anual", "balance_anual", "et_real_anual", "meses_cobertura_baja"} <= set(s.indicadores)
+
+
+def test_capa_de_erosion_sale_de_satelite_capas():
+    """Pendiente general × meses con NDVI bajo (satelite/capas.py), sin pedidos nuevos."""
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.erosion is not None
+    assert s.capas.erosion["valor"] == round(0.6 * 4, 1)
+    assert "erosion" not in s.capas.no_disponibles
+    assert s.indicadores["riesgo_erosion"].unidad == "% × meses"
+    assert not any(f.startswith("Capa de erosión") for f in s.informacion_falta)
+
+
+def test_sin_pendiente_la_erosion_va_a_informacion_que_falta(monkeypatch):
+    monkeypatch.setattr(elevacion, "calcular", lambda pol: {
+        "pendiente_general": {"valor": None, "unidad": "%", "fuente": "NASADEM", "anios": None,
+                              "resolucion": "30 m", "confianza": "sin_dato", "motivo": "caída"},
+        "pendiente_maxima": {"valor": None, "unidad": "%", "fuente": "NASADEM", "anios": None,
+                             "resolucion": "30 m", "confianza": "sin_dato", "motivo": "caída"},
+    })
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.capas.erosion is None and "erosion" in s.capas.no_disponibles
+    assert "riesgo_erosion" not in s.indicadores
+    assert "Capa de erosión: falta la pendiente o el NDVI del lote" in s.informacion_falta
 
 
 def test_sin_lenguaje_de_recomendacion():

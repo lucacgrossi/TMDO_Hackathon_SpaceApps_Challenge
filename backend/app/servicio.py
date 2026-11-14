@@ -52,7 +52,7 @@ from app.clima import indicadores as clima_indicadores
 from app.clima import power
 from app.clima import probabilidad as clima_probabilidad
 from app.clima import serie as clima_serie
-from app.satelite import cobertura, elevacion, et, lote, ndvi
+from app.satelite import capas, cobertura, elevacion, et, lote, ndvi
 
 log = logging.getLogger("fieldshift.servicio")
 
@@ -518,9 +518,13 @@ def _armar_salida(
     serie_anual = clima_serie.serie_anual(clima)
     if serie_anual is None:
         faltan.append("Serie por campaña: no se pudo armar con las campañas de NASA POWER")
-    faltan += [
-        "Capa de erosión",
-    ]
+    # Capas del mapa (satelite/capas.py, Back 2): arma la escena NDVI de cada mes y el índice de
+    # erosión con lo que ya devolvieron ndvi y elevacion, sin pedidos nuevos.
+    capas_sat = capas.armar(sat["ndvi"], sat["elevacion"])
+    erosion = capas_sat.get("erosion")
+    if erosion is None:
+        faltan.append("Capa de erosión: falta la pendiente o el NDVI del lote")
+    indicador_erosion = {"riesgo_erosion": Indicador.model_validate(erosion)} if erosion else {}
 
     return Salida(
         lote=LoteSalida(
@@ -535,6 +539,7 @@ def _armar_salida(
             **_confianza_agua(clima.indicadores, contraste),
             "et_real_anual": et_real,
             "meses_cobertura_baja": cobertura_baja,
+            **indicador_erosion,
         },
         contraste_mediciones=contraste.contraste,
         clima_celda=clima.clima_celda or ClimaCelda(bbox=(0, 0, 0, 0), posicion_lote="sin dato"),
@@ -542,8 +547,9 @@ def _armar_salida(
         tipos_de_anio=clima.tipos_de_anio,
         serie_anual=serie_anual,
         capas=Capas(
-            ndvi_mensual=capas_ndvi,
-            no_disponibles=["erosion", "agua_regional_mensual", "heladas_regional_mensual"],
+            ndvi_mensual=capas_sat.get("ndvi_mensual") or capas_ndvi,
+            erosion=erosion,
+            no_disponibles=[*capas_sat.get("no_disponibles", []), "agua_regional_mensual", "heladas_regional_mensual"],
         ),
         estrategias=estrategias,
         choque=Choque(hay=bool(ch.get("hay")), objetivos=ch.get("objetivos", []), texto=ch.get("texto", "")),
