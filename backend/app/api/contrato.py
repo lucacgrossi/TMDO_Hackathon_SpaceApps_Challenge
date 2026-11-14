@@ -192,8 +192,17 @@ class ClimaMensual(BaseModel):
     """Climatología de las 30 campañas. Índice 0 = enero."""
 
     lluvia_mm: list[float] = _doce()
-    minima_media_c: list[float] = _doce()
-    maxima_media_c: list[float] = _doce()
+    minima_media_c: list[float] = Field(
+        min_length=12, max_length=12,
+        description="Promedio de 30 años de la mínima MÁS BAJA de cada mes (T2M_MIN es extremo del mes)")
+    maxima_media_c: list[float] = Field(
+        min_length=12, max_length=12,
+        description="Promedio de 30 años de la máxima MÁS ALTA de cada mes (T2M_MAX es extremo del mes)")
+    t_media_c: list[float] | None = Field(
+        None, min_length=12, max_length=12, description="Temperatura media del mes (T2M), promedio de 30 años")
+    amplitud_diaria_c: list[float] | None = Field(
+        None, min_length=12, max_length=12,
+        description="Amplitud térmica diaria media (T2M_RANGE), promedio de 30 años; la usa Hargreaves")
     et0_mm: list[float | None] = _doce()
     balance_mm: list[float | None] = _doce()
     anios_con_helada: list[int] = _doce()
