@@ -5,7 +5,7 @@ Cómo trabajamos los dos del back sin pisarnos. Contexto general: `../CLAUDE.md`
 **Meta:** `/analizar` deployado, con datos reales de NASA para cualquier punto y la tabla de 4 columnas armada.
 **Alcance que manda:** MVP **4.3** (`../docs/mvp-alcance.md`).
 **Planilla CSV del productor** (aprobada por la persona 3): dominio `mediciones/` (Back 2) y ruta `POST /mediciones/planilla` (Back 1). Ver `../docs/plan-planilla-lluvia.md`.
-**Capas armonizadas:** grilla común del lote; el back calcula los rasters y el front los dibuja. Ver `../docs/plan-armonizacion-capas.md`.
+**Capas armonizadas:** grilla común del lote; el back calcula los rasters (`CapaRaster`) y el front los dibuja. Ver `../docs/plan-armonizacion-capas.md`. **En curso.**
 
 ## 1. Estructura por dominio y dueños
 Cada dominio es una carpeta con **un solo dueño**. Para tocar un dominio ajeno: avisar antes y que lo cambie el dueño, o hacer un PR chico que el dueño revise.
@@ -36,7 +36,7 @@ backend/
 │  │  ├─ et.py                  ←         ET real anual de MODIS, para contrastar Hargreaves
 │  │  └─ capas.py               ←         capas del mapa: ndvi_mensual[12], erosión
 │  ├─ mediciones/               ← Back 2  planilla CSV del productor
-│  │  └─ planilla.py            ←         lee y valida el CSV → serie mensual (PR #55)
+│  │  └─ planilla.py            ←         lee y valida el CSV → serie mensual
 │  ├─ motor/                    ← Lógica  cultivos, estrategias, mezcla, reglas, plantillas (ningún back lo toca)
 │  └─ demo/
 │     └─ rio_cuarto.json        ← Back 2  respuesta completa precalculada
@@ -59,55 +59,85 @@ backend/
 
 **Regla entre dominios:** un dominio no importa a otro, salvo `api/contrato.py` (los tipos compartidos). Solo `servicio.py` y `api/` conectan `clima/`, `satelite/`, `mediciones/` y `motor/`. Lo controla la CI (`.github/scripts/fronteras_dominios.py`).
 
-## 2. Qué hace cada uno
-Las fuentes están verificadas contra el lote demo (ver "Datos que usamos" en `../CLAUDE.md`). Todas andan sin login.
-El alcance que manda es el de **MVP 4.3** (`../docs/mvp-alcance.md`):
-- el lote es un **polígono dibujado** (de 1 a 20.000 ha);
-- el NDVI del lote sale de **HLS a 30 m**;
-- POWER es **un solo pedido mensual con las últimas 30 campañas** (hoy 1996/97 a 2025/26);
-- las mediciones del productor se muestran **al lado** de NASA (`clima/correccion.py`, no puntúa) y **además entran en los puntajes** mezcladas con NASA según sus años de registro (`motor/mezcla.py`).
+## 2. Qué falta
+Lo que ya está en `dev` (clima, probabilidades, contraste, servicio, motor, satélite, planilla y demo) no se repite acá: el detalle de cada módulo está en su docstring y en `../docs/`. El alcance que manda es el **MVP 4.3** (`../docs/mvp-alcance.md`).
 
-**Estado (14/11, a la noche):** todas las tareas de abajo están en `dev`, salvo las que dicen otra cosa.
-
-### Back 1 · núcleo, clima y predicción estadística
+### Back 1 (Benja)
 | # | Tarea | Archivo | Hecho cuando |
 |---|---|---|---|
-| 1 | Esqueleto, contrato Pydantic y mock para el front | `main.py`, `api/` | El front puede trabajar con el mock y `/analizar` responde con la forma del contrato |
-| 2 | NASA POWER mensual, últimas 30 campañas | `clima/power.py` | **Un solo pedido** mensual (`PRECTOTCORR_SUM`, `T2M`, `T2M_MIN`, `T2M_MAX`, `T2M_RANGE`, comunidad `AG`) hasta el año en curso, con las últimas 30 campañas completas de julio a junio (hoy 1996/97 a 2025/26). La última campaña de POWER es la campaña de toda la salida: `servicio.py` se la pasa a `ndvi.calcular` y a la erosión. Descarta la clave `AAAA13` (anual) y los meses −999. `T2M_MIN`/`T2M_MAX` mensuales son extremos del mes (heladas, días ≥ 35 °C); `T2M` y `T2M_RANGE` son medias (Hargreaves). No mezclar con la climatología precalculada de POWER (otro período, extremos absolutos) |
-| 3 | Indicadores climáticos | `clima/indicadores.py` | `clima_mensual` (lluvia, mínima y máxima media, años con helada, años con ≥ 35 °C, por mes); balance hídrico (lluvia − ET0 de Hargreaves); mes de "helada frecuente" si tuvo mínima < 0 °C en ≥ 1 de cada 3 años; terciles seco/normal/húmedo por balance de la campaña (si falta la ET, por lluvia, y se dice); `clima_celda` (bbox de la celda de POWER y posición del lote) |
-| 4 | **Probabilidad climatológica** (RF25, Must) | `clima/probabilidad.py` | Por estrategia, frecuencia en las 30 campañas de los eventos de su calendario: helada con cultivo sensible, siembra con menos de la mitad de la lluvia normal, máxima ≥ 35 °C. Devuelve `probabilidades: [{evento, mes, cultivo, anios, de, pct, texto, fuente}]` con texto fijo ("Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)") |
-| 5 | **Contraste con mediciones** (RF15) | `clima/correccion.py` | Pluviómetro contra POWER: `contraste_mediciones` con valor del productor, valor NASA, diferencia %, confianza resultante (diferencia > 15 % → "baja") y un `corregido_al_lado` informativo. Con planilla: en las **mismas campañas** (`campanas_comparadas`, `detalle_campanas`), y heladas y calor por mes contra NASA (1 de cada 3 campañas en común de diferencia, mínimo 1 → confianza baja en `meses_helada_frecuente`). Alcanza 1 año de registro (`MIN_ANIOS_REGISTRO = 1`). **El contraste no puntúa**; la mezcla en los puntajes la hace el motor. Sin mediciones, devuelve la lista vacía |
-| 6 | Orquestación | `servicio.py` | `analizar()` llama a `clima/`, `satelite/` y `motor/` y arma la `Salida` completa, con "Información que falta". Le pasa al motor las mediciones (`lluvia_anual_mm`, `anios_registro`, `serie_mensual`; no la materia orgánica). Si el NDVI observado no coincide con la rotación cargada (2 meses o más), lo manda a "Revisar con el agrónomo" (RF14) |
-| 7 | Serie por campaña (RF24, Could) | `clima/indicadores.py` | `serie_anual`: lluvia (y balance si existe) de cada una de las 30 campañas, su tercio, el promedio de las últimas 10 contra las 20 previas. Describe, no proyecta |
-| 8 | Ruta de la planilla (RF26) | `api/rutas.py` | `POST /mediciones/planilla` (multipart, hasta 1 MB) → `ResultadoPlanilla`; 200, 422 o 413. Usa `mediciones.planilla.leer_planilla` cuando llega el parser (PR #55) |
-| 9 | **Pendiente:** prioridades de 1 a 5 | `api/contrato.py` | `Prioridades` con `ge=1` (hoy acepta 0; el motor ya lleva un 0 a 1) |
+| 1 | **`CapaRaster` en el contrato** (paso 1 de `../docs/plan-armonizacion-capas.md`) | `api/contrato.py` + mock | Ver el detalle abajo. Destraba al front (Tobias ya tiene `lib/capaRaster.ts` y `CapaRasterLote.tsx` en #25) y a Back 2, que arma las capas |
+| 2 | **Conectar las capas nuevas** en la salida | `servicio.py` | `salida.capas.pendiente_mapa`, `cultivo_mapa` y `grilla` salen de `satelite/capas.py` (PR de Back 2 en curso: `luca/feat/satelite-grilla`). Si una capa falla, va a `capas.no_disponibles` con el motivo, sin romper `/analizar` |
+| 3 | Regenerar el mock después del cambio de contrato | `api/mock.py`, `mock_rio_cuarto.json` | El mock trae `CapaRaster` de ejemplo para que el front pruebe |
 
+**Detalle de `CapaRaster` para Benja** (sección 5 del plan de armonización; **todo aditivo y opcional**, sin romper lo que hay):
+```python
+class EscalaCapa(BaseModel):
+    cortes: list[float]
+    colores: list[str]          # hex, uno por clase
+    etiquetas: list[str]
 
-### Back 2 · datos satelitales del lote
+class ResumenCapa(BaseModel):
+    media: float | None
+    min: float | None
+    max: float | None
+    pixeles: int                # píxeles dentro del lote con dato
+
+class CapaRaster(BaseModel):
+    id: str                     # "pendiente" | "cultivo" | "ndvi" | "erosion"
+    titulo: str
+    unidad: str
+    fuente: str
+    fecha: str | None = None    # escena (NDVI) o "estática"
+    campana: str | None = None
+    resolucion_nativa: str      # "30 m", "250 m (MODIS, respaldo)", …
+    resolucion_grilla: str      # "1″ (~30 m)"
+    bounds: list[list[float]]   # [[sur, oeste], [norte, este]], iguales para todas las capas
+    ancho: int
+    alto: int
+    png: str                    # base64; transparente fuera del lote
+    valores: str | None = None  # base64 de int16 little-endian (<i2), por filas, fila 0 = norte, columna 0 = oeste
+    factor: float = 1.0         # valor real = entero × factor
+    nodata: int = -32768
+    escala: EscalaCapa
+    resumen: ResumenCapa
+    confianza: Literal["alta", "media", "baja", "sin_dato"]
+    nota: str | None = None
+
+class GrillaLote(BaseModel):
+    bounds: list[list[float]]
+    ancho: int
+    alto: int
+    paso: float                 # grados (1/3600 o 2/3600)
+```
+En `Capas` se agregan: `pendiente_mapa: CapaRaster | None = None`, `cultivo_mapa: CapaRaster | None = None`, `erosion_mapa: CapaRaster | None = None`, `grilla: GrillaLote | None = None`. En `CapaNdviMes`: `mapa: CapaRaster | None = None` (paso 4, más adelante). Los campos que ya existen no cambian. El front copia estos tipos a `src/lib/contrato.ts`.
+
+### Back 2 (Luca)
 | # | Tarea | Archivo | Hecho cuando |
 |---|---|---|---|
-| 1 | Cliente de Planetary Computer | `satelite/pc.py` | Búsqueda STAC y `item/statistics` sobre un polígono, con timeout y sin excepciones hacia afuera |
-| 2 | Lote y validación agrícola | `satelite/lote.py`, `satelite/cobertura.py` | `lote.py`: recibe el polígono GeoJSON (`[lon, lat]`) que dibujó el usuario o el lote de ejemplo; valida de 1 a 20.000 ha y sin líneas cruzadas; calcula área, centroide y bbox. `cobertura.py`: WorldCover dice qué % del polígono es cultivo (clase 40). Si no es agrícola → "Marcá un lote de campo" |
-| 3 | Pendiente | `satelite/elevacion.py` | NASADEM recortado al bbox como array (`item/crop/.npy`), solo con los píxeles dentro del polígono → plano por mínimos cuadrados → pendiente general y máxima (%). AWS Terrain Tiles de respaldo. En el lote demo ≈ 0,6 %. Probar también con un lote grande (20.000 ha) para el tamaño y el tiempo |
-| 4 | NDVI · visto por satélite (RF14) | `satelite/ndvi.py` | **HLS 30 m** (`hls2-s30` + `hls2-l30`): por cada mes de la última campaña, la escena con menos nubes (< 30 %) y el NDVI medio del polígono → `visto_por_satelite: {campana, fuente, meses[12]: {fecha, ndvi_medio, nubes_escena} \| null, meses_ndvi_bajo, umbral: 0.3}`. 12 meses en paralelo. **MODIS MOD13Q1 de respaldo** para los meses sin escena limpia (se dice en la fuente) |
-| 5 | ET satelital | `satelite/et.py` | ET real anual de MODIS (escala 0,1 → mm/año), para mostrarla al lado del balance de Back 1 |
-| 6 | Capas del mapa | `satelite/capas.py` | `ndvi_mensual[12]`: la escena HLS de cada mes (colección, item, fecha), para que el front arme las teselas de Planetary Computer sin repetir la búsqueda. Erosión: pendiente × meses de cobertura baja (valor del lote) |
-| 7 | Demo precalculada | `scripts/precalcular_demo.py`, `demo/rio_cuarto.json` | El JSON sale de `servicio.analizar()` para el lote demo, con los puntajes del motor. Se regenera después de cada cambio de contrato o del motor, y antes del congelamiento |
-| 8 | Deploy y merges | Cloud Run, `dev` | `/analizar` deployado y respondiendo en menos de 30 s (`DEPLOY.md`) |
-| 9 | Parser de la planilla (RF26) | `mediciones/planilla.py` | **En PR #55.** `leer_planilla(bytes)` → `ResultadoPlanilla`: codificación, separador y decimal detectados, diario o mensual, lluvia y temperaturas, campañas julio–junio, avisos y errores por fila |
-| 10 | Capas armonizadas | `satelite/grilla.py`, `raster.py`, `escalas.py` y los módulos de capas | **Planificado** (`../docs/plan-armonizacion-capas.md`): grilla común de 1″, rasters con PNG y valores por píxel, números del lote como resumen de su capa |
+| 1 | **Armonización, pasos 2 y 3** (en curso, sesión `armonizacion-capas`) | `satelite/grilla.py`, `raster.py`, `escalas.py`, `pc.raster_en_grilla`, `elevacion.py`, `cobertura.py`, `capas.py` | Grilla común de 1″ con máscara; pendiente y cultivo como `CapaRaster`; la pendiente general (≈ 0,6 % en el lote de ejemplo) y el % de cultivo salen como resumen de sus capas. PR a `dev` |
+| 2 | Armonización, paso 4 (si hay tiempo) | `ndvi.py`, `capas.py` | El raster de cada mes sobre la grilla y la media del lote desde el raster (`CapaNdviMes.mapa`) |
+| 3 | Armonización, paso 5 (si hay tiempo) | `capas.py` | Erosión por píxel = pendiente × meses bajos del píxel (`erosion_mapa`) |
+| 4 | **Regenerar la demo** | `scripts/precalcular_demo.py` → `demo/rio_cuarto.json` | Después del #57 (prioridades de 1 a 5), después de cada paso de la armonización y **antes del congelamiento** (domingo 12:00) |
+| 5 | **Deploy estable** | Cloud Run (`DEPLOY.md`) | Cuando la persona 3 mergee `dev` → `main`: deploy, prueba de `/salud` y `/analizar` con el lote de ejemplo, URL al front, `--min-instances=1` para la demo |
+| 6 | Mergear a `dev` | GitHub | Revisar la descripción de cada PR (sobre todo los de Benja) antes de mergear |
+
+### Front (para coordinar, no es del back)
+- **Tobias (#12):** barritas de **1 a 5**; hoy `min={0}` da 422 en `/analizar`.
+- **Tobias (#18):** campo de años de registro y la planilla CSV (`POST /mediciones/planilla`).
+- **Tobias (#25, en la auditoría):** NDVI con la escena del back (`capas.ndvi_mensual[mes]`) y la leyenda de clima con `clima_mensual` (hoy muestra valores ilustrativos).
+- **Front 2:** `cercania.ts` con las prioridades al cuadrado (`Σ p²·v / Σ p²`), igual que el motor.
 
 ### Decidido (ya no se discute)
 - **Orden de los meses:** índice 0 = enero en todos los arrays de 12 (back y front). La campaña es julio–junio.
 - **Campaña de la salida:** la última completa de POWER (hoy 2025/26), también para el NDVI, la erosión y las capas.
-- **Umbral de cobertura baja:** NDVI < 0,3 sobre HLS. Si un mes cae a MODIS de respaldo, la fuente del mes lo dice (MODIS mezcla el lote con los vecinos).
-- **Mediciones del productor (MVP 4.3):** se muestran al lado (`correccion.py`, no puntúa) **y** se mezclan en los puntajes del motor según los años de registro. Las probabilidades salen solo de NASA. La materia orgánica no puntúa.
-- **Prioridades de 1 a 5**, que pesan al cuadrado en la cercanía (el front repite la cuenta en `cercania.ts`).
-- Probabilidad climatológica sí (Must) · sin tendencias ni años análogos · sin modelo de predicción entrenado · NDVI del lote con HLS · POWER con un solo período de 30 campañas.
+- **Umbral de cobertura baja:** NDVI < 0,3 sobre HLS. Si un mes cae a MODIS de respaldo, la fuente del mes lo dice.
+- **Mediciones del productor (MVP 4.3):** al lado (`correccion.py`, no puntúa) **y** mezcladas en los puntajes del motor según los años de registro. Las probabilidades salen solo de NASA. La materia orgánica no puntúa.
+- **Prioridades de 1 a 5**, al cuadrado en la cercanía (#57).
+- **Capas:** el back calcula y el front dibuja, con `CapaRaster` (`valores` en int16 little-endian, fila 0 = norte; confirmado con el front en #25).
 
 ### Abierto
-- **Formato de las capas armonizadas** (`CapaRaster`): propuesto en `../docs/plan-armonizacion-capas.md`; lo acuerdan Back 1 (contrato), Back 2 y Front 1 (PR #25).
 - **Qué confianza lleva cada indicador** (alta / media / baja), según la resolución, los años y el contraste con la medición.
+- **Escala de clases de la erosión** (persona 3).
 
 ## 3. Interfaz entre Back 1 y Back 2
 Back 2 expone funciones en `satelite/`; **Back 1 las llama desde `servicio.py`**. Back 2 nunca edita `servicio.py`.
