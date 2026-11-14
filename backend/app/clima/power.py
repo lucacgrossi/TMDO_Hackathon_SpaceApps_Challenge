@@ -9,7 +9,7 @@ Convenciones
 - En todos los arrays de 12 meses, **el índice 0 es enero** (11 = diciembre),
   aunque la campaña arranque en julio. La campaña "2021/22" tiene en el índice
   6 julio de 2021 y en el índice 0 enero de 2022.
-- Una campaña entra solo si tiene los 12 meses completos en los 3 parámetros.
+- Una campaña entra solo si tiene los 12 meses completos en los 5 parámetros.
   Se descartan las claves ``AAAA13`` (total o valor anual) y los faltantes
   (``-999``, el ``fill_value`` de POWER).
 - ``pedir_power`` nunca lanza excepción: si algo falla devuelve ``ok=False``
@@ -29,10 +29,21 @@ Qué es cada parámetro (verificado el 14/11/2026)
   exacto con el mínimo de los ``T2M_MIN`` diarios (y el máximo de los
   ``T2M_MAX`` diarios), no con su promedio (julio 2020: mensual −1,84 °C =
   mínimo diario −1,84 °C; la media de las mínimas diarias es 2,12 °C).
-  Sirven para "hubo helada en el mes" (mínima < 0 °C) o "hubo un día ≥ 35 °C",
-  pero **no para Hargreaves**, que necesita medias. En el mismo chequeo, el
-  ``T2M`` mensual coincide con la media diaria y ``T2M_RANGE`` mensual con la
-  media de la amplitud diaria (máxima − mínima), que es lo que usa Hargreaves.
+  **Sirven para contar heladas** (mínima < 0 °C en el mes) **y días de
+  ≥ 35 °C** (máxima ≥ 35 °C en el mes). **No sirven para Hargreaves**, que
+  necesita medias.
+- ``T2M``: **temperatura media del mes** (°C). Definición: "The average air
+  (dry bulb) temperature at 2 meters" (mismo endpoint, parámetro T2M). En el
+  chequeo de 2020 coincide exacto con la media de los ``T2M`` diarios. Es la
+  T media que usa Hargreaves en ``clima/indicadores.py`` (PR 3).
+- ``T2M_RANGE``: **amplitud térmica diaria media del mes** (°C), es decir, la
+  media de (máxima − mínima) de cada día. Es el (Tmax − Tmin) de Hargreaves:
+  ET0 = 0,0023 · Ra · (T2M + 17,8) · √T2M_RANGE. Ojo: la definición de POWER
+  ("The difference between the minimum and maximum hourly air [...]
+  temperature [...] in the period of interest") leída literal parecería la
+  amplitud extrema del mes, pero los datos dicen otra cosa: en julio 2020 el
+  mensual es 14,27 °C = media de las amplitudes diarias (14,27 °C), mientras
+  que T2M_MAX − T2M_MIN del mes da 25,36 °C. Los 12 meses de 2020 coinciden.
 """
 
 from __future__ import annotations
@@ -46,7 +57,7 @@ import certifi
 import httpx
 
 URL_POWER = "https://power.larc.nasa.gov/api/temporal/monthly/point"
-PARAMETROS = ("PRECTOTCORR_SUM", "T2M_MIN", "T2M_MAX")
+PARAMETROS = ("PRECTOTCORR_SUM", "T2M", "T2M_MIN", "T2M_MAX", "T2M_RANGE")
 FUENTE = "NASA POWER mensual (comunidad AG)"
 RESOLUCION = "~50 km (0,5° × 0,625°)"
 TIMEOUT_S = 15.0
@@ -65,12 +76,18 @@ class Campana:
     etiqueta: str  # "2021/22"
     anio_inicio: int  # 2021 (julio–diciembre de este año, enero–junio del siguiente)
     lluvia_mm: list[float]  # PRECTOTCORR_SUM, mm/mes
+    t_media_c: list[float]  # T2M, °C: media del mes (para Hargreaves)
     t_min_c: list[float]  # T2M_MIN, °C: mínima más baja del mes (extremo, no media)
     t_max_c: list[float]  # T2M_MAX, °C: máxima más alta del mes (extremo, no media)
+    amplitud_diaria_c: list[float]  # T2M_RANGE, °C: media de (máx − mín) diaria (para Hargreaves)
 
     @property
     def lluvia_total_mm(self) -> float:
         return sum(self.lluvia_mm)
+
+    @property
+    def t_media_anual_c(self) -> float:
+        return sum(self.t_media_c) / 12
 
 
 @dataclass
@@ -135,14 +152,16 @@ def armar_serie(respuesta: dict[str, Any]) -> SeriePower:
         valores = [[s.get(k) for k in claves] for s in series]
         if not all(_valido(v) for fila in valores for v in fila):
             continue  # campaña incompleta en algún mes o parámetro
-        lluvia, t_min, t_max = ([float(v) for v in fila] for fila in valores)
+        lluvia, t_media, t_min, t_max, amplitud = ([float(v) for v in fila] for fila in valores)
         campanas.append(
             Campana(
                 etiqueta=f"{y}/{str(y + 1)[2:]}",
                 anio_inicio=y,
                 lluvia_mm=lluvia,
+                t_media_c=t_media,
                 t_min_c=t_min,
                 t_max_c=t_max,
+                amplitud_diaria_c=amplitud,
             )
         )
 
@@ -172,7 +191,8 @@ _cache: dict[tuple[float, float, int], SeriePower] = {}
 def pedir_power(lat: float, lon: float) -> SeriePower:
     """Pide POWER mensual para el punto y devuelve las últimas 30 campañas julio–junio.
 
-    Un solo GET con ``PRECTOTCORR_SUM``, ``T2M_MIN`` y ``T2M_MAX`` desde el año
+    Un solo GET con ``PRECTOTCORR_SUM``, ``T2M``, ``T2M_MIN``, ``T2M_MAX`` y
+    ``T2M_RANGE`` desde el año
     actual − 32 hasta el año actual − 1. Guarda en memoria por celda de POWER
     (solo los pedidos que salieron bien). Nunca lanza excepción.
     """
@@ -231,4 +251,6 @@ if __name__ == "__main__":
     print(f"Celda:      {s.celda}")
     print(f"Período:    {s.periodo}")
     print(f"n:          {s.n} campañas")
+    t_media = sum(c.t_media_anual_c for c in s.campanas) / s.n
     print(f"Lluvia media anual (julio–junio): {media:.0f} mm")
+    print(f"T2M media anual: {t_media:.1f} °C")

@@ -33,7 +33,8 @@ def test_arma_30_campanas_julio_junio(respuesta):
     assert s.fuente == "NASA POWER mensual (comunidad AG)"
     assert s.resolucion == "~50 km (0,5° × 0,625°)"
     for c in s.campanas:
-        assert len(c.lluvia_mm) == len(c.t_min_c) == len(c.t_max_c) == 12
+        assert len(c.lluvia_mm) == len(c.t_media_c) == len(c.t_min_c) == 12
+        assert len(c.t_max_c) == len(c.amplitud_diaria_c) == 12
 
 
 def test_indice_0_es_enero(respuesta):
@@ -43,6 +44,24 @@ def test_indice_0_es_enero(respuesta):
     assert c.lluvia_mm[6] == P["PRECTOTCORR_SUM"]["202107"]  # julio 2021
     assert c.t_min_c[5] == P["T2M_MIN"]["202206"]  # junio 2022
     assert c.t_max_c[11] == P["T2M_MAX"]["202112"]  # diciembre 2021
+    assert c.t_media_c[1] == P["T2M"]["202202"]  # febrero 2022
+    assert c.amplitud_diaria_c[7] == P["T2M_RANGE"]["202108"]  # agosto 2021
+
+
+def test_media_y_amplitud_son_medias_y_min_max_extremos(respuesta):
+    # T2M_MIN/MAX son extremos del mes; T2M y T2M_RANGE, medias de los diarios.
+    # Entonces la media queda entre los extremos y la amplitud diaria media es
+    # menor que la amplitud extrema del mes, en todos los meses.
+    for c in power.armar_serie(respuesta).campanas:
+        for m in range(12):
+            assert c.t_min_c[m] < c.t_media_c[m] < c.t_max_c[m]
+            assert 0 < c.amplitud_diaria_c[m] < c.t_max_c[m] - c.t_min_c[m]
+
+
+def test_t2m_media_anual_del_lote_demo(respuesta):
+    s = power.armar_serie(respuesta)
+    t_media = sum(c.t_media_anual_c for c in s.campanas) / s.n
+    assert 15 <= t_media <= 18
 
 
 def test_no_usa_claves_anuales_13(respuesta):
@@ -62,7 +81,7 @@ def test_lluvia_media_anual_del_lote_demo(respuesta):
     assert 800 <= media <= 850
 
 
-@pytest.mark.parametrize("parametro", ["PRECTOTCORR_SUM", "T2M_MIN", "T2M_MAX"])
+@pytest.mark.parametrize("parametro", power.PARAMETROS)
 def test_descarta_campana_con_faltante(respuesta, parametro):
     respuesta["properties"]["parameter"][parametro]["201103"] = -999.0  # marzo de 2010/11
     s = power.armar_serie(respuesta)
@@ -135,6 +154,7 @@ def test_pide_una_vez_por_celda(monkeypatch, respuesta):
     b = power.pedir_power(power.LAT_DEMO + 0.05, power.LON_DEMO - 0.05)  # misma celda
     assert a.ok and b is a and len(pedidos) == 1
     p = pedidos[0]
-    assert p["parameters"] == "PRECTOTCORR_SUM,T2M_MIN,T2M_MAX" and p["community"] == "AG"
+    assert p["parameters"] == "PRECTOTCORR_SUM,T2M,T2M_MIN,T2M_MAX,T2M_RANGE"
+    assert p["community"] == "AG"
     assert p["end"] - p["start"] == 31
     assert a.celda == (-33.0, -64.375)
