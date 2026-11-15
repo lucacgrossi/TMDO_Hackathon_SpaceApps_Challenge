@@ -311,11 +311,28 @@ class TiposDeAnio(BaseModel):
     umbral_humedo_mm: float = Field(description="Valor mínimo del tercio húmedo")
 
 
+class MesesCampana(BaseModel):
+    """Los 12 meses de una campaña (RF24, 4.5). Índice 0 = enero, como el resto del contrato:
+    en la campaña 2024/25, enero es de 2025 y julio es de 2024. ET0 y balance van `None` si
+    falta la ET0 (mismo caso que `CampanaSerie.balance_mm`)."""
+
+    lluvia_mm: list[float] = Field(min_length=12, max_length=12)
+    t_min_c: list[float] = Field(
+        min_length=12, max_length=12,
+        description="Mínima MÁS BAJA del mes (T2M_MIN es extremo); se compara con clima_mensual.minima_media_c")
+    t_max_c: list[float] = Field(
+        min_length=12, max_length=12,
+        description="Máxima MÁS ALTA del mes (T2M_MAX es extremo); se compara con clima_mensual.maxima_media_c")
+    et0_mm: list[float] | None = Field(default=None, min_length=12, max_length=12)
+    balance_mm: list[float] | None = Field(default=None, min_length=12, max_length=12)
+
+
 class CampanaSerie(BaseModel):
     campana: str
     lluvia_mm: float
     balance_mm: float | None
     tipo: TipoAnio
+    mensual: MesesCampana | None = None
 
 
 class SerieAnual(BaseModel):

@@ -4,6 +4,9 @@ Entra el `ResultadoClima` de `clima/indicadores.py` y sale la `SerieAnual` del c
 lluvia (y el balance, si hay ET0) de cada campaña julio–junio, en orden cronológico, con el
 tercio que ya le asignó `indicadores.py`. Mismo período y misma celda que el resto del clima.
 
+Cada campaña trae también sus 12 meses (`mensual`: lluvia, T mín, T máx, ET0 y balance, con
+índice 0 = enero) para elegirla en Clima histórico y verla contra la media de 30 años (4.5).
+
 Con n campañas se toma k = min(10, n // 3), como `serieHTML()` del prototipo:
 - `ultimas_10_mm`: lluvia media de las últimas k campañas.
 - `previas_20_mm`: lluvia media de las n − k anteriores.
@@ -18,8 +21,8 @@ Correr desde backend/:  py -m app.clima.serie
 
 from __future__ import annotations
 
-from app.api.contrato import CampanaSerie, SerieAnual
-from app.clima.indicadores import ResultadoClima, calcular
+from app.api.contrato import CampanaSerie, MesesCampana, SerieAnual
+from app.clima.indicadores import CampanaClima, ResultadoClima, calcular
 from app.clima.power import FUENTE, LAT_DEMO, LON_DEMO, RESOLUCION, pedir_power
 
 MAX_ULTIMAS = 10
@@ -32,6 +35,16 @@ def ventana(n: int) -> int:
 
 def _media(valores: list[float]) -> float:
     return sum(valores) / len(valores)
+
+
+def _r(valores: list[float] | None) -> list[float] | None:
+    return [round(v, 1) for v in valores] if valores is not None else None
+
+
+def meses(c: CampanaClima) -> MesesCampana:
+    """Los 12 meses de la campaña, redondeados a 0,1 (índice 0 = enero)."""
+    return MesesCampana(lluvia_mm=_r(c.lluvia_mm), t_min_c=_r(c.t_min_c), t_max_c=_r(c.t_max_c),
+                        et0_mm=_r(c.et0_mm), balance_mm=_r(c.balance_mm))
 
 
 def serie_anual(clima: ResultadoClima) -> SerieAnual | None:
@@ -51,6 +64,7 @@ def serie_anual(clima: ResultadoClima) -> SerieAnual | None:
                 lluvia_mm=round(c.lluvia_total_mm),
                 balance_mm=round(c.balance_total_mm) if c.balance_total_mm is not None else None,
                 tipo=c.tipo,
+                mensual=meses(c),
             )
             for c in campanas
         ]
