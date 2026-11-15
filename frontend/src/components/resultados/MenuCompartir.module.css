@@ -1,0 +1,52 @@
+/* Menú Compartir (persona 5): se abre debajo del botón, alineado a la derecha. */
+
+.raiz {
+  position: relative;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  right: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  min-width: 200px;
+  padding: var(--space-1);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--papel);
+  box-shadow: var(--sombra-pixel);
+}
+
+.opcion {
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--noche);
+  font: inherit;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+/* La opción con foco se marca también con fondo: el menú mueve el foco con las flechas aunque se haya abierto con el mouse. */
+.opcion:hover,
+.opcion:focus {
+  background: var(--soft);
+}
+
+.opcion:focus-visible {
+  outline: 2px solid var(--cielo);
+  outline-offset: -2px;
+}
+
+@media print {
+  .raiz {
+    display: none;
+  }
+}

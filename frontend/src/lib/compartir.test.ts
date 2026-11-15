@@ -31,7 +31,7 @@ describe("resumen para compartir", () => {
 
   it("arranca con el lote, el período de clima, la pendiente y las barras", () => {
     const [titulo, lote, objetivos] = texto.split("\n");
-    expect(titulo).toBe("Field Shift · comparación de rotaciones");
+    expect(titulo).toBe("AgroPixel · comparación de rotaciones");
     // Los datos del lote salen del mock: si cambia el período de clima, el test sigue valiendo
     expect(lote).toBe(`Lote: ${fmt(MOCK_BASE.lote.area_ha)} ha · ${metadatosHoja(MOCK_BASE, FECHA)}`);
     expect(lote).toContain(`Clima NASA POWER ${MOCK_BASE.periodo_clima}`);
