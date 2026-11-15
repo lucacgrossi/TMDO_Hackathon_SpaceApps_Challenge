@@ -37,6 +37,8 @@ export default function PanelEntradas() {
   const hayResultado = useApp((s) => s.hayResultado);
   const volverAMarcar = useApp((s) => s.volverAMarcar);
   const irA = useApp((s) => s.irA);
+  // La sección del dashboard que estaba abierta al ir a editar: se vuelve a esa, no siempre a Mapa.
+  const seccion = useApp((s) => s.seccion);
   const zona = useZona(entradas.poligono);
   const ha = superficie(entradas.poligono);
 
@@ -100,7 +102,7 @@ export default function PanelEntradas() {
             Consulta NASA POWER, HLS, NASADEM y ESA WorldCover. Suele tardar hasta 30 s.
           </p>
           {hayResultado && (
-            <Boton variante="fantasma" onClick={() => irA("mapa")}>
+            <Boton variante="fantasma" onClick={() => irA(seccion)}>
               Volver al análisis anterior
             </Boton>
           )}

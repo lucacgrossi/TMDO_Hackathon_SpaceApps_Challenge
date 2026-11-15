@@ -13,7 +13,7 @@
  * muestra en gris con el motivo. Acá solo se cargan.
  */
 import { useEntradas } from "@/lib/store";
-import { NO_SEMBRAR, type CultivoNoSembrar, type Entradas } from "@/lib/entradas";
+import { NO_SEMBRAR, noSembrarEnLaRotacion, type CultivoNoSembrar, type Entradas } from "@/lib/entradas";
 import { C } from "@/lib/calendario";
 import estilos from "./Campos.module.css";
 
@@ -29,6 +29,8 @@ const RESTRICCIONES: { k: Restriccion; n: string }[] = [
 export default function SeccionRestricciones() {
   const restricciones = useEntradas((s) => s.restricciones);
   const noSembrar = useEntradas((s) => s.noSembrar);
+  const verano = useEntradas((s) => s.verano);
+  const invierno = useEntradas((s) => s.invierno);
   const cambiar = useEntradas((s) => s.cambiar);
 
   const alternar = (k: Restriccion) =>
@@ -39,6 +41,9 @@ export default function SeccionRestricciones() {
     cambiar({
       noSembrar: noSembrar.includes(k) ? noSembrar.filter((x) => x !== k) : [...noSembrar, k],
     });
+
+  // "No sembrar" con un cultivo de la rotación actual: se avisa la contradicción (QA H-025).
+  const enRotacion = noSembrarEnLaRotacion({ verano, invierno, noSembrar });
 
   return (
     <div>
@@ -72,6 +77,26 @@ export default function SeccionRestricciones() {
           </button>
         ))}
       </div>
+      {enRotacion.length > 0 && (
+        <p className={estilos.aviso} role="status">
+          <b>Choca con tu rotación.</b> {textoNoSembrarEnRotacion(enRotacion)}
+        </p>
+      )}
     </div>
+  );
+}
+
+/**
+ * "Marcaste no sembrar trigo, que está en tu rotación actual. La columna
+ * Actual se compara igual; la restricción solo cambia o descarta las
+ * alternativas A, B y C que lo usan."
+ */
+function textoNoSembrarEnRotacion(cultivos: CultivoNoSembrar[]): string {
+  const nombres = cultivos.map((k) => C[k].n.toLowerCase());
+  const lista = nombres.length === 1 ? nombres[0] : `${nombres.slice(0, -1).join(", ")} y ${nombres[nombres.length - 1]}`;
+  const uno = cultivos.length === 1;
+  return (
+    `Marcaste no sembrar ${lista}, ${uno ? "que está" : "que están"} en tu rotación actual. ` +
+    `La columna Actual se compara igual; la restricción solo cambia o descarta las alternativas A, B y C que ${uno ? "lo" : "los"} usan.`
   );
 }

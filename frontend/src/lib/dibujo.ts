@@ -56,7 +56,8 @@ export function textosBarra(puntos: LatLng[]): { titulo: string; ayuda: string; 
   let titulo: string;
   if (n < 3) titulo = `Marcá las esquinas del lote: ${esquinas(n)}`;
   else if (cruza) titulo = esquinas(n); // con las líneas cruzadas la superficie no tiene sentido
-  else titulo = `Lote de ${formatoNumero(ha, ha < 10 ? 1 : 0)} ha, ${esquinas(n)}`;
+  // Un decimal debajo de 100 ha, igual que el panel (`superficie` de resumenEntradas; QA H-027).
+  else titulo = `Lote de ${formatoNumero(ha, ha < 100 ? 1 : 0)} ha, ${esquinas(n)}`;
 
   let ayuda: string;
   if (n === 0) ayuda = "Hacé clic en el mapa para marcar la primera esquina.";

@@ -74,6 +74,18 @@ export interface Entradas {
 }
 
 /**
+ * Cultivos de "No sembrar" que están en la rotación actual (verano o
+ * invierno), en el orden de la lista. El panel avisa la contradicción
+ * (QA H-025); la columna "Actual" se compara igual.
+ */
+export function noSembrarEnLaRotacion(
+  e: Pick<Entradas, "verano" | "invierno" | "noSembrar">,
+): CultivoNoSembrar[] {
+  const rotacion: string[] = [e.verano, e.invierno];
+  return NO_SEMBRAR.filter((k) => e.noSembrar.includes(k) && rotacion.includes(k));
+}
+
+/**
  * Lote de referencia de los tests y del mock: campo real cerca de Río Cuarto,
  * ~95 ha. La app no lo ofrece ni lo carga: el productor siempre marca el suyo.
  */
@@ -101,7 +113,9 @@ export const ENTRADAS_INICIALES: Entradas = {
   objetivos: { agua: 3, suelo: 3, erosion: 3, ingreso: 3 },
   restricciones: { sinRiego: true, sinHacienda: false, maquinariaLimitada: false },
   noSembrar: [],
-  anegable: "no",
-  textura: "franco",
+  // "No sé" hasta que el productor elija: así el back los marca como faltantes
+  // en vez de usarlos como dato del lote (QA H-011, "Nada inventado").
+  anegable: "no_se",
+  textura: "no_se",
   mediciones: { planilla: null },
 };

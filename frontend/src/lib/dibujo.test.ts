@@ -26,6 +26,12 @@ describe("dibujo · reglas y textos de la barra", () => {
     expect(t.error).toBe(false);
   });
 
+  it("debajo de 100 ha muestra un decimal, igual que el panel (QA H-027)", () => {
+    // La mitad del cuadrado: ~51 ha.
+    const mitad: LatLng[] = [CUADRADO[0], [-33.24, -64.2345], [-33.249, -64.2345], CUADRADO[3]];
+    expect(textosBarra(mitad).titulo).toMatch(/^Lote de \d{2},\d ha, 4 esquinas$/);
+  });
+
   it("un moño se marca como error", () => {
     const mono: LatLng[] = [CUADRADO[0], CUADRADO[2], CUADRADO[1], CUADRADO[3]];
     const t = textosBarra(mono);
