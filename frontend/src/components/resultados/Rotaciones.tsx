@@ -20,12 +20,17 @@ export default function Rotaciones({ salida }: { salida: Salida }) {
 
   return (
     <div className={css.rotaciones}>
-      <div className={css.prioridades}>
-        <SeccionObjetivos />
+      <section className={css.prioridades} aria-labelledby="titulo-prioridades">
+        <h2 id="titulo-prioridades" className={css.tituloPrioridades}>
+          Tus prioridades
+        </h2>
+        <div className={css.sliders}>
+          <SeccionObjetivos />
+        </div>
         <p className={css.nota}>
           Mover una prioridad recalcula la cercanía en el navegador (Σ p²·v / Σ p²); no vuelve a consultar a NASA.
         </p>
-      </div>
+      </section>
 
       <ChoqueObjetivos salida={salida} pesos={pesos} />
 
