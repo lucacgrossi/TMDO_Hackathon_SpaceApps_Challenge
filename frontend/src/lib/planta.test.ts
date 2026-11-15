@@ -39,9 +39,11 @@ describe("fotogramaPlanta", () => {
     expect(fotogramaPlanta(950, false)).toBe(3);
   });
 
-  it("el quinto queda fijo desde los 1,2 s", () => {
+  it("en bucle: la planta entera queda hasta los 2,1 s y vuelve a la semilla", () => {
     expect(fotogramaPlanta(1200, false)).toBe(4);
-    expect(fotogramaPlanta(60_000, false)).toBe(4);
+    expect(fotogramaPlanta(2099, false)).toBe(4);
+    expect(fotogramaPlanta(2100, false)).toBe(0);
+    expect(fotogramaPlanta(2100 + 950, false)).toBe(3);
   });
 
   it("con movimiento reducido siempre muestra el de 4 hojas", () => {
