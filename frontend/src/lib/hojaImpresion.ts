@@ -48,16 +48,21 @@ function conDetalle(fuente: string, ...detalle: (string | null | undefined)[]): 
   return d.length ? `${fuente} (${d.join(", ")})` : fuente;
 }
 
-/** Nombre de la fuente sin el detalle: lo que va antes de " (" o " · ". */
+/**
+ * Nombre de la fuente sin el detalle: lo que va antes de " (", " · " o " + ".
+ * "NASA HLS 30 m + MODIS 250 m (…)" y "NASA HLS 30 m (Landsat + Sentinel-2) …"
+ * son la misma fuente: "NASA HLS 30 m".
+ */
 function nombreFuente(f: string): string {
-  return f.split(/ \(| · /)[0].trim();
+  return f.split(/ \(| · | \+ /)[0].trim();
 }
 
 /**
  * Fuentes del análisis con sus años y resoluciones, una por fuente y en este
  * orden: clima, satélite, indicadores del lote y probabilidades. Si dos textos
- * nombran la misma fuente (la probabilidad repite la de POWER con otro
- * formato), queda el primero. Los textos vienen del back tal cual.
+ * nombran la misma fuente (la probabilidad repite la de POWER; el satélite y el
+ * indicador de NDVI describen HLS distinto), queda el más completo. Los textos
+ * vienen del back tal cual.
  */
 export function fuentesDelAnalisis(s: Salida): string[] {
   const cm = s.clima_mensual;
@@ -68,11 +73,19 @@ export function fuentesDelAnalisis(s: Salida): string[] {
     ...Object.values(s.indicadores).map((i) => conDetalle(i.fuente, i.resolucion, i.anios)),
     ...s.estrategias.flatMap((e) => e.probabilidades.map((p) => p.fuente)),
   ];
-  const vistos = new Set<string>();
-  return lista.filter((f) => {
+  // Una por fuente, en el orden en que aparece por primera vez. De dos textos de la
+  // misma fuente queda el que dice más (más palabras); si empatan, el primero.
+  const porNombre = new Map<string, string>();
+  for (const f of lista) {
     const nombre = nombreFuente(f);
-    if (!nombre || vistos.has(nombre)) return false;
-    vistos.add(nombre);
-    return true;
-  });
+    if (!nombre) continue;
+    const previo = porNombre.get(nombre);
+    if (previo == null || palabras(f) > palabras(previo)) porNombre.set(nombre, f);
+  }
+  return [...porNombre.values()];
+}
+
+/** Cuántas palabras tiene un texto, sin contar separadores ni paréntesis. */
+function palabras(f: string): number {
+  return f.replace(/[()·,]/g, " ").split(/\s+/).filter(Boolean).length;
 }

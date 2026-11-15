@@ -345,4 +345,11 @@
   .tabla tr {
     break-inside: avoid;
   }
+
+  /* El título de cada grupo no queda solo al pie de una hoja: va con su primera fila. */
+  .grupo,
+  .grupo th {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
 }

@@ -54,4 +54,16 @@ describe("fuentesDelAnalisis", () => {
     const power = f.filter((x) => x.startsWith(RIO_CUARTO.clima_mensual.fuente.split(" (")[0]));
     expect(power).toHaveLength(1);
   });
+
+  it("une dos textos de la misma fuente y deja el más completo", () => {
+    const corto = "NASA HLS 30 m + MODIS 250 m (respaldo en 1 de 12 meses)";
+    const largo = "NASA HLS 30 m (Landsat + Sentinel-2) y MODIS MOD13Q1 250 m de respaldo en 1 mes, vía Planetary Computer";
+    const s: Salida = {
+      ...RIO_CUARTO,
+      visto_por_satelite: { ...RIO_CUARTO.visto_por_satelite, fuente: corto },
+      indicadores: { ndvi: { ...Object.values(RIO_CUARTO.indicadores)[0], fuente: largo, resolucion: "30 m", anios: "2024/25" } },
+    };
+    const hls = fuentesDelAnalisis(s).filter((x) => x.startsWith("NASA HLS 30 m"));
+    expect(hls).toEqual([`${largo} (30 m, 2024/25)`]);
+  });
 });
