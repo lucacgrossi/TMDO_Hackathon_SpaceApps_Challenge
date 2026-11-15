@@ -180,7 +180,7 @@ th{font-size:12px;color:var(--muted);font-weight:600}
       <div class="clima-grid">
         <div class="panel">
           <h3 id="campTitulo">Campaña 2021/22: seca, 546 mm</h3>
-          <p class="pie muted" style="margin:0 0 8px">Barras: lluvia del mes (oscuro) contra la media de 30 años (claro). Líneas: T máx y T mín medias. Necesita <code>serie_anual.campanas[i].mensual</code> (pedido a Back 1).</p>
+          <p class="pie muted" style="margin:0 0 8px">Barras: lluvia del mes (oscuro) contra la media de 30 años (claro). Líneas: máxima más alta y mínima más baja del mes (extremos de POWER, <code>mensual.t_max_c</code> y <code>t_min_c</code>), a comparar con <code>clima_mensual.maxima_media_c</code> y <code>minima_media_c</code>. Índice 0 = enero; se dibuja de julio a junio rotando <code>[6..11, 0..5]</code>.</p>
           <svg id="graf" viewBox="0 0 760 300" width="100%" role="img" aria-label="Lluvia y temperaturas por mes de la campaña elegida"></svg>
         </div>
         <aside class="panel ficha">
