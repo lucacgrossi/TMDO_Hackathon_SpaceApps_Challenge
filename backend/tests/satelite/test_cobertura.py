@@ -61,7 +61,7 @@ def test_lote_demo(monkeypatch):
     stats = [p for p in pedidos if p.url.path.endswith("/item/statistics")]
     assert len(stats) == 1
     assert "2021_v200" in stats[0].url.params["item"] and stats[0].url.params["categorical"] == "true"
-    assert r["mapa"] is None and "HTTP 404" in r["mapa_motivo"] and "sin capa" in r["cultivo_pct"]["nota"]
+    assert r["mapa"] is None and "no devolvió el dato pedido" in r["mapa_motivo"] and "sin capa" in r["cultivo_pct"]["nota"]
 
 
 def _con_histograma(monkeypatch, *histogramas):
@@ -107,15 +107,37 @@ def test_falla_no_rompe(monkeypatch):
     r = cobertura.calcular(LOTE_EJEMPLO)
     ind = r["cultivo_pct"]
     assert ind["valor"] is None and ind["confianza"] == "sin_dato" and "no respondió" in ind["motivo"]
+    assert ind["motivo"].startswith("No se pudo verificar que el polígono sea un lote de campo")
     assert r["es_agricola"] is None and r["aviso"] is None
 
 
-def test_sin_items_ni_pixeles(monkeypatch):
+def test_planetary_computer_saturado_no_bloquea_y_lo_dice_sin_codigos(monkeypatch):
+    """H-002/H-013: con 429 en WorldCover el análisis sigue, con un motivo para el productor."""
+    monkeypatch.setattr(pc, "_cliente", httpx.Client(transport=httpx.MockTransport(lambda r: httpx.Response(429))))
+    monkeypatch.setattr(pc.time, "sleep", lambda s: None)
+    r = cobertura.calcular(LOTE_EJEMPLO)
+    assert r["es_agricola"] is None and r["aviso"] is None
+    motivo = r["cultivo_pct"]["motivo"]
+    assert "saturado; probá de nuevo en un minuto" in motivo and "HTTP" not in motivo and "429" not in motivo
+
+
+def test_sin_items_ni_pixeles_rechaza_el_poligono(monkeypatch):
+    """H-002: sin datos de WorldCover (por ejemplo, en el mar) el polígono no es un lote de campo."""
     monkeypatch.setattr(pc, "buscar", lambda *a, **k: [{"id": "ESA_WorldCover_10m_2020_v100_S36W066"}])
-    assert cobertura.calcular(LOTE_EJEMPLO)["cultivo_pct"]["confianza"] == "sin_dato"
+    r = cobertura.calcular(LOTE_EJEMPLO)
+    assert r["cultivo_pct"]["confianza"] == "sin_dato"
+    assert r["es_agricola"] is False and r["aviso"] == cobertura.AVISO_SIN_DATOS
     _con_histograma(monkeypatch, [[], []])
     r = cobertura.calcular(LOTE_EJEMPLO)
     assert r["cultivo_pct"]["valor"] is None and "píxeles válidos" in r["cultivo_pct"]["motivo"]
+    assert r["es_agricola"] is False and r["aviso"] == cobertura.AVISO_SIN_DATOS
+    assert "marcá un lote de campo" in cobertura.AVISO_SIN_DATOS
+
+
+def test_busqueda_vacia_en_el_mar_rechaza(monkeypatch):
+    monkeypatch.setattr(pc, "buscar", lambda *a, **k: [])
+    r = cobertura.calcular(LOTE_EJEMPLO)
+    assert r["es_agricola"] is False and r["aviso"].startswith("No hay datos de uso del suelo para este polígono")
 
 
 def test_suma_teselas_en_la_grilla(monkeypatch):

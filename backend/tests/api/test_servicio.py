@@ -195,6 +195,14 @@ def test_lote_no_agricola_da_422_con_el_aviso(monkeypatch):
     assert r.json() == {"mensaje": aviso}
 
 
+def test_poligono_sin_datos_de_worldcover_da_422(monkeypatch):
+    """H-002: un polígono en el mar (WorldCover sin datos) no se analiza como lote agrícola."""
+    monkeypatch.setattr(cobertura, "calcular", lambda p: cobertura._sin_cobertura("sin tesela"))
+    r = cliente.post("/analizar", json=_dibujado())
+    assert r.status_code == 422
+    assert r.json() == {"mensaje": cobertura.AVISO_SIN_DATOS}
+
+
 def _en(lat: float, lon: float, d: float = 0.004) -> dict:
     """Entrada dibujada con un cuadrado de ~2 × d grados centrado en (lat, lon)."""
     e = _dibujado()

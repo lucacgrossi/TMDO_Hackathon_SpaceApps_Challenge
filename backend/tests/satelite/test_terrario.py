@@ -66,7 +66,7 @@ def test_404_no_reintenta(monkeypatch):
         pedidos.append(request)
         return httpx.Response(404)
     monkeypatch.setattr(terrario, "_cliente", _cliente(handler))
-    with pytest.raises(terrario.ErrorTerrario, match="HTTP 404"):
+    with pytest.raises(terrario.ErrorTerrario, match="no tiene la tesela"):
         terrario._bajar(14, 0, 0)
     assert len(pedidos) == 1
 
