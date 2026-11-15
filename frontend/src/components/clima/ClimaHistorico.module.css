@@ -1,0 +1,120 @@
+.seccion {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: var(--noche, #14202b);
+}
+
+.panel {
+  background: var(--papel, #fff);
+  border-radius: 6px;
+  padding: 16px;
+  min-width: 0;
+}
+
+.grilla {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+  align-items: start;
+}
+
+.h2,
+.h3 {
+  margin: 0;
+  font-family: var(--font-pixelify, "Pixelify Sans"), var(--font-plex, "IBM Plex Sans"), sans-serif;
+}
+
+.h2 {
+  font-size: 24px;
+  line-height: 32px;
+  font-weight: 600;
+}
+
+.h3 {
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+
+.pie {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted, #5a6560);
+}
+
+.aviso {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--warn, #a86a0f);
+  background: var(--soft, #e8ece2);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.tercio {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 4px;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+}
+
+.tercio i {
+  width: 12px;
+  height: 12px;
+  background: var(--normal, #a8a29e);
+}
+
+.tercio[data-tipo="seco"] i {
+  background: var(--seco, #c0703a);
+}
+
+.tercio[data-tipo="humedo"] i {
+  background: var(--humedo, #2c7fb8);
+}
+
+.ficha {
+  margin: 0;
+}
+
+.fila {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line, #dce2d6);
+}
+
+.fila:last-child {
+  border-bottom: 0;
+}
+
+.etiqueta {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted, #5a6560);
+}
+
+.valor {
+  margin: 2px 0 0;
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.sinDato {
+  margin: 2px 0 0;
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--muted, #5a6560);
+}
+
+@media (max-width: 1100px) {
+  .grilla {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
