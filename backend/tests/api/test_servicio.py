@@ -122,6 +122,36 @@ def test_salida_valida_con_4_columnas():
     assert s.aviso.startswith("Herramienta de apoyo")
 
 
+def test_que_le_falta_en_numeros_contra_la_columna_con_mas_puntos():
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    disp = [e for e in s.estrategias if e.disponible and e.cercania_objetivos]
+    assert any(e.que_le_falta for e in disp)
+    for e in disp:
+        esperadas = sum(1 for o in servicio.OBJETIVOS
+                        if max(x.cercania_objetivos[o] for x in disp) > e.cercania_objetivos[o])
+        assert len(e.que_le_falta) == esperadas
+        for texto in e.que_le_falta:
+            assert " pts, " in texto and " menos que " in texto
+    for e in s.estrategias:
+        if not e.disponible:
+            assert e.que_le_falta == []
+
+
+def test_que_le_falta_sin_diferencias_queda_vacio_y_no_cuenta_descartadas():
+    from app.api.contrato import Estrategia
+
+    def col(id_, pts, disponible=True):
+        return Estrategia(id=id_, nombre=f"Columna {id_}", especies="", disponible=disponible,
+                          motivo_descarte=None if disponible else "descartada", calendario=None,
+                          resumen="", cercania_objetivos=pts if disponible else None)
+    iguales = {"agua": 50, "suelo": 50, "erosion": 50, "ingreso": 50}
+    cols = [col("actual", iguales), col("A", dict(iguales, suelo=80)), col("B", iguales, disponible=False)]
+    servicio.completar_que_le_falta(cols)
+    assert cols[1].que_le_falta == []
+    assert cols[0].que_le_falta == ["Salud del suelo: 50 pts, 30 menos que A · Columna A (80 pts)"]
+    assert cols[2].que_le_falta == []
+
+
 def test_por_http_responde_200_con_el_contrato():
     r = cliente.post("/analizar", json=ENTRADA)
     assert r.status_code == 200

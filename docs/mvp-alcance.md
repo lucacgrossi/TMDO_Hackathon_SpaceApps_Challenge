@@ -365,7 +365,7 @@ salida: {
     valores: { agua_mm, meses_cobertura_baja, aporte_n, rastrojo, erosion, ingreso, conflictos_helada_calor },
     valores_por_tipo_anio: { seco, normal, humedo },
     diferencia_vs_actual: { agua, suelo, erosion, ingreso },
-    cercania_objetivos: { agua, suelo, erosion, ingreso }, que_le_falta (hoy siempre vacío), sensible_clima,
+    cercania_objetivos: { agua, suelo, erosion, ingreso }, que_le_falta (puntos que le faltan por objetivo frente a la columna con más puntos), sensible_clima,
     reglas_aplicadas: [ { regla, efecto, dato } ],
     probabilidades: [ { evento, mes, cultivo, anios, de, pct, texto, fuente } ],
     evidencia, vacios, riesgos

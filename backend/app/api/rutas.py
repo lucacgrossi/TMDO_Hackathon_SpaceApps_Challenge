@@ -64,7 +64,7 @@ def analizar(entrada: Entrada) -> Salida | JSONResponse:
 
 # --- Planilla de mediciones del productor (docs/plan-planilla-lluvia.md, 5.2) ---
 
-PARSER_PENDIENTE = "Lectura de planillas en preparación: por ahora cargá la lluvia anual a mano"
+PARSER_PENDIENTE = "La lectura de planillas no está disponible en este momento: probá de nuevo en unos minutos"
 
 
 def _cargar_parser():

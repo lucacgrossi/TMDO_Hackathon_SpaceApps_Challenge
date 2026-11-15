@@ -3877,7 +3877,12 @@
     "erosion": 69,
     "ingreso": 32
    },
-   "que_le_falta": [],
+   "que_le_falta": [
+    "Agua (año normal): 65 pts, 22 menos que C · Diversificar el verano (87 pts)",
+    "Salud del suelo: 32 pts, 55 menos que A · Cobertura de invierno (87 pts)",
+    "Erosión: 69 pts, 27 menos que B · Cultivo de invierno comercial (96 pts)",
+    "Ingreso: 32 pts, 40 menos que B · Cultivo de invierno comercial (72 pts)"
+   ],
    "sensible_clima": false,
    "reglas_aplicadas": [
     {
@@ -4099,7 +4104,11 @@
     "erosion": 87,
     "ingreso": 27
    },
-   "que_le_falta": [],
+   "que_le_falta": [
+    "Agua (año normal): 55 pts, 32 menos que C · Diversificar el verano (87 pts)",
+    "Erosión: 87 pts, 9 menos que B · Cultivo de invierno comercial (96 pts)",
+    "Ingreso: 27 pts, 45 menos que B · Cultivo de invierno comercial (72 pts)"
+   ],
    "sensible_clima": false,
    "reglas_aplicadas": [
     {
@@ -4353,7 +4362,10 @@
     "erosion": 96,
     "ingreso": 72
    },
-   "que_le_falta": [],
+   "que_le_falta": [
+    "Agua (año normal): 61 pts, 26 menos que C · Diversificar el verano (87 pts)",
+    "Salud del suelo: 62 pts, 25 menos que A · Cobertura de invierno (87 pts)"
+   ],
    "sensible_clima": false,
    "reglas_aplicadas": [
     {
@@ -4600,7 +4612,11 @@
     "erosion": 89,
     "ingreso": 50
    },
-   "que_le_falta": [],
+   "que_le_falta": [
+    "Salud del suelo: 62 pts, 25 menos que A · Cobertura de invierno (87 pts)",
+    "Erosión: 89 pts, 7 menos que B · Cultivo de invierno comercial (96 pts)",
+    "Ingreso: 50 pts, 22 menos que B · Cultivo de invierno comercial (72 pts)"
+   ],
    "sensible_clima": false,
    "reglas_aplicadas": [
     {

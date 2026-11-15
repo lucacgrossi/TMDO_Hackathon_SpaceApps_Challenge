@@ -187,7 +187,7 @@ Siempre 4, en orden `actual`, `A`, `B`, `C`. Campos:
 | `sensible_clima` | `true` → marcar "sensible al clima" |
 | `probabilidades` | Lista de `Probabilidad`: `{evento: "helada"\|"siembra_seca"\|"calor", mes, cultivo, anios, de, pct, texto, fuente, contraste}`. **Mostrar siempre el conteo** (`texto` ya lo trae: "14 de 30 años (47 %)") y, si hay, `contraste` debajo |
 | `por_que`, `evidencia`, `beneficios`, `vacios`, `riesgos` | **Los 5 puntos de cada columna**: por qué, evidencia, beneficios, información que falta y a revisar con el agrónomo |
-| `que_le_falta`, `reglas_aplicadas` | Trazabilidad (`reglas_aplicadas`: `{regla, efecto, dato}`). `que_le_falta` existe en el contrato, pero `servicio.py` todavía no lo llena: hoy llega siempre `[]` |
+| `que_le_falta`, `reglas_aplicadas` | Trazabilidad (`reglas_aplicadas`: `{regla, efecto, dato}`). `que_le_falta`: por objetivo, cuántos puntos le faltan a la columna para llegar a la columna disponible con más puntos en ese objetivo (ej. "Erosión: 69 pts, 27 menos que B · Cultivo de invierno comercial (96 pts)"). No depende de las prioridades; vacío en la columna que lidera todos los objetivos y en las descartadas |
 
 ### 4.6 Recalcular la cercanía sin llamar a la API
 

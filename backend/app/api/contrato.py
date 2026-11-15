@@ -115,7 +115,10 @@ class MedicionMes(BaseModel):
 
 
 class MedicionesPropias(BaseModel):
-    """Mediciones del productor (RF15). Se muestran al lado de NASA; no cambian puntajes."""
+    """Mediciones del productor (RF15, RF26). Se muestran al lado de NASA (`clima/correccion.py`; el
+    contraste no cambia puntajes) y, desde la 4.3, el motor las mezcla con NASA en los puntajes según
+    sus años de registro (`motor/mezcla.py`). La app las carga solo por planilla (`serie_mensual`);
+    `lluvia_anual_mm`, `anios_registro` y `materia_organica_pct` siguen aceptándose en la API."""
 
     # Topes de sentido común agronómico: más de 4000 mm/año o más de 100 años de registro es un
     # error de carga, no una medición (con 99999 mm el contraste daba +12110 %).
@@ -425,12 +428,13 @@ class CapaRaster(BaseModel):
 
 
 class GrillaLote(BaseModel):
-    """Grilla común del lote (EPSG:4326, paso de 1″ o 2″): todas las capas la comparten."""
+    """Grilla común del lote (EPSG:4326, paso de 1″ que sube de a 1″ hasta entrar en el tope de
+    píxeles de `satelite/grilla.py`): todas las capas la comparten."""
 
     bounds: Bounds
     ancho: int = Field(ge=1)
     alto: int = Field(ge=1)
-    paso: float = Field(gt=0, description="Grados: 1/3600 (1″, ~30 m) o 2/3600 (2″, ~60 m)")
+    paso: float = Field(gt=0, description="Grados: k/3600 con k = 1, 2, 3… (1″ ≈ 30 m); sube de a 1″ en lotes grandes")
 
     @model_validator(mode="after")
     def _forma(self):
