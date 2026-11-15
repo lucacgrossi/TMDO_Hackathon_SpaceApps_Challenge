@@ -80,6 +80,7 @@
     top: auto;
     bottom: calc(100% - var(--alto-lienzo) + 16px);
     left: 16px;
+    right: 56px; /* deja libre el zoom de Leaflet */
   }
 
   /* Línea de tiempo y leyenda van debajo del mapa: no tapan el lote ni se cortan. */
