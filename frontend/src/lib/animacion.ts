@@ -1,5 +1,5 @@
 /**
- * Cuentas de las animaciones de la hoja, sin React ni DOM (se prueban con vitest).
+ * Cuentas de las animaciones de los números, sin React ni DOM (se prueban con vitest).
  * Es el `tween()` del prototipo: 380 ms con salida cúbica y valores enteros.
  */
 
@@ -26,20 +26,6 @@ export function pasoTween(
   if (p >= 1) return { valor: hasta, fin: true };
   return { valor: Math.round(desde + (hasta - desde) * salidaCubica(p)), fin: false };
 }
-
-/**
- * Entrada de la hoja (prototipo y DESIGN.md, "Movimiento"): al abrir, las
- * columnas o tarjetas entran en orden, la fila de la rotación se dibuja, las
- * barras de la serie aparecen una tras otra y los números cuentan desde 0.
- */
-/** Cuánto dura la clase `intro` en la hoja: lo que tarda la última pieza en llegar. */
-export const VENTANA_ENTRADA_MS = 1500;
-/** Los números cuentan desde 0 un poco más lento que al mover una barra. */
-export const DURACION_ENTRADA_MS = 700;
-/** Diferencia entre una columna (o tarjeta) y la siguiente. */
-export const PASO_COLUMNA_MS = 70;
-/** Diferencia entre una barra de la serie y la siguiente. */
-export const PASO_BARRA_MS = 18;
 
 /** Si el sistema pide menos movimiento: sin animaciones (en el servidor, tampoco). */
 export function sinMovimiento(): boolean {

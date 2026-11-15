@@ -1,6 +1,6 @@
 "use client";
 
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 import { cercania, cercaniaPorTipo, esSensibleAlClima, type Pesos } from "@/lib/cercania";
 import {
   OBJETIVOS,
@@ -33,8 +33,6 @@ import css from "./tabla.module.css";
 const NOMBRE_OBJETIVO: Record<Objetivo, string> = { agua: "Agua", suelo: "Suelo", erosion: "Erosión", ingreso: "Ingreso" };
 const NOMBRE_TIPO: Record<TipoAnio, string> = { seco: "Seco", normal: "Normal", humedo: "Húmedo" };
 const REGLA_FIJA: Origen = { fuente: "Tabla de cultivos (motor de reglas)", regla: true };
-/** Posición de la columna (0 = actual): ordena la entrada al abrir la hoja (`--k` del prototipo). */
-const orden = (k: number) => ({ "--k": k }) as CSSProperties;
 
 interface Contexto {
   salida: Salida;
@@ -389,14 +387,14 @@ export default function TablaTecnica({ salida }: { salida: Salida }) {
             <th scope="col" className={css.esquina}>
               <span className={css.oculto}>Fila</span>
             </th>
-            {salida.estrategias.map((e, k) => (
+            {salida.estrategias.map((e) => (
               <th
                 key={e.id}
                 scope="col"
                 className={css.cabecera}
                 data-id={e.id}
                 data-disponible={e.disponible}
-                style={orden(k)}
+               
               >
                 <div className={css.cabeceraFila}>
                   <InsigniaEstrategia id={e.id} descartada={!e.disponible} />
@@ -422,8 +420,8 @@ export default function TablaTecnica({ salida }: { salida: Salida }) {
                   {f.titulo}
                   {f.ayuda && <span className={css.ayuda}>{f.ayuda}</span>}
                 </th>
-                {salida.estrategias.map((e, k) => (
-                  <td key={e.id} data-disponible={e.disponible} style={orden(k)}>
+                {salida.estrategias.map((e) => (
+                  <td key={e.id} data-disponible={e.disponible}>
                     {esDisponible(e) ? f.celda(e, ctx) : <CeldaDescartada e={e} primera={gi === 0 && fi === 0} />}
                   </td>
                 ))}

@@ -1,10 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
-  DURACION_ENTRADA_MS,
   DURACION_TWEEN_MS,
-  PASO_BARRA_MS,
-  PASO_COLUMNA_MS,
-  VENTANA_ENTRADA_MS,
   pasoTween,
   salidaCubica,
   sinMovimiento,
@@ -34,13 +30,7 @@ describe("pasoTween (tween del prototipo)", () => {
   });
 });
 
-describe("entrada de la hoja", () => {
-  it("la última columna y la última de 30 barras llegan antes de que se saque la clase intro", () => {
-    expect(3 * PASO_COLUMNA_MS + 80 + 500).toBeLessThanOrEqual(VENTANA_ENTRADA_MS);
-    expect(29 * PASO_BARRA_MS + 60 + 500).toBeLessThanOrEqual(VENTANA_ENTRADA_MS);
-    expect(DURACION_ENTRADA_MS).toBeLessThan(VENTANA_ENTRADA_MS);
-  });
-
+describe("sinMovimiento", () => {
   it("sin ventana (servidor o tests) no falla al leer la preferencia", () => {
     expect(sinMovimiento()).toBe(false);
   });
