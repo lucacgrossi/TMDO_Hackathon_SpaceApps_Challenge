@@ -5,6 +5,7 @@ import { useCallback, useMemo, useState } from "react";
 import { dibujoNdvi, estadoCapas, filasFicha, type IdCapaLote, lecturaPixel, moverPixel, rasterDeCapa } from "@/lib/capasLote";
 import type { Salida } from "@/lib/contrato";
 import { useMapaLote } from "@/lib/mapaLote";
+import { useResultadoStore } from "@/lib/resultado";
 import { useEntradas } from "@/lib/store";
 import { useVista } from "@/lib/vista";
 import FichaLote from "./FichaLote";
@@ -31,7 +32,11 @@ const MapaLote = dynamic(() => import("./MapaLote"), {
  * mismo que lee el resto del dashboard; la capa, `useMapaLote`.
  */
 export default function SeccionMapa({ salida }: { salida: Salida }) {
-  const poligono = useEntradas((s) => s.poligono);
+  // El lote con el que se pidió este análisis: si después se editó el lote, el
+  // mapa sigue mostrando (y recortando las capas a) el que corresponde a los datos.
+  const delPedido = useResultadoStore((s) => s.pedidoCon?.poligono);
+  const actual = useEntradas((s) => s.poligono);
+  const poligono = delPedido && delPedido.length >= 3 ? delPedido : actual;
   const mes = useVista((s) => s.mes);
   const cambiarMes = useVista((s) => s.cambiarMes);
   const capaElegida = useMapaLote((s) => s.capa);
