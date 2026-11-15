@@ -1,0 +1,54 @@
+.mapa {
+  height: 100%;
+  width: 100%;
+  background: var(--noche, #14202b);
+}
+
+/* Cada píxel es un dato: el raster se ve nítido, a la escala real. */
+.px {
+  image-rendering: pixelated;
+  animation: aparecer 0.2s ease-out;
+}
+
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Leaflet pone el color como atributo: la clase lo pisa con los tokens. */
+.lote {
+  stroke: var(--papel, #fff);
+}
+
+.pixel {
+  stroke: var(--papel, #fff);
+  filter: drop-shadow(0 0 1px var(--noche, #14202b));
+}
+
+.celda {
+  stroke: var(--cielo-brillo, #7fd6e6);
+  fill: var(--cielo, #1c7c93);
+}
+
+.rotulo {
+  background: var(--noche, #14202b);
+  color: var(--papel, #fff);
+  border: 0;
+  border-radius: 2px;
+  box-shadow: 3px 3px 0 rgba(20, 32, 43, 0.15);
+  font-size: 12px;
+  line-height: 16px;
+  white-space: normal;
+  width: 240px;
+}
+
+.rotulo::before {
+  display: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .px {
+    animation: none;
+  }
+}

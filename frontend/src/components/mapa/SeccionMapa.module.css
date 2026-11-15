@@ -1,0 +1,76 @@
+.seccion {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  gap: 16px;
+  align-items: start;
+}
+
+.mapa {
+  position: relative;
+  height: 640px;
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--noche, #14202b);
+}
+
+.mapa:focus-visible {
+  outline: 2px solid var(--cielo, #1c7c93);
+  outline-offset: 2px;
+}
+
+.cargando {
+  display: grid;
+  place-items: center;
+  height: 100%;
+  color: var(--papel, #fff);
+  font-size: 14px;
+}
+
+/* Controles que flotan sobre el mapa: encima de los paneles de Leaflet (z 400). */
+.arribaIzq,
+.arribaDer,
+.abajoIzq,
+.abajoDer {
+  position: absolute;
+  z-index: 1000;
+}
+
+.arribaIzq {
+  left: 16px;
+  top: 16px;
+  right: 340px;
+}
+
+.arribaDer {
+  right: 16px;
+  top: 16px;
+}
+
+.abajoIzq {
+  left: 16px;
+  bottom: 16px;
+}
+
+.abajoDer {
+  right: 56px;
+  bottom: 16px;
+}
+
+@media (max-width: 1100px) {
+  .seccion {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .arribaIzq {
+    right: 16px;
+  }
+
+  .arribaDer {
+    top: auto;
+    bottom: 220px;
+  }
+
+  .abajoDer {
+    display: none;
+  }
+}

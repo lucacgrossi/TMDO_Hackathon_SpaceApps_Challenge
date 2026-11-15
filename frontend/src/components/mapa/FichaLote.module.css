@@ -1,0 +1,63 @@
+.ficha {
+  background: var(--papel, #fff);
+  border-radius: 6px;
+  padding: 16px;
+  color: var(--noche, #14202b);
+  align-self: start;
+}
+
+.titulo {
+  margin: 0;
+  font-family: var(--font-pixelify, "Pixelify Sans"), var(--font-plex, "IBM Plex Sans"), sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+}
+
+.filas {
+  margin: 0;
+}
+
+.fila {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line, #dce2d6);
+}
+
+.fila:last-child {
+  border-bottom: 0;
+}
+
+.etiqueta {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted, #5a6560);
+}
+
+.dato {
+  margin: 2px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.valor {
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.sinDato {
+  font-size: 14px;
+  line-height: 24px;
+  color: var(--muted, #5a6560);
+}
+
+.pie {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted, #5a6560);
+}
