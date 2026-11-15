@@ -104,7 +104,8 @@ def erosion(visto_por_satelite: dict | None, cobertura_baja: dict | None,
         "anios": cobertura_baja.get("anios"),
         "resolucion": RESOLUCION_EROSION,
         "confianza": confianza,
-        "nota": (f"Pendiente general {_numero(pend)} % × {meses_bajos} meses con NDVI medio < "
+        "nota": (f"Pendiente general {_numero(pend)} % × {meses_bajos} {'mes' if meses_bajos == 1 else 'meses'} "
+                 "con NDVI medio < "
                  f"{_numero(umbral)} en la campaña {cobertura_baja.get('anios')}. Índice relativo para "
                  "comparar lotes y meses: no es pérdida de suelo (t/ha)"),
         "pendiente_pct": pend,
@@ -155,7 +156,7 @@ def erosion_por_pixel(base: dict | None, pendiente_mapa: dict | None, meses_bajo
                 f"El mapa muestra dónde: pendiente del píxel × meses del píxel (media {_numero(res['media'])}); "
                 "la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor "
                 "del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es "
-                "pérdida de suelo (t/ha). Escala de clases propuesta, a validar por la persona 3")
+                "pérdida de suelo (t/ha). Escala de clases provisoria")
         mapa = raster.capa(
             id="erosion", titulo="Riesgo de erosión (índice)", unidad=UNIDAD_EROSION, fuente=base["fuente"],
             resolucion_nativa="30 m (pendiente NASADEM × NDVI HLS)", grilla=g, array=ero, mascara=validos,
