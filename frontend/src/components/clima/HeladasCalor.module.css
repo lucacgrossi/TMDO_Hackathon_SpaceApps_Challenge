@@ -53,10 +53,30 @@
 }
 
 .pie {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
   margin: 8px 0 0;
   font-size: 12px;
   line-height: 16px;
   color: var(--muted, #5a6560);
+}
+
+/* Muestra de "Helada frecuente": el mismo fondo y la negrita de la celda. */
+.leyenda {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--noche, #14202b);
+}
+
+.muestra {
+  width: 12px;
+  height: 12px;
+  background: var(--cielo-suave, #ddf3f7);
+  border: 1px solid var(--cielo, #1c7c93);
 }
 
 .oculto {

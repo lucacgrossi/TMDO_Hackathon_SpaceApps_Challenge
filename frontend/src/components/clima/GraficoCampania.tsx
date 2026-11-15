@@ -127,6 +127,28 @@ function Leyenda({ conCampania }: { conCampania: boolean }) {
   );
 }
 
+/** Leyenda del balance: color de la campaña y de la media de 30 años. */
+function LeyendaBalance({ conCampania }: { conCampania: boolean }) {
+  return (
+    <div className={css.leyenda}>
+      <div className={css.filaLeyenda}>
+        <ul>
+          {conCampania && (
+            <li>
+              <Muestra tipo="barra" color={COLOR.balance} />
+              Esta campaña
+            </li>
+          )}
+          <li>
+            <Muestra tipo="barra" color={COLOR.balanceMedia} />
+            Media de 30 años
+          </li>
+        </ul>
+      </div>
+    </div>
+  );
+}
+
 const ejeX = { dataKey: "corto", tick: { fill: COLOR.eje, fontSize: 12 }, stroke: COLOR.grilla };
 
 export default function GraficoCampania({ filas, conCampania }: { filas: FilaGrafico[]; conCampania: boolean }) {
@@ -155,9 +177,7 @@ export default function GraficoCampania({ filas, conCampania }: { filas: FilaGra
         </ResponsiveContainer>
         <Leyenda conCampania={conCampania} />
         <figcaption className={css.pie}>
-          {conCampania
-            ? "Barras: lluvia del mes de la campaña (oscuro) contra la media de 30 años (claro). Líneas: la máxima más alta y la mínima más baja del mes (llenas) contra su media de 30 años (punteadas)."
-            : "Media de 30 años: lluvia en barras; la máxima más alta y la mínima más baja del mes en líneas punteadas."}
+          Lluvia del mes en barras; la máxima más alta y la mínima más baja del mes en líneas.
         </figcaption>
       </figure>
 
@@ -173,9 +193,8 @@ export default function GraficoCampania({ filas, conCampania }: { filas: FilaGra
             {conCampania && <Bar dataKey="balance" name={NOMBRE.balance} fill={COLOR.balance} isAnimationActive={false} />}
           </ComposedChart>
         </ResponsiveContainer>
-        <figcaption className={css.pie}>
-          Balance de agua del mes (lluvia − ET0 de Hargreaves){conCampania ? ": la campaña (oscuro) contra la media de 30 años (claro)." : ", media de 30 años."}
-        </figcaption>
+        <LeyendaBalance conCampania={conCampania} />
+        <figcaption className={css.pie}>Balance de agua del mes: lluvia menos ET0 (Hargreaves).</figcaption>
       </figure>
     </div>
   );

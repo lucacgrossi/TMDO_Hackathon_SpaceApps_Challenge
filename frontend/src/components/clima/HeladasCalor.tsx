@@ -50,10 +50,15 @@ export default function HeladasCalor({ clima }: { clima: ClimaMensual }) {
           </tbody>
         </table>
       </div>
-      <p className={css.pie}>
-        Cada número es la cantidad de años, de {n}, con ese evento en el mes. En negrita y con fondo, los meses con helada frecuente según el back.{" "}
-        {clima.fuente}, {clima.resolucion}, {clima.periodo}.
-      </p>
+      <div className={css.pie}>
+        <span className={css.leyenda}>
+          <i className={css.muestra} aria-hidden="true" />
+          Helada frecuente
+        </span>
+        <span>
+          Años, de {n}, con cada evento. {clima.fuente}, {clima.periodo}.
+        </span>
+      </div>
     </section>
   );
 }
