@@ -11,8 +11,7 @@
  *
  * Qué NO hace: no dibuja nada en el mapa. Solo escribe `ubicacion` (y
  * `modoLote: "dibujo"`) en el store compartido; el mapa la lee y pone la marca.
- * En el prototipo final este bloque está SIEMPRE visible en el paso 1, dentro
- * de ElegirLote, arriba del "o · Probar con el lote de ejemplo".
+ * Vive en la caja de S1 (PantallaMarcar), arriba de "Probar con el lote de ejemplo".
  *
  * La búsqueda (debounce, Esri, teclado) está en el hook compartido
  * `src/lib/useBuscadorLugares.ts`, que también usa el buscador del mapa; la
@@ -20,11 +19,13 @@
  */
 
 import { useId, useState } from "react";
+import Boton from "@/components/comunes/Boton";
 import ListaSugerencias from "@/components/comunes/ListaSugerencias";
 import { MENSAJES, fmt } from "@/lib/buscador";
 import type { UbicacionElegida } from "@/lib/entradas";
 import { useEntradas } from "@/lib/store";
 import { useBuscadorLugares } from "@/lib/useBuscadorLugares";
+import estilos from "./BuscadorLote.module.css";
 
 export default function BuscadorLote() {
   const ubicacion = useEntradas((s) => s.ubicacion);
@@ -80,11 +81,13 @@ export default function BuscadorLote() {
   }
 
   return (
-    <div className="where">
-      <label htmlFor={`${idBase}-q`}>¿Dónde está tu lote?</label>
-      <div className="qrow">
+    <div className={estilos.buscador}>
+      <label className={estilos.etiqueta} htmlFor={`${idBase}-q`}>
+        Buscá dónde está
+      </label>
+      <div className={estilos.campo}>
         {/* Lupa decorativa: aria-hidden para que el lector de pantalla no lea "⌕". */}
-        <span className="qic" aria-hidden="true">
+        <span className={estilos.lupa} aria-hidden="true">
           ⌕
         </span>
         <input
@@ -92,7 +95,7 @@ export default function BuscadorLote() {
           type="search"
           autoComplete="off"
           spellCheck={false}
-          placeholder="Buscá la localidad, paraje o ruta · o pegá coordenadas o un link de Google Maps"
+          placeholder="Lugar, coordenadas o link de Google Maps"
           value={b.texto}
           onChange={(e) => b.alEscribir(e.target.value)}
           onKeyDown={b.alTeclear}
@@ -104,33 +107,20 @@ export default function BuscadorLote() {
             b.activa >= 0 && b.listaVisible ? idOpcion(b.activa) : undefined
           }
         />
-        <button
-          type="button"
-          className="sm"
-          onClick={usarMiUbicacion}
-          disabled={buscandoGps}
-        >
-          {buscandoGps ? "Buscando…" : "◉ Usar mi ubicación"}
-        </button>
       </div>
 
       <ListaSugerencias buscador={b} id={idLista} idOpcion={idOpcion} />
 
       {ubicacion && (
-        <div className="picked">
-          <span>
-            <b>Tu lote está acá:</b> {ubicacion.etiqueta}
-            {ubicacion.precisionM ? (
-              <small> (± {fmt(ubicacion.precisionM)} m)</small>
-            ) : null}
-          </span>
-        </div>
+        <p className={estilos.elegido}>
+          <b>Tu lote está acá:</b> {ubicacion.etiqueta}
+          {ubicacion.precisionM ? <small> (± {fmt(ubicacion.precisionM)} m)</small> : null}
+        </p>
       )}
 
-      <small className="wsrc">
-        Si estás en el campo, «Usar mi ubicación» toma el GPS del celu. Después
-        marcás las esquinas en el mapa. Búsqueda de lugares: Esri.
-      </small>
+      <Boton variante="fantasma" onClick={usarMiUbicacion} disabled={buscandoGps} className={estilos.gps}>
+        {buscandoGps ? "Buscando tu ubicación…" : "Usar mi ubicación"}
+      </Boton>
     </div>
   );
 }
