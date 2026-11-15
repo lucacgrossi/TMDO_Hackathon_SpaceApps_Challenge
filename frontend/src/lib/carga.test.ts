@@ -36,22 +36,22 @@ describe("textosError", () => {
   it("422 de esquema (error de la app): no ofrece reintentar ni habla del polígono", () => {
     const t = textosError(422, true);
     expect(t.titulo).not.toContain("polígono");
-    expect(t.acciones).toEqual(["ejemplo", "marcar"]);
+    expect(t.acciones).toEqual(["marcar"]);
   });
 
   it("422: el polígono no es un lote agrícola", () => {
     const t = textosError(422);
     expect(t.titulo).toBe("Este polígono no parece un lote agrícola");
-    expect(t.acciones).toEqual(["marcar", "ejemplo"]);
+    expect(t.acciones).toEqual(["marcar"]);
   });
 
   it("503: NASA POWER no responde", () => {
     const t = textosError(503);
     expect(t.titulo).toBe("NASA POWER no responde");
-    expect(t.acciones).toEqual(["reintentar", "ejemplo"]);
+    expect(t.acciones).toEqual(["reintentar"]);
   });
 
-  it("otro código o sin respuesta: solo probar de nuevo, sin el lote de ejemplo", () => {
+  it("otro código o sin respuesta: solo probar de nuevo", () => {
     expect(textosError(500).acciones).toEqual(["reintentar"]);
     expect(textosError(0).acciones).toEqual(["reintentar"]);
     expect(textosError(500).comoSeguir).not.toMatch(/ejemplo/i);

@@ -67,7 +67,7 @@ export default function PanelEntradas() {
             </div>
             <div>
               <dt>Zona</dt>
-              <dd>{zona ?? (entradas.modoLote === "demo" ? "Lote de ejemplo, Río Cuarto" : "Sin dato")}</dd>
+              <dd>{zona ?? "Sin dato"}</dd>
             </div>
           </dl>
         </header>

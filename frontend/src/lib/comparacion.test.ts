@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { cambiosDesdeLaComparacion, fotoDe, listaDeCambios, useComparacion } from "@/lib/comparacion";
-import { ENTRADAS_INICIALES, type Entradas } from "@/lib/entradas";
+import { ENTRADAS_INICIALES, LOTE_DEMO, type Entradas, type LatLng } from "@/lib/entradas";
 import { useEntradas } from "@/lib/store";
 import { useVista } from "@/lib/vista";
 
-const base: Entradas = structuredClone(ENTRADAS_INICIALES);
+const base: Entradas = { ...structuredClone(ENTRADAS_INICIALES), poligono: LOTE_DEMO.map((p) => [...p] as LatLng) };
 const con = (parcial: Partial<Entradas>): Entradas => ({ ...structuredClone(base), ...parcial });
 
 describe("cambiosDesdeLaComparacion", () => {
@@ -20,8 +20,7 @@ describe("cambiosDesdeLaComparacion", () => {
     expect(cambiosDesdeLaComparacion(base, con({ paso: "inicio", ubicacion: { lat: -33, lng: -64, etiqueta: "x" } }))).toEqual([]);
   });
 
-  it("lote: cambia el modo o un vértice del polígono", () => {
-    expect(cambiosDesdeLaComparacion(base, con({ modoLote: "dibujo" }))).toEqual(["lote"]);
+  it("lote: cambia un vértice del polígono", () => {
     const poligono = base.poligono.map((p) => [...p] as [number, number]);
     poligono[2][0] += 0.001;
     expect(cambiosDesdeLaComparacion(base, con({ poligono }))).toEqual(["lote"]);
@@ -81,7 +80,7 @@ describe("cambiosDesdeLaComparacion", () => {
   });
 
   it("varios cambios, siempre en el mismo orden", () => {
-    const actuales = con({ mediciones: { ...base.mediciones, lluviaAnualMm: 650, materiaOrganicaPct: null }, verano: "maiz", modoLote: "dibujo" });
+    const actuales = con({ mediciones: { ...base.mediciones, lluviaAnualMm: 650, materiaOrganicaPct: null }, verano: "maiz", poligono: base.poligono.slice(0, 3) });
     expect(cambiosDesdeLaComparacion(base, actuales)).toEqual(["lote", "rotacion", "mediciones"]);
   });
 });

@@ -1,6 +1,6 @@
 import type { Entrada, MedicionMes, Restriccion } from "./contrato";
-import { LOTE_DEMO, type Entradas, type LatLng } from "./entradas";
-import { areaHa, centro, mismoPoligono } from "./geo";
+import type { Entradas, LatLng } from "./entradas";
+import { areaHa, centro } from "./geo";
 
 /**
  * Pasa las entradas del panel (`useEntradas`) al cuerpo de `POST /analizar`
@@ -25,9 +25,6 @@ const positivo = (v: number | null) => (v != null && Number.isFinite(v) && v > 0
 
 export function entradaDesde(e: Entradas): Entrada {
   const [lat, lon] = centro(e.poligono);
-  // "ejemplo" habilita la respuesta precalculada de Río Cuarto si NASA cae: solo
-  // vale si el lote ES el de ejemplo (en modo demo el productor puede moverlo).
-  const esEjemplo = e.modoLote === "demo" && mismoPoligono(e.poligono, LOTE_DEMO);
 
   const restricciones: Restriccion[] = [];
   if (e.restricciones.sinRiego) restricciones.push("sin_riego");
@@ -51,7 +48,8 @@ export function entradaDesde(e: Entradas): Entrada {
 
   return {
     lote: {
-      tipo: esEjemplo ? "ejemplo" : "dibujado",
+      // Siempre lo marca el productor: la app no ofrece el lote de ejemplo.
+      tipo: "dibujado",
       poligono: { type: "Polygon", coordinates: [anilloGeoJSON(e.poligono)] },
       centro: [lat, lon],
       area_ha: Math.round(areaHa(e.poligono) * 100) / 100,

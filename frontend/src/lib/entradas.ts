@@ -34,8 +34,8 @@ export type Textura = "franco" | "arenoso" | "arcilloso" | "no_se";
  */
 export type Paso = "inicio" | "mapa";
 
-/** "demo" = lote de ejemplo de Río Cuarto · "dibujo" = el productor marca el suyo. */
-export type ModoLote = "demo" | "dibujo";
+/** El lote siempre lo marca el productor: no hay lote de ejemplo en la app. */
+export type ModoLote = "dibujo";
 
 /** Lugar que eligió el productor con el buscador, el GPS o coordenadas (F4). */
 export interface UbicacionElegida {
@@ -50,7 +50,7 @@ export interface UbicacionElegida {
 export interface Entradas {
   paso: Paso;
   modoLote: ModoLote;
-  /** Esquinas del lote. Con el modo "demo" es el rectángulo de ejemplo. */
+  /** Esquinas del lote. Vacío hasta que el productor lo marca en S1. */
   poligono: LatLng[];
   /** Dónde está el lote según el buscador (F4). El mapa lo usa para centrarse. */
   ubicacion: UbicacionElegida | null;
@@ -77,7 +77,10 @@ export interface Entradas {
   };
 }
 
-/** Lote de ejemplo: campo real cerca de Río Cuarto, ~95 ha (DEMO del prototipo). */
+/**
+ * Lote de referencia de los tests y del mock: campo real cerca de Río Cuarto,
+ * ~95 ha. La app no lo ofrece ni lo carga: el productor siempre marca el suyo.
+ */
 export const LOTE_DEMO: LatLng[] = [
   [-33.2436, -64.2381],
   [-33.2436, -64.2268],
@@ -93,8 +96,8 @@ export const CIUDAD_REFERENCIA: { nombre: string; punto: LatLng } = {
 
 export const ENTRADAS_INICIALES: Entradas = {
   paso: "mapa",
-  modoLote: "demo",
-  poligono: LOTE_DEMO.map((p) => [...p] as LatLng),
+  modoLote: "dibujo",
+  poligono: [],
   ubicacion: null,
   verano: "soja",
   invierno: "barbecho",

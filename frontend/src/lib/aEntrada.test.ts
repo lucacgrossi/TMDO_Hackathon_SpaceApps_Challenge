@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 import { anilloGeoJSON, entradaDesde } from "@/lib/aEntrada";
-import { ENTRADAS_INICIALES, type Entradas, type LatLng } from "@/lib/entradas";
+import { ENTRADAS_INICIALES, LOTE_DEMO, type Entradas, type LatLng } from "@/lib/entradas";
 import { RESULTADO_EJEMPLO, type ResultadoPlanilla } from "@/lib/planilla";
 
-const base: Entradas = structuredClone(ENTRADAS_INICIALES);
+const base: Entradas = { ...structuredClone(ENTRADAS_INICIALES), poligono: LOTE_DEMO.map((p) => [...p] as LatLng) };
 const con = (parcial: Partial<Entradas>): Entradas => ({ ...structuredClone(base), ...parcial });
 
 describe("entradaDesde · lote", () => {
@@ -31,9 +31,9 @@ describe("entradaDesde · lote", () => {
     expect(anilloGeoJSON(p)).toHaveLength(4);
   });
 
-  it("lote de ejemplo: tipo ejemplo, centro [lat, lon] y lat/lon iguales al centro", () => {
+  it("lote marcado: tipo dibujado, centro [lat, lon] y lat/lon iguales al centro", () => {
     const e = entradaDesde(base);
-    expect(e.lote.tipo).toBe("ejemplo");
+    expect(e.lote.tipo).toBe("dibujado");
     expect(e.lote.poligono.type).toBe("Polygon");
     expect(e.lote.poligono.coordinates[0]).toHaveLength(5);
     const [lat, lon] = e.lote.centro;

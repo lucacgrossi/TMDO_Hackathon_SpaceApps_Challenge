@@ -2,8 +2,8 @@
 
 import { create } from "zustand";
 import { useEncuadre } from "./encuadre";
-import { LOTE_DEMO, type LatLng } from "./entradas";
-import { areaHa, formatoNumero, mismoPoligono, seCruza } from "./geo";
+import type { LatLng } from "./entradas";
+import { areaHa, formatoNumero, seCruza } from "./geo";
 import { useMapa } from "./mapa";
 import { useEntradas } from "./store";
 import { useToast } from "./toast";
@@ -92,7 +92,7 @@ interface EstadoDibujo {
   deshacer: () => void;
   mover: (i: number, punto: LatLng) => void;
   setArrastrando: (si: boolean) => void;
-  /** Cancelar: sale sin guardar. Si el lote sigue siendo el de ejemplo, vuelve al modo ejemplo. */
+  /** Cancelar: sale sin guardar (el lote anterior, si había, queda como estaba). */
   cancelar: () => void;
   /** finishDraw: si el lote es válido lo guarda y sale; devuelve si pudo. */
   terminar: () => boolean;
@@ -122,11 +122,7 @@ export const useDibujo = create<EstadoDibujo>()((set, get) => {
     mover: (i, punto) => set({ puntos: get().puntos.map((p, j) => (j === i ? punto : p)) }),
     setArrastrando: (si) => set({ arrastrando: si }),
 
-    cancelar: () => {
-      salir();
-      const { poligono, cambiar } = useEntradas.getState();
-      if (mismoPoligono(poligono, LOTE_DEMO)) cambiar({ modoLote: "demo" });
-    },
+    cancelar: () => salir(),
 
     terminar: () => {
       const { puntos } = get();

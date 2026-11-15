@@ -15,8 +15,6 @@ interface Props {
   onMarcarOtro: () => void;
   /** "Probar de nuevo" (503 y otros): repite `/analizar` con las mismas entradas. */
   onReintentar: () => void;
-  /** "Probar con el lote de ejemplo" (422 y 503): Río Cuarto, con el respaldo precalculado del back. */
-  onEjemplo: () => void;
   /** El back rechazó el pedido por el esquema (422 con `{detail}`): error de la app, no del lote. */
   deLaApp?: boolean;
   /** "Cerrar" (y Esc): oculta el error y deja el panel como estaba. Sin él, no hay botón. */
@@ -34,7 +32,6 @@ export default function ErrorAnalisis({
   mensaje,
   onMarcarOtro,
   onReintentar,
-  onEjemplo,
   deLaApp = false,
   onCerrar,
 }: Props) {
@@ -42,7 +39,6 @@ export default function ErrorAnalisis({
   const acciones: Record<AccionError, () => void> = {
     marcar: onMarcarOtro,
     reintentar: onReintentar,
-    ejemplo: onEjemplo,
   };
 
   useEffect(() => {

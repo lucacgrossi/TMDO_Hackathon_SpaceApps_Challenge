@@ -84,6 +84,7 @@ export default function CapaLote() {
   // lotePin(): ¿el lote se ve como un punto en pantalla? Se mide su recuadro
   // en píxeles de la pantalla; si el lado más corto mide menos de 28 px, pin.
   const medirPin = useCallback(() => {
+    if (poligono.length < 3) return setPinVisible(false);
     const limites = L.latLngBounds(poligono);
     const a = mapa.latLngToContainerPoint(limites.getNorthWest());
     const z = mapa.latLngToContainerPoint(limites.getSouthEast());
@@ -99,7 +100,8 @@ export default function CapaLote() {
     // fijo y se cambia con "Volver a marcar el lote" (S1).
   });
 
-  if (paso !== "mapa") return null;
+  // Antes de marcar el primer lote no hay nada que dibujar (no hay lote de ejemplo).
+  if (paso !== "mapa" || poligono.length < 3) return null;
 
   const ha = areaHa(poligono);
   // Con "Lluvia y heladas" el rótulo dice "Tu lote": al lado de la zona de

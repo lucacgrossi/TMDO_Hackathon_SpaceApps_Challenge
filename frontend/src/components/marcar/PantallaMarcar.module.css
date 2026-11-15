@@ -49,23 +49,6 @@
   color: var(--muted);
 }
 
-.separador {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 16px;
-}
-
-.separador::before,
-.separador::after {
-  content: "";
-  flex: 1;
-  height: 1px;
-  background: var(--line);
-}
-
 .fuente {
   margin: 0;
   font-size: 12px;

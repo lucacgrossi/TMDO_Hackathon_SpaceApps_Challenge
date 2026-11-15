@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import type { LatLng } from "@/lib/entradas";
-import { LOTE_DEMO } from "@/lib/entradas";
 import { centro } from "@/lib/geo";
 
 /**
@@ -48,13 +47,6 @@ export function tituloZona(d: DireccionEsri | null | undefined): string | null {
   return null;
 }
 
-/**
- * Zona del lote de ejemplo, fija: la demo no tiene que depender del WiFi
- * (CLAUDE.md, "Lote de la demo").
- */
-const ZONA_DEMO = "Lote cerca de Río Cuarto, Córdoba";
-const CENTRO_DEMO = centro(LOTE_DEMO);
-
 /** Guarda lo ya buscado (por centro redondeado a ~100 m) para no repetir pedidos al mover el lote. */
 const cache = new Map<string, string | null>();
 const clave = ([lat, lng]: LatLng) => `${lat.toFixed(3)},${lng.toFixed(3)}`;
@@ -76,11 +68,9 @@ export async function buscarZona([lat, lng]: LatLng, signal?: AbortSignal): Prom
 export function useZona(poligono: LatLng[]): string | null {
   const c = centro(poligono);
   const k = clave(c);
-  const esDemo = k === clave(CENTRO_DEMO);
-  const [zona, setZona] = useState<string | null>(esDemo ? ZONA_DEMO : (cache.get(k) ?? null));
+  const [zona, setZona] = useState<string | null>(cache.get(k) ?? null);
 
   useEffect(() => {
-    if (esDemo) return setZona(ZONA_DEMO);
     if (cache.has(k)) return setZona(cache.get(k) ?? null);
     setZona(null); // mientras busca, no queda el nombre del lugar anterior
     const ctrl = new AbortController();
@@ -100,7 +90,7 @@ export function useZona(poligono: LatLng[]): string | null {
     };
     // c cambia de referencia en cada render; la clave k ya representa el centro
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [k, esDemo]);
+  }, [k]);
 
   return zona;
 }
