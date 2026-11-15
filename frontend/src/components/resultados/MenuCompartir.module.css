@@ -17,6 +17,16 @@
   border-radius: 6px;
   background: var(--papel);
   box-shadow: var(--sombra-pixel);
+  /* Nace del botón (arriba a la derecha), no del centro. */
+  transform-origin: top right;
+  animation: entrarMenu 150ms var(--ease-out);
+}
+
+@keyframes entrarMenu {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
 }
 
 .opcion {

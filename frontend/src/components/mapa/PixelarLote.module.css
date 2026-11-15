@@ -1,0 +1,26 @@
+/*
+ * La grilla de ~30 m llena el lote en una ola de 10 saltos desde la primera
+ * esquina (steps: se ve de a píxeles, no como un fundido) y después se apaga.
+ */
+.pixelar {
+  image-rendering: pixelated;
+  pointer-events: none;
+  animation:
+    ola 0.9s steps(10, end) both,
+    apagar 0.5s ease 1.6s forwards;
+}
+
+@keyframes ola {
+  from {
+    clip-path: circle(0% at var(--ox, 0%) var(--oy, 0%));
+  }
+  to {
+    clip-path: circle(150% at var(--ox, 0%) var(--oy, 0%));
+  }
+}
+
+@keyframes apagar {
+  to {
+    opacity: 0;
+  }
+}

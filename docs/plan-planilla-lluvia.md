@@ -1,6 +1,6 @@
 # Plan · Planilla de mediciones del productor (CSV: lluvia y temperatura)
 
-**Estado:** aprobado por la persona 3 (14/11). Propuesta de Back 2 (Luca). Cambia el alcance del MVP 4.2, que decía "carga a mano, sin subir archivo" (RF15). Si no entra antes del congelamiento, sigue andando la carga a mano que ya está en `dev`.
+**Estado:** aprobado por la persona 3 (14/11). Propuesta de Back 2 (Luca). Cambia el alcance del MVP 4.2, que decía "carga a mano, sin subir archivo" (RF15). **Actualizado el 15/11 (test E2E, H-009):** las mediciones se cargan **solo por planilla**; la app no tiene carga a mano. La API sigue aceptando `lluvia_anual_mm` y `anios_registro`, pero la app no los ofrece, y la materia orgánica no se carga.
 
 **Prioridades:** la **lluvia** es **Must** dentro de esta propuesta. Las **temperaturas** (mínima y máxima) son **Should**: columnas opcionales que se suman si hay tiempo. Si no entran, la planilla funciona solo con lluvia.
 
@@ -19,7 +19,7 @@ Con la planilla, el productor sube su **registro mes a mes** y la comparación s
 **Qué no cambia:**
 - Sin la planilla, todo sigue igual que hoy.
 - No se guarda nada (RNF6). El archivo se procesa en el pedido y se descarta.
-- La materia orgánica sigue cargándose a mano (es un valor suelto).
+- La materia orgánica no se carga en la app (15/11, H-009).
 
 ## 2. Formato del archivo: CSV
 **Por qué CSV:** Excel y Google Sheets lo exportan sin pasos raros, se lee con la librería estándar de Python (sin dependencias pesadas en Cloud Run), el productor puede abrir el mismo archivo y ver qué cargó, y los tests corren sin red. XLSX queda para después (pide `openpyxl` y trae varias hojas, celdas combinadas y fechas como número).
@@ -46,10 +46,10 @@ En el formato mensual, `t_min_c` es **la mínima más baja del mes** y `t_max_c`
 | Codificación | UTF-8, UTF-8 con BOM, Latin-1 / Windows-1252 | Intentar UTF-8 (quitando el BOM); si falla, Latin-1 |
 | Separador | `;` `,` tabulación | `csv.Sniffer` sobre las primeras líneas; con empate, gana `;` |
 | Decimal | `12,5` o `12.5` | Si el separador es `;` o tab, se acepta coma decimal; si es `,`, solo punto |
-| Fecha diaria | `dd/mm/aaaa`, `dd-mm-aaaa`, `aaaa-mm-dd`, `d/m/aa` (años 00–69 → 2000s) | Por expresión regular, **siempre día/mes** (nunca el orden de Estados Unidos) |
+| Fecha diaria | `dd/mm/aaaa`, `dd-mm-aaaa`, `aaaa-mm-dd`, `d/m/aa` (años 00–69 → 2000s) | Por expresión regular, **siempre día/mes** (nunca el orden de Estados Unidos). Si una fecha solo tiene sentido como mes/día (`07/13/2023`), o más del 20 % de las filas tienen una fecha que no existe, el archivo se rechaza: "Las fechas parecen estar en formato mes/día; usá día/mes" (H-016) |
 | Mes | `aaaa-mm`, `mm/aaaa`, `mm-aaaa` | Por expresión regular |
 | Encabezado | Opcional (sin encabezado, solo se lee la lluvia). Nombres reconocidos, sin distinguir mayúsculas ni tildes: fecha → `fecha`, `dia`, `mes`, `periodo`; lluvia → `lluvia`, `lluvia_mm`, `mm`, `precipitacion`, `pp`; mínima → `t_min_c`, `tmin`, `minima`, `temp_min`; máxima → `t_max_c`, `tmax`, `maxima`, `temp_max` | Si la primera fila no tiene fecha, es encabezado. Sin encabezado: columna 1 = fecha y columna 2 = lluvia |
-| Columnas extra | Se ignoran, con aviso ("columna `humedad_suelo` ignorada: no se usa en esta versión") | Solo se usan las reconocidas |
+| Columnas extra | Se ignoran, con aviso ('columna "humedad_suelo" ignorada: no se usa en esta versión') | Solo se usan las reconocidas |
 
 **Granularidad:** se detecta por el formato de la primera fecha válida. Un archivo mezclado (diario y mensual) da error.
 
@@ -71,7 +71,8 @@ El parser es **extensible**: tiene una tabla de variables reconocidas, cada una 
 5. **Mensual:** un mes repetido es un **error** (no se suma, porque no se sabe cuál vale).
 6. **Valores fuera de rango** (tabla de arriba), `t_min_c > t_max_c` el mismo día, o fechas futuras → el valor o la fila se descarta, con aviso.
 7. **Campañas completas por variable:** se arman campañas **julio–junio, igual que NASA POWER**, por separado para cada variable. Solo cuentan las que tienen los 12 meses con dato. Las parciales se informan, pero no se comparan.
-8. **Errores de fila:** como mucho se informan las primeras 20, cada una con número de fila y motivo. El archivo se rechaza si ninguna variable llega a **12 meses válidos**.
+8. **Errores de fila:** como mucho se informan las primeras 20, cada una con número de fila y motivo. El archivo se rechaza si ninguna variable llega a **12 meses válidos**: "Tu planilla tiene lluvia en 1 mes: hacen falta al menos 12 meses".
+9. **Textos:** los valores citados en los mensajes van entre comillas dobles, nunca con comillas invertidas (la interfaz los muestra tal cual).
 
 ## 4. Diseño por pieza
 
@@ -99,16 +100,16 @@ SeriePlanilla:
   periodo: {desde: "AAAA-MM", hasta: "AAAA-MM"}
   campanas_completas: {lluvia_mm: ["2019/20", ...], t_min_c: [...], t_max_c: [...]}
   lluvia_media_campana_mm: float | None
-  filas_leidas: int
+  filas_leidas: int   # filas de datos, sin el encabezado
   filas_usadas: int
   avisos: [ {fila: int | None, motivo: str} ]
   formato: {codificacion, separador, decimal}
 ```
 
 ### 4.2 Front (Front 1, `SeccionMediciones.tsx`, coordinando con #18 y #45)
-- En "Mediciones propias": la opción **"Subir planilla (CSV)"**, al lado de la carga a mano, más el link **"Descargar plantilla"** (`frontend/public/plantillas/mediciones.csv`).
-- Al elegir el archivo → `POST /mediciones/planilla` → **vista previa**: "Lluvia: 6 campañas completas (2018/19 a 2023/24) · Temperatura: 4 campañas · 1.248 registros diarios · 3 filas descartadas [ver]". Si hay errores, la lista por fila y la opción de seguir con la carga a mano.
-- Al comparar, se mandan los `meses` en `entrada.mediciones_propias.serie_mensual`. El campo manual de lluvia se deshabilita mientras haya una planilla con lluvia.
+- En "Mediciones propias": solo **"Subir planilla (CSV)"** (no hay carga a mano), más el link **"Descargar plantilla"** (`frontend/public/plantillas/mediciones.csv`: mensual, con 12 meses de ejemplo de la campaña 2024/25 que se reemplazan por los datos propios; subida sin cambios, la vista previa la rechaza).
+- Al elegir el archivo → `POST /mediciones/planilla` → **vista previa**: "Lluvia: 6 campañas completas (2018/19 a 2023/24) · Temperatura: 4 campañas · 1.248 registros diarios · 3 filas descartadas [ver]". Las filas descartadas no cuentan el encabezado y cada una tiene su aviso. Si hay errores, la lista por fila; un archivo que falla no borra la planilla válida anterior, y si el que no responde es el servidor, el texto lo dice y no pide corregir el archivo (H-024).
+- Al comparar, se mandan los `meses` en `entrada.mediciones_propias.serie_mensual`.
 - En la tabla, la fila del contraste ya existe (#45). Se suman las filas de helada y calor si llegan, y si llega `detalle_campanas`, una mini tabla por campaña (Could).
 
 ### 4.3 CI (Back 2)

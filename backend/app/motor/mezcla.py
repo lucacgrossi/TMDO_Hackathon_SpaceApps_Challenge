@@ -14,18 +14,20 @@ Formas de entrada (`entradas["mediciones"]`, todas opcionales):
 período que cubre el registro**, igual que el contraste de `clima/correccion.py`, para que el número
 que muestra la tabla sea el mismo que entra en los puntajes. Usa `indicadores["campanas_nasa"]`
 (NASA campaña por campaña, índice 0 = enero):
-- Planilla: las campañas julio–junio completas del productor que también están en NASA.
-- Lluvia anual a mano: las últimas `anios_registro` campañas de NASA.
+- Planilla: las campañas julio–junio completas del productor que también están en NASA. Los años de
+  registro (y el peso) son esas campañas completas, no años calendario (H-007).
+- Lluvia anual a mano (solo por API): las últimas `anios_registro` campañas de NASA. Sin
+  `anios_registro`, contra el promedio de las 30 y pesa como 1 año. El contraste compara igual (H-006).
 - Sin `campanas_nasa`, o sin campañas completas en común: contra el promedio de las 30 campañas, y la
   evidencia lo dice.
 Esa diferencia se aplica después sobre las 30 campañas: los terciles, sus `n` y la ET0 siguen siendo
 los de NASA.
 
 Qué se mezcla:
-- Lluvia: un factor productor/NASA (anual, o uno por mes con la serie) escala la lluvia de cada
-  mes de los tres tipos de año: `pp × (w·f + 1 − w)`. Con la planilla, `f_m` = media del productor
-  / media de NASA en las campañas en común, así que sobre esas campañas la diferencia anual es
-  exactamente la del contraste (salvo que un mes caiga fuera de [FACTOR_MIN, FACTOR_MAX]).
+- Lluvia: **un solo factor anual** `f = 1 + d/100`, con `d` el % entero productor/NASA que muestra la
+  evidencia, escala la lluvia de los 12 meses de los tres tipos de año: `pp × (w·f + 1 − w)`. Así el
+  valor de las reglas es exactamente la cuenta del texto: NASA de las 30 × (1 + w·d/100) (H-001).
+  `f` se limita a [FACTOR_MIN, FACTOR_MAX] y, si se limita, la evidencia lo dice.
 - Heladas (mínima < 0 °C) y calor (máxima ≥ 35 °C): frecuencia por mes
   `NASA_30 + w·(productor − NASA)`, con productor y NASA contados en las mismas campañas.
 - La ET0 sigue siendo la de NASA (Hargreaves necesita la temperatura media y la amplitud diaria,
@@ -52,6 +54,8 @@ FRACCION_DIFERENCIA = 1 / 3         # meses que se nombran en la evidencia: el m
 SIN_CAMPANAS = "sin NASA campaña por campaña: comparado con el promedio de las 30 campañas"
 SIN_COMUNES = ("tu registro no tiene campañas completas (julio a junio) en común con NASA: comparado con el "
                "promedio de las 30 campañas")
+SIN_ANIOS = "sin años de registro: pesa como 1 año y se compara con el promedio de las 30 campañas"
+SIN_CAMPANA_COMPLETA = "tu planilla no tiene ninguna campaña completa (julio a junio)"
 
 
 def peso_productor(anios: int | None) -> float:
@@ -79,6 +83,14 @@ def _anios(n: int) -> str:
 
 def _campanas(n: int) -> str:
     return f"{n} {'campaña' if n == 1 else 'campañas'}"
+
+
+def _mismas(n: int) -> str:
+    return "la misma campaña" if n == 1 else f"las mismas {n} campañas"
+
+
+def _ultimas(n: int) -> str:
+    return "la última campaña" if n == 1 else f"las últimas {n} campañas"
 
 
 def _rango(campanas: list[str]) -> str:
@@ -158,67 +170,99 @@ def _nasa_mensual(terciles: dict) -> list[float]:
 
 
 def _sin_lluvia() -> dict:
-    return {"factores": [1.0] * 12, "peso": 0.0, "anios": 0, "texto": None, "campanas": [], "diferencia_pct": None}
+    return {"factor": 1.0, "limitado": False, "peso": 0.0, "anios": 0, "texto": None, "campanas": [],
+            "diferencia_pct": None}
 
 
-def _lluvia_planilla(serie: list[dict], nasa: dict, nasa_mes: list[float]) -> dict | None:
-    por_mes = _por_mes(serie, "lluvia_mm")
-    if not any(por_mes):
+def _comparacion(texto: str, vp: float, vn: float, w: float, anios: int, campanas: list[str]) -> dict:
+    """Diferencia productor/NASA y el factor que entra en las reglas.
+
+    El factor es **el mismo % entero que muestra el texto** (`1 + d/100`), para que la cuenta de la
+    evidencia se pueda rehacer a mano: NASA de las 30 × (w·factor + 1 − w). Si cae fuera de
+    [FACTOR_MIN, FACTOR_MAX] se limita y la evidencia lo dice (H-001, H-006).
+    """
+    d = _dif(vp, vn)
+    crudo = 1 + d / 100
+    factor = _limitar(crudo)
+    return {"factor": factor, "limitado": factor != crudo, "peso": w, "anios": anios, "campanas": campanas,
+            "diferencia_pct": d, "texto": f"{texto} {vn:.0f} mm ({_signo(d)})"}
+
+
+def _lluvia_planilla(serie: list[dict], nasa: dict, nasa_anual: float) -> dict | None:
+    """Lluvia de la planilla: campañas julio–junio completas, como el contraste.
+
+    Los años de registro son las campañas completas que se comparan (las mismas que dice el
+    contraste), no los años calendario de la planilla (H-007).
+    """
+    if not any(_por_mes(serie, "lluvia_mm")):
         return None
-    anios = min(len(v) for v in por_mes if v)
-    w = peso_productor(anios)
     prod = _campanas_productor(serie, "lluvia_mm")
+    if not prod:
+        return {**_sin_lluvia(), "texto": f"Lluvia: {SIN_CAMPANA_COMPLETA}, no entra en las reglas"}
     comunes = [c for c in sorted(prod) if "lluvia_mm" in nasa.get(c, {})]
     if comunes:
         n = len(comunes)
-        p_mes = [sum(prod[c][m] for c in comunes) / n for m in range(12)]
-        n_mes = [sum(nasa[c]["lluvia_mm"][m] for c in comunes) / n for m in range(12)]
-        vp, vn = sum(p_mes), sum(n_mes)
+        vp = sum(sum(prod[c]) for c in comunes) / n
+        vn = sum(sum(nasa[c]["lluvia_mm"]) for c in comunes) / n
         if vn > 0:
-            d = _dif(vp, vn)
-            return {"factores": [_limitar(p_mes[m] / n_mes[m]) if n_mes[m] > 0 else 1.0 for m in range(12)],
-                    "peso": w, "anios": anios, "campanas": comunes, "diferencia_pct": d,
-                    "texto": (f"Lluvia: tu registro {vp:.0f} mm/año ({pct(w)}, {_anios(anios)}) contra NASA POWER "
-                              f"en las mismas {_campanas(n)} ({_rango(comunes)}) {vn:.0f} mm ({_signo(d)})")}
+            w = peso_productor(n)
+            return _comparacion(f"Lluvia: tu registro {vp:.0f} mm/año ({pct(w)}, {_campanas(n)}) contra NASA POWER "
+                                f"en {_mismas(n)} ({_rango(comunes)})", vp, vn, w, n, comunes)
+    if nasa_anual <= 0:
+        return None
     # Sin NASA campaña por campaña o sin campañas en común: contra el promedio de las 30 (como antes de #64).
-    nasa_anual = sum(nasa_mes)
-    prod_anual = sum(sum(v) / len(v) if v else nasa_mes[m] for m, v in enumerate(por_mes))
+    n = len(prod)
+    vp = sum(sum(v) for v in prod.values()) / n
+    w = peso_productor(n)
     motivo = SIN_COMUNES if nasa else SIN_CAMPANAS
-    return {"factores": [_limitar((sum(v) / len(v)) / nasa_mes[m]) if v and nasa_mes[m] > 0 else 1.0
-                         for m, v in enumerate(por_mes)],
-            "peso": w, "anios": anios, "campanas": [],
-            "diferencia_pct": _dif(prod_anual, nasa_anual) if nasa_anual > 0 else None,
-            "texto": (f"Lluvia: tu registro mensual {prod_anual:.0f} mm/año ({pct(w)}, {_anios(anios)}) + "
-                      f"NASA POWER {nasa_anual:.0f} mm ({pct(1 - w)}), {motivo}")}
+    return _comparacion(f"Lluvia: tu registro {vp:.0f} mm/año ({pct(w)}, {_campanas(n)}), {motivo} de NASA POWER",
+                        vp, nasa_anual, w, n, [])
 
 
-def _lluvia_anual(mediciones: dict, nasa: dict, nasa_mes: list[float]) -> dict | None:
+def _lluvia_anual(mediciones: dict, nasa: dict, nasa_anual: float) -> dict | None:
+    """Lluvia anual cargada a mano (solo por API). Contra las últimas `anios_registro` campañas de NASA.
+
+    Sin `anios_registro` no se sabe qué período cubre: se compara con el promedio de las 30 campañas,
+    pesa como 1 año y la evidencia lo dice. `clima/correccion.py` compara contra lo mismo (H-006).
+    """
     anual = _num(mediciones.get("lluvia_anual_mm"))
-    nasa_anual = sum(nasa_mes)
     if not anual or anual <= 0 or nasa_anual <= 0:
         return None
-    anios = int(_num(mediciones.get("anios_registro")) or 1)
+    anios = _num(mediciones.get("anios_registro"))
+    if anios is None or anios < 1:
+        w = peso_productor(1)
+        return _comparacion(f"Lluvia: tu pluviómetro {anual:.0f} mm/año ({pct(w)}), {SIN_ANIOS} de NASA POWER",
+                            anual, nasa_anual, w, 0, [])
+    anios = int(anios)
     w = peso_productor(anios)
-    ultimas = sorted(c for c in nasa if "lluvia_mm" in nasa[c])[-anios:] if anios >= 1 else []
+    ultimas = sorted(c for c in nasa if "lluvia_mm" in nasa[c])[-anios:]
     vn = sum(sum(nasa[c]["lluvia_mm"]) for c in ultimas) / len(ultimas) if ultimas else 0.0
     if vn > 0:
-        d = _dif(anual, vn)
-        return {"factores": [_limitar(anual / vn)] * 12, "peso": w, "anios": anios, "campanas": ultimas,
-                "diferencia_pct": d,
-                "texto": (f"Lluvia: tu pluviómetro {anual:.0f} mm/año ({pct(w)}, {_anios(anios)}) contra NASA POWER "
-                          f"en las últimas {_campanas(len(ultimas))} ({_rango(ultimas)}) {vn:.0f} mm ({_signo(d)})")}
-    return {"factores": [_limitar(anual / nasa_anual)] * 12, "peso": w, "anios": anios, "campanas": [],
-            "diferencia_pct": _dif(anual, nasa_anual),
-            "texto": (f"Lluvia: tu pluviómetro {anual:.0f} mm/año ({pct(w)}, {_anios(anios)}) + NASA POWER "
-                      f"{nasa_anual:.0f} mm ({pct(1 - w)}), {SIN_CAMPANAS}")}
+        return _comparacion(f"Lluvia: tu pluviómetro {anual:.0f} mm/año ({pct(w)}, {_anios(anios)}) contra NASA "
+                            f"POWER en {_ultimas(len(ultimas))} ({_rango(ultimas)})",
+                            anual, vn, w, anios, ultimas)
+    return _comparacion(f"Lluvia: tu pluviómetro {anual:.0f} mm/año ({pct(w)}, {_anios(anios)}), {SIN_CAMPANAS} de "
+                        "NASA POWER", anual, nasa_anual, w, anios, [])
 
 
 def _lluvia(mediciones: dict, terciles: dict, nasa: dict) -> dict:
-    """{factores[12], peso, anios, texto, campanas, diferencia_pct}. Factor 1 y peso 0 si no hay dato."""
-    nasa_mes = _nasa_mensual(terciles)
-    return (_lluvia_planilla(mediciones.get("serie_mensual") or [], nasa, nasa_mes)
-            or _lluvia_anual(mediciones, nasa, nasa_mes)
+    """{factor, limitado, peso, anios, texto, campanas, diferencia_pct}. Factor 1 y peso 0 si no hay dato."""
+    nasa_anual = sum(_nasa_mensual(terciles))
+    return (_lluvia_planilla(mediciones.get("serie_mensual") or [], nasa, nasa_anual)
+            or _lluvia_anual(mediciones, nasa, nasa_anual)
             or _sin_lluvia())
+
+
+def _texto_lluvia(ll: dict, lluvia_nasa: float, lluvia: float) -> str:
+    """La cuenta completa: diferencia → NASA de las 30 con ese % al peso del productor → valor de las reglas."""
+    if not ll["peso"]:
+        return f"{ll['texto']} → NASA de las 30 campañas: {lluvia:.0f} mm/año para las reglas"
+    d = _signo(ll["diferencia_pct"])
+    if ll["limitado"]:
+        usado = _signo(round((ll["factor"] - 1) * 100))
+        d = f"{d}, limitado a {usado} (más que eso es más error de medición que diferencia real),"
+    return (f"{ll['texto']} → NASA de las 30 campañas ({lluvia_nasa:.0f} mm) con ese {d} al {pct(ll['peso'])}: "
+            f"{lluvia:.0f} mm/año para las reglas")
 
 
 def _frecuencia(mediciones: dict, clave: str, nasa_anios: list[int], n_nasa: int, nasa: dict,
@@ -230,25 +274,25 @@ def _frecuencia(mediciones: dict, clave: str, nasa_anios: list[int], n_nasa: int
     """
     nasa30 = [nasa_anios[m] / n_nasa if n_nasa else 0.0 for m in range(12)]
     vacio = {"mezcla": nasa30, "peso": 0.0, "anios": 0, "campanas": [], "prod": None, "nasa_periodo": None}
-    serie = mediciones.get("serie_mensual") or []
-    por_mes = _por_mes(serie, clave)
-    if not any(por_mes):
+    # Años de registro = campañas julio–junio completas, como el contraste (H-007). Sin ninguna
+    # completa no entra: el contraste ya lo manda a "Información que falta".
+    prod = _campanas_productor(mediciones.get("serie_mensual") or [], clave)
+    if not prod:
         return vacio
-    anios = min(len(v) for v in por_mes if v)
-    w = peso_productor(anios)
-    prod = _campanas_productor(serie, clave)
     comunes = [c for c in sorted(prod) if clave in nasa.get(c, {})]
     if comunes:
         n = len(comunes)
+        w = peso_productor(n)
         p = [sum(1 for c in comunes if es_evento(prod[c][m])) / n for m in range(12)]
         q = [sum(1 for c in comunes if es_evento(nasa[c][clave][m])) / n for m in range(12)]
         mezcla = [min(1.0, max(0.0, nasa30[m] + w * (p[m] - q[m]))) for m in range(12)]
-        return {"mezcla": mezcla, "peso": w, "anios": anios, "campanas": comunes, "prod": p, "nasa_periodo": q}
+        return {"mezcla": mezcla, "peso": w, "anios": n, "campanas": comunes, "prod": p, "nasa_periodo": q}
     # Sin campañas en común: contra las 30 campañas (como antes de #64).
-    p30 = [sum(1 for x in v if es_evento(x)) / len(v) if v else None for v in por_mes]
-    mezcla = [w * x + (1 - w) * nasa30[m] if x is not None else nasa30[m] for m, x in enumerate(p30)]
-    return {"mezcla": mezcla, "peso": w, "anios": anios, "campanas": [],
-            "prod": [x if x is not None else nasa30[m] for m, x in enumerate(p30)], "nasa_periodo": nasa30}
+    n = len(prod)
+    w = peso_productor(n)
+    p30 = [sum(1 for v in prod.values() if es_evento(v[m])) / n for m in range(12)]
+    mezcla = [w * p30[m] + (1 - w) * nasa30[m] for m in range(12)]
+    return {"mezcla": mezcla, "peso": w, "anios": n, "campanas": [], "prod": p30, "nasa_periodo": nasa30}
 
 
 def _texto_frecuencia(nombre: str, f: dict, hay_nasa: bool) -> str:
@@ -259,21 +303,21 @@ def _texto_frecuencia(nombre: str, f: dict, hay_nasa: bool) -> str:
         cambios = [m for m in range(12) if abs(round(prod[m] * n) - round(nasa[m] * n)) >= umbral]
         detalle = "; ".join(f"{MESES[m]}: tu estación {round(prod[m] * n)} de {n}, NASA {round(nasa[m] * n)} de {n} "
                             f"→ {pct(f['mezcla'][m])} de los años" for m in cambios[:3]) or "coinciden con NASA"
-        return (f"{nombre}: tu estación ({pct(w)}, {_anios(anios)}) contra NASA POWER en las mismas {_campanas(n)} "
+        return (f"{nombre}: tu estación ({pct(w)}, {_campanas(anios)}) contra NASA POWER en {_mismas(n)} "
                 f"({_rango(comunes)}) · {detalle}")
     cambios = [m for m in range(12) if abs(prod[m] - nasa[m]) >= 0.15]
     detalle = "; ".join(f"{MESES[m]}: tu estación {pct(prod[m])}, NASA {pct(nasa[m])}"
                         for m in cambios[:3]) or "coinciden con NASA"
     motivo = SIN_COMUNES if hay_nasa else SIN_CAMPANAS
-    return f"{nombre}: tu estación ({pct(w)}, {_anios(anios)}) + NASA POWER ({pct(1 - w)}), {motivo} · {detalle}"
+    return f"{nombre}: tu estación ({pct(w)}, {_campanas(anios)}) + NASA POWER ({pct(1 - w)}), {motivo} · {detalle}"
 
 
 def mezclar(entradas: dict, ind: dict) -> dict:
     """Clima que usan las reglas: terciles de lluvia/ET0 y frecuencias de helada y calor por mes.
 
     Devuelve {terciles, helada, calor, lluvia_nasa_mm, lluvia_mm, pesos{lluvia, helada, calor},
-              anios{...}, periodo_comparado{lluvia, helada, calor}, diferencia_lluvia_pct, datos[str],
-              hay_productor, hay_et0}. `ind` no se modifica.
+              anios{...}, periodo_comparado{lluvia, helada, calor}, diferencia_lluvia_pct, lluvia_limitada,
+              datos[str], hay_productor, hay_et0}. Con la planilla, `anios` cuenta campañas completas. `ind` no se modifica.
     """
     mediciones = entradas.get("mediciones") or {}
     terciles_nasa = ind["terciles"]
@@ -281,12 +325,13 @@ def mezclar(entradas: dict, ind: dict) -> dict:
     nasa = _nasa_por_campana(ind)
 
     ll = _lluvia(mediciones, terciles_nasa, nasa)
-    factores, w_ll = ll["factores"], ll["peso"]
+    w_ll = ll["peso"]
+    ajuste = w_ll * ll["factor"] + 1 - w_ll  # el mismo para los 12 meses y los 3 tipos de año
     terciles = {}
     for t in TIPOS:
         ter = terciles_nasa[t]
         terciles[t] = {
-            "pp": [ter["pp"][m] * (w_ll * factores[m] + 1 - w_ll) for m in range(12)],
+            "pp": [ter["pp"][m] * ajuste for m in range(12)],
             "pp_nasa": list(ter["pp"]),
             "et0": list(ter["et0"]) if ter.get("et0") else None,
             "n": ter.get("n", 0),
@@ -299,9 +344,7 @@ def mezclar(entradas: dict, ind: dict) -> dict:
     lluvia_nasa = sum(_nasa_mensual(terciles_nasa))
     lluvia = sum(_nasa_mensual(terciles))
     if ll["texto"]:
-        ajuste = (f"NASA de las 30 campañas ({lluvia_nasa:.0f} mm) con ese {_signo(ll['diferencia_pct'])} al "
-                  f"{pct(w_ll)}: " if ll["campanas"] else "")
-        datos.append(f"{ll['texto']} → {ajuste}{lluvia:.0f} mm/año para las reglas")
+        datos.append(_texto_lluvia(ll, lluvia_nasa, lluvia))
     for nombre, f in (("Heladas", helada), ("Calor", calor)):
         if f["prod"] is not None:
             datos.append(_texto_frecuencia(nombre, f, bool(nasa)))
@@ -316,6 +359,7 @@ def mezclar(entradas: dict, ind: dict) -> dict:
         "anios": {"lluvia": ll["anios"], "helada": helada["anios"], "calor": calor["anios"]},
         "periodo_comparado": {"lluvia": ll["campanas"], "helada": helada["campanas"], "calor": calor["campanas"]},
         "diferencia_lluvia_pct": ll["diferencia_pct"],
+        "lluvia_limitada": ll["limitado"],
         "datos": datos,
         "hay_productor": bool(w_ll or helada["peso"] or calor["peso"]),
         "hay_et0": all(terciles[t]["et0"] for t in TIPOS),
