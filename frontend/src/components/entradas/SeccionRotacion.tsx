@@ -10,17 +10,10 @@
  */
 import { useEntradas } from "@/lib/store";
 import { INVIERNOS, VERANOS, type Invierno, type Verano } from "@/lib/entradas";
-import {
-  C,
-  INICIALES_MES,
-  MESES,
-  ORDEN_CAMPANA,
-  calendario,
-  describirSegmento,
-  nombreTramo,
-  notaCalendario,
-  segmentos,
-} from "@/lib/calendario";
+import { C, INICIALES_MES, MESES, ORDEN_CAMPANA, calendario, notaCalendario } from "@/lib/calendario";
+import type { CultivoMes } from "@/lib/contrato";
+import { LETRA_CULTIVO, NOMBRE_LEYENDA, ORDEN_LEYENDA } from "@/lib/formato";
+import linea from "@/components/resultados/linea.module.css";
 import estilos from "./Campos.module.css";
 import "./calendario.css";
 
@@ -32,7 +25,9 @@ export default function SeccionRotacion() {
   const cambiar = useEntradas((s) => s.cambiar);
 
   // El calendario no se guarda: se deriva de verano + invierno en cada render (es barato, 12 meses).
-  const tramos = segmentos(calendario(verano, invierno));
+  const meses = calendario(verano, invierno) as CultivoMes[];
+  // La leyenda dice solo las letras que aparecen, en el mismo orden que la de la tabla.
+  const presentes = ORDEN_LEYENDA.filter((c) => meses.includes(c));
   // Si un cultivo sale de su ventana típica (verano de 2ª, cobertura que se seca antes), se dice (QA H-003).
   const nota = notaCalendario(verano, invierno);
 
@@ -100,27 +95,36 @@ export default function SeccionRotacion() {
             </div>
           </div>
           <div className="r">
-            {/* role="list": un lector de pantalla lee cada tramo con su nombre y meses, no solo el color. */}
-            <div className="row2" role="list" aria-label="Calendario de la rotación, de julio a junio">
-              {tramos.map((t) => {
-                const g = C[t.cultivo].g;
-                // "Barbecho (pelado)": el mismo término en el rótulo, el title y el aria-label (QA H-027).
-                const nombre = nombreTramo(t.cultivo);
+            {/* Un cuadrado por mes con la letra del cultivo, como en la tabla de Rotaciones.
+                role="list": un lector de pantalla lee cada mes con su cultivo, no solo el color. */}
+            <div className={linea.mesesCultivo} role="list" aria-label="Calendario de la rotación, de julio a junio">
+              {ORDEN_CAMPANA.map((m) => {
+                const c = meses[m];
                 return (
                   <span
-                    key={t.desde}
+                    key={m}
                     role="listitem"
-                    className={`seg ${g}`}
-                    style={{ flex: t.meses }}
-                    title={describirSegmento(t)}
-                    aria-label={describirSegmento(t)}
+                    className={linea.mesCultivo}
+                    data-grupo={C[c].g}
+                    title={`${MESES[m]}: ${NOMBRE_LEYENDA[c]}`}
+                    aria-label={`${MESES[m]}: ${NOMBRE_LEYENDA[c]}`}
                   >
-                    {nombre}
+                    {LETRA_CULTIVO[c]}
                   </span>
                 );
               })}
             </div>
           </div>
+        </div>
+        <div className={`${linea.letras} letras-rot`} aria-hidden="true">
+          {presentes.map((c) => (
+            <span key={c}>
+              <b className={linea.muestraLetra} data-grupo={C[c].g}>
+                {LETRA_CULTIVO[c]}
+              </b>
+              {NOMBRE_LEYENDA[c]}
+            </span>
+          ))}
         </div>
         <div className="cap">Campaña de julio a junio, armada con lo que elegiste.</div>
       </div>

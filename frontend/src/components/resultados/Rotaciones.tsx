@@ -28,7 +28,7 @@ export default function Rotaciones({ salida }: { salida: Salida }) {
           <SeccionObjetivos />
         </div>
         <p className={css.nota}>
-          Mover una prioridad recalcula la cercanía en el navegador (Σ p²·v / Σ p²); no vuelve a consultar a NASA.
+          Mover una prioridad recalcula la cercanía al instante, sin volver a consultar a NASA.
         </p>
       </section>
 
