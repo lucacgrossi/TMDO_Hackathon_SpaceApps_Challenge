@@ -23,6 +23,11 @@ describe("margenes del mapa del lote", () => {
     expect(m.paddingBottomRight).toEqual([12, 238]);
   });
 
+  it("un lote alto no se corre al costado del selector: el selector es una barra y va arriba", () => {
+    const m = margenesLote(MAPA, [SELECTOR, LINEA, LEYENDA], 0.75);
+    expect(m.paddingTopLeft).toEqual([12, 118]);
+  });
+
   it("celular: los paneles que van debajo del mapa no cuentan", () => {
     const mapa = caja(16, 0, 359, 640);
     const linea = caja(16, 652, 359, 760);

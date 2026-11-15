@@ -4,8 +4,9 @@
  * pantalla (como `getBoundingClientRect`) y devuelve el padding de `fitBounds`.
  *
  * Cada panel que cae sobre el mapa se "aparta" hacia uno de sus dos lados más
- * cercanos (la línea de tiempo, abajo; la leyenda, abajo o a la derecha). Se
- * prueban las combinaciones y gana la que deja el lote más grande, según su
+ * cercanos (la leyenda, abajo o a la derecha). Las barras anchas (el selector,
+ * la línea de tiempo) solo arriba o abajo, así el lote no se corre a un costado.
+ * Se prueban las combinaciones y gana la que deja el lote más grande, según su
  * forma (`aspecto` = ancho / alto en metros).
  */
 
@@ -56,9 +57,11 @@ export function margenesLote(mapa: Caja, paneles: Caja[], aspecto: number, aire 
     .filter((c) => seSuperpone(c, mapa))
     .map((c) => {
       const i = insets(c, mapa);
-      return (Object.keys(i) as Lado[])
+      const barra = c.right - c.left >= 2 * (c.bottom - c.top);
+      const lados: Lado[] = barra ? ["top", "bottom"] : ["top", "right", "bottom", "left"];
+      return lados
         .sort((a, b) => i[a] - i[b])
-        .slice(0, 2)
+        .slice(0, barra ? 1 : 2)
         .map((lado) => ({ lado, px: i[lado] }));
     });
 
