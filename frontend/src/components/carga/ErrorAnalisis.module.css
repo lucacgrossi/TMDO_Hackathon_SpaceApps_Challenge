@@ -1,0 +1,65 @@
+/* S3b · Error del análisis. Botones: components/comunes/Boton. */
+
+.card {
+  display: flex;
+  gap: var(--space-4);
+  align-items: flex-start;
+  width: min(620px, 100%);
+  padding: var(--space-6);
+  background: var(--papel);
+  color: var(--noche);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--bad);
+  border-radius: 6px;
+  font-family: var(--f);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.semilla {
+  flex: none;
+  display: block;
+  margin-top: var(--space-1);
+}
+
+.texto {
+  min-width: 0;
+}
+
+.titulo {
+  margin: 0;
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.mensaje {
+  margin: var(--space-2) 0 0;
+}
+
+.seguir {
+  margin: var(--space-2) 0 0;
+  color: var(--muted);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.codigo {
+  margin: var(--space-3) 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+@media (max-width: 480px) {
+  .card {
+    flex-direction: column;
+  }
+}
