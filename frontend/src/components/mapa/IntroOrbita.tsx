@@ -199,6 +199,18 @@ export default function IntroOrbita() {
       capaNubes.style.setProperty("--escala", `${(1 + 0.3 * a).toFixed(3)}`);
       rotulo.style.setProperty("--apertura", `${a}`);
     };
+    // Los nombres (capa semitransparente) se esconden durante el vuelo: al
+    // cambiar de nivel, Leaflet deja el nivel viejo debajo del nuevo hasta que
+    // termina el fundido y se veían los nombres duplicados. Vuelven al aterrizar.
+    const nombres: { capa: L.TileLayer; opacidad: number }[] = [];
+    mapa.eachLayer((c) => {
+      if (c instanceof L.TileLayer && c.options.className === "capa-nombres") {
+        nombres.push({ capa: c, opacidad: c.options.opacity ?? 1 });
+      }
+    });
+    nombres.forEach(({ capa }) => capa.setOpacity(0));
+    const mostrarNombres = () => nombres.forEach(({ capa, opacidad }) => capa.setOpacity(opacidad));
+
     let nubesFuera = false;
     const quitarNubes = (suave: boolean) => {
       if (nubesFuera) return;
@@ -244,6 +256,7 @@ export default function IntroOrbita() {
     };
 
     const terminar = (devolverZoomMinimo = true) => {
+      mostrarNombres();
       if (volando) {
         volando = false;
         interno._moveEnd(true);

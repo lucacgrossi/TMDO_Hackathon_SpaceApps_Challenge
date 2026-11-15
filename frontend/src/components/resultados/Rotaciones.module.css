@@ -44,6 +44,10 @@
   padding: var(--space-4);
   border-radius: 6px;
   background: var(--papel);
+  /* Fuera de pantalla, el navegador no calcula ni pinta la tabla: entrar a
+     Rotaciones o mover una prioridad no traba la vista. `auto` recuerda el alto real. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1400px;
 }
 
 /* Título/H2: Pixelify Sans 600, 24/32. */
