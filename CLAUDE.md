@@ -40,9 +40,9 @@ Responde al desafío *"Field Shift: Adapting Farms with NASA Data"*: comparar ro
 
 **Predicción estadística (probabilidad climatológica):** la probabilidad de cada evento sale de la frecuencia con que ocurrió en las 30 campañas del punto, según el calendario de cada estrategia: helada con cultivo sensible, siembra con menos de la mitad de la lluvia normal, máxima ≥ 35 °C. Ejemplo: "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)". Siempre muestra el conteo de años, no solo el porcentaje.
 
-**Mediciones del productor:** se cargan **a mano** (lluvia anual del pluviómetro y años de registro, materia orgánica) o **subiendo una planilla CSV** con su registro diario o mensual de lluvia y, si tiene estación, de temperaturas mínima y máxima (ruta `POST /mediciones/planilla`; ver `docs/plan-planilla-lluvia.md`). Se usan de dos formas:
+**Mediciones del productor:** se cargan **solo subiendo una planilla CSV** con su registro diario o mensual de lluvia y, si tiene estación, de temperaturas mínima y máxima (ruta `POST /mediciones/planilla`; ver `docs/plan-planilla-lluvia.md`). No hay carga a mano: la app no ofrece la lluvia anual ni los años de registro sueltos (la API los sigue aceptando en `mediciones_propias`), y la materia orgánica no se carga. Se usan de dos formas:
 - **Contraste al lado de NASA** (`clima/correccion.py`): "Tu pluviómetro (2018/19 a 2023/24, 6 campañas): 702 mm/año · NASA en las mismas campañas: 781 mm (−10 %)"; con planilla, la comparación es en las **mismas campañas** que NASA. Si la lluvia difiere más del 15 %, la confianza del agua baja a "baja"; si las heladas o el calor difieren en 1 de cada 3 campañas en común o más, baja la de las heladas. Todo va a "Revisar con el agrónomo". El contraste **no cambia puntajes**.
-- **Mezcla en los puntajes del motor** (`motor/mezcla.py`): la lluvia y las temperaturas del productor se mezclan con NASA según sus años de registro y mueven el agua, la erosión y los riesgos de helada y calor. Las **probabilidades climatológicas** siguen saliendo solo de las 30 campañas de NASA. La materia orgánica se muestra como "dato del productor" y no puntúa.
+- **Mezcla en los puntajes del motor** (`motor/mezcla.py`): la lluvia y las temperaturas del productor se mezclan con NASA según sus años de registro y mueven el agua, la erosión y los riesgos de helada y calor. Las **probabilidades climatológicas** siguen saliendo solo de las 30 campañas de NASA.
 - Sin mediciones, todo funciona solo con NASA.
 
 **Capas del mapa:** el back las calcula y el front solo las dibuja. Todas usan la misma campaña y el mismo mes que la tabla, y las escalas salen del back. El plan para llevarlas a una grilla común del lote (1″, ~30 m), con cada número del lote calculado como resumen de su capa, está en `docs/plan-armonizacion-capas.md`.
@@ -70,7 +70,7 @@ Verificados el 14/11 contra el lote demo: todos funcionan sin login y responden 
 | NASA GIBS | NDVI como imagen (capa visual) | 250 m | Teselas WMTS | Front |
 | Esri World Imagery | Mapa base | — | Teselas | Front |
 | Esri World Geocoding | Buscar el lugar del lote | — | `suggest` / `findAddressCandidates`, sin cuenta | Front |
-| Mediciones del productor | Lluvia, temperaturas mínima y máxima, materia orgánica | Su lote | A mano o planilla CSV (`mediciones/planilla.py`, Back 2) | Contraste (Back 1) y mezcla en el motor (Lógica) |
+| Mediciones del productor | Lluvia, temperaturas mínima y máxima | Su lote | Planilla CSV (`mediciones/planilla.py`, Back 2) | Contraste (Back 1) y mezcla en el motor (Lógica) |
 
 Todo se lleva a **escala mensual + climatología de 30 años**. Los datos gruesos se presentan como "contexto regional".
 
