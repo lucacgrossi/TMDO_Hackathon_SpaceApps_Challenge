@@ -44,7 +44,7 @@ export default function PantallaCarga({ superficieHa, lugar, inicio }: Props) {
       <div className={estilos.centro}>
         <PlantaPixel fotograma={fotogramaPlanta(ms, quieto)} escala={12} className={estilos.planta} />
 
-        <h1 className={estilos.titulo}>Analizando tu lote</h1>
+        <h1 className={estilos.titulo}>Analizando tu lote…</h1>
         <p className={estilos.lote}>
           {textoLote(superficieHa, lugar)} <span className={estilos.tiempo}>{textoTiempo(ms)}</span>
         </p>
