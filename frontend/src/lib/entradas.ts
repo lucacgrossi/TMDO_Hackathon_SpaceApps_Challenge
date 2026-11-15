@@ -63,12 +63,8 @@ export interface Entradas {
   noSembrar: CultivoNoSembrar[];
   anegable: Anegable;
   textura: Textura;
-  /** Mediciones propias (RF15). null = no cargó. */
+  /** Mediciones propias (RF15), solo por planilla: no hay carga a mano. */
   mediciones: {
-    lluviaAnualMm: number | null;
-    /** Años de registro del pluviómetro (entero ≥ 1): el back decide con esto cuánto pesa la lluvia del productor. */
-    aniosRegistro: number | null;
-    materiaOrganicaPct: number | null;
     /**
      * Planilla CSV subida (RF26): nombre del archivo y lo que devolvió el
      * parser. Sus `serie.meses` van en `mediciones_propias.serie_mensual`.
@@ -107,5 +103,5 @@ export const ENTRADAS_INICIALES: Entradas = {
   noSembrar: [],
   anegable: "no",
   textura: "franco",
-  mediciones: { lluviaAnualMm: null, aniosRegistro: null, materiaOrganicaPct: null, planilla: null },
+  mediciones: { planilla: null },
 };

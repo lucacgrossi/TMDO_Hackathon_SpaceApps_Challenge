@@ -94,24 +94,6 @@ describe("entradaDesde · mediciones propias", () => {
     });
   });
 
-  it("pluviómetro, años y materia orgánica con los nombres del contrato", () => {
-    const m = { ...base.mediciones, lluviaAnualMm: 620, aniosRegistro: 8, materiaOrganicaPct: 2.4 };
-    expect(entradaDesde(con({ mediciones: m })).mediciones_propias).toMatchObject({
-      lluvia_anual_mm: 620,
-      anios_registro: 8,
-      materia_organica_pct: 2.4,
-    });
-  });
-
-  it("valores que el back rechazaría no se mandan (lluvia 0, años 0, materia orgánica fuera de rango)", () => {
-    const m = { ...base.mediciones, lluviaAnualMm: 0, aniosRegistro: 0, materiaOrganicaPct: 140 };
-    expect(entradaDesde(con({ mediciones: m })).mediciones_propias).toMatchObject({
-      lluvia_anual_mm: null,
-      anios_registro: null,
-      materia_organica_pct: null,
-    });
-  });
-
   it("la planilla leída por el back va en serie_mensual, con null en lo que falta", () => {
     const resultado: ResultadoPlanilla = structuredClone({ ...RESULTADO_EJEMPLO, ejemplo: false });
     resultado.serie!.meses = [{ mes: "2023-01", lluvia_mm: 120.5 }];

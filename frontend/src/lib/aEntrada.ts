@@ -20,9 +20,6 @@ export function anilloGeoJSON(poligono: readonly LatLng[]): [number, number][] {
 /** Barras de 1 a 5 (el contrato rechaza 0 o decimales con 422). */
 const prioridad = (v: number) => Math.min(5, Math.max(1, Math.round(v)));
 
-/** Número positivo o null (el back rechaza 0 o negativos en la lluvia). */
-const positivo = (v: number | null) => (v != null && Number.isFinite(v) && v > 0 ? v : null);
-
 export function entradaDesde(e: Entradas): Entrada {
   const [lat, lon] = centro(e.poligono);
 
@@ -43,8 +40,6 @@ export function entradaDesde(e: Entradas): Entrada {
           t_max_c: x.t_max_c ?? null,
         }))
       : null;
-  const anios = m.aniosRegistro != null && m.aniosRegistro >= 1 ? Math.round(m.aniosRegistro) : null;
-  const mo = m.materiaOrganicaPct != null && m.materiaOrganicaPct >= 0 && m.materiaOrganicaPct <= 100 ? m.materiaOrganicaPct : null;
 
   return {
     lote: {
@@ -71,9 +66,10 @@ export function entradaDesde(e: Entradas): Entrada {
     anegable: e.anegable,
     textura_suelo: e.textura,
     mediciones_propias: {
-      lluvia_anual_mm: positivo(m.lluviaAnualMm),
-      anios_registro: anios,
-      materia_organica_pct: mo,
+      // Las mediciones llegan solo por planilla: no hay carga a mano.
+      lluvia_anual_mm: null,
+      anios_registro: null,
+      materia_organica_pct: null,
       serie_mensual: serie && serie.length ? serie : null,
     },
   };
