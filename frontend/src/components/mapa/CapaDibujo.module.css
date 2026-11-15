@@ -1,0 +1,20 @@
+/* Esquinas del lote mientras se dibuja: cuadrados pixel (DESIGN.md, S1) */
+.esquina {
+  width: 100%;
+  height: 100%;
+  background: var(--hoja);
+  border: 2px solid var(--papel);
+  box-shadow: 1px 1px 0 rgba(20, 32, 43, 0.5);
+  cursor: grab;
+}
+
+/* La primera, que cierra el lote, va invertida */
+.primera {
+  background: var(--papel);
+  border-color: var(--hoja);
+  cursor: pointer;
+}
+
+:global(.leaflet-marker-dragging) .esquina {
+  cursor: grabbing;
+}

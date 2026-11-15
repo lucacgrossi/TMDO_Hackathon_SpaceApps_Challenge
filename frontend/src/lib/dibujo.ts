@@ -43,24 +43,29 @@ export function evaluar(puntos: LatLng[]): Evaluacion {
   return { n, ha, cruza, valido };
 }
 
+/** "1 esquina" / "4 esquinas". */
+const esquinas = (n: number) => `${n} esquina${n === 1 ? "" : "s"}`;
+
 /**
- * Textos de la barra (drawUI del prototipo): la línea en negrita dice cuánto
- * va marcado y la de abajo qué hacer o qué está mal (`error` la pinta en rojo).
+ * Textos de la barra de dibujo (S1): la línea en negrita dice cuánto va
+ * marcado y la de abajo qué hacer o qué está mal (`error` la pinta en rojo).
+ * Sin puntos medios entre datos (DESIGN.md, "Lenguaje de la interfaz").
  */
 export function textosBarra(puntos: LatLng[]): { titulo: string; ayuda: string; error: boolean } {
   const { n, ha, cruza, valido } = evaluar(puntos);
   let titulo: string;
-  if (n < 3) titulo = `Marcá las esquinas del lote · ${n} punto${n === 1 ? "" : "s"}`;
-  else if (cruza) titulo = `${n} puntos`; // con las líneas cruzadas la superficie no tiene sentido
-  else titulo = `${formatoNumero(ha, ha < 10 ? 1 : 0)} ha · ${n} puntos`;
+  if (n < 3) titulo = `Marcá las esquinas del lote: ${esquinas(n)}`;
+  else if (cruza) titulo = esquinas(n); // con las líneas cruzadas la superficie no tiene sentido
+  else titulo = `Lote de ${formatoNumero(ha, ha < 10 ? 1 : 0)} ha, ${esquinas(n)}`;
 
   let ayuda: string;
-  if (n < 3) ayuda = "Tocá el mapa en cada esquina. Podés arrastrar cada punto para acomodarlo.";
-  else if (cruza) ayuda = "Las líneas se cruzan: arrastrá o deshacé un punto.";
+  if (n === 0) ayuda = "Hacé clic en el mapa para marcar la primera esquina.";
+  else if (n < 3) ayuda = "Seguí marcando: hacen falta 3 esquinas o más. Podés arrastrar cada una para acomodarla.";
+  else if (cruza) ayuda = "Las líneas se cruzan: arrastrá o deshacé una esquina.";
   else if (ha < AREA_MIN_HA) ayuda = `Muy chico: el mínimo es ${AREA_MIN_HA} ha.`;
   else if (ha > AREA_MAX_HA)
     ayuda = `Muy grande: el máximo es ${formatoNumero(AREA_MAX_HA)} ha. Acercá el mapa y marcá el lote.`;
-  else ayuda = "Arrastrá los puntos para ajustar. Tocá el primero o «Listo» para cerrar.";
+  else ayuda = "Arrastrá las esquinas para ajustar. Tocá la primera o «Listo» para cerrar.";
 
   return { titulo, ayuda, error: n >= 3 && !valido };
 }
@@ -75,6 +80,12 @@ interface EstadoDibujo {
    * cerraría el lote sin querer.
    */
   arrastrando: boolean;
+  /**
+   * Sube en 1 cada vez que un lote se cierra bien (con «Listo», tocando la
+   * primera esquina o con Enter). La pantalla de marcar lo escucha para pasar
+   * al panel de entradas, venga de donde venga el cierre.
+   */
+  cierres: number;
   /** startDraw: arranca vacío o con un lote ya dibujado para editarlo. */
   iniciar: (previo?: LatLng[] | null) => void;
   agregar: (punto: LatLng) => void;
@@ -98,6 +109,7 @@ export const useDibujo = create<EstadoDibujo>()((set, get) => {
     dibujando: false,
     puntos: [],
     arrastrando: false,
+    cierres: 0,
 
     iniciar: (previo) => {
       if (get().dibujando) return;
@@ -122,6 +134,7 @@ export const useDibujo = create<EstadoDibujo>()((set, get) => {
       if (!valido) return false;
       useEntradas.getState().cambiar({ poligono: puntos, modoLote: "dibujo" });
       salir();
+      set({ cierres: get().cierres + 1 });
       // Encuadra el lote nuevo con 30 % de aire y lo confirma con un aviso.
       useEncuadre.getState().pedirEncuadre(0.3);
       useToast.getState().mostrar(`Lote dibujado: ${formatoNumero(ha, 1)} ha`);

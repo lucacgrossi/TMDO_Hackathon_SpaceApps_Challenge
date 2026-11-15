@@ -1,10 +1,11 @@
 "use client";
 
 import L from "leaflet";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Marker, Polygon, Polyline, useMap, useMapEvents } from "react-leaflet";
 import { useDibujo } from "@/lib/dibujo";
 import { useMapa } from "@/lib/mapa";
+import estilos from "./CapaDibujo.module.css";
 
 /**
  * F5 · Lo que se ve en el mapa mientras se dibuja el lote: la línea punteada
@@ -20,19 +21,28 @@ import { useMapa } from "@/lib/mapa";
 /** Tocar a menos de 14 px de la primera esquina cierra el lote (en vez de sumar otra). */
 const RADIO_CIERRE_PX = 14;
 
-/** Color de acento del CSS (`--accent`), leído en el momento: cambia en modo oscuro. */
-function acento(): string {
-  return getComputedStyle(document.documentElement).getPropertyValue("--accent").trim() || "#1b8ac2";
+/**
+ * Color del trazo, leído del CSS en el momento: blanco (`--papel`) para que se
+ * vea sobre cualquier imagen satelital (el verde `--hoja` se pierde en los
+ * lotes), con el relleno en `--hoja-brillo`.
+ */
+function colorCss(token: string, porDefecto: string): string {
+  return getComputedStyle(document.documentElement).getPropertyValue(token).trim() || porDefecto;
 }
 
-// Íconos de las esquinas con las clases `.vx` del prototipo. La primera es más
-// grande y rellena: es la que se toca para cerrar.
-const iconoEsquina = L.divIcon({ className: "", html: '<div class="vx"></div>', iconSize: [16, 16], iconAnchor: [8, 8] });
+// Esquinas pixel (DESIGN.md, S1): cuadrados de 10 px. La primera va rellena:
+// es la que se toca para cerrar el lote.
+const iconoEsquina = L.divIcon({
+  className: "",
+  html: `<div class="${estilos.esquina}"></div>`,
+  iconSize: [10, 10],
+  iconAnchor: [5, 5],
+});
 const iconoPrimera = L.divIcon({
   className: "",
-  html: '<div class="vx first"></div>',
-  iconSize: [20, 20],
-  iconAnchor: [10, 10],
+  html: `<div class="${estilos.esquina} ${estilos.primera}"></div>`,
+  iconSize: [12, 12],
+  iconAnchor: [6, 6],
 });
 
 export default function CapaDibujo() {
@@ -40,6 +50,8 @@ export default function CapaDibujo() {
   const dibujando = useDibujo((s) => s.dibujando);
   const puntos = useDibujo((s) => s.puntos);
   const pedidoDibujo = useMapa((s) => s.pedidoDibujo);
+  /** Dónde está el mouse: de la última esquina hasta acá va el tramo punteado. */
+  const [cursor, setCursor] = useState<L.LatLng | null>(null);
 
   // Arranca el dibujo cuando lo pide Encuadre (al llegar al lugar elegido en
   // el paso 2). El 0 inicial no es un pedido.
@@ -72,6 +84,11 @@ export default function CapaDibujo() {
 
   // addVertex: cada toque suma una esquina; cerca de la primera, cierra.
   useMapEvents({
+    mousemove: (e) => {
+      // Solo el tramo al cursor se redibuja: es un estado local de esta capa.
+      if (useDibujo.getState().dibujando) setCursor(e.latlng);
+    },
+    mouseout: () => setCursor(null),
     click: (e) => {
       const d = useDibujo.getState();
       if (!d.dibujando) return;
@@ -88,16 +105,26 @@ export default function CapaDibujo() {
 
   if (!dibujando) return null;
 
-  const color = acento();
+  const color = colorCss("--papel", "#FFFFFF");
+  const relleno = colorCss("--hoja-brillo", "#4CAF50");
+  const ultima = puntos[puntos.length - 1];
   return (
     <>
       {/* Relleno de prueba: aparece con 3 esquinas, para ver la forma que va a quedar. */}
       <Polygon
         positions={puntos.length >= 3 ? puntos : []}
-        pathOptions={{ stroke: false, fillColor: color, fillOpacity: 0.18 }}
+        pathOptions={{ stroke: false, fillColor: relleno, fillOpacity: 0.25 }}
         interactive={false}
       />
-      <Polyline positions={puntos} pathOptions={{ color, weight: 3, dashArray: "6 6" }} interactive={false} />
+      <Polyline positions={puntos} pathOptions={{ color, weight: 2 }} interactive={false} />
+      {/* Tramo hacia el cursor, punteado: dónde caería la próxima esquina. */}
+      {ultima && cursor && (
+        <Polyline
+          positions={[ultima, cursor]}
+          pathOptions={{ color, weight: 2, dashArray: "4 4", opacity: 0.9 }}
+          interactive={false}
+        />
+      )}
       {puntos.map((p, i) => (
         <Marker
           // La clave es la posición en la lista: deshacer saca siempre la última.
@@ -109,7 +136,7 @@ export default function CapaDibujo() {
           keyboard={false}
           // Sin esto, tocar una esquina también llegaría al mapa y sumaría otra.
           bubblingMouseEvents={false}
-          title={i === 0 ? "Tocá para cerrar · arrastrá para mover" : "Arrastrá para mover"}
+          title={i === 0 ? "Tocá para cerrar o arrastrá para mover" : "Arrastrá para mover"}
           eventHandlers={{
             drag: (e) => {
               const ll = (e.target as L.Marker).getLatLng();

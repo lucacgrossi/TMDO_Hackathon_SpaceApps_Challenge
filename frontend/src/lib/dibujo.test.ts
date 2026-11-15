@@ -14,22 +14,22 @@ const CUADRADO: LatLng[] = [
 
 describe("dibujo · reglas y textos de la barra", () => {
   it("con menos de 3 puntos pide marcar esquinas", () => {
-    expect(textosBarra([]).titulo).toBe("Marcá las esquinas del lote · 0 puntos");
-    expect(textosBarra([CUADRADO[0]]).titulo).toBe("Marcá las esquinas del lote · 1 punto");
+    expect(textosBarra([]).titulo).toBe("Marcá las esquinas del lote: 0 esquinas");
+    expect(textosBarra([CUADRADO[0]]).titulo).toBe("Marcá las esquinas del lote: 1 esquina");
     expect(evaluar(CUADRADO.slice(0, 2)).valido).toBe(false);
   });
 
   it("un cuadrado de ~100 ha es válido y muestra la superficie", () => {
     const t = textosBarra(CUADRADO);
     expect(evaluar(CUADRADO).valido).toBe(true);
-    expect(t.titulo).toMatch(/^\d+ ha · 4 puntos$/);
+    expect(t.titulo).toMatch(/^Lote de \d+ ha, 4 esquinas$/);
     expect(t.error).toBe(false);
   });
 
   it("un moño se marca como error", () => {
     const mono: LatLng[] = [CUADRADO[0], CUADRADO[2], CUADRADO[1], CUADRADO[3]];
     const t = textosBarra(mono);
-    expect(t.titulo).toBe("4 puntos");
+    expect(t.titulo).toBe("4 esquinas");
     expect(t.ayuda).toContain("se cruzan");
     expect(t.error).toBe(true);
   });
@@ -68,6 +68,16 @@ describe("dibujo · store", () => {
     useDibujo.getState().iniciar(CUADRADO.slice(0, 2));
     expect(useDibujo.getState().terminar()).toBe(false);
     expect(useDibujo.getState().dibujando).toBe(true);
+  });
+
+  it("cada cierre válido suma uno a `cierres` (lo escucha la pantalla de marcar); cancelar no", () => {
+    const antes = useDibujo.getState().cierres;
+    useDibujo.getState().iniciar(CUADRADO);
+    useDibujo.getState().cancelar();
+    expect(useDibujo.getState().cierres).toBe(antes);
+    useDibujo.getState().iniciar(CUADRADO);
+    useDibujo.getState().terminar();
+    expect(useDibujo.getState().cierres).toBe(antes + 1);
   });
 
   it("cancelar con el lote de ejemplo vuelve al modo ejemplo", () => {

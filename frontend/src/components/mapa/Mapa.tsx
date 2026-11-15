@@ -121,7 +121,8 @@ export default function Mapa() {
             maxNativeZoom={ZOOM_NATIVO_ESRI}
             opacity={0.85}
           />
-          <ZoomControl position="topleft" />
+          {/* Abajo a la izquierda: arriba están la caja de S1 y las herramientas del mapa. */}
+          <ZoomControl position="bottomleft" />
           <CapaNdvi />
           <CapaPendiente />
           <CapaClima />
