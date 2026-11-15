@@ -13,11 +13,12 @@
   overflow-y: auto;
 }
 
+/* Logo con fondo transparente: toma el `--noche` de la barra, sin recuadro propio. */
 .logo {
-  width: 200px;
+  display: block;
+  width: 168px;
   height: auto;
-  border-radius: 2px;
-  margin-bottom: var(--space-4);
+  margin: var(--space-1) auto var(--space-6);
 }
 
 .nav {

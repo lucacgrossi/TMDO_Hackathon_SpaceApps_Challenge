@@ -41,7 +41,7 @@ export default function HojaImpresion({ salida }: { salida: Salida }) {
     <div className={css.hoja}>
       <header className={css.cabecera}>
         {/* eslint-disable-next-line @next/next/no-img-element -- en papel conviene la imagen tal cual, sin el optimizador */}
-        <img className={css.logo} src="/img/agropixel-logo.png" alt="AgroPixel" width={72} height={55} />
+        <img className={css.logo} src="/img/agropixel-logo.png" alt="AgroPixel" width={72} height={68} />
         <div>
           <h1 className={css.titulo}>{TITULO_HOJA}</h1>
           <dl className={css.ficha}>
