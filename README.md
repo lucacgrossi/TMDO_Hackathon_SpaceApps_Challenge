@@ -68,23 +68,31 @@ Prefer to watch? The **[demo video](https://youtu.be/3xEYUBRogrE)** walks throug
 
 ## Screenshots
 
-Screenshots of the reference field near Río Cuarto, Córdoba, captured during development. They include the AI-generated AgroPixel logo.
+Captured from [agropixel.earth](https://agropixel.earth) on 15 November 2026, with live data: a 124 ha field near Río Cuarto, Córdoba, with soybean and winter fallow, 2025/26 season, 30 climate seasons from 1996/97 to 2025/26. The screenshots include the AI-generated AgroPixel logo.
 
-**1. Field and inputs.** The field drawn on the satellite map and the side panel: current rotation (soybean + winter fallow), priorities, constraints, field data and the grower's own records.
+**1. Field and inputs.** The field outlined on the satellite map, and the side panel with the current rotation (soybean + winter fallow, shown as a July–June calendar), priorities, constraints, field data and the grower's own records.
 
 ![Field outlined on the satellite map with the input panel](docs/img/inputs.jpg)
 
-**2. Map.** Satellite layers of the field (NDVI, slope, cropland, erosion, NASA POWER cell), the monthly NDVI timeline for the season, and the field's technical sheet. Every value shows its source, resolution and confidence.
+**2. Map: NDVI per pixel.** The HLS NDVI of the field on its 1 arc-second (~30 m) grid for July 2025, the monthly NDVI timeline of the season, and the field's technical sheet. Every value shows its source, resolution and confidence.
 
-![Map section with layer selector, NDVI timeline and technical sheet](docs/img/map.jpg)
+![Map section with the per-pixel NDVI layer, monthly timeline and technical sheet](docs/img/map.jpg)
 
-**3. Historical climate.** The 30 seasons colored by dry (S), normal (N) and wet (H) years. The selected season shows its monthly rainfall, temperatures and water balance against the 30-year mean.
+**3. Map: erosion risk per pixel.** NASADEM slope multiplied by the months of low ground cover seen by HLS, pixel by pixel. The field value in the table is the summary of this layer.
 
-![Historical climate section with 30 seasons and monthly detail](docs/img/historical-climate.jpg)
+![Map section with the per-pixel erosion risk layer](docs/img/map-erosion.jpg)
 
-**4. Rotations.** The priorities, the four rotations with their calendars, goal fit score, water balance by year type and climatological probability, and the five parts of each column.
+**4. Historical climate.** The 30 seasons, one stripe each: the color is more intense the further the season's water balance is from normal, and the letter gives its tercile (S dry, N normal, H wet). The selected season (2025/26, dry, 601 mm) shows its monthly rainfall, temperature extremes and water balance against the 30-year mean.
+
+![Historical climate section with 30 seasons and the monthly detail of 2025/26](docs/img/historical-climate.jpg)
+
+**5. Rotations.** The priorities and the four rotations, each with its July–June calendar, months of bare soil, goal fit score, water balance by year type, its first climatological probability, and the five parts of the column.
 
 ![Rotations section with the four strategy cards](docs/img/rotations.jpg)
+
+**6. Comparison table.** Goal fit score by criterion and by year type, the calendars with frost and heat markers and the NDVI seen by satellite, and each value with its source, confidence and difference from the current rotation. It can be exported to PDF.
+
+![Technical comparison table of the four rotations](docs/img/comparison-table.jpg)
 
 ## What it does
 
