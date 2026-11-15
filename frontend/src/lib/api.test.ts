@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { esErrorDeEsquema, esReintentable, mensajeDeError } from "@/lib/api";
+import { esErrorDeEsquema, esReintentable, MENSAJE_TIEMPO_AGOTADO, mensajeDeError, mensajeSinRespuesta } from "@/lib/api";
 import { camp0De, CAMP0 } from "@/lib/ndvi";
 
 describe("mensajeDeError", () => {
@@ -18,14 +18,31 @@ describe("mensajeDeError", () => {
     expect(m).toContain("prioridades.agua");
   });
 
-  it("sin cuerpo legible dice el código", () => {
-    expect(mensajeDeError(502, null)).toBe("El servidor respondió con un error (502).");
+  it("sin cuerpo legible no muestra el código HTTP", () => {
+    expect(mensajeDeError(502, null)).toBe("El servidor de AgroPixel respondió con un error inesperado.");
+    expect(mensajeDeError(502, null)).not.toContain("502");
   });
 
   it("vale reintentar si NASA no respondió o el server falló; no si el lote es inválido", () => {
     expect(esReintentable(503)).toBe(true);
     expect(esReintentable(500)).toBe(true);
     expect(esReintentable(422)).toBe(false);
+  });
+});
+
+describe("sin respuesta del servidor", () => {
+  it("con internet, dice que no responde el servidor de AgroPixel (no manda a revisar internet)", () => {
+    const m = mensajeSinRespuesta(false);
+    expect(m).toContain("servidor de AgroPixel");
+    expect(m).not.toMatch(/internet/i);
+  });
+
+  it("con el navegador sin conexión, dice que es internet", () => {
+    expect(mensajeSinRespuesta(true)).toMatch(/sin conexión a internet/);
+  });
+
+  it("tiempo agotado: habla del servidor de AgroPixel, con los segundos", () => {
+    expect(MENSAJE_TIEMPO_AGOTADO).toBe("El servidor de AgroPixel no terminó de responder en 45 s.");
   });
 });
 

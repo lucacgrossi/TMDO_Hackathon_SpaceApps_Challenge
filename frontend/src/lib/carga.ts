@@ -60,6 +60,11 @@ export type AccionError = "marcar" | "reintentar";
 
 export interface TextosError {
   titulo: string;
+  /**
+   * Qué pasó, en una frase. Si está, reemplaza al `mensaje` del back (que dice
+   * lo mismo con otras palabras); si no, se muestra el `mensaje` tal cual.
+   */
+  explicacion?: string;
   comoSeguir: string;
   /** Una o dos; la primera es la acción principal. */
   acciones: readonly AccionError[];
@@ -67,13 +72,18 @@ export interface TextosError {
 
 /**
  * Qué pasó y cómo seguir según el código de `/analizar` (api-frontend.md §4.2).
- * 422: el polígono no es un lote agrícola. 503: NASA POWER no respondió.
- * Cualquier otro (500, red caída, tiempo agotado): solo "Probar de nuevo".
+ * - 422: el polígono no es un lote agrícola.
+ * - 503: el sistema de NASA (NASA POWER) no respondió al servidor de AgroPixel.
+ * - 0 (sin respuesta, tiempo agotado): el que no responde es el servidor de
+ *   AgroPixel, no internet; salvo que el navegador diga que está sin conexión
+ *   (`sinInternet`).
+ * - Otro (500…): no se pudo terminar el análisis.
  * `deLaApp` (422 con `{detail}`): el pedido no cumplió el esquema; reintentar
  * no lo arregla, así que solo se ofrece marcar de nuevo.
- * No hay lote de ejemplo: el productor siempre marca el suyo.
+ * Nunca se muestra el código HTTP. No hay lote de ejemplo: el productor
+ * siempre marca el suyo.
  */
-export function textosError(codigo: number, deLaApp = false): TextosError {
+export function textosError(codigo: number, deLaApp = false, sinInternet = false): TextosError {
   if (deLaApp) {
     return {
       titulo: "No se pudo armar el pedido del análisis",
@@ -90,14 +100,31 @@ export function textosError(codigo: number, deLaApp = false): TextosError {
   }
   if (codigo === 503) {
     return {
-      titulo: "NASA POWER no responde",
-      comoSeguir: "Probá de nuevo en unos minutos.",
+      titulo: "El sistema de NASA (NASA POWER) no responde",
+      explicacion:
+        "El clima de 30 campañas del lote sale de NASA POWER, y ese servicio no contestó. Sin esos datos no se puede armar la comparación.",
+      comoSeguir: "Tu lote y tus entradas quedan como están. Probá de nuevo en unos minutos.",
+      acciones: ["reintentar"],
+    };
+  }
+  if (codigo === 0 && sinInternet) {
+    return {
+      titulo: "Sin conexión a internet",
+      explicacion: "El navegador no tiene conexión, así que el pedido no llegó al servidor de AgroPixel.",
+      comoSeguir: "Tu lote y tus entradas quedan como están. Probá de nuevo cuando vuelva la conexión.",
+      acciones: ["reintentar"],
+    };
+  }
+  if (codigo === 0) {
+    return {
+      titulo: "El servidor de AgroPixel no responde",
+      comoSeguir: "Tu lote y tus entradas quedan como están. Probá de nuevo en unos segundos.",
       acciones: ["reintentar"],
     };
   }
   return {
     titulo: "No se pudo terminar el análisis",
-    comoSeguir: "Revisá la conexión y probá de nuevo en unos segundos.",
+    comoSeguir: "Tu lote y tus entradas quedan como están. Probá de nuevo en unos segundos.",
     acciones: ["reintentar"],
   };
 }

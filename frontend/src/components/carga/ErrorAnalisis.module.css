@@ -60,13 +60,6 @@
   margin-top: var(--space-4);
 }
 
-.codigo {
-  margin: var(--space-3) 0 0;
-  font-size: 12px;
-  line-height: 16px;
-  color: var(--muted);
-}
-
 @media (max-width: 480px) {
   .card {
     flex-direction: column;

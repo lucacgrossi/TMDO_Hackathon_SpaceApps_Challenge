@@ -39,7 +39,7 @@ export class ErrorDeApi extends Error {
  * - `{detail: [...]}`: 422 de FastAPI porque el pedido no cumple el esquema. Es
  *   un error del front: se dice así, con el primer campo que falló.
  */
-export function mensajeDeError(estado: number, cuerpo: unknown): string {
+export function mensajeDeError(_estado: number, cuerpo: unknown): string {
   if (cuerpo && typeof cuerpo === "object") {
     const c = cuerpo as { mensaje?: unknown; detail?: unknown };
     if (typeof c.mensaje === "string" && c.mensaje.trim()) return c.mensaje.trim();
@@ -50,7 +50,8 @@ export function mensajeDeError(estado: number, cuerpo: unknown): string {
       return `El pedido no tiene el formato que espera el servidor (error de la app, no de tus datos): ${campo ? `${campo}: ` : ""}${msg}`;
     }
   }
-  return `El servidor respondió con un error (${estado}).`;
+  // Sin el código HTTP a la vista (QA H-028): no le dice nada al productor.
+  return "El servidor de AgroPixel respondió con un error inesperado.";
 }
 
 /**
@@ -61,6 +62,25 @@ export function esErrorDeEsquema(cuerpo: unknown): boolean {
   if (!cuerpo || typeof cuerpo !== "object") return false;
   const c = cuerpo as { mensaje?: unknown; detail?: unknown };
   return !(typeof c.mensaje === "string" && c.mensaje.trim()) && Array.isArray(c.detail);
+}
+
+/** El servidor no contestó a tiempo (`TIMEOUT_ANALIZAR_MS`). */
+export const MENSAJE_TIEMPO_AGOTADO = `El servidor de AgroPixel no terminó de responder en ${TIMEOUT_ANALIZAR_MS / 1000} s.`;
+
+/**
+ * Sin respuesta del servidor (fetch rechazado). El navegador sabe si está sin
+ * conexión (`navigator.onLine`); si no, el que no responde es nuestro servidor
+ * y no tiene sentido mandar a revisar internet.
+ */
+export function mensajeSinRespuesta(sinInternet: boolean): string {
+  return sinInternet
+    ? "El navegador está sin conexión a internet."
+    : "El servidor de AgroPixel no contestó: puede estar apagado o reiniciándose. No es un problema de tu lote ni de tus entradas.";
+}
+
+/** true solo si el navegador avisa que está sin conexión. En el servidor (SSR), false. */
+export function navegadorSinConexion(): boolean {
+  return typeof navigator !== "undefined" && navigator.onLine === false;
 }
 
 /** 503 = NASA POWER no respondió; 5xx y 408/429 también vale reintentar. */
@@ -99,9 +119,9 @@ export async function analizar(entrada: Entrada, signal?: AbortSignal): Promise<
     // Abortado por un pedido más nuevo: no es un error para mostrar
     if (signal?.aborted) throw e;
     if (tiempo.signal.aborted) {
-      throw new ErrorDeApi("El servidor tardó más de lo esperado en traer los datos de NASA.", null, true);
+      throw new ErrorDeApi(MENSAJE_TIEMPO_AGOTADO, null, true);
     }
-    throw new ErrorDeApi("No se pudo conectar con el servidor. Revisá la conexión a internet.", null, true);
+    throw new ErrorDeApi(mensajeSinRespuesta(navegadorSinConexion()), null, true);
   } finally {
     clearTimeout(reloj);
     signal?.removeEventListener("abort", cortar);
@@ -141,6 +161,11 @@ export async function subirPlanilla(archivo: File): Promise<ResultadoPlanilla> {
     // 5xx: el problema es del servidor, no del archivo (H-024).
     return error(mensajeDeError(r.status, cuerpo), r.status >= 500);
   } catch {
-    return error("El servidor de AgroPixel no responde: el archivo no se revisó. Probá de nuevo en unos minutos.", true);
+    return error(
+      navegadorSinConexion()
+        ? "El navegador está sin conexión a internet: no se pudo leer la planilla."
+        : "El servidor de AgroPixel no contestó: el archivo no se revisó. Probá de nuevo en unos minutos.",
+      true,
+    );
   }
 }
