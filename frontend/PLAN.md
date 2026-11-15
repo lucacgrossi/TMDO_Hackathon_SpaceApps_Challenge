@@ -2,6 +2,14 @@
 
 **Código congelado a las 18:00.** Diseño: `DESIGN.md`, el Figma [AgroPixel · Rediseño del front](https://www.figma.com/design/uQbWWU8RVCaWDeVma4Padn) (S1 a S3b y componentes) y el mockup `../docs/prototipo/agropixel-dashboard-mockup.html` (S4 a S6b). Reglas: `CLAUDE.md` de esta carpeta. Producto: `../docs/mvp-alcance.md` (4.5).
 
+## Antes de empezar (todos)
+1. Traer `dev` actualizado (trae el contrato de la 4.5: PR #86) y crear la branch desde ahí.
+2. Leer `DESIGN.md` y las secciones de **`../docs/api-frontend.md`** que tocan a cada uno:
+   - **Persona 4:** §4.1 (entrada de `/analizar`: qué se manda desde el panel), §4.2 (errores 422 y 503, para S3b) y §5 (`/mediciones/planilla`: vista previa, avisos y errores, para S2 y el modal).
+   - **Persona 5:** §4.3 (convenciones: índice 0 = enero, textos tal cual, `null` = sin dato), §4.5 (`estrategias`, las 4 columnas), §4.6 (recalcular la cercanía) y §4.11 (`choque`).
+   - **Luca:** §4.7 (clima y `mensual`), §4.8 (`visto_por_satelite`) y §4.9 (`capas`, `CapaRaster`, valor de un píxel).
+3. Los meses: índice 0 = enero en toda la API; para mostrar de julio a junio, usar el helper de `src/lib/` (llega en el PR de Luca, etapa 1), no rotar a mano.
+
 Tres personas en el front. Cada una es dueña de sus carpetas y no toca las de las otras sin avisar. Todo con mock primero (`NEXT_PUBLIC_USAR_MOCK=true`); la API real se prueba en la integración.
 
 | Quién | Qué | Pantallas | Fuente del diseño |
@@ -37,7 +45,7 @@ Carpetas: `components/dashboard/`, `components/resultados/`.
 ## Luca · Mapa, Clima histórico y revisión
 Carpetas: `components/mapa/` (solo la sección del dashboard: `SeccionMapa`, `InspectorPixel`, `FichaLote`, y los cambios en `SelectorCapas`, `LineaTiempo`, `Leyenda`) y `components/clima/`. El mapa de dibujo de S1 y S2 es de persona 4: si hay que tocar `Mapa.tsx` o `CapaDibujo.tsx`, se avisa.
 1. **S4 Mapa**: capas del back como `ImageOverlay` pixelado (NDVI ×12, pendiente, cultivo, erosión) y la celda de POWER; selector de capas con Cultivo y Erosión; línea de tiempo jul→jun con la barrita del NDVI medio de cada mes; leyenda desde `capa.escala`; `InspectorPixel` leyendo `valores[fila][columna]` (`capaRaster.ts`); `FichaLote` con 6 filas y su confianza.
-2. **S5 Clima histórico**: `SelectorCampanias` (30 barras por tercio, con letra), `GraficoCampania` con recharts (lluvia contra la media, T mín y T máx), ficha de la campaña, `HeladasCalor` (frecuencias de `clima_mensual`) y `ContrasteMediciones`. **Sin `serie_anual.campanas[i].mensual`** (pedido a Back 1 en el PR #85): el gráfico muestra la media de 30 años y el selector queda deshabilitado con el motivo. Cuando Back 1 lo mergee: actualizar `src/lib/contrato.ts` y el mock.
+2. **S5 Clima histórico**: `SelectorCampanias` (30 barras por tercio, con letra), `GraficoCampania` con recharts (lluvia contra la media, T mín y T máx), ficha de la campaña, `HeladasCalor` (frecuencias de `clima_mensual`) y `ContrasteMediciones`. Los meses de cada campaña vienen en `serie_anual.campanas[i].mensual` (Back 1, PR #86, ya en `dev`): sumar `MesesCampana` a `src/lib/contrato.ts` y al mock. Sus `t_min_c`/`t_max_c` son extremos del mes y se comparan con `minima_media_c`/`maxima_media_c`. Si `mensual` viene `null`, media de 30 años y selector deshabilitado.
 3. **Revisión de todos los PRs del front** antes de mergear a `dev` (checklist abajo).
 4. Al final: cambiar "Field Shift" por "AgroPixel" en `compartir.ts` y su test, y borrar el CSS del prototipo que quede sin uso.
 
