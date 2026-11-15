@@ -1,5 +1,6 @@
 <p align="center">
-  <img src="frontend/public/img/agropixel-logo.png" alt="AgroPixel logo" width="180">
+  <img src="frontend/public/img/agropixel-logo.png" alt="AgroPixel logo" width="180"><br>
+  <sub>Logo: AI-generated (see <a href="#use-of-ai-tools">Use of AI tools</a>)</sub>
 </p>
 
 <h1 align="center">AgroPixel</h1>
@@ -11,6 +12,12 @@
 
 <p align="center">
   <a href="https://agropixel.earth"><strong>🌱 Live app: agropixel.earth</strong></a>
+  &nbsp;·&nbsp;
+  <a href="https://youtu.be/3xEYUBRogrE"><strong>▶️ Demo video</strong></a>
+</p>
+
+<p align="center">
+  <img src="docs/img/rotations.jpg" alt="AgroPixel Rotations dashboard: the current rotation and three alternatives side by side" width="900">
 </p>
 
 ---
@@ -19,6 +26,7 @@
 
 - [Summary](#summary)
 - [Try it](#try-it)
+- [Screenshots](#screenshots)
 - [What it does](#what-it-does)
 - [How it works](#how-it-works)
 - [NASA data](#nasa-data)
@@ -55,6 +63,28 @@ Each option is evaluated against **30 growing seasons of NASA POWER climate data
 5. Explore the dashboard: **Mapa** (*Map*), **Clima histórico** (*Historical climate*) and **Rotaciones** (*Rotations*).
 
 > The interface is in Spanish, because the target users are Argentine growers and agronomists. The [glossary](#glossary-of-interface-terms-spanish--english) maps every agronomic term in the interface to its English equivalent.
+
+Prefer to watch? The **[demo video](https://youtu.be/3xEYUBRogrE)** walks through the whole flow.
+
+## Screenshots
+
+Screenshots of the reference field near Río Cuarto, Córdoba, captured during development. They include the AI-generated AgroPixel logo.
+
+**1. Field and inputs.** The field drawn on the satellite map and the side panel: current rotation (soybean + winter fallow), priorities, constraints, field data and the grower's own records.
+
+![Field outlined on the satellite map with the input panel](docs/img/inputs.jpg)
+
+**2. Map.** Satellite layers of the field (NDVI, slope, cropland, erosion, NASA POWER cell), the monthly NDVI timeline for the season, and the field's technical sheet. Every value shows its source, resolution and confidence.
+
+![Map section with layer selector, NDVI timeline and technical sheet](docs/img/map.jpg)
+
+**3. Historical climate.** The 30 seasons colored by dry (S), normal (N) and wet (H) years. The selected season shows its monthly rainfall, temperatures and water balance against the 30-year mean.
+
+![Historical climate section with 30 seasons and monthly detail](docs/img/historical-climate.jpg)
+
+**4. Rotations.** The priorities, the four rotations with their calendars, goal fit score, water balance by year type and climatological probability, and the five parts of each column.
+
+![Rotations section with the four strategy cards](docs/img/rotations.jpg)
 
 ## What it does
 
@@ -358,19 +388,27 @@ Details: [`backend/DEPLOY.md`](backend/DEPLOY.md).
 ## Use of AI tools
 
 - **Inside the app:** none. AgroPixel uses no language models or machine learning at runtime; every result comes from fixed rules, statistics and text templates.
-- **During development:** the team used **Claude Code** (Anthropic) as a programming assistant to write, review, test and document code. The idea, the agronomic approach, the rules and every product decision were defined by the team.
+- **Code and documentation:** the team used **Claude Code** (Anthropic) as a programming assistant to write, review, test and document code. The idea, the agronomic approach, the rules and every product decision were defined by the team.
+- **Images:** the **AgroPixel logo** ([`frontend/public/img/agropixel-logo.png`](frontend/public/img/agropixel-logo.png), also used as the favicon) and the **pixel-art illustrations** of the interface were generated with AI tools. They also appear in the screenshots of this README.
+- **Video:** the **[demo video](https://youtu.be/3xEYUBRogrE)** was produced with AI tools.
+- No NASA logos, flags or mission identifiers were used or modified in any AI-generated content.
 
 ## Team
 
 **TMDO**, a team of five from FCEFyN, Universidad Nacional de Córdoba (Argentina):
 
-| Role | Area |
-|---|---|
-| Backend core and technical lead | API contract, climate (NASA POWER), service orchestration |
-| Satellite data and grower records | HLS, MODIS, NASADEM, WorldCover, CSV parser, deployment |
-| Product and agronomic logic | Rule engine and product definition |
-| Frontend: map and inputs | Field drawing, input panel, map layers |
-| Frontend: results and comparison | Dashboard, rotation cards, technical table, PDF export |
+- Benjamin Martin
+- Luca Camaño
+- Tobias Roncati
+- Valentin Ribero
+- Trinidad Cruz
+
+The work was split into five areas:
+- **Backend core:** API contract, climate (NASA POWER) and service orchestration.
+- **Satellite data and grower records:** HLS, MODIS, NASADEM, WorldCover, the CSV parser and deployment.
+- **Product and agronomic logic:** the rule engine and the product definition.
+- **Frontend, map and inputs:** field drawing, input panel and map layers.
+- **Frontend, results and comparison:** dashboard, rotation cards, technical table and PDF export.
 
 ---
 
