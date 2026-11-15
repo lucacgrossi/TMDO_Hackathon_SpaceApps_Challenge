@@ -43,7 +43,7 @@ Variables CSS en `:root` de `src/app/globals.css`; Tailwind las toma con `theme.
 **Sombra pixel:** `3px 3px 0 rgba(20, 32, 43, .15)` (sin desenfoque). Solo en el CTA, la card de estrategia activa, el inspector de píxel y los controles que flotan sobre el mapa.
 
 ## Tipografía
-Dos familias, por `next/font/google`:
+Dos familias, guardadas en el repo (`src/app/fuentes/`, `next/font/local`):
 - **Pixelify Sans** (500 y 600): solo títulos. Nunca en números, párrafos ni tablas.
 - **IBM Plex Sans** (400, 500 y 600): todo lo demás. Números comparables con `font-variant-numeric: tabular-nums`.
 
