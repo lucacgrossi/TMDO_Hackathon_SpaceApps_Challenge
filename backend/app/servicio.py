@@ -228,6 +228,9 @@ def _entradas_motor(entrada: Entrada) -> dict:
         "pesos": entrada.prioridades.model_dump(),
         "no_sembrar": list(entrada.no_sembrar),
         "maquinaria_limitada": "maquinaria_limitada" in entrada.restricciones,
+        # Todas las restricciones cargadas (sin riego, sin hacienda, maquinaria limitada), para que el
+        # motor diga en "Por qué aparece" cuáles se aplicaron (H-025 del QA del 15/11).
+        "restricciones": list(entrada.restricciones),
         "anegable": entrada.anegable,
         "textura": entrada.textura_suelo,
         # El motor (app/motor/mezcla.py, #53) mezcla lluvia y temperaturas del productor con NASA,
@@ -273,7 +276,7 @@ def _motor_stub(entrada: Entrada, motivo: str = MOTOR_PENDIENTE) -> dict:
     nombres = (
         ("actual", "Lo que hacés hoy"),
         ("A", "Cobertura de invierno"),
-        ("B", "Cultivo de invierno"),
+        ("B", "Cultivo de invierno comercial"),
         ("C", "Diversificar el verano"),
     )
     especies = f"{entrada.cultivo_verano} + {entrada.invierno}"

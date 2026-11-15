@@ -3404,7 +3404,7 @@
   },
   {
    "id": "B",
-   "nombre": "Cultivo de invierno",
+   "nombre": "Cultivo de invierno comercial",
    "especies": "Trigo + soja 2ª",
    "disponible": true,
    "motivo_descarte": null,

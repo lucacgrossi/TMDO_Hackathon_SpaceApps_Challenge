@@ -393,6 +393,20 @@ def test_stub_sin_probabilidades_y_sin_aviso_extra(monkeypatch):
     assert servicio.PROBABILIDAD_SIN_CULTIVOS not in s.informacion_falta
 
 
+def test_stub_nombra_a_b_como_cultivo_de_invierno_comercial(monkeypatch):
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: None)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.estrategias[2].nombre == "Cultivo de invierno comercial"
+
+
+def test_el_motor_recibe_todas_las_restricciones():
+    e = copy.deepcopy(ENTRADA)
+    e["restricciones"] = ["sin_riego", "sin_hacienda", "maquinaria_limitada"]
+    entradas = servicio._entradas_motor(Entrada.model_validate(e))
+    assert entradas["restricciones"] == ["sin_riego", "sin_hacienda", "maquinaria_limitada"]
+    assert entradas["maquinaria_limitada"] is True
+
+
 # --- Campaña del NDVI = última campaña de POWER -----------------------------
 
 
