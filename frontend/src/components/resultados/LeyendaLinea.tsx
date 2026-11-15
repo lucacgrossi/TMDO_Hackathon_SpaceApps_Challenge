@@ -26,10 +26,6 @@ export default function LeyendaLinea() {
         <i className={css.muestraCalor} />
         Máxima ≥ 35 °C con cultivo de verano
       </span>
-      <span>
-        <i style={{ background: "color-mix(in srgb, var(--ink) 18%, transparent)" }} />
-        Mes del mapa
-      </span>
       <span className={css.escalaNdvi}>
         Fila fina: NDVI visto por satélite (misma escala que el mapa)
         <span className={css.rampa} aria-hidden="true">
