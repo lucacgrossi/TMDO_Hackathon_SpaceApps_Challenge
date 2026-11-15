@@ -99,9 +99,11 @@ export default function ContrasteMediciones({ salida }: { salida: Salida }) {
         </span>
       </h3>
       <ul className={css.lista}>
-        {contrastes.map((c) =>
-          esDatoDelProductor(c) ? <FilaDatoProductor key={c.indicador} c={c} /> : <FilaContraste key={c.indicador} c={c} />,
-        )}
+        {contrastes.map((c, i) => {
+          // "helada" y "calor" llegan una fila por mes: el indicador solo no alcanza como clave
+          const clave = `${c.indicador}-${c.mes ?? i}`;
+          return esDatoDelProductor(c) ? <FilaDatoProductor key={clave} c={c} /> : <FilaContraste key={clave} c={c} />;
+        })}
       </ul>
     </section>
   );

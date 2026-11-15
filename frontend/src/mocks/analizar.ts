@@ -1,9 +1,13 @@
 /**
  * Mock de POST /analizar: imita lo que haría el backend con las entradas que
- * le importan a la hoja, a partir de la salida fija del lote de Río Cuarto
- * (`rio-cuarto.ts`, copia del mock del backend).
+ * le importan a la hoja, a partir de la demo precalculada del lote de Río
+ * Cuarto (`rio-cuarto.ts`, generado con `scripts/generar-mock.mjs` desde
+ * `backend/app/demo/rio_cuarto.json`).
  *
  * Qué simula:
+ * - El lote dibujado (H-019): la superficie es la del polígono, y las capas del
+ *   lote y la celda de NASA POWER se corren al centro del polígono, para que el
+ *   mapa las dibuje sobre él. Los valores siguen siendo los de la demo.
  * - Restricción "No sembrar": la alternativa queda descartada (en gris con el
  *   motivo) cuando se excluyen los dos cultivos que puede usar, como en el
  *   prototipo. Si se excluye uno solo, el backend elegiría el otro; el mock no
@@ -22,13 +26,17 @@
  *   barbecho) ni las prioridades (la cercanía la recalcula el front con
  *   `cercania.ts`, RF13).
  */
-import type { CultivoNoSembrar, Estrategia, IdEstrategia, Salida } from "@/lib/contrato";
+import type { Bounds, CultivoNoSembrar, Estrategia, IdEstrategia, Salida } from "@/lib/contrato";
+import type { LatLng } from "@/lib/entradas";
+import { areaHa, centro } from "@/lib/geo";
 import { RIO_CUARTO } from "./rio-cuarto";
 
 /** Milímetros sin decimales, con punto de miles (es-AR). */
 const fmt = (n: number) => n.toLocaleString("es-AR", { maximumFractionDigits: 0 });
 
 export interface OpcionesMock {
+  /** Polígono dibujado: el mock copia su superficie y su centro. */
+  poligono?: readonly LatLng[] | null;
   noSembrar?: readonly CultivoNoSembrar[];
   lluviaAnualMm?: number | null;
   materiaOrganicaPct?: number | null;
@@ -133,10 +141,41 @@ function cargarMateriaOrganica(salida: Salida, pct: number): void {
   for (const e of salida.estrategias) e.vacios = e.vacios.filter(noEsMO);
 }
 
+/** Corre unos bounds [[sur, oeste], [norte, este]] en (dLat, dLng) grados. */
+function correr([[s, o], [n, e]]: Bounds, dLat: number, dLng: number): Bounds {
+  return [
+    [s + dLat, o + dLng],
+    [n + dLat, e + dLng],
+  ];
+}
+
+/**
+ * Superficie del polígono (con dos decimales, como el back) y capas del lote
+ * corridas a su centro: la grilla, los rasters y la celda de POWER se mueven
+ * juntos, así el mapa los dibuja sobre el lote dibujado y no sobre el de la demo.
+ */
+function alLoteDibujado(salida: Salida, poligono: readonly LatLng[]): void {
+  salida.lote.area_ha = Math.round(areaHa([...poligono]) * 100) / 100;
+  const grilla = salida.capas.grilla;
+  if (!grilla) return;
+  const [[s, o], [n, e]] = grilla.bounds;
+  const [lat, lng] = centro([...poligono]);
+  const dLat = lat - (s + n) / 2;
+  const dLng = lng - (o + e) / 2;
+  const c = salida.capas;
+  grilla.bounds = correr(grilla.bounds, dLat, dLng);
+  for (const capa of [c.pendiente_mapa, c.cultivo_mapa, c.erosion_mapa, ...c.ndvi_mensual.map((m) => m?.mapa)]) {
+    if (capa) capa.bounds = correr(capa.bounds, dLat, dLng);
+  }
+  const [oe, su, es, no] = salida.clima_celda.bbox;
+  salida.clima_celda.bbox = [oe + dLng, su + dLat, es + dLng, no + dLat];
+}
+
 /** Devuelve una copia nueva de la salida del lote demo, ajustada a las entradas. */
 export function mockAnalizar(opciones: OpcionesMock = {}): Salida {
   const salida = structuredClone(RIO_CUARTO);
-  const { noSembrar = [], lluviaAnualMm = null, materiaOrganicaPct = null } = opciones;
+  const { poligono = null, noSembrar = [], lluviaAnualMm = null, materiaOrganicaPct = null } = opciones;
+  if (poligono && poligono.length >= 3) alLoteDibujado(salida, poligono);
   if (lluviaAnualMm != null && lluviaAnualMm > 0) contrastarPluviometro(salida, lluviaAnualMm);
   if (materiaOrganicaPct != null) cargarMateriaOrganica(salida, materiaOrganicaPct);
   const [actual, a, b, c] = salida.estrategias;
@@ -148,5 +187,5 @@ export function mockAnalizar(opciones: OpcionesMock = {}): Salida {
 export const MOCK_BASE: Salida = mockAnalizar();
 /** B descartada: "No sembrar trigo ni cebada". */
 export const MOCK_DESCARTADA: Salida = mockAnalizar({ noSembrar: ["trigo", "cebada"] });
-/** Pluviómetro que no coincide: 620 mm contra 769 de NASA (−19 %). */
+/** Pluviómetro que no coincide: 620 mm contra 819 de NASA (−24 %). */
 export const MOCK_PLUVIOMETRO: Salida = mockAnalizar({ lluviaAnualMm: 620 });

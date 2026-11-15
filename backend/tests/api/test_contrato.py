@@ -1,6 +1,9 @@
 """El contrato acepta lo que devuelve `satelite/` (Back 2) tal cual. Correr desde backend/: py -m pytest tests/api"""
 
-from app.api.contrato import Indicador, MesSatelite, VistoPorSatelite
+import pytest
+from pydantic import ValidationError
+
+from app.api.contrato import Indicador, MedicionesPropias, MesSatelite, VistoPorSatelite
 
 # Forma de un mes de `satelite/ndvi.py` cuando cae a MODIS de respaldo (compuesto de 16 días, sin nubes de escena).
 MES_MODIS = {
@@ -36,3 +39,18 @@ def test_indicador_acepta_nota_de_back_2():
         "resolucion": "30 m", "confianza": "alta", "nota": "Plano ajustado sobre 1050 píxeles del lote",
     })
     assert ind.nota.startswith("Plano")
+
+
+# --- Topes de las mediciones a mano (reporte QA 15/11: 99999 mm y 150 años se aceptaban) ---------
+
+@pytest.mark.parametrize("campos", [{"lluvia_anual_mm": 4000, "anios_registro": 100},
+                                    {"lluvia_anual_mm": 650, "anios_registro": 1}])
+def test_mediciones_dentro_de_los_topes(campos):
+    MedicionesPropias.model_validate(campos)
+
+
+@pytest.mark.parametrize("campos", [{"lluvia_anual_mm": 99999}, {"lluvia_anual_mm": 4000.1},
+                                    {"anios_registro": 150}, {"anios_registro": 101}])
+def test_mediciones_fuera_de_los_topes_dan_error(campos):
+    with pytest.raises(ValidationError):
+        MedicionesPropias.model_validate(campos)

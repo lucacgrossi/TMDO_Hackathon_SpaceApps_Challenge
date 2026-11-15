@@ -2,14 +2,17 @@
 
 `analizar(entrada) -> Salida` conecta los tres dominios y arma la respuesta completa:
 
-1. `satelite.lote.validar`: si el polígono no sirve → `ErrorServicio` 422 con el motivo.
+1. `satelite.lote.validar`: si el polígono no sirve → `ErrorServicio` 422 con el motivo. Si el
+   centro del lote está en el hemisferio norte → 422 antes de pedir nada a NASA POWER: los
+   calendarios, la campaña julio–junio y los terciles son del hemisferio sur (H-014).
 2. En paralelo, con un presupuesto total de `PRESUPUESTO_S`:
    - clima: `clima.power.pedir_power` → `clima.indicadores.calcular`;
    - satélite: `cobertura`, `elevacion`, `ndvi` y `et` (cada una con el polígono del lote).
    Cada fuente que falla o no llega a tiempo queda `sin_dato` con su motivo y va a
    "Información que falta"; nunca rompe la respuesta.
-3. WorldCover dice que el lote no es agrícola → 422 con su aviso. Sin dato de WorldCover no se
-   bloquea. NASA POWER caído → 503 (la ruta sirve la respuesta precalculada si el lote es el de
+3. WorldCover dice que el lote no es agrícola, o no tiene datos para el polígono (mar) → 422 con
+   su aviso. WorldCover caído o saturado no bloquea: va a "Información que falta".
+   NASA POWER caído → 503 (la ruta sirve la respuesta precalculada si el lote es el de
    ejemplo): POWER es la base, sin él no hay comparación.
 4. Motor de reglas (persona 3): `reglas.analizar` + `plantillas.armar`, traducido a los nombres
    del contrato. Si `app.motor` todavía no está en el código, un stub devuelve las 4 columnas
@@ -63,6 +66,9 @@ PRESUPUESTO_S = 25.0  # /analizar tiene que responder en menos de 30 s (RNF7)
 TIPOS = ("seco", "normal", "humedo")
 OBJETIVOS = ("agua", "suelo", "erosion", "ingreso")
 MENSAJE_POWER_CAIDO = "NASA POWER no responde, probá de nuevo en unos segundos."
+MENSAJE_HEMISFERIO_NORTE = (
+    "Por ahora AgroPixel usa calendarios del hemisferio sur: marcá un lote en el hemisferio sur."
+)
 MOTOR_PENDIENTE = "Motor de reglas pendiente: las columnas todavía no tienen puntajes"
 PROBABILIDAD_SIN_CULTIVOS = "Probabilidad climatológica: falta el catálogo de cultivos del motor"
 
@@ -228,6 +234,9 @@ def _entradas_motor(entrada: Entrada) -> dict:
         "pesos": entrada.prioridades.model_dump(),
         "no_sembrar": list(entrada.no_sembrar),
         "maquinaria_limitada": "maquinaria_limitada" in entrada.restricciones,
+        # Todas las restricciones cargadas (sin riego, sin hacienda, maquinaria limitada), para que el
+        # motor diga en "Por qué aparece" cuáles se aplicaron (H-025 del QA del 15/11).
+        "restricciones": list(entrada.restricciones),
         "anegable": entrada.anegable,
         "textura": entrada.textura_suelo,
         # El motor (app/motor/mezcla.py, #53) mezcla lluvia y temperaturas del productor con NASA,
@@ -273,7 +282,7 @@ def _motor_stub(entrada: Entrada, motivo: str = MOTOR_PENDIENTE) -> dict:
     nombres = (
         ("actual", "Lo que hacés hoy"),
         ("A", "Cobertura de invierno"),
-        ("B", "Cultivo de invierno"),
+        ("B", "Cultivo de invierno comercial"),
         ("C", "Diversificar el verano"),
     )
     especies = f"{entrada.cultivo_verano} + {entrada.invierno}"
@@ -449,6 +458,8 @@ def analizar(entrada: Entrada) -> Salida:
         raise ErrorServicio(422, v["motivo"] or "El polígono del lote no es válido.")
     poligono = v["poligono"]
     lat, lon = v["centro"]
+    if lat > 0:  # H-014: calendario, campaña julio–junio y terciles son del hemisferio sur
+        raise ErrorServicio(422, MENSAJE_HEMISFERIO_NORTE)
 
     # El NDVI arranca en paralelo con la campaña que se espera que sea la última de POWER; si POWER
     # termina en otra, se vuelve a pedir con esa (NDVI, terciles y serie siempre en la misma campaña).

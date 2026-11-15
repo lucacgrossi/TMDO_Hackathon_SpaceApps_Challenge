@@ -151,6 +151,10 @@ function LeyendaBalance({ conCampania }: { conCampania: boolean }) {
 
 const ejeX = { dataKey: "corto", tick: { fill: COLOR.eje, fontSize: 12 }, stroke: COLOR.grilla };
 
+/** Ejes con el signo menos tipográfico (−15 °C, −180 mm), como el resto de la app. */
+const ejeMm = (v: number) => `${fmt(v)} mm`;
+const ejeC = (v: number) => `${fmt(v)} °C`;
+
 export default function GraficoCampania({ filas, conCampania }: { filas: FilaGrafico[]; conCampania: boolean }) {
   const seriesArriba: Serie[] = conCampania
     ? ["lluvia", "lluviaMedia", "tmax", "tmaxMedia", "tmin", "tminMedia"]
@@ -164,8 +168,8 @@ export default function GraficoCampania({ filas, conCampania }: { filas: FilaGra
           <ComposedChart data={filas} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid stroke={COLOR.grilla} vertical={false} />
             <XAxis {...ejeX} />
-            <YAxis yAxisId="mm" tick={{ fill: COLOR.eje, fontSize: 12 }} stroke={COLOR.grilla} width={60} unit=" mm" />
-            <YAxis yAxisId="c" orientation="right" tick={{ fill: COLOR.eje, fontSize: 12 }} stroke={COLOR.grilla} width={44} unit=" °C" />
+            <YAxis yAxisId="mm" tick={{ fill: COLOR.eje, fontSize: 12 }} stroke={COLOR.grilla} width={60} tickFormatter={ejeMm} />
+            <YAxis yAxisId="c" orientation="right" tick={{ fill: COLOR.eje, fontSize: 12 }} stroke={COLOR.grilla} width={44} tickFormatter={ejeC} />
             <Tooltip content={<TooltipMes series={seriesArriba} />} />
             <Bar yAxisId="mm" dataKey="lluviaMedia" name={NOMBRE.lluviaMedia} fill={COLOR.lluviaMedia} isAnimationActive={false} />
             {conCampania && <Bar yAxisId="mm" dataKey="lluvia" name={NOMBRE.lluvia} fill={COLOR.lluvia} isAnimationActive={false} />}
@@ -186,7 +190,7 @@ export default function GraficoCampania({ filas, conCampania }: { filas: FilaGra
           <ComposedChart data={filas} margin={{ top: 8, right: 44, bottom: 0, left: 0 }}>
             <CartesianGrid stroke={COLOR.grilla} vertical={false} />
             <XAxis {...ejeX} />
-            <YAxis tick={{ fill: COLOR.eje, fontSize: 12 }} stroke={COLOR.grilla} width={60} unit=" mm" />
+            <YAxis tick={{ fill: COLOR.eje, fontSize: 12 }} stroke={COLOR.grilla} width={60} tickFormatter={ejeMm} />
             <ReferenceLine y={0} stroke={COLOR.eje} />
             <Tooltip content={<TooltipMes series={seriesBalance} />} />
             <Bar dataKey="balanceMedia" name={NOMBRE.balanceMedia} fill={COLOR.balanceMedia} isAnimationActive={false} />

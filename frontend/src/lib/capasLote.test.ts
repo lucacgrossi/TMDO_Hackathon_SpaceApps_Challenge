@@ -28,11 +28,12 @@ describe("capas del mapa del lote", () => {
     expect(estadoCapas(DEMO).map((c) => c.nombre)).toEqual(["Satélite", "NDVI", "Pendiente", "Cultivo", "Erosión", "Celda NASA POWER"]);
   });
 
-  it("el mock no trae erosión: va deshabilitada con el motivo", () => {
-    const erosion = estadoCapas(MOCK).find((c) => c.id === "erosion")!;
+  it("una respuesta sin erosión la deshabilita con el motivo", () => {
+    const sinErosion: Salida = { ...MOCK, capas: { ...MOCK.capas, erosion_mapa: null } };
+    const erosion = estadoCapas(sinErosion).find((c) => c.id === "erosion")!;
     expect(erosion.disponible).toBe(false);
     expect(erosion.motivo).toBe("Esta respuesta no trae la capa.");
-    expect(estadoCapas(MOCK).filter((c) => !c.disponible)).toHaveLength(1);
+    expect(estadoCapas(sinErosion).filter((c) => !c.disponible)).toHaveLength(1);
   });
 
   it("una capa en no_disponibles se apaga aunque traiga raster", () => {
@@ -68,15 +69,29 @@ describe("imagen del NDVI por mes", () => {
     expect(dibujoNdvi(sinRaster, 2).tipo).toBe("gibs");
   });
 
-  it("el mock (ids inventados) usa GIBS con el año de la campaña del back", () => {
-    const julio = dibujoNdvi(MOCK, 6);
-    expect(julio).toMatchObject({ tipo: "gibs", fecha: "15/07/2024" });
-    if (julio.tipo === "gibs") expect(julio.url).toContain("/default/2024-07-15/");
-    expect(dibujoNdvi(MOCK, 0)).toMatchObject({ tipo: "gibs", fecha: "15/01/2025" });
+  // El mock sin rasters: no pide teselas de HLS (es_mock) y cae a GIBS
+  const mockSinRaster: Salida = {
+    ...MOCK,
+    capas: { ...MOCK.capas, ndvi_mensual: MOCK.capas.ndvi_mensual.map((m) => (m ? { ...m, mapa: null } : m)) },
+  };
+
+  it("el mock sin raster usa GIBS con el año de la campaña del back", () => {
+    const julio = dibujoNdvi(mockSinRaster, 6);
+    expect(julio).toMatchObject({ tipo: "gibs", fecha: "15/07/2025" });
+    if (julio.tipo === "gibs") expect(julio.url).toContain("/default/2025-07-15/");
+    expect(dibujoNdvi(mockSinRaster, 0)).toMatchObject({ tipo: "gibs", fecha: "15/01/2026" });
   });
 
   it("mes sin escena ni dato: nada, con el motivo", () => {
-    expect(dibujoNdvi(MOCK, 10)).toEqual({ tipo: "nada", motivo: "Sin imagen de NDVI para noviembre." });
+    const sinNov: Salida = {
+      ...mockSinRaster,
+      capas: { ...mockSinRaster.capas, ndvi_mensual: mockSinRaster.capas.ndvi_mensual.map((m, i) => (i === 10 ? null : m)) },
+      visto_por_satelite: {
+        ...MOCK.visto_por_satelite,
+        meses: MOCK.visto_por_satelite.meses.map((m, i) => (i === 10 ? null : m)),
+      },
+    };
+    expect(dibujoNdvi(sinNov, 10)).toEqual({ tipo: "nada", motivo: "Sin imagen de NDVI para noviembre." });
   });
 
   it("sin campaña no se arma la fecha de GIBS", () => {
@@ -117,10 +132,18 @@ describe("celda y píxel", () => {
     expect(l.fuente).toContain("confianza alta");
   });
 
-  it("cultivo se lee con la etiqueta de la clase", () => {
-    const cultivo = MOCK.capas.cultivo_mapa!;
+  it("una capa de clases se lee con la etiqueta de la clase", () => {
+    const cultivo = {
+      ...MOCK.capas.cultivo_mapa!,
+      unidad: "clase",
+      escala: { cortes: [0, 1], colores: ["#9E9E9E", "#F2C94C"], etiquetas: ["Otro uso", "Cultivo (clase 40)"] },
+    };
     expect(textoValor(cultivo, 1)).toBe("Cultivo (clase 40)");
     expect(textoValor(cultivo, 0)).toBe("Otro uso");
+  });
+
+  it("el cultivo de la demo es el porcentaje del píxel, con su unidad (H-019)", () => {
+    expect(textoValor(MOCK.capas.cultivo_mapa!, 93.9)).toBe("93,9 %");
   });
 
   it("flechas: arranca en el centro y no sale de la grilla", () => {
@@ -170,8 +193,11 @@ describe("ficha técnica del lote", () => {
     expect(f[5].fuente).toContain("500 m");
   });
 
-  it("lo que falta dice sin dato, nunca cero (mock sin erosión)", () => {
-    const erosion = filasFicha(MOCK)[4];
+  it("lo que falta dice sin dato, nunca cero (respuesta sin erosión)", () => {
+    // El mock ya trae la erosión de la demo: se le saca para probar el caso sin dato.
+    const { riesgo_erosion: _sinErosion, ...indicadores } = MOCK.indicadores;
+    const s: Salida = { ...MOCK, indicadores, capas: { ...MOCK.capas, erosion: null, erosion_mapa: null } };
+    const erosion = filasFicha(s)[4];
     expect(erosion).toMatchObject({ valor: "sin dato", confianza: "sin_dato" });
     expect(erosion.nota).toBe("Esta respuesta no trae el índice de erosión.");
   });

@@ -69,8 +69,8 @@ Header `Content-Type: application/json`. **Tarda hasta ~25 s** (llama a NASA POW
 
 | Campo | Tipo | Notas |
 |---|---|---|
-| `lluvia_anual_mm` | número > 0 | Carga a mano: lluvia anual del pluviómetro |
-| `anios_registro` | entero ≥ 1 | Años de registro del pluviómetro (define cuánto pesa frente a NASA: 1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10+ 75 %) |
+| `lluvia_anual_mm` | número > 0 y ≤ 4000 | Carga a mano: lluvia anual del pluviómetro |
+| `anios_registro` | entero de 1 a 100 | Años de registro del pluviómetro (define cuánto pesa frente a NASA: 1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10+ 75 %) |
 | `materia_organica_pct` | 0–100 | Se muestra como "dato del productor"; no puntúa |
 | `serie_mensual` | lista de `MedicionMes` (hasta 480) | **Mandar tal cual `serie.meses` de `/mediciones/planilla`.** Si trae lluvia, manda sobre `lluvia_anual_mm` |
 
@@ -113,7 +113,7 @@ Si un campo no cumple el esquema (ej. prioridad 0, coordenadas fuera de rango, m
 
 | Código | Cuerpo | Cuándo | Qué mostrar |
 |---|---|---|---|
-| `422` | `{"mensaje"}` | El polígono no es válido o no es un lote agrícola (ESA WorldCover) | El `mensaje` tal cual, y dejar al usuario redibujar |
+| `422` | `{"mensaje"}` | El polígono no es válido, no es un lote agrícola (ESA WorldCover) o está en el hemisferio norte (latitud del centro > 0: los calendarios son del hemisferio sur) | El `mensaje` tal cual, y dejar al usuario redibujar |
 | `422` | `{"detail": [...]}` | La entrada no cumple el esquema | Bug del front: revisar el pedido |
 | `503` | `{"mensaje"}` | NASA POWER no respondió (lote dibujado) | El `mensaje` + botón "Probar de nuevo" |
 | `500` | `{"mensaje"}` | Error inesperado del back | El `mensaje` (texto fijo) |

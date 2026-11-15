@@ -9,7 +9,7 @@
  */
 import { colorEscala } from "./capaRaster";
 import type { CapaRaster, Capas, EscalaCapa, MesSatelite, VistoPorSatelite } from "./contrato";
-import { fmt } from "./formato";
+import { fmtNdvi } from "./formato";
 import { mesesCampania } from "./ordenCampania";
 
 export const NOTA_MODIS = "MODIS 250 m de respaldo: mezcla el lote con los vecinos, confianza baja.";
@@ -111,7 +111,7 @@ export function lineaTiempo(visto: VistoPorSatelite, capas?: Capas | null): MesL
       modis,
       motivo: null,
       conRaster,
-      texto: `${nombre}: NDVI ${fmt(m.ndvi_medio, 2)}, ${m.fuente}, ${fecha}` + (modis ? `. ${NOTA_MODIS}` : ""),
+      texto: `${nombre}: NDVI ${fmtNdvi(m.ndvi_medio)}, ${m.fuente}, ${fecha}` + (modis ? `. ${NOTA_MODIS}` : ""),
     };
   });
 }

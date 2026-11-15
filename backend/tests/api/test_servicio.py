@@ -195,6 +195,44 @@ def test_lote_no_agricola_da_422_con_el_aviso(monkeypatch):
     assert r.json() == {"mensaje": aviso}
 
 
+def test_poligono_sin_datos_de_worldcover_da_422(monkeypatch):
+    """H-002: un polígono en el mar (WorldCover sin datos) no se analiza como lote agrícola."""
+    monkeypatch.setattr(cobertura, "calcular", lambda p: cobertura._sin_cobertura("sin tesela"))
+    r = cliente.post("/analizar", json=_dibujado())
+    assert r.status_code == 422
+    assert r.json() == {"mensaje": cobertura.AVISO_SIN_DATOS}
+
+
+def _en(lat: float, lon: float, d: float = 0.004) -> dict:
+    """Entrada dibujada con un cuadrado de ~2 × d grados centrado en (lat, lon)."""
+    e = _dibujado()
+    anillo = [[lon - d, lat + d], [lon + d, lat + d], [lon + d, lat - d], [lon - d, lat - d], [lon - d, lat + d]]
+    e["lote"]["poligono"]["coordinates"] = [anillo]
+    e["lote"]["centro"] = [lat, lon]
+    e["lat"], e["lon"] = lat, lon
+    return e
+
+
+def test_lote_en_el_hemisferio_norte_da_422_sin_pedir_a_power(monkeypatch):
+    """H-014: Iowa (42,03, −93,75). Se rechaza antes de pedir datos a NASA POWER o al satélite."""
+    pedidos = []
+
+    def no_llamar(*args, **kwargs):
+        pedidos.append(args)
+        raise AssertionError("no debería pedir datos")
+
+    monkeypatch.setattr(power, "pedir_power", no_llamar)
+    monkeypatch.setattr(cobertura, "calcular", no_llamar)
+    r = cliente.post("/analizar", json=_en(42.03, -93.75))
+    assert r.status_code == 422
+    assert r.json() == {"mensaje": servicio.MENSAJE_HEMISFERIO_NORTE}
+    assert pedidos == []
+
+
+def test_lote_en_el_hemisferio_sur_sigue():
+    assert cliente.post("/analizar", json=_en(-35.0, -61.0)).status_code == 200
+
+
 def test_cobertura_sin_dato_no_bloquea(monkeypatch):
     def caida(poligono, **_):
         raise RuntimeError("sin red")
@@ -393,6 +431,20 @@ def test_stub_sin_probabilidades_y_sin_aviso_extra(monkeypatch):
     assert servicio.PROBABILIDAD_SIN_CULTIVOS not in s.informacion_falta
 
 
+def test_stub_nombra_a_b_como_cultivo_de_invierno_comercial(monkeypatch):
+    monkeypatch.setattr(servicio, "_cargar_motor", lambda: None)
+    s = servicio.analizar(Entrada.model_validate(ENTRADA))
+    assert s.estrategias[2].nombre == "Cultivo de invierno comercial"
+
+
+def test_el_motor_recibe_todas_las_restricciones():
+    e = copy.deepcopy(ENTRADA)
+    e["restricciones"] = ["sin_riego", "sin_hacienda", "maquinaria_limitada"]
+    entradas = servicio._entradas_motor(Entrada.model_validate(e))
+    assert entradas["restricciones"] == ["sin_riego", "sin_hacienda", "maquinaria_limitada"]
+    assert entradas["maquinaria_limitada"] is True
+
+
 # --- Campaña del NDVI = última campaña de POWER -----------------------------
 
 
@@ -419,7 +471,9 @@ def test_pluviometro_que_difiere_baja_la_confianza_del_agua_y_llega_al_motor(mon
     monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado(recibido))
     sin = servicio.analizar(Entrada.model_validate(ENTRADA))
     entrada = copy.deepcopy(ENTRADA)
-    entrada["mediciones_propias"] = {"lluvia_anual_mm": 650, "anios_registro": 10, "materia_organica_pct": 2.8}
+    # Sin años de registro: contra el promedio de las 30 campañas (819 mm), −21 %. Con años, el contraste
+    # compara contra las últimas campañas, como la mezcla del motor (H-006).
+    entrada["mediciones_propias"] = {"lluvia_anual_mm": 650, "materia_organica_pct": 2.8}
     s = servicio.analizar(Entrada.model_validate(entrada))
 
     lluvia, mo = s.contraste_mediciones
@@ -433,7 +487,7 @@ def test_pluviometro_que_difiere_baja_la_confianza_del_agua_y_llega_al_motor(mon
     assert any("difiere 21 %" in r for r in a.riesgos) and a.riesgos[0] == "Secado ~30 días antes de la siembra"
     assert c.riesgos == []  # descartada: solo el motivo
     # El peso de la medición en los puntajes lo pone el motor (mezcla.py): acá solo se verifica que le llegue.
-    assert recibido["entradas"]["mediciones"] == {"lluvia_anual_mm": 650, "anios_registro": 10, "serie_mensual": None}
+    assert recibido["entradas"]["mediciones"] == {"lluvia_anual_mm": 650, "anios_registro": None, "serie_mensual": None}
     assert "materia_organica_pct" not in recibido["entradas"]
     assert not any("en preparación" in f and "Contraste" in f for f in s.informacion_falta)
 

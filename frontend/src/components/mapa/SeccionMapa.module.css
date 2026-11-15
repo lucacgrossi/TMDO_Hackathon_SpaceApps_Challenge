@@ -5,9 +5,17 @@
   align-items: start;
 }
 
+/* El mapa con sus paneles. El lienzo es el mapa en sí: los paneles flotan
+   encima y el encuadre deja el lote en la zona libre (H-020). */
 .mapa {
+  --alto-lienzo: 640px;
   position: relative;
-  height: 640px;
+  min-width: 0;
+  border-radius: 6px;
+}
+
+.lienzo {
+  height: var(--alto-lienzo);
   border-radius: 6px;
   overflow: hidden;
   background: var(--noche, #14202b);
@@ -46,9 +54,11 @@
   top: 16px;
 }
 
+/* Sin meterse debajo de la leyenda: 16 + 260 de leyenda + 56 del zoom + 24 de aire */
 .abajoIzq {
   left: 16px;
   bottom: 16px;
+  max-width: calc(100% - 356px);
 }
 
 .abajoDer {
@@ -65,12 +75,25 @@
     right: 16px;
   }
 
+  /* Abajo del lienzo, no del bloque (que ahora incluye la línea de tiempo y la leyenda) */
   .arribaDer {
     top: auto;
-    bottom: 220px;
+    bottom: calc(100% - var(--alto-lienzo) + 16px);
+    left: 16px;
+    right: 56px; /* deja libre el zoom de Leaflet */
   }
 
+  /* Línea de tiempo y leyenda van debajo del mapa: no tapan el lote ni se cortan. */
+  .abajoIzq,
   .abajoDer {
-    display: none;
+    position: static;
+    max-width: none;
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .mapa {
+    --alto-lienzo: 480px;
   }
 }

@@ -1,5 +1,6 @@
 import io
 import json
+import re
 from datetime import date
 from pathlib import Path
 
@@ -257,3 +258,13 @@ def test_meses_bajos_sin_raster_en_algun_mes(monkeypatch):
     monkeypatch.setattr(pc, "_cliente", _servidor(en_grilla=False))
     r = ndvi.calcular(LOTE_EJEMPLO, campana=2024)
     assert r["meses_bajos_mapa"] is None and "sin raster" in r["meses_bajos_motivo"]
+
+
+def test_nota_con_un_mes_faltante_en_singular():
+    """H-017: decía "faltan 1 meses"."""
+    meses = [{"mes": f"2025-{m:02d}", "ndvi_medio": 0.6, "coleccion": "hls2-s30"} for m in range(1, 12)] + [None]
+    nota = ndvi._armar("2025/26", meses, [{"mes": "2025-12", "motivo": "Diciembre 2025: sin escena"}])[
+        "meses_cobertura_baja"]["nota"]
+    # "11 meses con dato" contiene "1 meses": se busca el 1 suelto.
+    assert "falta 1 mes (ver" in nota and not re.search(r"(?<!\d)1 meses", nota)
+    assert ndvi._meses(1) == "1 mes" and ndvi._meses(0) == "0 meses" and ndvi._meses(11) == "11 meses"

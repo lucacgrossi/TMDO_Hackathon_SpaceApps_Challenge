@@ -23,6 +23,7 @@ import {
   textoEfecto,
   tramosCalendario,
 } from "@/lib/formato";
+import { meses } from "@/lib/plural";
 import { useEntradas } from "@/lib/store";
 import CeldaDato, { HuellaDato, type Origen } from "./CeldaDato";
 import ContrasteMediciones, { MateriaOrganicaProductor } from "./ContrasteMediciones";
@@ -77,7 +78,8 @@ function cultivosPresentes(salida: Salida): CultivoMes[] {
 function frenteALaActual(e: EstrategiaDisponible, valor: number, base: number | undefined, unidad: string) {
   if (e.id === "actual" || base == null) return null;
   const d = valor - base;
-  return d === 0 ? "igual que la actual" : `${conSigno(d)} ${unidad} frente a la actual`;
+  const u = unidad === "meses" ? meses(d) : unidad;
+  return d === 0 ? "igual que la actual" : `${conSigno(d)} ${u} frente a la actual`;
 }
 
 function Lista({ items, vacio }: { items: readonly ReactNode[]; vacio: string }) {
@@ -247,7 +249,7 @@ const GRUPOS: Grupo[] = [
               unidad="pts"
               diferencia={frenteALaActual(e, e.puntos.erosion, actual?.puntos.erosion, "pts")}
             >
-              {e.valores.meses_cobertura_baja} meses pelado, pendiente{" "}
+              {e.valores.meses_cobertura_baja} {meses(e.valores.meses_cobertura_baja)} pelado, pendiente{" "}
               {typeof p.valor === "number" ? `${fmt(p.valor, 1)} %` : "sin dato"}
             </CeldaDato>
           );
@@ -275,7 +277,7 @@ const GRUPOS: Grupo[] = [
         celda: (e, { actual }) => (
           <CeldaDato
             valor={fmt(e.valores.meses_cobertura_baja)}
-            unidad="meses"
+            unidad={meses(e.valores.meses_cobertura_baja)}
             diferencia={frenteALaActual(e, e.valores.meses_cobertura_baja, actual?.valores.meses_cobertura_baja, "meses")}
           />
         ),

@@ -1,21 +1,21 @@
 /**
  * Salida de /analizar para el lote de la demo (Río Cuarto): copia de
- * `backend/app/api/mock_rio_cuarto.json` (Back 1, PR #27), con la forma exacta
- * de `contrato.ts`. TypeScript la valida contra el contrato al compilar.
+ * `backend/app/demo/rio_cuarto.json` (la demo precalculada del back, con datos
+ * reales de NASA de ese lote), con `es_mock` en true y el aviso del mock al
+ * principio de "Información que falta". TypeScript la valida contra
+ * `contrato.ts` al compilar.
  *
- * Las 4 columnas salen del motor de reglas de la persona 3 con indicadores
- * ILUSTRATIVOS, no con datos de NASA: por eso `es_mock` es true y
- * "Información que falta" lo dice.
- *
- * No editar a mano: si el backend regenera el JSON, se vuelve a copiar.
- * Las variantes (descartada, pluviómetro) se arman en `analizar.ts`.
+ * NO EDITAR A MANO: se genera con `node scripts/generar-mock.mjs` (desde
+ * `frontend/`). Si el back regenera la demo, se vuelve a correr.
+ * Lo que depende de las entradas (área y centro del lote dibujado, No sembrar,
+ * mediciones) se arma en `analizar.ts`.
  */
 import type { Salida } from "@/lib/contrato";
 
 export const RIO_CUARTO: Salida = {
   "lote": {
-    "localidad_aprox": "a 17 km de Río Cuarto, Córdoba",
-    "area_ha": 95,
+    "localidad_aprox": null,
+    "area_ha": 94.86,
     "pendiente_pct": {
       "valor": 0.6,
       "unidad": "%",
@@ -24,208 +24,232 @@ export const RIO_CUARTO: Salida = {
       "resolucion": "30 m",
       "confianza": "alta",
       "motivo": null,
-      "nota": "Plano ajustado sobre 1050 píxeles del lote"
+      "nota": "Plano ajustado sobre 1230 píxeles del lote"
     },
     "pendiente_maxima_pct": {
-      "valor": 1.8,
+      "valor": 2.6,
       "unidad": "%",
       "fuente": "NASADEM · NASA, vía Planetary Computer",
       "anios": "2000 (misión SRTM, reprocesada en NASADEM)",
       "resolucion": "30 m",
       "confianza": "media",
       "motivo": null,
-      "nota": "Percentil 95 de la pendiente por píxel (1050 píxeles); valor por píxel, ruidoso"
+      "nota": "Percentil 95 de la pendiente por píxel (1230 píxeles); valor por píxel, ruidoso"
     },
     "cobertura_agricola_pct": {
-      "valor": 98,
+      "valor": 93.9,
       "unidad": "%",
       "fuente": "ESA WorldCover 2021 v200, vía Planetary Computer",
       "anios": "2021",
-      "resolucion": "10 m",
+      "resolucion": "10 m, clase mayoritaria en la grilla de 1″ (~30 m)",
       "confianza": "alta",
       "motivo": null,
-      "nota": "9310 de 9500 píxeles de 10 m dentro del lote son cultivo"
+      "nota": "1155 de 1230 píxeles de la grilla de 1″ (~30 m) dentro del lote son cultivo"
     }
   },
   "visto_por_satelite": {
-    "campana": "2024/25",
+    "campana": "2025/26",
     "fuente": "NASA HLS 30 m + MODIS 250 m (respaldo en 1 de 12 meses)",
     "meses": [
       {
-        "mes": "2025-01",
-        "fecha": "2025-01-18",
-        "ndvi_medio": 0.71,
-        "nubes_escena": 4,
+        "mes": "2026-01",
+        "fecha": "2026-01-22",
+        "ndvi_medio": 0.62,
+        "nubes_escena": 0,
+        "coleccion": "hls2-l30",
+        "item": "HLS.L30.T20HLJ.2026022T140852.v2.0",
+        "pixeles": 1230,
+        "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m"
+      },
+      {
+        "mes": "2026-02",
+        "fecha": "2026-02-07",
+        "ndvi_medio": 0.51,
+        "nubes_escena": 0,
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2025-01-18",
-        "pixeles": 1050,
+        "item": "HLS.S30.T20HLJ.2026038T140659.v2.0",
+        "pixeles": 1230,
         "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
       },
       {
-        "mes": "2025-02",
-        "fecha": "2025-02-12",
-        "ndvi_medio": 0.78,
-        "nubes_escena": 4,
-        "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2025-02-12",
-        "pixeles": 1050,
-        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
-      },
-      {
-        "mes": "2025-03",
-        "fecha": "2025-03-09",
-        "ndvi_medio": 0.69,
+        "mes": "2026-03",
+        "fecha": "2026-03-06",
+        "ndvi_medio": 0.685,
         "nubes_escena": null,
         "coleccion": "modis-13Q1-061",
-        "item": "MOCK-MOD13Q1-2025-03-09",
-        "pixeles": 15,
+        "item": "MOD13Q1.A2026065.h12v12.061.2026083115612",
+        "pixeles": 1230,
         "fuente": "NASA MODIS MOD13Q1 · 250 m, compuesto de 16 días · respaldo: sin escena HLS con < 30 % de nubes. Mezcla el lote con los vecinos: con el umbral 0,3 marca menos meses que HLS"
       },
       {
-        "mes": "2025-04",
-        "fecha": "2025-04-15",
-        "ndvi_medio": 0.42,
-        "nubes_escena": 4,
+        "mes": "2026-04",
+        "fecha": "2026-04-12",
+        "ndvi_medio": 0.478,
+        "nubes_escena": 2,
+        "coleccion": "hls2-l30",
+        "item": "HLS.L30.T20HLJ.2026102T140820.v2.0",
+        "pixeles": 1230,
+        "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m"
+      },
+      {
+        "mes": "2026-05",
+        "fecha": "2026-05-23",
+        "ndvi_medio": 0.509,
+        "nubes_escena": 0,
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2025-04-15",
-        "pixeles": 1050,
+        "item": "HLS.S30.T20HLJ.2026143T140701.v2.0",
+        "pixeles": 1230,
         "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
       },
       {
-        "mes": "2025-05",
-        "fecha": "2025-05-20",
-        "ndvi_medio": 0.24,
-        "nubes_escena": 4,
+        "mes": "2026-06",
+        "fecha": "2026-06-23",
+        "ndvi_medio": 0.633,
+        "nubes_escena": 2,
+        "coleccion": "hls2-l30",
+        "item": "HLS.L30.T20HLJ.2026174T140751.v2.0",
+        "pixeles": 1230,
+        "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m"
+      },
+      {
+        "mes": "2025-07",
+        "fecha": "2025-07-19",
+        "ndvi_medio": 0.264,
+        "nubes_escena": 0,
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2025-05-20",
-        "pixeles": 1050,
+        "item": "HLS.S30.T20HLJ.2025200T141111.v2.0",
+        "pixeles": 1230,
         "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
       },
       {
-        "mes": "2025-06",
-        "fecha": "2025-06-14",
-        "ndvi_medio": 0.22,
-        "nubes_escena": 4,
+        "mes": "2025-08",
+        "fecha": "2025-08-28",
+        "ndvi_medio": 0.307,
+        "nubes_escena": 0,
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2025-06-14",
-        "pixeles": 1050,
+        "item": "HLS.S30.T20HLJ.2025240T141101.v2.0",
+        "pixeles": 1230,
         "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
       },
       {
-        "mes": "2024-07",
-        "fecha": "2024-07-22",
-        "ndvi_medio": 0.26,
-        "nubes_escena": 4,
+        "mes": "2025-09",
+        "fecha": "2025-09-25",
+        "ndvi_medio": 0.202,
+        "nubes_escena": 0,
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2024-07-22",
-        "pixeles": 1050,
+        "item": "HLS.S30.T20HLJ.2025268T140721.v2.0",
+        "pixeles": 1230,
         "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
       },
       {
-        "mes": "2024-08",
-        "fecha": "2024-08-16",
-        "ndvi_medio": 0.21,
-        "nubes_escena": 4,
-        "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2024-08-16",
-        "pixeles": 1050,
-        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+        "mes": "2025-10",
+        "fecha": "2025-10-26",
+        "ndvi_medio": 0.298,
+        "nubes_escena": 0,
+        "coleccion": "hls2-l30",
+        "item": "HLS.L30.T20HLJ.2025299T140848.v2.0",
+        "pixeles": 1230,
+        "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m"
       },
       {
-        "mes": "2024-09",
-        "fecha": "2024-09-10",
-        "ndvi_medio": 0.19,
-        "nubes_escena": 4,
-        "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2024-09-10",
-        "pixeles": 1050,
-        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+        "mes": "2025-11",
+        "fecha": "2025-11-19",
+        "ndvi_medio": 0.431,
+        "nubes_escena": 0,
+        "coleccion": "hls2-l30",
+        "item": "HLS.L30.T20HLJ.2025323T140852.v2.0",
+        "pixeles": 1230,
+        "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m"
       },
       {
-        "mes": "2024-10",
-        "fecha": "2024-10-28",
-        "ndvi_medio": 0.18,
-        "nubes_escena": 4,
+        "mes": "2025-12",
+        "fecha": "2025-12-19",
+        "ndvi_medio": 0.549,
+        "nubes_escena": 0,
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2024-10-28",
-        "pixeles": 1050,
-        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
-      },
-      null,
-      {
-        "mes": "2024-12",
-        "fecha": "2024-12-17",
-        "ndvi_medio": 0.38,
-        "nubes_escena": 4,
-        "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2024-12-17",
-        "pixeles": 1050,
+        "item": "HLS.S30.T20HLJ.2025353T140709.v2.0",
+        "pixeles": 1230,
         "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
       }
     ],
-    "meses_ndvi_bajo": 6,
-    "meses_con_dato": 11,
+    "meses_ndvi_bajo": 3,
+    "meses_con_dato": 12,
     "umbral": 0.3,
     "confianza": "baja",
-    "motivo": "NDVI medio del lote < 0,3 en 6 de 11 meses con dato; faltan 1 meses (ver Información que falta); en los meses con MODIS el píxel de 250 m mezcla el lote con los vecinos",
-    "faltantes": [
-      {
-        "mes": "2024-11",
-        "motivo": "noviembre de 2024: sin escena HLS con < 30 % de nubes; MODIS de respaldo: sin compuesto con píxeles buenos"
-      }
-    ],
+    "motivo": "NDVI medio del lote < 0,3 en 3 de 12 meses con dato; en los meses con MODIS el píxel de 250 m mezcla el lote con los vecinos",
+    "faltantes": [],
     "orden_meses": "índice 0 = enero … 11 = diciembre; julio a diciembre del primer año de la campaña, enero a junio del segundo"
   },
   "indicadores": {
     "lluvia_anual": {
-      "valor": 769,
-      "unidad": "mm/año",
+      "valor": 819,
+      "unidad": "mm/campaña",
       "fuente": "NASA POWER mensual (comunidad AG)",
-      "anios": "1995/96–2024/25",
+      "anios": "1996/97 a 2025/26",
       "resolucion": "~50 km (0,5° × 0,625°)",
       "confianza": "media",
       "motivo": null,
-      "nota": null
+      "nota": "Media de 30 campañas julio–junio; celda de ~50 km: contexto regional"
+    },
+    "meses_helada_frecuente": {
+      "valor": 4,
+      "unidad": "meses",
+      "fuente": "NASA POWER mensual (comunidad AG)",
+      "anios": "1996/97 a 2025/26",
+      "resolucion": "~50 km (0,5° × 0,625°)",
+      "confianza": "media",
+      "motivo": null,
+      "nota": "Meses con mínima < 0 °C en al menos 1 de cada 3 años: junio, julio, agosto, septiembre"
     },
     "et0_anual": {
-      "valor": 1235,
-      "unidad": "mm/año",
-      "fuente": "Hargreaves (FAO-56) con temperaturas de NASA POWER",
-      "anios": "1995/96–2024/25",
+      "valor": 1447,
+      "unidad": "mm/campaña",
+      "fuente": "Hargreaves (FAO-56) con T2M y T2M_RANGE de NASA POWER",
+      "anios": "1996/97 a 2025/26",
       "resolucion": "~50 km (0,5° × 0,625°)",
       "confianza": "media",
       "motivo": null,
-      "nota": null
+      "nota": "ET de referencia (cultivo de referencia), no la ET real del lote"
     },
     "balance_anual": {
-      "valor": -466,
-      "unidad": "mm/año",
-      "fuente": "NASA POWER − ET0 Hargreaves",
-      "anios": "1995/96–2024/25",
+      "valor": -628,
+      "unidad": "mm/campaña",
+      "fuente": "NASA POWER (lluvia) − ET0 de Hargreaves (FAO-56)",
+      "anios": "1996/97 a 2025/26",
       "resolucion": "~50 km (0,5° × 0,625°)",
       "confianza": "media",
       "motivo": null,
-      "nota": null
+      "nota": "Lluvia − ET0, media de las campañas"
     },
     "et_real_anual": {
-      "valor": 690,
+      "valor": 607,
       "unidad": "mm/año",
       "fuente": "MODIS MOD16A3GF/MYD16A3GF v061 (Terra y Aqua) · NASA, vía Planetary Computer",
       "anios": "2025",
       "resolucion": "500 m",
       "confianza": "media",
       "motivo": null,
-      "nota": null
+      "nota": "ET real de 2025: promedio de Terra 600 mm y Aqua 614 mm. A 500 m el píxel mezcla el lote con los vecinos."
     },
     "meses_cobertura_baja": {
-      "valor": 6,
+      "valor": 3,
       "unidad": "meses",
       "fuente": "NASA HLS 30 m (Landsat + Sentinel-2) y MODIS MOD13Q1 250 m de respaldo en 1 mes, vía Planetary Computer",
-      "anios": "2024/25",
+      "anios": "2025/26",
       "resolucion": "30 m (250 m en 1 de 12 meses)",
       "confianza": "baja",
       "motivo": null,
-      "nota": "NDVI medio del lote < 0,3 en 6 de 11 meses con dato"
+      "nota": "NDVI medio del lote < 0,3 en 3 de 12 meses con dato; en los meses con MODIS el píxel de 250 m mezcla el lote con los vecinos"
+    },
+    "riesgo_erosion": {
+      "valor": 2.6,
+      "unidad": "% × meses",
+      "fuente": "Pendiente: NASADEM · NASA, vía Planetary Computer · Cobertura: NASA HLS 30 m (Landsat + Sentinel-2) y MODIS MOD13Q1 250 m de respaldo en 1 mes, vía Planetary Computer",
+      "anios": "2025/26",
+      "resolucion": "pendiente del plano × meses bajos por píxel en la grilla de 1″ (~30 m); pendiente y NDVI a 30 m",
+      "confianza": "baja",
+      "motivo": null,
+      "nota": "Valor del lote: pendiente general 0,6 % (plano) × 4,3 meses con NDVI < 0,3 en promedio por píxel (1230 píxeles de la grilla de 1″ (~30 m), campaña 2025/26). El mapa muestra dónde: pendiente del píxel × meses del píxel (media 5,5); la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases propuesta, a validar por la persona 3"
     }
   },
   "contraste_mediciones": [],
@@ -241,2597 +265,3366 @@ export const RIO_CUARTO: Salida = {
   },
   "clima_mensual": {
     "lluvia_mm": [
-      110,
-      100,
-      105,
-      60,
-      30,
-      12,
-      10,
-      12,
-      35,
-      80,
-      100,
-      115
+      130.8,
+      105.2,
+      103.2,
+      75.3,
+      25.8,
+      13,
+      9.7,
+      14.5,
+      31.2,
+      78.6,
+      114.2,
+      117.5
     ],
     "minima_media_c": [
-      17,
-      16,
-      14,
-      10,
-      6,
-      3,
-      2,
-      4,
-      7,
-      10,
-      13,
-      16
+      10.9,
+      9.6,
+      7.8,
+      3.9,
+      0.8,
+      -1.7,
+      -2.5,
+      -1.3,
+      0.4,
+      3.8,
+      6.6,
+      8.7
     ],
     "maxima_media_c": [
-      31,
-      29,
+      38.7,
+      37,
+      35,
+      30.8,
       27,
-      23,
-      19,
-      16,
-      16,
-      19,
-      21,
-      24,
-      27,
-      30
+      24.3,
+      25.2,
+      30.1,
+      32.1,
+      34.9,
+      36.8,
+      38
     ],
-    "t_media_c": null,
-    "amplitud_diaria_c": null,
+    "t_media_c": [
+      23.5,
+      22.2,
+      20,
+      16,
+      12,
+      9,
+      8.5,
+      10.8,
+      13.8,
+      17.4,
+      20.2,
+      22.5
+    ],
+    "amplitud_diaria_c": [
+      15.1,
+      14.3,
+      13.7,
+      13,
+      12.2,
+      12.7,
+      13.3,
+      14.9,
+      15.6,
+      15.5,
+      15.7,
+      15.7
+    ],
     "et0_mm": [
-      170,
-      135,
-      115,
-      80,
-      55,
-      40,
-      45,
-      65,
-      90,
-      120,
-      150,
-      170
+      202.4,
+      157.3,
+      135.4,
+      87.8,
+      59.2,
+      44.9,
+      49.7,
+      73,
+      105.3,
+      148.8,
+      178.1,
+      205.5
     ],
     "balance_mm": [
-      -60,
-      -35,
-      -10,
-      -20,
-      -25,
-      -28,
-      -35,
-      -53,
-      -55,
+      -71.5,
+      -52.1,
+      -32.2,
+      -12.5,
+      -33.4,
+      -31.9,
       -40,
-      -50,
-      -55
+      -58.5,
+      -74.1,
+      -70.2,
+      -63.9,
+      -88.1
     ],
     "anios_con_helada": [
       0,
       0,
       0,
-      2,
-      12,
+      0,
+      8,
       25,
-      27,
-      22,
-      9,
-      1,
+      26,
+      20,
+      11,
+      0,
       0,
       0
     ],
     "anios_con_35c": [
-      20,
-      9,
-      2,
-      0,
-      0,
-      0,
-      0,
-      0,
-      0,
+      29,
+      24,
+      16,
       1,
-      6,
-      18
+      0,
+      0,
+      0,
+      2,
+      5,
+      14,
+      25,
+      26
     ],
     "helada_frecuente": [
       false,
       false,
       false,
       false,
-      true,
-      true,
-      true,
-      true,
       false,
+      true,
+      true,
+      true,
+      true,
       false,
       false,
       false
     ],
     "n_anios": 30,
-    "periodo": "1995/96–2024/25",
+    "periodo": "1996/97 a 2025/26",
     "fuente": "NASA POWER mensual (comunidad AG)",
     "resolucion": "~50 km (0,5° × 0,625°)"
   },
   "tipos_de_anio": {
     "metodo": "terciles_balance",
     "seco": [
-      "1995/96",
-      "1998/99",
-      "2001/02",
-      "2004/05",
-      "2007/08",
-      "2010/11",
-      "2013/14",
-      "2016/17",
-      "2019/20",
-      "2022/23"
-    ],
-    "normal": [
       "1996/97",
-      "1999/00",
-      "2002/03",
       "2005/06",
       "2008/09",
       "2011/12",
-      "2014/15",
       "2017/18",
+      "2019/20",
       "2020/21",
+      "2021/22",
+      "2022/23",
+      "2025/26"
+    ],
+    "normal": [
+      "2000/01",
+      "2001/02",
+      "2002/03",
+      "2009/10",
+      "2010/11",
+      "2012/13",
+      "2013/14",
+      "2016/17",
+      "2018/19",
       "2023/24"
     ],
     "humedo": [
       "1997/98",
-      "2000/01",
+      "1998/99",
+      "1999/00",
       "2003/04",
+      "2004/05",
       "2006/07",
-      "2009/10",
-      "2012/13",
+      "2007/08",
+      "2014/15",
       "2015/16",
-      "2018/19",
-      "2021/22",
       "2024/25"
     ],
-    "umbral_seco_mm": -420,
-    "umbral_humedo_mm": -240
+    "umbral_seco_mm": -730.6,
+    "umbral_humedo_mm": -529.6
   },
   "serie_anual": {
     "fuente": "NASA POWER mensual (comunidad AG)",
     "resolucion": "~50 km (0,5° × 0,625°)",
-    "periodo": "1995/96–2024/25",
+    "periodo": "1996/97 a 2025/26",
     "campanas": [
       {
-        "campana": "1995/96",
-        "lluvia_mm": 615,
-        "balance_mm": -620,
+        "campana": "1996/97",
+        "lluvia_mm": 678,
+        "balance_mm": -794,
         "tipo": "seco",
         "mensual": {
           "lluvia_mm": [
-            88,
-            80,
-            84,
-            48,
-            24,
-            9.6,
-            8,
-            9.6,
-            28,
-            64,
-            80,
-            92
+            141.4,
+            80.9,
+            89.9,
+            34.2,
+            7.9,
+            10.6,
+            0.1,
+            0.5,
+            47.7,
+            59.5,
+            82,
+            123.2
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            13.7,
+            7.3,
+            8.9,
+            3.8,
+            -0.1,
+            -1.1,
+            -1.6,
+            0.5,
+            0.7,
+            5.7,
+            8.6,
+            10
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
+            37.8,
+            36.7,
+            36.6,
+            34.3,
+            34.5,
+            22.5,
             24,
-            27,
-            30
+            32,
+            28.7,
+            32.5,
+            36.8,
+            35.5
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            200.8,
+            156.2,
+            136,
+            103.1,
+            67.4,
+            46.1,
+            50.3,
+            81.7,
+            100.3,
+            147,
+            191.6,
+            191.4
           ],
           "balance_mm": [
-            -82,
-            -55,
-            -31,
-            -32,
-            -31,
-            -30.4,
-            -37,
-            -55.4,
-            -62,
-            -56,
-            -70,
-            -78
-          ]
-        }
-      },
-      {
-        "campana": "1996/97",
-        "lluvia_mm": 769,
-        "balance_mm": -466,
-        "tipo": "normal",
-        "mensual": {
-          "lluvia_mm": [
-            110,
-            100,
-            105,
-            60,
-            30,
-            12,
-            10,
-            12,
-            35,
-            80,
-            100,
-            115
-          ],
-          "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
-          ],
-          "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
-          ],
-          "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
-          ],
-          "balance_mm": [
-            -60,
-            -35,
-            -10,
-            -20,
-            -25,
-            -28,
-            -35,
-            -53,
-            -55,
-            -40,
-            -50,
-            -55
+            -59.5,
+            -75.3,
+            -46.1,
+            -68.8,
+            -59.4,
+            -35.6,
+            -50.1,
+            -81.2,
+            -52.7,
+            -87.5,
+            -109.5,
+            -68.2
           ]
         }
       },
       {
         "campana": "1997/98",
-        "lluvia_mm": 923,
-        "balance_mm": -312,
+        "lluvia_mm": 1156,
+        "balance_mm": -184,
         "tipo": "humedo",
         "mensual": {
           "lluvia_mm": [
-            132,
-            120,
-            126,
-            72,
-            36,
-            14.4,
-            12,
-            14.4,
-            42,
-            96,
-            120,
-            138
+            126.9,
+            154.7,
+            76.8,
+            162.5,
+            73,
+            19.6,
+            14.1,
+            18,
+            29.7,
+            136,
+            130,
+            214.9
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
             10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            10.5,
+            7.3,
+            5.7,
+            3.9,
+            0.5,
+            0.1,
+            -2,
+            2.2,
+            4.4,
+            8,
+            9.2
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            38.5,
+            35.6,
+            34.7,
+            28.2,
+            24.9,
+            19.8,
+            32.1,
+            37.2,
+            32.1,
+            33.4,
+            37,
+            34.7
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            187.8,
+            129.6,
+            120.6,
+            74.4,
+            57.5,
+            40.2,
+            53.7,
+            75.6,
+            110.6,
+            138.3,
+            164,
+            188.2
           ],
           "balance_mm": [
-            -38,
-            -15,
-            11,
-            -8,
-            -19,
-            -25.6,
-            -33,
-            -50.6,
-            -48,
-            -24,
-            -30,
-            -32
+            -60.9,
+            25.1,
+            -43.7,
+            88.1,
+            15.5,
+            -20.6,
+            -39.6,
+            -57.6,
+            -80.9,
+            -2.3,
+            -34,
+            26.7
           ]
         }
       },
       {
         "campana": "1998/99",
-        "lluvia_mm": 615,
-        "balance_mm": -620,
-        "tipo": "seco",
+        "lluvia_mm": 933,
+        "balance_mm": -459,
+        "tipo": "humedo",
         "mensual": {
           "lluvia_mm": [
-            88,
-            80,
-            84,
-            48,
-            24,
-            9.6,
-            8,
-            9.6,
-            28,
-            64,
-            80,
-            92
+            104.1,
+            18.9,
+            263.7,
+            109.6,
+            6.4,
+            14.6,
+            4.2,
+            10.1,
+            42.4,
+            54.1,
+            187.6,
+            117.7
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            8.1,
+            10.6,
+            9.2,
+            1,
+            0.8,
+            -0.4,
+            1.6,
+            -0.5,
+            -3.2,
+            4.4,
+            8.2,
+            8.7
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            36.2,
+            37.8,
+            34,
+            27.3,
+            26.5,
+            22.8,
+            22.3,
+            24.5,
+            27.2,
+            35.9,
+            34.4,
+            37.1
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
+            189.6,
+            174.2,
+            124.1,
+            80.2,
             55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            41,
+            49.6,
+            69.4,
+            94.7,
+            152.3,
+            162.3,
+            199.9
           ],
           "balance_mm": [
-            -82,
-            -55,
-            -31,
-            -32,
-            -31,
-            -30.4,
-            -37,
-            -55.4,
-            -62,
-            -56,
-            -70,
-            -78
+            -85.5,
+            -155.3,
+            139.6,
+            29.4,
+            -48.6,
+            -26.4,
+            -45.4,
+            -59.3,
+            -52.3,
+            -98.2,
+            25.3,
+            -82.2
           ]
         }
       },
       {
         "campana": "1999/00",
-        "lluvia_mm": 769,
-        "balance_mm": -466,
-        "tipo": "normal",
+        "lluvia_mm": 1088,
+        "balance_mm": -272,
+        "tipo": "humedo",
         "mensual": {
           "lluvia_mm": [
-            110,
-            100,
-            105,
-            60,
-            30,
-            12,
-            10,
-            12,
-            35,
-            80,
-            100,
-            115
+            172.5,
+            69,
+            73.6,
+            126.4,
+            87.5,
+            10.8,
+            17.4,
+            20.2,
+            39.8,
+            159.1,
+            99.3,
+            212.9
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            10.1,
+            8.6,
+            5,
+            6.2,
+            3.5,
+            -2.3,
+            -3.6,
+            -5,
+            1.5,
+            0.1,
+            5.1,
+            4.9
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            34,
+            34.4,
+            31.6,
+            31.4,
+            21.2,
+            22.1,
+            24.2,
+            28.7,
+            31.1,
+            33.4,
+            35.5,
+            35.8
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            187.2,
+            154.8,
+            132.8,
+            83.9,
+            51.7,
+            42.2,
+            45.4,
+            70.6,
+            107.8,
+            140,
+            159.7,
+            184.2
           ],
           "balance_mm": [
-            -60,
-            -35,
-            -10,
-            -20,
-            -25,
-            -28,
-            -35,
-            -53,
-            -55,
-            -40,
-            -50,
-            -55
+            -14.8,
+            -85.8,
+            -59.2,
+            42.4,
+            35.7,
+            -31.4,
+            -28.1,
+            -50.4,
+            -68,
+            19.1,
+            -60.4,
+            28.6
           ]
         }
       },
       {
         "campana": "2000/01",
-        "lluvia_mm": 923,
-        "balance_mm": -312,
-        "tipo": "humedo",
+        "lluvia_mm": 850,
+        "balance_mm": -575,
+        "tipo": "normal",
         "mensual": {
           "lluvia_mm": [
-            132,
-            120,
-            126,
-            72,
-            36,
-            14.4,
-            12,
-            14.4,
-            42,
-            96,
-            120,
-            138
+            95.5,
+            23.5,
+            223.9,
+            168.9,
+            21.9,
+            6.3,
+            18.8,
+            2.9,
+            15.2,
+            90,
+            94.2,
+            89.4
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            7.1,
+            11.6,
+            9.1,
+            1.9,
+            1.7,
+            -4.1,
+            -5.9,
+            -1.6,
+            -0.6,
+            5.3,
+            2.5,
+            6.5
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            38.8,
+            39.4,
+            37.8,
+            29.6,
+            25.6,
+            23.9,
+            22.4,
+            25.6,
+            33,
+            34.5,
+            33.6,
+            37.2
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            202.5,
+            176.4,
+            129.4,
+            79.8,
+            53.8,
+            43.2,
+            42.9,
+            68.7,
+            106.4,
+            148.1,
+            164.9,
+            209
           ],
           "balance_mm": [
-            -38,
-            -15,
-            11,
-            -8,
-            -19,
-            -25.6,
-            -33,
-            -50.6,
-            -48,
-            -24,
-            -30,
-            -32
+            -107,
+            -152.9,
+            94.5,
+            89.1,
+            -32,
+            -36.9,
+            -24.1,
+            -65.8,
+            -91.2,
+            -58.2,
+            -70.7,
+            -119.6
           ]
         }
       },
       {
         "campana": "2001/02",
-        "lluvia_mm": 615,
-        "balance_mm": -620,
-        "tipo": "seco",
+        "lluvia_mm": 734,
+        "balance_mm": -688,
+        "tipo": "normal",
         "mensual": {
           "lluvia_mm": [
-            88,
-            80,
-            84,
-            48,
-            24,
-            9.6,
-            8,
-            9.6,
-            28,
-            64,
-            80,
-            92
+            85.8,
+            59.6,
+            67.7,
+            122.7,
+            17.9,
+            1.4,
+            4.7,
+            29.1,
+            110.5,
+            121.7,
+            36.6,
+            76.2
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            9.6,
+            11.6,
+            5.2,
+            3.7,
+            0.3,
+            -3.4,
+            -4.4,
+            0.6,
+            1.2,
+            4.2,
+            5.7,
+            6.6
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            36.5,
+            37.1,
+            36.4,
+            35.5,
+            27.4,
+            25,
+            23.7,
+            26.1,
+            27.3,
+            35.8,
+            32.5,
+            37.8
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
+            199.6,
+            159.7,
+            140,
+            84.8,
+            63.9,
+            43.2,
+            48.4,
+            73.2,
             90,
-            120,
-            150,
-            170
+            134.6,
+            169.6,
+            214.9
           ],
           "balance_mm": [
-            -82,
-            -55,
-            -31,
-            -32,
-            -31,
-            -30.4,
-            -37,
-            -55.4,
-            -62,
-            -56,
-            -70,
-            -78
+            -113.8,
+            -100.1,
+            -72.3,
+            37.9,
+            -46,
+            -41.8,
+            -43.7,
+            -44,
+            20.6,
+            -12.9,
+            -133,
+            -138.7
           ]
         }
       },
       {
         "campana": "2002/03",
-        "lluvia_mm": 769,
-        "balance_mm": -466,
+        "lluvia_mm": 814,
+        "balance_mm": -651,
         "tipo": "normal",
         "mensual": {
           "lluvia_mm": [
-            110,
-            100,
-            105,
-            60,
-            30,
-            12,
-            10,
-            12,
-            35,
-            80,
-            100,
-            115
+            169.1,
+            48.7,
+            65.8,
+            83.9,
+            8.8,
+            1.1,
+            5.9,
+            34.1,
+            3.5,
+            79.5,
+            185.6,
+            128.2
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            9.8,
+            6.2,
+            7.9,
+            4.1,
+            1.8,
+            1.2,
+            -2.5,
+            -1.8,
+            0.4,
+            2.8,
+            5.7,
+            10.2
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            42.2,
+            39.1,
+            35.2,
+            30.5,
+            26.2,
+            26,
+            24.4,
+            33.6,
+            33,
+            40.3,
+            38,
+            38.1
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            206.9,
+            160.2,
+            138.7,
+            84.1,
+            61,
+            49,
+            49.3,
+            74.6,
+            109.1,
+            159.1,
+            183.2,
+            190.5
           ],
           "balance_mm": [
-            -60,
-            -35,
-            -10,
-            -20,
-            -25,
-            -28,
-            -35,
-            -53,
-            -55,
-            -40,
-            -50,
-            -55
+            -37.7,
+            -111.6,
+            -72.8,
+            -0.2,
+            -52.2,
+            -47.9,
+            -43.4,
+            -40.5,
+            -105.6,
+            -79.5,
+            2.4,
+            -62.3
           ]
         }
       },
       {
         "campana": "2003/04",
-        "lluvia_mm": 923,
-        "balance_mm": -312,
+        "lluvia_mm": 1065,
+        "balance_mm": -433,
         "tipo": "humedo",
         "mensual": {
           "lluvia_mm": [
-            132,
-            120,
-            126,
-            72,
-            36,
-            14.4,
-            12,
-            14.4,
-            42,
-            96,
-            120,
-            138
+            140.5,
+            221.8,
+            116,
+            61.8,
+            186.6,
+            0,
+            64.3,
+            75,
+            0.7,
+            8.6,
+            21.1,
+            168.3
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
+            12,
+            9.9,
+            9.3,
             4,
-            7,
-            10,
-            13,
-            16
+            0.8,
+            -0.6,
+            -2.8,
+            -3.4,
+            -0.2,
+            4.7,
+            7.4,
+            5.7
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            38.3,
+            36.4,
+            33.9,
+            33.4,
+            25.1,
+            22.4,
+            24.1,
+            29.4,
+            34.9,
+            36,
+            40.2,
+            36.2
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            218,
+            158.6,
+            142.7,
+            88.5,
+            48.6,
+            45.2,
+            49.4,
+            66.3,
+            111.2,
+            168.1,
+            200.8,
+            200
           ],
           "balance_mm": [
-            -38,
-            -15,
-            11,
-            -8,
-            -19,
-            -25.6,
-            -33,
-            -50.6,
-            -48,
-            -24,
-            -30,
-            -32
+            -77.5,
+            63.1,
+            -26.6,
+            -26.7,
+            138,
+            -45.2,
+            14.9,
+            8.8,
+            -110.5,
+            -159.5,
+            -179.7,
+            -31.6
           ]
         }
       },
       {
         "campana": "2004/05",
-        "lluvia_mm": 615,
-        "balance_mm": -620,
-        "tipo": "seco",
+        "lluvia_mm": 898,
+        "balance_mm": -509,
+        "tipo": "humedo",
         "mensual": {
           "lluvia_mm": [
-            88,
-            80,
-            84,
-            48,
-            24,
-            9.6,
-            8,
-            9.6,
-            28,
-            64,
-            80,
-            92
+            236.9,
+            113.6,
+            92.7,
+            59.4,
+            34.7,
+            5.9,
+            34.1,
+            13.1,
+            0.4,
+            86.4,
+            57.3,
+            163.4
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            9.6,
+            6.5,
+            6.6,
+            0.8,
+            0.4,
+            -1.9,
+            -1.3,
+            -1.3,
+            1,
+            3.3,
+            5.6,
+            8.8
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            37.5,
+            36.8,
+            32.4,
+            29.4,
+            26.2,
+            25.6,
+            23.5,
+            31.8,
+            32.4,
+            31.2,
+            36.6,
+            34.2
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            194,
+            145.6,
+            131.9,
+            87.5,
+            60.9,
+            44.6,
+            46,
+            67.8,
+            109.2,
+            148.3,
+            173.3,
+            198.3
           ],
           "balance_mm": [
-            -82,
-            -55,
-            -31,
+            42.9,
             -32,
-            -31,
-            -30.4,
-            -37,
-            -55.4,
-            -62,
-            -56,
-            -70,
-            -78
+            -39.2,
+            -28.1,
+            -26.1,
+            -38.7,
+            -12,
+            -54.8,
+            -108.8,
+            -61.9,
+            -116,
+            -34.8
           ]
         }
       },
       {
         "campana": "2005/06",
-        "lluvia_mm": 769,
-        "balance_mm": -466,
-        "tipo": "normal",
+        "lluvia_mm": 619,
+        "balance_mm": -852,
+        "tipo": "seco",
         "mensual": {
           "lluvia_mm": [
-            110,
-            100,
-            105,
-            60,
-            30,
-            12,
-            10,
-            12,
-            35,
-            80,
-            100,
-            115
+            152.2,
+            86.7,
+            62.6,
+            78.6,
+            2,
+            4.1,
+            13.4,
+            12.8,
+            17.4,
+            61,
+            88.6,
+            39.2
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            9.8,
+            9.9,
+            6.1,
+            3.5,
+            0.5,
+            1.7,
+            -1.6,
+            -2.9,
+            -2.3,
+            3.5,
+            5.7,
+            7
           ],
           "t_max_c": [
-            31,
-            29,
+            42,
+            36.7,
+            34,
+            29.7,
+            24.8,
             27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
             27,
-            30
+            27.8,
+            28.8,
+            37.2,
+            38.3,
+            37.7
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            208.4,
+            159.2,
+            139,
+            93.4,
+            61.1,
+            47.5,
+            49.3,
+            69,
+            99.3,
+            152.3,
+            182.8,
+            209.4
           ],
           "balance_mm": [
-            -60,
-            -35,
-            -10,
-            -20,
-            -25,
-            -28,
-            -35,
-            -53,
-            -55,
-            -40,
-            -50,
-            -55
+            -56.2,
+            -72.5,
+            -76.4,
+            -14.8,
+            -59.1,
+            -43.4,
+            -35.9,
+            -56.2,
+            -81.9,
+            -91.4,
+            -94.2,
+            -170.1
           ]
         }
       },
       {
         "campana": "2006/07",
-        "lluvia_mm": 923,
-        "balance_mm": -312,
+        "lluvia_mm": 959,
+        "balance_mm": -447,
         "tipo": "humedo",
         "mensual": {
           "lluvia_mm": [
-            132,
-            120,
-            126,
-            72,
-            36,
-            14.4,
-            12,
-            14.4,
-            42,
-            96,
-            120,
-            138
+            159.6,
+            152.5,
+            144.5,
+            30.1,
+            6.5,
+            14.7,
+            1.2,
+            0.6,
+            6.7,
+            93,
+            195.1,
+            154.9
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            11.8,
+            8,
+            8.3,
+            3.8,
+            -4,
+            -2,
+            -3.5,
+            -0.8,
+            -1.9,
+            5.5,
+            5.7,
+            9.2
           ],
           "t_max_c": [
-            31,
+            37.9,
+            35.6,
+            32.4,
+            33.6,
+            24.5,
+            22.8,
             29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            31,
+            35.9,
+            35.8,
+            35.9,
+            37.1
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            176.4,
+            148.8,
+            126.9,
+            86.5,
+            54,
+            44.6,
+            56.4,
+            74.6,
+            112.3,
+            157.1,
+            171.8,
+            197
           ],
           "balance_mm": [
-            -38,
-            -15,
-            11,
-            -8,
-            -19,
-            -25.6,
-            -33,
-            -50.6,
-            -48,
-            -24,
-            -30,
-            -32
+            -16.7,
+            3.7,
+            17.6,
+            -56.3,
+            -47.5,
+            -29.9,
+            -55.1,
+            -74,
+            -105.6,
+            -64.1,
+            23.2,
+            -42.1
           ]
         }
       },
       {
         "campana": "2007/08",
-        "lluvia_mm": 615,
-        "balance_mm": -620,
-        "tipo": "seco",
+        "lluvia_mm": 894,
+        "balance_mm": -530,
+        "tipo": "humedo",
         "mensual": {
           "lluvia_mm": [
-            88,
-            80,
-            84,
-            48,
-            24,
-            9.6,
-            8,
-            9.6,
-            28,
-            64,
-            80,
-            92
+            243,
+            105.9,
+            167.4,
+            27.5,
+            9.8,
+            9.8,
+            19.6,
+            0.7,
+            64.2,
+            76.5,
+            29.1,
+            141
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            8.3,
+            10.4,
+            8.7,
+            0.1,
+            -3.8,
+            -2.5,
+            -8.1,
+            -3.8,
+            -0.5,
+            3.7,
+            3.9,
+            8.1
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            37.8,
+            33.9,
+            32.6,
+            29.6,
+            31.9,
+            23.7,
+            24.1,
+            22.8,
+            31.1,
+            35.7,
+            38,
+            38.4
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            188.8,
+            149.3,
+            131,
+            89.2,
+            63.6,
+            43.8,
+            47.1,
+            59,
+            102.2,
+            149.7,
+            189.1,
+            211.2
           ],
           "balance_mm": [
-            -82,
-            -55,
-            -31,
-            -32,
-            -31,
-            -30.4,
-            -37,
-            -55.4,
-            -62,
-            -56,
-            -70,
-            -78
+            54.2,
+            -43.4,
+            36.4,
+            -61.7,
+            -53.8,
+            -34,
+            -27.6,
+            -58.3,
+            -38,
+            -73.2,
+            -159.9,
+            -70.2
           ]
         }
       },
       {
         "campana": "2008/09",
-        "lluvia_mm": 769,
-        "balance_mm": -466,
-        "tipo": "normal",
+        "lluvia_mm": 632,
+        "balance_mm": -879,
+        "tipo": "seco",
         "mensual": {
           "lluvia_mm": [
-            110,
-            100,
-            105,
-            60,
-            30,
-            12,
-            10,
-            12,
-            35,
-            80,
-            100,
-            115
+            98.4,
+            81,
+            48,
+            11.3,
+            20.7,
+            0,
+            7.1,
+            4.2,
+            31.8,
+            34.4,
+            159.7,
+            135.1
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
+            10.6,
+            10.6,
+            11.7,
+            8.2,
             2,
-            4,
-            7,
-            10,
-            13,
-            16
+            -2.1,
+            1,
+            0.3,
+            1.3,
+            3.8,
+            5.5,
+            8
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            38.9,
+            38.5,
+            36.8,
+            34,
+            31.5,
+            24.6,
+            28.9,
+            34,
+            32.8,
+            32.8,
+            37.5,
+            38.2
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            202.6,
+            162.7,
+            153.5,
+            106,
+            66.1,
+            48.4,
+            54.1,
+            75.9,
+            100.4,
+            149.6,
+            188,
+            203.1
           ],
           "balance_mm": [
-            -60,
-            -35,
-            -10,
-            -20,
-            -25,
-            -28,
-            -35,
-            -53,
-            -55,
-            -40,
-            -50,
-            -55
+            -104.3,
+            -81.7,
+            -105.5,
+            -94.7,
+            -45.4,
+            -48.4,
+            -47,
+            -71.7,
+            -68.7,
+            -115.2,
+            -28.2,
+            -68.1
           ]
         }
       },
       {
         "campana": "2009/10",
-        "lluvia_mm": 923,
-        "balance_mm": -312,
-        "tipo": "humedo",
+        "lluvia_mm": 815,
+        "balance_mm": -660,
+        "tipo": "normal",
         "mensual": {
           "lluvia_mm": [
-            132,
-            120,
-            126,
-            72,
-            36,
-            14.4,
-            12,
-            14.4,
-            42,
-            96,
-            120,
-            138
+            59.5,
+            108.8,
+            76.1,
+            77,
+            18.3,
+            3.7,
+            9,
+            0.1,
+            75,
+            16.3,
+            123,
+            248.4
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            10.8,
+            12,
+            10.9,
+            3.8,
+            1.1,
+            -0.2,
+            -4,
+            0.5,
+            -2.4,
+            2.4,
+            6.9,
+            9.8
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            40.6,
+            38.6,
+            34.3,
+            29.5,
+            28.4,
+            24.8,
+            24.2,
+            37.4,
+            30.1,
+            41.2,
+            37.3,
+            34.4
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            213.1,
+            154.8,
+            142.6,
+            84.4,
+            58.7,
+            46.2,
+            50.7,
+            84.7,
+            97.8,
+            165,
+            190,
+            187.7
           ],
           "balance_mm": [
-            -38,
-            -15,
-            11,
-            -8,
-            -19,
-            -25.6,
-            -33,
-            -50.6,
-            -48,
-            -24,
-            -30,
-            -32
+            -153.5,
+            -46,
+            -66.5,
+            -7.5,
+            -40.4,
+            -42.4,
+            -41.6,
+            -84.6,
+            -22.8,
+            -148.7,
+            -67,
+            60.7
           ]
         }
       },
       {
         "campana": "2010/11",
-        "lluvia_mm": 615,
-        "balance_mm": -620,
-        "tipo": "seco",
+        "lluvia_mm": 754,
+        "balance_mm": -687,
+        "tipo": "normal",
         "mensual": {
           "lluvia_mm": [
-            88,
-            80,
-            84,
-            48,
-            24,
-            9.6,
-            8,
-            9.6,
-            28,
-            64,
-            80,
-            92
+            180.9,
+            97.2,
+            82.4,
+            44.4,
+            5.4,
+            10.9,
+            0.5,
+            0.8,
+            69.3,
+            85.7,
+            102,
+            74.6
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            11.7,
+            11.6,
+            5.9,
+            4.9,
+            -1,
+            -3.8,
+            -4.5,
+            -4,
+            1.9,
+            1.4,
+            6.7,
+            7.9
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            36.7,
+            33,
+            33.8,
+            32.2,
+            26.1,
+            24.9,
+            26.9,
+            30.6,
+            31.8,
+            32.4,
+            40.3,
+            36.6
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            208.5,
+            143.7,
+            137,
+            95.5,
+            61.5,
+            45.3,
+            48.3,
+            67.8,
+            99.1,
+            140.7,
+            177.9,
+            215.6
           ],
           "balance_mm": [
-            -82,
+            -27.5,
+            -46.4,
+            -54.6,
+            -51.1,
+            -56.1,
+            -34.4,
+            -47.9,
+            -67,
+            -29.8,
             -55,
-            -31,
-            -32,
-            -31,
-            -30.4,
-            -37,
-            -55.4,
-            -62,
-            -56,
-            -70,
-            -78
+            -75.9,
+            -141
           ]
         }
       },
       {
         "campana": "2011/12",
-        "lluvia_mm": 769,
-        "balance_mm": -466,
-        "tipo": "normal",
+        "lluvia_mm": 674,
+        "balance_mm": -835,
+        "tipo": "seco",
         "mensual": {
           "lluvia_mm": [
-            110,
-            100,
-            105,
-            60,
-            30,
-            12,
-            10,
-            12,
-            35,
-            80,
-            100,
-            115
+            48.1,
+            188.2,
+            66.5,
+            79.8,
+            18,
+            0.1,
+            0.6,
+            6,
+            23.4,
+            98.2,
+            110.3,
+            35.1
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            13.2,
+            10.6,
+            5.2,
+            2.7,
+            2.5,
+            -3.4,
+            -4.5,
+            -2.9,
+            2.7,
+            5.5,
+            8.4,
+            7
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            40.9,
+            37,
+            36.5,
+            32.1,
+            28,
+            28,
+            26.2,
+            30,
+            37.4,
+            33.8,
+            36.8,
+            42.2
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            222.2,
+            164.5,
+            139.3,
+            86.3,
+            65.6,
+            47.7,
+            50.6,
+            68.4,
+            117.6,
+            145.5,
+            183.2,
+            218.5
           ],
           "balance_mm": [
-            -60,
-            -35,
-            -10,
-            -20,
-            -25,
-            -28,
-            -35,
-            -53,
-            -55,
-            -40,
-            -50,
-            -55
+            -174.1,
+            23.7,
+            -72.8,
+            -6.5,
+            -47.6,
+            -47.6,
+            -49.9,
+            -62.4,
+            -94.2,
+            -47.3,
+            -72.9,
+            -183.4
           ]
         }
       },
       {
         "campana": "2012/13",
-        "lluvia_mm": 923,
-        "balance_mm": -312,
-        "tipo": "humedo",
+        "lluvia_mm": 834,
+        "balance_mm": -605,
+        "tipo": "normal",
         "mensual": {
           "lluvia_mm": [
-            132,
-            120,
-            126,
-            72,
-            36,
-            14.4,
-            12,
-            14.4,
-            42,
-            96,
-            120,
-            138
+            87.2,
+            61.3,
+            102.7,
+            62.1,
+            25,
+            0.8,
+            1.6,
+            24.4,
+            93.5,
+            143.7,
+            151.6,
+            80.6
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
+            8.8,
+            9.2,
+            7.2,
             3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            0,
+            -1.7,
+            -1.6,
+            -1.1,
+            1.2,
+            4.3,
+            9.4,
+            10.3
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            37.8,
+            38.2,
+            34.4,
+            30.3,
+            29.4,
+            25.8,
+            25.8,
+            28.7,
+            30.8,
+            29.7,
+            35.7,
+            41.6
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            207.2,
+            157.8,
+            129.4,
+            95.2,
+            64.8,
+            49.4,
+            50.6,
+            71.1,
+            101.3,
+            132.2,
+            170.9,
+            209.6
           ],
           "balance_mm": [
-            -38,
-            -15,
-            11,
-            -8,
-            -19,
-            -25.6,
-            -33,
-            -50.6,
-            -48,
-            -24,
-            -30,
-            -32
+            -120,
+            -96.5,
+            -26.7,
+            -33.1,
+            -39.8,
+            -48.6,
+            -48.9,
+            -46.7,
+            -7.8,
+            11.5,
+            -19.4,
+            -129
           ]
         }
       },
       {
         "campana": "2013/14",
-        "lluvia_mm": 615,
-        "balance_mm": -620,
-        "tipo": "seco",
+        "lluvia_mm": 889,
+        "balance_mm": -546,
+        "tipo": "normal",
         "mensual": {
           "lluvia_mm": [
-            88,
-            80,
-            84,
-            48,
-            24,
-            9.6,
-            8,
-            9.6,
-            28,
-            64,
-            80,
-            92
+            91.2,
+            175.3,
+            103.9,
+            91,
+            24.9,
+            3,
+            1.4,
+            1.1,
+            4.1,
+            81.3,
+            155.9,
+            155.6
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            9.2,
+            7.9,
+            5.6,
+            0.5,
+            1.9,
+            0.3,
+            -4.3,
+            -2.4,
+            -1.6,
+            3.8,
+            8.3,
+            11.4
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            39.9,
+            35.5,
+            30.5,
+            27.9,
+            24.5,
+            22.2,
+            27.8,
+            31.7,
+            37.6,
+            33.7,
+            39.8,
+            39.4
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            216.5,
+            132.1,
+            124.7,
+            82.7,
+            56.4,
+            45.1,
+            52.5,
+            75.2,
+            97,
+            156,
+            177.3,
+            219.4
           ],
           "balance_mm": [
-            -82,
-            -55,
-            -31,
-            -32,
-            -31,
-            -30.4,
-            -37,
-            -55.4,
-            -62,
-            -56,
-            -70,
-            -78
+            -125.2,
+            43.2,
+            -20.9,
+            8.3,
+            -31.5,
+            -42.1,
+            -51,
+            -74.2,
+            -92.9,
+            -74.7,
+            -21.4,
+            -63.9
           ]
         }
       },
       {
         "campana": "2014/15",
-        "lluvia_mm": 769,
-        "balance_mm": -466,
-        "tipo": "normal",
+        "lluvia_mm": 942,
+        "balance_mm": -487,
+        "tipo": "humedo",
         "mensual": {
           "lluvia_mm": [
-            110,
-            100,
-            105,
-            60,
-            30,
-            12,
-            10,
-            12,
-            35,
-            80,
-            100,
-            115
+            145.1,
+            274.9,
+            90.6,
+            72.4,
+            4.5,
+            3,
+            1.8,
+            0.5,
+            46.6,
+            70.6,
+            96.7,
+            136
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
+            11.4,
+            7.8,
+            7.5,
+            6.5,
+            3.1,
+            -3,
+            -0.3,
+            -1.4,
+            4.1,
             4,
-            7,
-            10,
-            13,
-            16
+            6.5,
+            6.5
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            35.8,
+            33.7,
+            32.5,
+            30.5,
+            26.4,
+            27.6,
+            23.9,
+            32.6,
+            28.7,
+            37.8,
+            36.8,
+            39.9
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            189.9,
+            134.8,
+            125.9,
+            88.9,
+            60.7,
+            48,
+            52.4,
+            81,
+            105.6,
+            160.8,
+            176.2,
+            205.1
           ],
           "balance_mm": [
-            -60,
-            -35,
-            -10,
-            -20,
-            -25,
-            -28,
-            -35,
-            -53,
-            -55,
-            -40,
-            -50,
-            -55
+            -44.8,
+            140.1,
+            -35.3,
+            -16.5,
+            -56.2,
+            -45.1,
+            -50.6,
+            -80.6,
+            -59,
+            -90.2,
+            -79.6,
+            -69.2
           ]
         }
       },
       {
         "campana": "2015/16",
-        "lluvia_mm": 923,
-        "balance_mm": -312,
+        "lluvia_mm": 1007,
+        "balance_mm": -319,
         "tipo": "humedo",
         "mensual": {
           "lluvia_mm": [
-            132,
-            120,
-            126,
-            72,
-            36,
-            14.4,
-            12,
-            14.4,
-            42,
-            96,
-            120,
-            138
+            206.3,
+            165,
+            82.4,
+            85.1,
+            19.7,
+            44.8,
+            11,
+            19.1,
+            35.8,
+            68.1,
+            162.7,
+            106.6
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
             13,
-            16
+            11.3,
+            7.5,
+            0.6,
+            4.3,
+            -0.6,
+            -2.5,
+            1.1,
+            0.6,
+            2.7,
+            5.7,
+            8.3
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            40.5,
+            34.3,
+            31.9,
+            31.6,
+            18.8,
+            19.8,
+            25,
+            30.6,
+            30,
+            30.8,
+            31.9,
+            37.8
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            185.7,
+            156.9,
+            126.4,
+            75.6,
+            43.6,
+            37.9,
+            51.6,
+            70.7,
+            100,
+            123.9,
+            156.8,
+            196.7
           ],
           "balance_mm": [
-            -38,
-            -15,
-            11,
-            -8,
-            -19,
-            -25.6,
-            -33,
-            -50.6,
-            -48,
-            -24,
-            -30,
-            -32
+            20.6,
+            8.1,
+            -44,
+            9.5,
+            -23.9,
+            6.9,
+            -40.5,
+            -51.6,
+            -64.2,
+            -55.8,
+            5.9,
+            -90.1
           ]
         }
       },
       {
         "campana": "2016/17",
-        "lluvia_mm": 615,
-        "balance_mm": -620,
-        "tipo": "seco",
+        "lluvia_mm": 747,
+        "balance_mm": -704,
+        "tipo": "normal",
         "mensual": {
           "lluvia_mm": [
-            88,
-            80,
-            84,
-            48,
-            24,
-            9.6,
-            8,
-            9.6,
-            28,
-            64,
-            80,
-            92
+            98.6,
+            82.2,
+            100.7,
+            72,
+            31.6,
+            14.7,
+            4.3,
+            66.2,
+            1.5,
+            122.5,
+            57.3,
+            95.8
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            12.1,
+            10.9,
+            8.1,
+            5.8,
+            1.1,
+            -2.4,
+            0.1,
+            0.8,
+            -3,
+            4.6,
+            5.1,
+            10
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            39.5,
+            39.4,
+            37.5,
+            27.2,
+            28.4,
+            25.8,
+            20.2,
+            28.4,
+            31.6,
+            30.8,
+            37.2,
+            40.7
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            212.6,
+            163.2,
+            138,
+            80.8,
+            56.2,
+            47.6,
+            43.2,
+            76,
+            105.7,
+            136,
+            177.1,
+            215.1
           ],
           "balance_mm": [
-            -82,
-            -55,
-            -31,
-            -32,
-            -31,
-            -30.4,
-            -37,
-            -55.4,
-            -62,
-            -56,
-            -70,
-            -78
+            -113.9,
+            -81,
+            -37.3,
+            -8.8,
+            -24.5,
+            -33,
+            -39,
+            -9.8,
+            -104.2,
+            -13.5,
+            -119.8,
+            -119.4
           ]
         }
       },
       {
         "campana": "2017/18",
-        "lluvia_mm": 769,
-        "balance_mm": -466,
-        "tipo": "normal",
+        "lluvia_mm": 651,
+        "balance_mm": -862,
+        "tipo": "seco",
         "mensual": {
           "lluvia_mm": [
-            110,
-            100,
-            105,
-            60,
-            30,
-            12,
-            10,
-            12,
-            35,
-            80,
-            100,
-            115
+            82.7,
+            44.5,
+            19.9,
+            58.7,
+            69.8,
+            6.4,
+            10.1,
+            4.5,
+            33.5,
+            125.7,
+            66.7,
+            128.4
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            11.4,
+            10.4,
+            5.9,
+            5.3,
+            3.3,
+            -2.9,
+            -3.9,
+            1.4,
+            1.5,
+            5.2,
+            7.2,
+            10.6
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            39.5,
+            39.1,
+            36.6,
+            33.1,
+            27.5,
+            23.9,
+            26.5,
+            29.2,
+            32.3,
+            35.5,
+            38.3,
+            42.2
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            209.8,
+            166.3,
+            156,
+            96.9,
+            61.6,
+            45.2,
+            50.4,
+            77.5,
+            102.2,
+            149.9,
+            187.6,
+            209.5
           ],
           "balance_mm": [
-            -60,
-            -35,
-            -10,
-            -20,
-            -25,
-            -28,
-            -35,
-            -53,
-            -55,
-            -40,
-            -50,
-            -55
+            -127.1,
+            -121.8,
+            -136.1,
+            -38.2,
+            8.3,
+            -38.9,
+            -40.4,
+            -73,
+            -68.7,
+            -24.2,
+            -120.9,
+            -81.2
           ]
         }
       },
       {
         "campana": "2018/19",
-        "lluvia_mm": 923,
-        "balance_mm": -312,
-        "tipo": "humedo",
+        "lluvia_mm": 902,
+        "balance_mm": -534,
+        "tipo": "normal",
         "mensual": {
           "lluvia_mm": [
-            132,
-            120,
-            126,
-            72,
-            36,
-            14.4,
-            12,
-            14.4,
-            42,
-            96,
-            120,
-            138
+            144.1,
+            27.9,
+            219.3,
+            73.1,
+            30.6,
+            8.9,
+            4.7,
+            1,
+            44.1,
+            62.9,
+            209.9,
+            75.5
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            8.5,
+            8.6,
+            7.8,
+            7.1,
+            1.4,
+            -1.4,
+            -1.9,
+            -1.9,
+            0.1,
+            3.2,
+            8.7,
+            8.9
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            38.8,
+            38.4,
+            35.4,
+            31.6,
+            25.5,
+            21.9,
+            25,
+            29.2,
+            36,
+            33.6,
+            37.1,
+            37.9
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            199.9,
+            163.3,
+            123.3,
+            88.1,
+            56.3,
+            44.4,
+            43.8,
+            74.9,
+            116.9,
+            146.9,
+            172.6,
+            205.2
           ],
           "balance_mm": [
-            -38,
+            -55.8,
+            -135.4,
+            96,
             -15,
-            11,
-            -8,
-            -19,
-            -25.6,
-            -33,
-            -50.6,
-            -48,
-            -24,
-            -30,
-            -32
+            -25.7,
+            -35.5,
+            -39.1,
+            -73.8,
+            -72.7,
+            -84,
+            37.3,
+            -129.7
           ]
         }
       },
       {
         "campana": "2019/20",
-        "lluvia_mm": 615,
-        "balance_mm": -620,
+        "lluvia_mm": 621,
+        "balance_mm": -873,
         "tipo": "seco",
         "mensual": {
           "lluvia_mm": [
-            88,
-            80,
-            84,
-            48,
-            24,
-            9.6,
-            8,
-            9.6,
-            28,
-            64,
-            80,
-            92
+            74.6,
+            109.2,
+            92.4,
+            21.9,
+            0,
+            0.9,
+            0.2,
+            0,
+            13.2,
+            59.4,
+            146.7,
+            103
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
+            11.1,
+            9.2,
+            12.4,
+            5.3,
+            0.2,
+            0.7,
+            -0.7,
+            -1,
+            -1.3,
             4,
-            7,
-            10,
-            13,
-            16
+            9.3,
+            7.8
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            38.9,
+            37.9,
+            38.4,
+            31.1,
+            30.4,
+            24.6,
+            26,
+            33.6,
+            35.8,
+            35.6,
+            35.9,
+            40.4
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            208.4,
+            166.3,
+            148.2,
+            93.4,
+            66.7,
+            45.2,
+            50.8,
+            73.3,
+            107.4,
+            142.2,
+            177.3,
+            214.9
           ],
           "balance_mm": [
-            -82,
-            -55,
-            -31,
-            -32,
-            -31,
-            -30.4,
-            -37,
-            -55.4,
-            -62,
-            -56,
-            -70,
-            -78
+            -133.8,
+            -57,
+            -55.7,
+            -71.5,
+            -66.7,
+            -44.3,
+            -50.6,
+            -73.3,
+            -94.1,
+            -82.8,
+            -30.6,
+            -112
           ]
         }
       },
       {
         "campana": "2020/21",
-        "lluvia_mm": 769,
-        "balance_mm": -466,
-        "tipo": "normal",
+        "lluvia_mm": 732,
+        "balance_mm": -733,
+        "tipo": "seco",
         "mensual": {
           "lluvia_mm": [
-            110,
-            100,
-            105,
-            60,
-            30,
-            12,
-            10,
-            12,
-            35,
-            80,
-            100,
-            115
+            204.4,
+            88.1,
+            98.2,
+            75.9,
+            16.4,
+            16.4,
+            2.2,
+            0,
+            3.7,
+            55.1,
+            87.6,
+            83.5
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            11.1,
+            10.7,
+            7.2,
+            6.4,
+            2.5,
+            -3.3,
+            -1.8,
+            -4.8,
+            1.5,
+            1.9,
+            9.3,
+            8.2
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            37.5,
+            33.4,
+            35.6,
+            29.4,
+            27.2,
+            26.5,
+            23.5,
+            30.5,
+            32.6,
+            40,
+            36.8,
+            39.1
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            192,
+            152.5,
+            130,
+            89.9,
+            60.1,
+            42.3,
+            50,
+            79.3,
+            111,
+            154.3,
+            183.1,
+            220.2
           ],
           "balance_mm": [
-            -60,
-            -35,
-            -10,
-            -20,
-            -25,
-            -28,
-            -35,
-            -53,
-            -55,
-            -40,
-            -50,
-            -55
+            12.4,
+            -64.4,
+            -31.8,
+            -14,
+            -43.7,
+            -26,
+            -47.9,
+            -79.3,
+            -107.3,
+            -99.2,
+            -95.4,
+            -136.7
           ]
         }
       },
       {
         "campana": "2021/22",
-        "lluvia_mm": 923,
-        "balance_mm": -312,
-        "tipo": "humedo",
+        "lluvia_mm": 546,
+        "balance_mm": -952,
+        "tipo": "seco",
         "mensual": {
           "lluvia_mm": [
-            132,
-            120,
-            126,
-            72,
-            36,
-            14.4,
-            12,
-            14.4,
-            42,
-            96,
-            120,
-            138
+            88.9,
+            70.8,
+            46.5,
+            17.2,
+            3.9,
+            0.6,
+            2.9,
+            0.1,
+            50.6,
+            53.7,
+            117.2,
+            93.5
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            11.9,
+            6.7,
+            4.2,
+            2.1,
+            -1.6,
+            -2.8,
+            -1.9,
+            0.1,
+            1.5,
+            4.3,
+            6.8,
+            11.8
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            41.2,
+            37.2,
+            35.1,
+            32.2,
+            27.6,
+            25.7,
+            25.3,
+            31.5,
+            29.4,
+            39.2,
+            37,
+            38
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            211.9,
+            160.7,
+            139.9,
+            97.7,
+            60.7,
+            45.3,
+            54,
+            79.1,
+            103.6,
+            159.2,
+            182.2,
+            203
           ],
           "balance_mm": [
-            -38,
-            -15,
-            11,
-            -8,
-            -19,
-            -25.6,
-            -33,
-            -50.6,
-            -48,
-            -24,
-            -30,
-            -32
+            -123,
+            -89.9,
+            -93.4,
+            -80.5,
+            -56.7,
+            -44.7,
+            -51.1,
+            -79.1,
+            -53.1,
+            -105.5,
+            -65.1,
+            -109.5
           ]
         }
       },
       {
         "campana": "2022/23",
-        "lluvia_mm": 615,
-        "balance_mm": -620,
+        "lluvia_mm": 803,
+        "balance_mm": -731,
         "tipo": "seco",
         "mensual": {
           "lluvia_mm": [
-            88,
-            80,
-            84,
-            48,
-            24,
-            9.6,
-            8,
-            9.6,
-            28,
-            64,
-            80,
-            92
+            136.8,
+            72.5,
+            169.2,
+            153.3,
+            4,
+            4.9,
+            2.8,
+            40.8,
+            10.2,
+            38.6,
+            106.5,
+            63.1
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
+            12.2,
+            3.8,
+            8.4,
+            5.3,
+            0.8,
+            -2.7,
+            -1.5,
+            1.2,
+            1.1,
             3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            4.4,
+            11.2
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            39.6,
+            39.9,
+            37.1,
+            29.9,
+            26.6,
+            27.5,
+            27.2,
+            29.2,
+            31.8,
+            34.6,
+            38.2,
+            40.8
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            214.4,
+            169.8,
+            145.8,
+            84.9,
+            62.4,
+            46.8,
+            54.2,
+            75.3,
+            107,
+            152.1,
+            193.2,
+            227.3
           ],
           "balance_mm": [
-            -82,
-            -55,
-            -31,
-            -32,
-            -31,
-            -30.4,
-            -37,
-            -55.4,
-            -62,
-            -56,
-            -70,
-            -78
+            -77.6,
+            -97.3,
+            23.4,
+            68.4,
+            -58.5,
+            -41.9,
+            -51.4,
+            -34.4,
+            -96.8,
+            -113.4,
+            -86.7,
+            -164.2
           ]
         }
       },
       {
         "campana": "2023/24",
-        "lluvia_mm": 769,
-        "balance_mm": -466,
+        "lluvia_mm": 795,
+        "balance_mm": -652,
         "tipo": "normal",
         "mensual": {
           "lluvia_mm": [
-            110,
-            100,
-            105,
-            60,
-            30,
-            12,
-            10,
-            12,
-            35,
-            80,
-            100,
-            115
+            219.2,
+            177.7,
+            34.5,
+            60.1,
+            12.5,
+            2.6,
+            15.5,
+            0.5,
+            7.7,
+            76.6,
+            79.3,
+            108.8
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
+            13.1,
             10,
-            6,
-            3,
-            2,
+            10.1,
+            6.8,
+            -3,
+            -1.1,
+            -1.6,
+            1.4,
+            3.1,
+            2.9,
             4,
-            7,
-            10,
-            13,
-            16
+            8.9
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            38.2,
+            37.9,
+            41,
+            29.2,
+            25.4,
+            28.8,
+            27.8,
+            29.6,
+            34.5,
+            33.9,
+            38.6,
+            37.8
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
-            150,
-            170
+            196.6,
+            163.6,
+            146.5,
+            86.8,
+            52.7,
+            46.9,
+            49.6,
+            73.9,
+            102.3,
+            149.5,
+            181,
+            197.2
           ],
           "balance_mm": [
-            -60,
-            -35,
-            -10,
-            -20,
-            -25,
-            -28,
-            -35,
-            -53,
-            -55,
-            -40,
-            -50,
-            -55
+            22.6,
+            14,
+            -112,
+            -26.7,
+            -40.2,
+            -44.3,
+            -34.1,
+            -73.4,
+            -94.6,
+            -72.9,
+            -101.7,
+            -88.5
           ]
         }
       },
       {
         "campana": "2024/25",
-        "lluvia_mm": 923,
-        "balance_mm": -312,
+        "lluvia_mm": 939,
+        "balance_mm": -520,
         "tipo": "humedo",
         "mensual": {
           "lluvia_mm": [
-            132,
-            120,
-            126,
-            72,
-            36,
-            14.4,
-            12,
-            14.4,
-            42,
-            96,
-            120,
-            138
+            86.8,
+            100.5,
+            105.8,
+            30.1,
+            3.8,
+            142.9,
+            0.6,
+            6.3,
+            0,
+            123.6,
+            222.6,
+            115.9
           ],
           "t_min_c": [
-            17,
-            16,
-            14,
-            10,
-            6,
-            3,
-            2,
-            4,
-            7,
-            10,
-            13,
-            16
+            13.7,
+            12,
+            9.2,
+            3.7,
+            0.7,
+            -5.6,
+            -3.7,
+            -3,
+            2.6,
+            6.2,
+            7.1,
+            6.9
           ],
           "t_max_c": [
-            31,
-            29,
-            27,
-            23,
-            19,
-            16,
-            16,
-            19,
-            21,
-            24,
-            27,
-            30
+            38.9,
+            42.5,
+            36,
+            28.6,
+            30.5,
+            21.4,
+            23.4,
+            30.2,
+            34.9,
+            34.6,
+            34.5,
+            34.8
           ],
           "et0_mm": [
-            170,
-            135,
-            115,
-            80,
-            55,
-            40,
-            45,
-            65,
-            90,
-            120,
+            207.1,
+            173,
+            128.2,
+            84.6,
+            64.7,
+            42.6,
+            48.1,
+            65.6,
+            123.6,
             150,
-            170
+            170.9,
+            200.7
           ],
           "balance_mm": [
-            -38,
+            -120.3,
+            -72.5,
+            -22.4,
+            -54.5,
+            -60.9,
+            100.3,
+            -47.5,
+            -59.3,
+            -123.6,
+            -26.4,
+            51.7,
+            -84.8
+          ]
+        }
+      },
+      {
+        "campana": "2025/26",
+        "lluvia_mm": 601,
+        "balance_mm": -879,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            44.8,
+            96.6,
+            111.9,
+            107,
+            3.2,
+            27.8,
+            18,
+            42.6,
+            13.3,
+            17,
+            63.8,
+            54.9
+          ],
+          "t_min_c": [
+            12.3,
+            13,
+            7.2,
+            0.5,
+            -0.4,
+            0,
+            -3.3,
+            -2.2,
+            -1.1,
+            2.4,
+            6.6,
+            11.6
+          ],
+          "t_max_c": [
+            39.4,
+            36.5,
+            35.6,
+            30.4,
+            28.9,
+            22.5,
+            23.3,
+            26.3,
+            30.6,
+            36.5,
+            38.9,
+            39.3
+          ],
+          "et0_mm": [
+            212.6,
+            161.5,
+            135.5,
+            81.1,
+            59,
+            42.8,
+            48.3,
+            69.2,
+            106.1,
+            157,
+            184.4,
+            222.1
+          ],
+          "balance_mm": [
+            -167.8,
+            -64.9,
+            -23.6,
+            25.9,
+            -55.8,
             -15,
-            11,
-            -8,
-            -19,
-            -25.6,
-            -33,
-            -50.6,
-            -48,
-            -24,
-            -30,
-            -32
+            -30.2,
+            -26.6,
+            -92.8,
+            -140,
+            -120.7,
+            -167.3
           ]
         }
       }
     ],
-    "ultimas_10_mm": 784.4,
-    "previas_20_mm": 761.3,
-    "secos_en_ultimas_10": 3
+    "ultimas_10_mm": 733.6,
+    "previas_20_mm": 861.9,
+    "secos_en_ultimas_10": 6
   },
   "capas": {
-    "erosion": null,
+    "erosion": {
+      "valor": 2.6,
+      "unidad": "% × meses",
+      "fuente": "Pendiente: NASADEM · NASA, vía Planetary Computer · Cobertura: NASA HLS 30 m (Landsat + Sentinel-2) y MODIS MOD13Q1 250 m de respaldo en 1 mes, vía Planetary Computer",
+      "anios": "2025/26",
+      "resolucion": "pendiente del plano × meses bajos por píxel en la grilla de 1″ (~30 m); pendiente y NDVI a 30 m",
+      "confianza": "baja",
+      "nota": "Valor del lote: pendiente general 0,6 % (plano) × 4,3 meses con NDVI < 0,3 en promedio por píxel (1230 píxeles de la grilla de 1″ (~30 m), campaña 2025/26). El mapa muestra dónde: pendiente del píxel × meses del píxel (media 5,5); la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases propuesta, a validar por la persona 3",
+      "pendiente_pct": 0.6,
+      "meses_cobertura_baja": 3,
+      "meses_bajos": [
+        6,
+        8,
+        9
+      ],
+      "metodo": "por_pixel",
+      "valor_con_pendiente_general": 1.8,
+      "meses_bajos_medio_pixel": 4.3,
+      "media_por_pixel": 5.5
+    },
     "ndvi_mensual": [
       {
-        "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2025-01-18",
-        "fecha": "2025-01-18",
-        "mapa": null
+        "coleccion": "hls2-l30",
+        "item": "HLS.L30.T20HLJ.2026022T140852.v2.0",
+        "fecha": "2026-01-22",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Enero 2026",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m",
+          "fecha": "2026-01-22",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAB1UlEQVR42s1XMW6DQBBco+tokKgCkhtcBIkPUCR5QZ6Rd0R5R56RFyQp/AFLuDANEnZliYY6aXLWsbm73YMzZiVL9nE+z83Ozq5XT2/lD/xFnkZQxAnoYnc+wsdXC3PHJgvh83W7CmBBsclC47NFAbXFAGgRJ1CG2c1ZlS81RJ5Gg4VtX1sPOdT9TS4gXtYPA4C783HAsPq+artZQOnIEHfrewAAKBuA9+YbAOACyOQAN9HoqdnDqdkPFrEcqHWsKVv1Ulo0SUvgBcmmCdTzY/pPAnJvnkZQtR3kaXRZ08lFPbtqO9bFhKpPrEls+DZm5f4iTsi9GLR6GVPBCqlLUzeyhUnDct30fck6ZfwqYKG2RbmBYoEbKuCpjhFgIR/qnnXoFEfARHCIERQYKv1jwdnkodNoYNOnC0hfFzLZ0+KHEglcuBg7ZhBLY2wGODUhptzWV7qpmbR1TX0RJ6R3Yr/EbKmfdc/ZgzOnnfmsfvaY52LcrjLw1Ti0jGJ7sPX8WQdnKuWyujkgqcnLxDhHp4FuJrxG2/SeegqcDaw6h14t9ZSxY42a0jUGKB6k2YzO9SfOqTPhKtfpFReR7WD1mY1dVzIC0x80Xz/gy/jFtToRB4gL2F+0wOHzYMcIcAAAAABJRU5ErkJggg==",
+          "valores": "6ALoApwC5wFjAWABXAFlAWUBbAE4Aj4DmQOGA4EDgQN8A2wDYgNyA4EDhAOAA4ADfwOCA30DcwN6A4cDhwOUA5sDhQNOAxQDDQMNAxcDGgPRAgCA4gLiAqACBQJuAWcBawFzAXMBXQEaAjUDjwOGA4MDgwNyA1wDXANmA2YDYwNnA2cDaQNyA3sDewN9A38DfwOMA5YDlwNRA+4CAwMDAw0DEgPHAgCAsAKwApoC4QFFAX4BewGLAYsBYQEHAiwDkgOGA4IDbANsA10DZwNnA1kDTwNPA08DVwNzA4MDgwOEA4YDhgOPA5cDogNRA+MCAgMCA/YCBAPHAgCAyALIAokCbgH6AH4BlgGZAZkBfAH5ARIDmwOEA3kDawNrA2cDbgNoA1cDSQNAA0ADUQN8A40DiAOIA5ADkAOVA5oDmwNRA+AC3QLdAu0CCwPRAgCANgI2AtUBUQFDAXQBgAGNAY0BjAHHAdsCkgODA3EDYQNhA2MDZgNcA1QDRQNAA0ADXQODA44DiAOMA5MDkwOVA5sDkANKA9ICrgLgAuACEgPJAgCA/gD+AC8BrgH+ASgC+wGwAWQBZAGmAd0CiAOEA28DYQNhA2UDXQNTA1IDSQNOA04DcgOLA4sDiQOQA5kDmQObA6EDmgNEA7oCtALxAvECFwOpAgCAjgCOACUB9wEBApUCpAKwAS4BLgFDAZICfwN8A2QDcQNxA3oDaANVA1EDWgNtA20DhAOMA48DmQOgA5gDmAOOA48DmAM0A64C7AISAxIDGAPBAgCA3gDeAPoA+QEuAksCqQKhAT8BPwFAARcC8gIIAxADGwMbA+EC1QIMAxED1gL4AvgCPgM1AzwDYgNnAx8D1wLXAugCPgMJA8ICDAMOAw4DCAPmAgCA6QDyAPIA0gGXAmgCLwJ0AWEBYQG5ARwCRwJfAmUCXwJfAj4CIQJJAmQCPwJPAk8CdQJxAoMCpgKUAjUCIAIgAmkCtgLWAt8C+gL6AvoCAQPYAgCAEAE3ATcBlAEdAikCqAFSAaMBowEDAgUCEgIkAvkBzwHPAdABwAGsAbwB3gHnAecB5wH4AQcCCQIUAiQCLQItAlMCgAK0AuMC7QL2AvYCBwOsAgCACAL+Af4B9gEbAuMBnQHKARYCFgIvAiACFQISAu4BqgGqAYEBhwGZAaUBrQG4AdQB1AEBAikCNgJTAnYCQwJDAi8CcwKeAs4C7ALtAu0CDgN6AgCADAMFAwUD5gK3AhACqAEGAlACUAJTAlQCJwICAuMBrAGsAYsBjAGcAbUBvQGtAbEBsQEDAm4CkQJzAlgCKQIpAhYCXgKNArsC4wLhAuECDAOQAgCASwNaA1oDWwNFA4oCnQHRAUoCSgI9AjUCHQLsAbkBiQGJAYABmQGdAZ0BkwGBAZIBkgH5AWgCcwJdAjMC1QHVAdQBVAKYArkC3ALqAuoCBAPBAgCAUgNhA2EDaQNiA7ECpwG8ASACIAIYAiACFQLcAZcBdAGNAY0BsAGfAYcBewF4AY0BjQHoATsCKgIqAhECuQG5AdcBVwKdAs4C6gL7AvsCAwPFAgCAPwNFA0UDVgM9A5AC1QHcAQECAQLxAfwBFgL3AaEBhgGtAa0BxQGxAY8BfgF9AY4BjgHOAf4B7QHrAeEBtgG2Ad4BOAKMAuAC9QL/Av8CAAPPAgCAIwM0AzQDRwMVA1oCBwIYAuwB7AHTAekBBwLvAbYBmgG0AbQBzwG/AawBnwGiAboBugHiAfQB6wHzAeoBvQG9AdkBOgKHAtEC9wIDAwMDAwP7AgCAMwNBA0EDRAMbAzUCIgJXAt4BygHKAewB6gHfAd8BvwHJAckB5QHUAccBxAHkARcCFwIfAhACFwInAhAC3wHfAQACaAJ/ArUC/AIHAwwDDAMOAwCAVANiA2IDTwMlA0ACBgJEAuoB2QHZAdwB1QHvAQkC9AHcAdwB4wHkAcgBxQH2ATcCNwIqAggCIAI/AisCBAIEAiYCdAJ/ApkCxgLRAt0C3QLQAgCAUwNVA1UDRgP0AkcC/gEJAvQB5QHlAbABrgH/ASkCEwLWAdYBuwHSAcgB1QEwAnECcQI1Av8BMwJhAjACGgJeAl4CiQJ3Am0CiAKkArACsAKvAgCALAMkAyQDFQPdAiwC1AHoAc4BzAHMAZwBsgEUAjwCBwLEAcQBugHaAeQB5gE+AnoCegIzAgkCOwJSAhsCKwJ7AnsCiwJ1Am4CjAKnArICsgK9AgCAJAMPAwADAAPkAi4C9AEPAsYBngGeAZkBwgEkAkUC6wHEAcQB+AEIAgUC/AEBAhACEAICAv4BIQItAgYCGwJmAmYCnwKcAosCpwK1ArkCuQLDAgCANwMXAwgDCAMAA0gC8QEFAsABqwGrAbYB2gEnAlQC/QHuAe4BKQIqAi0CNwIHAucB4wHjAeMB+QH3AeQBBQJbAlsCqAKaAoMCoQKyAr4CvgLOAgCAEwPuAuwC7ALtAlMC5wENAuABrwGvAcgB+gEqAjICBwL5AfQBKQJaAl8CQQILAvUB5wHnAdsB1wHQAdkB+QE7AjsCcQJxAnACfwKWArkCuQLWAgCAzAK2AsUCxQLVAkACKQI+AsMBlgGWAasB3wEYAi8CGwIXAhcCMwJkAl4COAIIAvUB7gHuAeQB2gHlAfMB8wEdAh0CXgJvAmkCcwKPArQCtALTAgCAtAKwAr0CvQLSAigCIwI8ArMBmwGbAZoBtQEOAkgCRQI+Aj4CNwJOAkACFwL9AdwBzgHOAdoB+QEaAhcC/QEWAhYCWAJoAl0CcwKTArYCtgLEAgCAzQLFAsgCyAK+AlEC9QH8AdoBswGzAa8B0wEzAmUCZAJfAl8CXwJpAkoCJwINAvsBDALLAfEBEAIyAjMCEQIoAigCUgJJAksCbgKTAroCugK2AgCA6ALjAuQC5ALEApUCEALhAegBswGzAbAB/gFXAm8CZQJaAm4CbgJzAlUCPgI6AjsCPgI+AkoCJQIyAkkCPAJTAlMCYAJGAk4CcAKNAqwCrAKuAgCABQP/Au8C7wLnAqICLgIdAhACzQHNAc8BMQJ7AnkCbgJzAnoCegJvAmsCdAJiAkMCPQI9AkgCSgJBAlYCZwJpAmkCYgJIAlICdQKSAp8CpAKkAgCAAgPwAsQCxALmAqECLwIrAiECAwITAhMCXQKRAoUCegKLApICkgJ7AnwCjwJsAkUCNQI1AjECMgItAkMCVgJhAmECWQIyAjkCcAKbAqMCmAKYAgCA5gLjArICsgLTAqkCKQIXAjwCNAItAi0CWgJ6AnYCcAJ+Ao0CjQKBAosCiwJQAiwCIAIgAhICBAIUAjQCPwJGAkYCRAIkAisCcQKgAqYCjAKMAgCA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.62,
+            "min": 0.142,
+            "max": 0.93,
+            "pixeles": 1230,
+            "valor_lote": 0.62
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2026-01-22 con 0.0 % de nubes en la tesela"
+        }
       },
       {
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2025-02-12",
-        "fecha": "2025-02-12",
-        "mapa": null
+        "item": "HLS.S30.T20HLJ.2026038T140659.v2.0",
+        "fecha": "2026-02-07",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Febrero 2026",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS S30 (Sentinel-2) · 30 m",
+          "fecha": "2026-02-07",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAABG0lEQVR42u2WsQ6CMBCGfwwbC4kbjGXBGHcfxBfxIfQh3Fwd2Rx1YDAuhuhCFxPYSFyYdWpTtIjRGHrKTZSD9Ovf3n+19uvZFUrEJYcukiJHtMnQRmTLg9UDkaAPmhQ5DdBh3zMK1FYHi/MWp+wix5PRoAIeITNH0dB3Efqucdtv379QFQWAscOkbQXMQcrL9kEFZMpLBMzBsO9JX10djgCAgDnQ7YL6f+i7Dwu+/16XfyaCrZq8mFA8CzUBAKPmVasF2FSMuvyc7+pBp3FUm4xLLmEr0F+Iuo4oQevkVtU1vjN9W8X/aqGkQJsOuBGgz3zQGFCdqXdV/ykoGR8lcUZJVf3DpaRT9DW3oV31bd3if7vXk7KnDvSNuAE16GIhlm/qQQAAAABJRU5ErkJggg==",
+          "valores": "7ADsAOwABQFKAVQBZgFmAWYBiAFVAoEDkwOSA5MDkwOTA4kDhAOOA5QDlwOTA5MDkwOUA5QDkAOUA5cDlwOdA50DjAN6A3YDcQNxA3IDcgNRAwCA7QDtAO0AIAE/AXcBegFbAVsBhwFAAmYDkgORA5YDlgOOA38DgQOGA4cDhgOIA4gDigONA5QDkwOUA5MDkwOXA5oDnQN8A20DbgNuA3QDdQNBAwCA6gDqAPEAJwFRAYMBlgF9AX0BnQFAAnADkwOTA5YDjwOPA4QDiAOCA4EDdwN1A3UDgQOPA5MDlAOWA5cDlwOaA5sDnAN6A2oDYQNhA0IDcQM5AwCA8QDxAAUBHQFSAXAB6QF+AX4BoQFPAmsDmAOYA5YDjwOPA40DkAOKA4ADdgN1A3UDhQOXA5kDlwOVA5oDmgOZA5oDnAN3A2IDVgNWA24DcgM/AwCA/QD9AAsBAAE3AWMBqAFeAV4BqAHnAUYDlwOXA5IDhgOGA4kDiQOBA4ADcgN5A3kDiAOZA5sDlwOYA5sDmwOaA5sDmwNxA10DIgNgA2ADdwNAAwCArgCuAPoAJwJrAoMCfgKeAaUBpQGrAVADkgOSA44DhQOFA4gDgAN7A3kDdQN/A38DkwOaA5gDmQOZA5oDmgObA5wDnQNrA1IDSQNcA1wDcgM3AwCAmACYAP8AEAIJAiUCwQLJAX8BfwFxAQQDgAOJA4QDhAOEA4cDdANvA3ADdAOAA4ADlAOZA5gDmwOaA5wDnAOcA5wDmwNdA1MDXwN1A3UDdgNVAwCA4ADgAAkBRAKkAq8CsQLhASgBKAHAAY4CNgNOA0MDcANwA0oDQQNJA0UDLwNaA1oDdAN8A4UDkAOHA1wDCwMLAxsDWQMPA1kDZANzA3MDbQNgAwCAygDfAN8AbQLAAvoCiAKcAYABgAFxAl4CdAKYAnwCewJ7AkUCPAJoAnICUQJ1AnUCkAJvAoQCzALJAhYCfgJ+ArYC1wLXAl0DXQNYA1gDZwNGAwCAGQGQAZABAwJLAmUCEwIbASwBLAFWAWQBTAFoAUoBQgFCAUYBUgFEAS4BRwFBAUEBNQE9ATQBNwE1AS4BRAFEAUABLgGmAU0DVwNmA2YDZwNDAwCAnwKWApYClgLfAscC6gE1AfoA+gAOARIB/QD9AOgA7QDtAOgA6wDnAOgA7ADrAO4A7gDtAPEA8QD1APEA9wD3AO8A8wBxAUMDVQNXA1cDYgMbAwCAWgNlA2UDYQNGAw4DJQJUARQBFAEUASUBEAH+APMA5gDmAOIA4wDjAOIA5wDiAOAA4ADfAOUA5ADlAOcA4gDiAOMA6wByATkDSQM+Az4DZgMZAwCAdQOEA4QDgQN5AycDIAIeAfMA8wAEAQQB/QDwAOYA3ADcANoA1gDcANsA2wDkANwA3ADiAN8A4wDmAN8A5ADkAOAA6AB4AUADQwNYA1gDXwMdAwCAewODA4MDgQN5AygDCgIHAfQA9AD9AAQB+QDlAOEA4ADfAN8A3wDZANsA3ADeANsA2wDdAN8A3QDgAN8A3ADcANwA4gB4AUQDTgNdA10DXAMpAwCAcgN5A3kDfgN3AyYDDQIaAfEA8QADAf4A/wDtAOMA3QDbANsA2gDZANgA0wDTANQA1ADWANYA2gDaANkA1gDWANgA4ABpAT4DUANhA2EDZgNYAwCAZANwA3ADeANcA/ACUgKAAe0A7QDyAOwA8ADkANoA3ADbANsA2gDbANcA1QDSANUA1QDYANUA2wDaANkA1QDVANkA4gBoAUMDUwNhA10DXQNmAwCAcgN2A3YDdANeAwMDWgJqAeQA4gDiANwA4QDaANoA2gDaANoA1wDZANcA0wDVANwA3ADbANkA3ADXANUA1QDVANYA4ABdATUDVgNcA2YDZgNqAwCAdwN+A34DcgNaA+gCegJMAeIA3gDeANoA3gDgAN4A2wDbANsA2gDcANYA2QDZANoA2gDYANYA2ADbANoA1gDWANcA4ABoAS8DRwNWA1IDUgNWAwCAfAN9A30DawNNA9YCfQIbAeIA2wDbANUA1QDbAN0A2ADVANUA1QDYANgA1ADZANsA2wDbANoA4ADkAOEA3ADaANoA4wB2Ae4CJQNGA0cDRwNKAwCAagNoA2gDUANBA8ECKwL3ANkA3QDdANcA2ADcANsA2ADVANUA2QDXANkA2ADYANwA3ADaAN0A3gDhANcA1gDaANoA3wBkAQEDLQNAA0gDSANWAwCAZANZA0YDRgM1A9cCXgIIAdwA1wDXANUA1QDbANsA2ADSANIA1QDaANUA2QDXANYA1gDTANkA2QDZANYA1ADTANMA3wBsAQ4DPANHA0oDSgNRAwCAZgNYA0IDQgM8A9sCfgJKAd0A2QDZANMA1QDYANoA2gDXANcA1wDaANsA2gDcANcA2ADYANgA1gDWANcA1wDYANgA3ABgAQwDMQM+A0sDSwNbAwCATwM6AzIDMgM1A8YCMQIlAdsA1wDXANkA1wDXANcA1ADZANoA3ADbANoA1QDVANUA1QDVANYA1ADTANYAzgDaANoA3wBLAfICHQMyA00DTQNZAwCALgMnAyYDJgMcA+YCMgJLAdkA2QDZANQA1QDWANYA1wDXANcA1QDYANkA1wDYANgA0wDTANcA2ADVANcA1QDXANcA5ABQAekCGgMtA0kDSQNXAwCALQMkAyIDIgMZA+YCDAIAAdcA1QDVANIA0ADTANgA1wDYANgA2ADaANUA0gDXANYA0wDTANMA1gDTANcA1QDXANcA2gBOAeUCGQMtA0gDSANRAwCAMgMuAyUDJQMYA/YCLgLuANoA0wDTANAA0gDTANYA1gDWANgA2ADZANYA1ADSANAA1ADPANAAzwDWANUA0gDZANkA3ABCAdkCDgMpA0wDTANHAwCAPQM+AywDLAMbAwwDTwLyANQA0QDRAM8A1ADVANYA0wDTANoA2gDWANcA1ADSANQA1ADUANQA1ADVANYA1wDeAN4A2QBFAd8CCQMtA0YDRgNEAwCASANDAzMDMwMnAx4DZAL5ANcA1QDVANEA1QDUANcA2ADYANUA1QDVANUA1wDUANQA1gDWANUA0gDRANMA0wDhAOEA2QBDAdoCCQMwA0ADOQM5AwCAUQNFAyMDIwMsAyEDcgLvAN4A4ADWANYA0gDWANQA0wDRANQA1ADUANYA1QDVANMA0gDSAM4A0ADQANAA0gDSANIA2gA7AboCDAM4A0IDOAM4AwCAQgNAAyADIAMoAxcDiQIEAdYA0gDSANIA1ADUANUA0QDUANYA1gDVANYA0wDTANQA1ADUANEA0ADSANEA0gDTANMA2ABEAbsCDwM4Az0DMgMyAwCA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.51,
+            "min": 0.152,
+            "max": 0.925,
+            "pixeles": 1230,
+            "valor_lote": 0.51
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2026-02-07 con 0.0 % de nubes en la tesela"
+        }
       },
       {
         "coleccion": "modis-13Q1-061",
-        "item": "MOCK-MOD13Q1-2025-03-09",
-        "fecha": "2025-03-09",
-        "mapa": null
+        "item": "MOD13Q1.A2026065.h12v12.061.2026083115612",
+        "fecha": "2026-03-06",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Marzo 2026",
+          "unidad": "NDVI",
+          "fuente": "NASA MODIS MOD13Q1 · 250 m, compuesto de 16 días · respaldo: sin escena HLS con < 30 % de nubes. Mezcla el lote con los vecinos: con el umbral 0,3 marca menos meses que HLS",
+          "fecha": "2026-03-06",
+          "campana": "2025/26",
+          "resolucion_nativa": "250 m (MODIS, respaldo)",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAAxElEQVR42t3XLRKDMBAF4M0OjiNUtufAV3APDlXFFXoDjoDBgFwfU11UZsqwJBFp+5aViMyXl80Prnvc35RZz0HoHyX96BgdGYotILOhCMUW0kxCUZBRKBLSVI9W2sdJPN2uNQxStEQn8VBJzssLf+kDcgdFS1PdTKhLvoGiIyF7VEMSETFyX27O0aMZhGqby88wsduQLSDP8cxDSvMQioZUoYhI28+81CxLJp4a69PCJQf+ZluwBeS5fpdRTgK2gDR116+mElhX3NOMHAAAAABJRU5ErkJggg==",
+          "valores": "HAIcAhwCHAIcAhwCHAIcAhwCHAIcAkEDQQNBA0EDQQNBA0EDQQNBA2cDZwNnA2cDZwNnA2cDZwNnA2cDZwNnA2cDZwNnA2cDZwNnA1wDXANcAwCAVAJUAlQCVAJUAlQCVAJUAlQCVAJBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNnA2cDZwNnA2cDZwNnA2cDZwNYA1gDWANYAwCAVAJUAlQCVAJUAlQCVAJUAlQCQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDZwNnA2cDZwNnA2cDZwNnA2cDWANYA1gDWANYAwCAVAJUAlQCVAJUAlQCVAJUAlQCQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDZwNnA2cDZwNnA2cDZwNnA2cDWANYA1gDWANYAwCAVAJUAlQCVAJUAlQCVAJUAkEDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA2cDZwNnA2cDZwNnA2cDZwNnA1gDWANYA1gDWANYAwCAVAJUAlQCVAJUAlQCVAJBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNnA2cDZwNnA2cDZwNnA2cDZwNYA1gDWANYA1gDWANYAwCAVAJUAlQCVAJUAlQCQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDZwNnA2cDZwNnA2cDZwNnA2cDWANYA1gDWANYA1gDWANYAwCAVAJUAlQCVAJUAlQCQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDQQNBA0EDZwNnA2cDZwNnA2cDZwNnA2cDWANYA1gDWANYA1gDWANYAwCAVAJUAlQCVAJUAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAgCAVAJUAlQCVAKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwJPAwCAVAJUAlQCVAKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CTwNPAwCAVAJUAlQCnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CTwNPAwCAVAJUAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAk8DTwNPAwCAVAKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwJPA08DTwNPAwCAVAKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CTwNPA08DTwNPAwCAnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CnwKfAp8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CzwLPAs8CTwNPA08DTwNPAwCANgM2AzYDNgM2AzYDNgM2A/wB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AQ8CDwIPAg8CDwIPAg8CDwIPAk0DTQNNA00DTQNNAwCANgM2AzYDNgM2AzYDNgP8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AEPAg8CDwIPAg8CDwIPAg8CDwJNA00DTQNNA00DTQNNAwCANgM2AzYDNgM2AzYDNgP8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AEPAg8CDwIPAg8CDwIPAg8CDwJNA00DTQNNA00DTQNNAwCANgM2AzYDNgM2AzYD/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwBDwIPAg8CDwIPAg8CDwIPAg8CTQNNA00DTQNNA00DTQNNAwCANgM2AzYDNgM2A/wB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AQ8CDwIPAg8CDwIPAg8CDwIPAk0DTQNNA00DTQNNA00DTQNNAwCANgM2AzYDNgP8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AEPAg8CDwIPAg8CDwIPAg8CDwJNA00DTQNNA00DTQNNA00DTQNNAwCANgM2AzYDNgP8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AH8AfwB/AEPAg8CDwIPAg8CDwIPAg8CDwJNA00DTQNNA00DTQNNA00DTQNNAwCA+QL5AvkC+QL5AvkC+QL5AvkC+QL5AvkCBgIGAgYCBgIGAgYCBgIGAgYC9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYBTQNNAwCA+QL5AvkC+QL5AvkC+QL5AvkC+QL5AgYCBgIGAgYCBgIGAgYCBgIGAvYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AU0DTQNNAwCA+QL5AvkC+QL5AvkC+QL5AvkC+QIGAgYCBgIGAgYCBgIGAgYCBgL2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gFNA00DTQNNAwCA+QL5AvkC+QL5AvkC+QL5AvkC+QIGAgYCBgIGAgYCBgIGAgYCBgL2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gFNA00DTQNNAwCA+QL5AvkC+QL5AvkC+QL5AvkCBgIGAgYCBgIGAgYCBgIGAgYC9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYBTQNNA00DTQNNAwCA+QL5AvkC+QL5AvkC+QL5AgYCBgIGAgYCBgIGAgYCBgIGAvYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AU0DTQNNA00DTQNNAwCA+QL5AvkC+QL5AvkC+QIGAgYCBgIGAgYCBgIGAgYCBgL2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gH2AfYB9gFNA00DTQNNA00DTQNNAwCA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.685,
+            "min": 0.502,
+            "max": 0.871,
+            "pixeles": 1230,
+            "valor_lote": 0.685
+          },
+          "confianza": "baja",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. MODIS de respaldo puesto en la grilla con vecino más cercano: se ven bloques de 250 m"
+        }
+      },
+      {
+        "coleccion": "hls2-l30",
+        "item": "HLS.L30.T20HLJ.2026102T140820.v2.0",
+        "fecha": "2026-04-12",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Abril 2026",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m",
+          "fecha": "2026-04-12",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAABfklEQVR42u2Xu27DIBSGTyI2FqRuZSQLUl/Az9NXypYta4YOfYNmyB5Z8WIvkfBmyYvnZjoWxVyCb6JVj2TJF8DfufADm/3H+zdYLG9qeHt5dT7PaRkVcLif4fNLWb+r43WzdXVeCmqsbX0f86aGvKkXB790VbANMUEyKuDSVaNTjePNnRliDnS4n601ZPNad9IEjLVCtX7QjIo+/KfrzVqrodRMhcyogBPc/KAmhOQs6J2pAlNAMVDB1IdSYJtM+E4HfMY5PUvY15ZFZ+oxqpKzXst2gg6AC9WC5CwKzGwnOevHAgAoq27wL2fq9chgJ8nZYJIgpHk/xrA//icUWWJroEOsJfySMyirzi/4ZdX1V2y9rbYymV74vEp2Cf0VoIVqJwv5rKCmNDwjFf+pj5lMc+nk3EZ8kGtvnvWyMwNIfHW55PEjOqL6kpmCudb+5CYTQu4E/QFMfJFM6YCXvDxhVEnqx+SBPKUK+Hc2JcmBprhJttYoypO+pUuxXh83Bbc0uU9bKAAAAABJRU5ErkJggg==",
+          "valores": "lQGVAZ4BnQFtAZEByQGSAZIBigHIAZMBaQFuAW4BbgFzAY8BmQF8AWIBYAFlAWUBYQFkAWsBdwFuAVkBWQFPAUEBJgFSAh0DEQMRAwYDHwPzAgCAlgGWAasBigFNAVcBgAGQAZABoQHJAZ8BdAF2AW8BbwGIAbEBpwGTAY8BjgGIAYgBfAFyAWQBZAFjAVwBXAFZAUoBHwE/AhcDGAMYAw0DIAMNAwCAkwGTAbABdAExAVoBvgHSAdIBkAHAAaoBhQF8AXsBnAGcAbsBoAGcAbIBtwGyAbIBnAFyAVYBWgFiAWABYAFZAUUBQwE1AgMDHQMdAxcDJgMBAwCA0gHSAacBTAEGAUEB5AG9Ab0BTQG7Aa4BfwF2AZABrQGtAbUBoQGpAdIB7AHtAe0BuwFoAUgBWQFhAVkBWQFOAToBSgFFAg0DKAMoAyADMAP5AgCAMgEyAV8BtAHZAQMCHgKtAa0BJQGkAZMBcAF2AaEBygHKAcEByAHeAfMBEwL8AfwBpwFeAUkBUwFWAUwBTAFGAT0BLQFeAigDJwMoAygDPwP8AgCA0ADQAG0BlAJdAoECpQI1Ap4BngGXAYoBhgGIAbUB0wHTAdQBBQIYAhECLALyAfIBfgFPAU8BUgFLAUUBRQE5ATMBEAFhAjADJQMnAycDPQMUAwCAQQFBAbIB1QJAApoC0QJKAsABwAFvAYQBlwG0AckBwQHBAfoBSgJRAkoCUwILAgsCeAFJAWABSQE3AUABQAFCASoBCgFgAigDJAMiAyIDMgMwAwCATQFNAYMBXgKPArYCxwIzAscBxwGgAbgBoQH0AQ0CBAIEAkMCdwJ3AnQCewJsAmwCKALuAdsB7AHcAaYBBwIHAmwCYgK/AiIDIgMfAx8DMgMhAwCAwgB2AXYBSAIFA/oCqALhAfQB9AFTAl0CHgI6An8CowKjApUChgKVArcCvwKmAqYCpwKXAnsCewJVAk0CwQLBAvECvALXAiMDJwMfAx8DOAMJAwCAPQEPAg8CVwLfAsQCJwKsAeIB4gEvAhsC8AHQAekBGwIbAisCAwLgAfkBGwL5AfkB4wHrAe8B6QHEAdkBFAIUAvABpAFiAjEDLAMiAyIDOQMMAwCAXwK0ArQCrgKkAlMC5wG8AZ0BnQGSAY4BgwFmAUwBNgE2AUoBWgFGAS4BMQFLAUMBQwE2ATkBUQFhAUsBMQExAUMBPgEZAicDKwMnAycDMwMlAwCAzgL3AvcCAQPfAoMC7wGHAYMBgwGtAagBkgGLAYIBbwFvAVsBVAFlAXMBZgFPAVABUAFhAWwBZQFwAYUBdAF0AVQBUQEUAgIDLgMmAyYDKQMtAwCADwMnAycDKAMGA6wCAQKCAXgBeAGoAboBqAGUAYEBdAF0AWwBaAFtAWwBZwFiAWIBYgFuAXMBdQF7AX0BcQFxAVoBVwEQAvsCMAMlAyUDKwMlAwCAJgMxAzEDKAMIA7sCRQK0AXoBegGnAbwBqAGLAYEBgAF6AXoBcAFtAWwBaAFkAWcBZwFvAXIBcwFyAW8BZQFlAVkBRAEUAg8DKQMoAygDKQMuAwCADwMhAyEDKAP9AqwCigL1AXsBewGsAbUBqwGQAX4BhAF6AXoBbgFxAXABZgFgAWEBYQFpAWsBaAFqAWcBYAFgAVsBNgEJAhQDIQMfAx8DJANDAwCA2gINAw0DHQPfAoACqQIZAmMBYwGRAZ4BlAF/AXUBcwFrAWsBZwFtAW0BZAFfAWMBYwFlAWQBZQFkAWMBYAFgAVoBRAH5AfoCIAMaAycDJwNDAwCAwAIAAwADEAPTAncCiwIJAk8BXgFeAWsBbQFvAW0BYgFlAWUBawFnAWEBXAFeAWQBZAFkAWIBZQFjAV8BWwFbAVEBVQH6AfUCLgMfAywDLAM2AwCA8AIUAxQD+QK2Al0CVwLtAVgBVQFVAV4BbgF3AW0BYgFkAWQBYQFbAVsBXAFfAWQBZAFnAWcBZgFlAWABXQFdAVoBVQEKAvQCDgMJAyIDIgMnAwCAAwMUAxQD8AKbAkoCKwLAAV8BWQFZAV8BZgFtAWsBYwFcAVwBVgFXAV8BZwFsAXEBcQFyAXABdAFuAWcBYwFnAWcBVQEgAusC1ALYAvoC+gIJAwCA9QLrAusCtQKIAlACOALVAWsBXQFdAWEBYAFpAWgBYAFXAVcBVwFgAWYBbQFyAXQBdAFwAW0BcwFtAWkBZQFlAWUBZQEdAtQC1wLSAu4C7gIKAwCA0AKoAlYCVgJGAhsCHgLlAXkBYAFgAVsBYAFnAWUBYQFXAVcBVgFnAWsBaQFrAWoBagFmAWYBZwFoAWkBZgFjAWMBfAEQAsMC8QLcAvEC8QITAwCAmgJtAjICMgIPAuQB+QHJAXMBYQFhAV8BYgFkAWcBZgFcAVwBWgFpAXMBbgFmAWUBawFrAW0BagFmAWUBZwFkAWQBdAEBArsC1wK9AtgC2AIBAwCASAIoAhoCGgLxAecB9AGxAXUBbQFtAWoBagFyAW0BZQFnAWIBaAFtAXMBcQFsAWcBZQFlAWUBZgFkAWIBYQFfAV8BVQH3AbMCowKqAtkC2QL0AgCA9wHnAecB5wHTAdYB5wG6AXgBawFrAWIBYQFwAXIBagFlAWUBaQFzAW8BawFrAWkBYAFgAV8BZAFnAWcBXgFZAVkBRgH7AbICjgKmAtcC1wLrAgCA0gHQAcUBxQGyAaUBugG2AYIBYgFiAVQBWQFkAWcBYgFkAWQBaQFpAWwBagFjAWMBYwFjAWIBZQFvAW0BXwFbAVsBWgH0AZwCmwKhArsCuwLZAgCA+wHWAcEBwQGVAYsBlQGcAZQBcwFzAVoBXQFmAWcBaAFqAWsBawFrAWkBZQFhAWQBbQFkAWoBbQFxAW8BZgFmAWYBcAHuAZcCrQKcAqsCqwLIAgCAIwLkAb8BvwGEAXYBiAGWAZMBgQGBAW8BawFwAW8BagFrAW8BbwFvAWgBYQFnAXIBcQFxAWsBcAFuAW8BcAFuAW4BZgHiAZcCoQKYAq0CrQK8AgCATwIGAr4BvgGOAXQBkAGmAZUBjQGNAYoBhAGCAX8BgAF/AX4BfgF9AX8BfAFyAXQBdQF1AXABaAFkAWwBdAF0AXQBVgH1AagCjwKeArQCwALAAgCAZwIpArYBtgGvAZ0BqwG1AZMBjQGGAYYBhAGFAYQBhQF/AYIBggGEAX8BfAF0AXQBeQF5AW8BZAFiAWUBYQFcAVwBUwEPArsCkgKlArcCxgLGAgCAKgIvAtMB0wHSAb4BuwGvAXoBdAFvAW8BagFoAWsBcAFvAXIBcgF7AXIBZAFjAWsBbgFuAWMBXgFiAV4BWwFeAV4BZQHjAaUClAKSAqICsAKwAgCA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.478,
+            "min": 0.194,
+            "max": 0.835,
+            "pixeles": 1230,
+            "valor_lote": 0.478
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2026-04-12 con 2.0 % de nubes en la tesela"
+        }
       },
       {
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2025-04-15",
-        "fecha": "2025-04-15",
-        "mapa": null
+        "item": "HLS.S30.T20HLJ.2026143T140701.v2.0",
+        "fecha": "2026-05-23",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Mayo 2026",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS S30 (Sentinel-2) · 30 m",
+          "fecha": "2026-05-23",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAB2klEQVR42s1Xu27CQBAcTte5QaICS27sAiJET0H+gCJF2nR0qfIh+YN8AaX/IA19hCAFbiKZVEg0rpMma905d76HMWa7s33e2dmdObsXPs1+8BfL+xCraIFqbIoM8yBGm7EpMgCQ8tC154e3HqeLSRxcFVg1VPnEa0y8MR2Myiq6CDF3FQfXVdAFqyosBJglcYAkDvA4u9NWcy0250Gszc1f50vp4e3p2CmDumDDaIxhNJbmtMv5VKkeAPj312e52J6O2OdnAMAk7FtVeqmWm3TBdS/Y52fJBWgkiPEmIzIdjLD+2JXrNXaYhP3abv4DSkzSJnrhISsAAClyJ1BJHOCQFZJPp++5tgCRVVFcEtBVtJBm5WWTlgBdQwRGYG2e1c0rd1WfTSKfoE5at97HR1VsieBd2NThYC6s2TLnwrDtaHGd+VI11aS01iVoo5hae6K5IV9typAoKBVIskMvoK6s1AExsWgSE7sWyKbhzaivv/oGw42ESQvM97NLZVdttb0WqK3pu/jrTbS+KVgv1bfxK9JUfKwNQKazXwXcJCbeBmuqMagCM51UTkBdj0+bhNXv1EatF63JZbao7eIe09o2B/cRgmnebNl2IYFfsp3VfyPTfvGeyZ5+AWC375B3jYgIAAAAAElFTkSuQmCC",
+          "valores": "HgMeA/ACAwIlASMBAAERAREBOgESAekA6QDtAOYA5gDvAP0AAQH3APUA5ADtAO0A7gDwAOgA8wDsAOwA7ADxAOsA7gAzATABKAEoASMBMgE5AQCAHgMeA+sC3gEcAS4BEgEJAQkBOgEWAfMA8ADvAOYA5gDpAAIB/wD5AP0A/QD5APkA8AAFAfkA7wDrAOwA7ADzAO8A7gAhASsBGgEaAR8BJQEsAQCAEgMSA+YCmQE6AS8BIgEPAQ8BLwESAfcA7wDvAPYA7wDvAAkBBQEAAfoACAECAQIB9QDzAPEA7ADqAOsA6wDkAPwA7wAkATABGwEbASwBHgEpAQCA9wL3ArQCJQEdASABZQEdAR0BSAEaAfQA5gDsAPIA/wD/AAcB9wD4AAsBFAECAQIBAAHwAOoA7AD4AOkA6QDkAOoA7wAqAS0BKwErARwBJQExAQCAoAKgAqMB9AAhAUEBZgEcARwBVgEcAfEA9gADAfUA/wD/APwA+AADAQcBBwH6APoA/gDtAOwA7ADsAOEA4QDkAN8A7wAvAR4BOQEkASQBJwE9AQCAuwC7AAABlwHPAf8BPgJ3AXMBcwEPAfUA+gD7AP0AAwEDAf4ABgEGAQkBBAH8APwA9QDwAO4A7gDvAOgA6ADxAO0A8wAoASMBLAErASsBKgFDAQCAeQB5ACMBoAGRAeYBRQKJAVoBWgEUAQwBBgEFAQIBAAEAAQgBEAEJAQkBCgEGAQYB/ADvAPYA+AD6APYA9gDyAPAA8ABGASoBJgEfAR8BLAE3AQCAzgDOAPEAEgJiApACJAK1AegA6AAlARgBAgEBAQwBEgESARkBGQEXARUBHQEcARwBDwENAQoBCgELAf8AGQEZAUQBEwFVATgBIgEfAR8BLgE+AQCAwQCrAKsA/AGLArMCYAJ3ATgBOAHgAeUBdwGVAdkB9QH1Ae0B3wHGAeYBHwIBAgEC4gH8AeMB/AERArgBXAJcAooCYgLWAUkBKgEpASkBMAE7AQCAzQAgASAB1QEbAi0CwQFJAYICggIJAzsDPAMoAxoDBwMHAwMD/AL1AvEC/ALxAvEC4wL0AuQCrQLtAgoDEwMTAxkDBwOuAlUBLwEoASgBLAFGAQCABAEPAQ8BIAExATQBGwGXAjwDPANMA10DVgNEAzcDIAMgAwQD9AL8AgID8wLqAtMC0wLqAv0C9wIIAyADEwMTA/gC3AKKAlcBQAE4ATgBLAFnAQCACAEPAQ8BGAEeASIBKgGjAisDKwM/A0EDPwMqA/8C9wL3AuICvwKRAsECsAKtAr4CvgLXAgIDDgMSAxgDHAMcAwED0QJMAlsBTAFKAUoBLAFNAQCAEAEWARYBHQEoATgBMQGzAiYDJgMKA/UCCgMRAx8DHAMcAwgDBwMDAwoD8ALQAt8C3wIDAyADCwMLA/8C9wL3AuUC0AJUAlcBTgE5ATkBNgFdAQCAGAEYARgBGwElAUABSgGZAhADEAPmAuUCGAMRA/sCAgMJAwkD/AIFA/ECvwKcAs0CzQL+AhUDBQP+AvYCAAMAA/MC1gI6Ak8BRQE4ATgBPwFWAQCAGQETARMBFAEZASABXgGBAukC6QKCAq8CxgLbAvcCAgMKAwoDCAMBA+sC0QLCAtkC2QL6AgADBAMEA/YC4gLiAtYCzAI5AlwBQwE7ATsBOAFGAQCADwELAQsBDgEYARMBVwFUAsgCyAKMAscCtgLIAgQD8QL7AvsCAQMbAxYDBwP2Au4C7gL3AuoC8gL+AucCxwLHAsQCyAJaAmEBTAFAAUUBRQFIAQCACAEOAQ4BBwEXAQ8BTQFAAscCrQKtAuECvQLRAvEC5gLhAuEC7AL1AvAC3gLXAuQC5ALPAsgC6wLpAtwCvQK9ArQCqgJWAoYBYwFYAVYBVgFhAQCABAELAQsBCAEPAQMBQgEuAscC0gLSAswCrQKaAs0C4ALeAt4C8wLzAtoC1wLNAt0C3QLmAsoC0ALWAscCuwK7AqgCtAJPAp4BdwFtAXIBcgF2AQCADAEHAQcBCAEGAQIBRAE+AsoC0gLSArsCtwLYAgUDHAMQAxADEgMOA+cC3ALRAsICwgK4AsUC0wLPAsoCwAK2ArYCwAJQAqkBfgFuAWsBawFqAQCABAEGAQYBAAELAQ0BLwEyAo8CpgKmAqcCpgLYAggDCwMCAwID/QLxAs0C1wLiAu0C7QLQAskC2ALLAq4CkAJ/An8C1AJzAqgBiwFmAWEBYQFlAQCAAAH+APkA+QD9AP4AJQEaAo0CqQKpApACkgLJAuQC5AIAAwAD+QLoAskC1gLhAtwC3ALYAtUC1gLTAsoCyQKfAp8CxwKAApABeQFcAVUBVQFSAQCAAgH3APQA9AD+AAYBLAHtAZECuwK7AqwCvALkAt0CtALNAs0C7wLDArMCygLPAr8CuwK7AsECxALDAq4CxAKzArMCuQJbAngBXQFWAV4BXgFSAQCA8QD2AP8A/wAJAQoBNAHxAZECsAKwAq4CwALRAroCswKjAsgCzgLcAuUC3ALSAtQC0ALQAtMCywLDAsMCwAK/Ar8CuAI/AlcBYAFcAWEBYQFNAQCA9wD5AAwBDAEcAS8BTQEfAq0CpAKkApICmAKvAqwCuAK0ArQCqQKpAsEC0AK7AskCvgK+AvQC5gLfAuEC2ALRAtECsAJRAloBPgFGAUUBRQFHAQCA+wD+AA4BDgEgAS4BRQFSAssCoQKhAoAClAK2AscC0ALOAs4CxwLfAvMC9QLPAsQCsAKwAtYC5QLmAu4C8gLkAuQC2gKCAlMBPgE1AUYBRgFNAQCA/gABARIBEgEdATEBQQFTAtMCoQKhAnsCjQKcArcCqwKzAuMC4wL6Au4C5QLYAssC3wLYAu8C9gL0Au4C4gL1AvUC3gJtAlkBQAFAAV4BXgFSAQCA9wD2AAIBAgEeATcBVgF2AuYCuwK7Aq4CogKhAroCqQK+AuUC5QLgAtYC3QLIAtAC6wLrAgcD8QLtAuEC1QLoAugCzgJvAlYBQAFaAXQBdAFOAQCA9gD3APYA9gAXAScBXAF4AgsD0gLSArYCsQK1Ar8CxQLRAuIC4gL0AvUC9gLtAuUCBwMHA/wC/wL9AvoC6ALbAtsC+QJ+AlIBSQFXAVkBPQE9AQCA+QDxAPAA8AAHASEBTQF7AvIC/AL7AvsC9QLmAucC6gLoAvwC/AIIA/YC8gLkAtwC8gLyAtsC2gLcAuMC6gLzAvMC/AJvAlUBTQFPAVIBRQFFAQCA7ADyAOoA6gD5AAYBVgF1AsICsAK0ArQCwALeAsECuALHAuIC4gIAA+EC1wK9AtQC5QLlAswC0QLhAuoC5wLaAtoCxgJVAlABQQFRAU8BSQFJAQCA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.509,
+            "min": 0.121,
+            "max": 0.861,
+            "pixeles": 1230,
+            "valor_lote": 0.509
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2026-05-23 con 0.0 % de nubes en la tesela"
+        }
+      },
+      {
+        "coleccion": "hls2-l30",
+        "item": "HLS.L30.T20HLJ.2026174T140751.v2.0",
+        "fecha": "2026-06-23",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Junio 2026",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m",
+          "fecha": "2026-06-23",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAABlklEQVR42tVYO26EMBCdHbmjQaIKSGlIESSULgXHoEsR5QS5QM4S5QTb5Qoptl+hZYulQYJUSDTUSRFhGQcbs/aCdzojM35+83kDm+Dl4QcYe0sfgbesqSH2fNC1xAkBAGDXFbPee00/NihyZpsNgN6FzugmFTazplY6kGVzDimEXUSBe/aNZZfhAbHrxAmVUgFZNmPPh11XQNbUygyp5qVuapHP5ycaEh6cThGZznVyc3v/57gE2O4PNPx51UIUuP/ATwE/B6BK+Ml3eRw86AGK8nWK5bmtZ1Yx9c6jwIW8ainY2PMpo3nVDi6jW4RjPmQEEJmz7f4Ap6KbPFRlj4qPOJUAfS+/BvnX3ypraiMAjIXehDSaMln+E75SL1UMuqKBtmi7SL4pUBGDS6fEVD2gTdOSTLYRrsRwCZ02wSzqzpeXAslPcCjSa5v6q5WhFxEk/Waa6m2LSqhIkdbQeun0NNbw1yokGWC0CaTsbGJrg+dBI19APe38BL42s0TUiqLAXb2Y2DXaMDnNGkoSJ7T2vxMAwC9aV6/l6qZ/ygAAAABJRU5ErkJggg==",
+          "valores": "kAOQA5gDNQOJAUEBXQFpAWkBzgGPAU0BNQFCATcBNwFDAYMBoAGOAVABLAExATEBNQFOATkBHQEZATcBNwFvAVwBhQG5AXgBbgFuAXYBmAF0AQCAjwOPA6QDHAMEAXoBZAF0AXQB2wGCAXMBewFfAUIBQgFMAZsBwgGIAWQBfAFiAWIBNQFrAXEBGgEaATkBOQE7AU4BagGIAW8BVAFUAV4BfAFcAQCAlAOUA6AD6gKdAHgBdAGFAYUBvQF1AYgBhwFmAWYBdAF0AbYBwgF8AXYBpQGNAY0BRQFDAUcBKwFAAS4BLgEhAVEBWwFvAXYBVAFUAVwBdwFTAQCAsAOwA2UDRQKeAEcBWAF+AX4BiAGKAYoBcQFvAW8BegF6AZgBcwFIAXYBlgFvAW8BPAEMAf0AEwEtARUBFQEHASEBQAFiAXgBcAFwAV4BdgFPAQCAPgM+A4QCiQFlAdIBxgGUAZQBXAGNAXYBYgF7AWwBXwFfAVQBOAEvAWIBYwE0ATQBJQEIAfsAAwECAf4A/gANAQkBMwFeAWABXQFRAVEBbQFkAQCAxADEAEsB6QHJAQYCVgIOAp0BnQGwAZMBlwGcAXUBUgFSAVwBXAE+ATsBMwEcARwBFQEQAQgBCgEDAQUBBQEmARwBQwF8AWYBVwFUAVQBaAGIAQCACwALAOQA5wLiAfgBcwIlAvIB8gEWAuIBwQGqAXEBSQFJAU4BWQEyARYBAwH5APkA+wADAe8A3ADyAAoBCgECAegADwFkAYgBawFWAVYBagGJAQCApACkAA8BaQJwAlYCPQL2AdoB2gE3AlUC0gGHAX4BgwGDAYYBfwFGAUkBiwGDAYMBVgFLAWABdwFPATABeQF5AZ4BXwFcAZABaQFcAVwBdgFxAQCA9wAuAS4BAALiAtICQQJ4AeEB4QGfAtYCjAJbAmwCWwJbAi8COAJRAlICTgJMAkwCVgJJAjYCUAJEAjQCfwJ/ApICngJQAnwBYQFfAV8BdQFmAQCAHAFrAWsBBAKCAmICCgKYAh4DHgNjA3EDbwNvA3IDWwNbAzoDWQN4A2IDTANxA3EDfwNyA1cDWgN2A3MDaQNpA3oDnwMGA3IBTwFfAV8BWwF4AQCA0gHfAd8BtwF4AT4B8QFGA7IDsgOdA6ADoQOZA5UDnwOfA6gDlQONA5QDowOYA4oDigOcA6UDmwOTA5kDnQOdA5oDnQMNA6IBUwF0AXQBUwF/AQCAjwFJAUkBPQFdAV4BBQJLA6UDpQOQA4wDjQOQA40DiwOLA4kDhAOBA4UDhgODA4YDhgOKA4sDiwOLA4wDjAOMA4wDgwP6AscBYQF5AXkBVAF0AQCAQwEZARkBIAFNAXYBMAJDA54DngOJA4ADhAOIA4gDiAOIA4cDhwOIA4gDgwOBA4gDiAOKA4oDiQOFA4QDhgOGA4oDhgPzAqsBZAFnAWcBZAGNAQCAHQECAQIBAgE/AVABJwJIA5MDkwN6A3YDfwOHA4sDiwOHA4cDiAOLA4gDfQN8A4YDhgOJA4oDhwOCA4UDhgOGA4YDkQPoAnoBbwFmAWYBcAGCAQCALAEXARcB9QAvAS0BvwErA4kDiQNiA28DeAOCA4sDiwOLA4sDigOIA4QDggOGA4kDiQOHA4gDiAOGA4YDggOCA4MDjwP0AooBawFqAWoBagFQAQCAKgEXARcB/gA6AVMBUAEHA44DjgNpA3UDfQOCA4gDiAOLA4sDiQOKA4oDigOMA4wDjAOHA4YDiAOHA4YDgAOAA4IDhwMNA9cBeQF9AXQBdAFjAQCAHQELAQsBDAFCAT0BNgH7Ao4DgQOBA38DgwOBA4YDigOLA4sDigOLA4sDiQOJA4sDiwOIA4cDiAOGA4YDggOCA4ADgAMYAwUClwGqAZcBlwGRAQCAEQEFAQUBEwE5ARQBpAEWA4YDhgOGA4MDfwN/A4cDjQONA40DjQOMA4kDiQOKA4kDiQOIA4cDiQOLA4gDhAOEA4QDigMKA+YBtgHHAcABwAGlAQCABgEPAQ8BIQFCARoB3QEwA40DiAOIA4QDgwOGA4oDjgOPA48DjQOPA44DiwOJA4cDhwOIA4oDigOLA4wDhQN+A34DkwMAA8kB1AHPAcIBwgG5AQCAEAEWARYBIAFQAUkBcwENA5ADggOCA30DfAOCA4gDjAOMA4wDjAONA48DjAOKA4kDiQOJA4oDigOLA4oDgANzA3MDiwMVA/sB2gHaAcMBwwG7AQCAGgEYARgBGAE2ASIBfQH8AoYDgQOBA38DewN9A4IDhgOJA4kDjAOKA4gDiQOKA4kDiQOHA4gDiAOKA4gDggN/A38DhgMmAxwCvQHaAcoBygGtAQCAGAEbARcBFwEqASkBoQHpAn0DhwOHA4MDhwOHA4IDhAOIA4gDjAOJA4YDigOMA4gDiQOJA4sDhgOEA4UDhQOHA4cDjQMaA+8BtgHVAccBxwGzAQCAIwErAT4BPgFfAYcB3gH+Ao0DhgOGA4EDhgOFA4IDhAODA4gDiAOGA4gDjAOMA4oDjAOMA4oDhwOGA4YDgwOGA4YDkgP4AqwBuwHVAcMBwwG7AQCANQE8AXABcAGpAdIBBwIfA5sDegN6A3IDegN+A3sDfgOAA4ADfwOBA4kDiQOGA4cDhwOHA4gDiQOIA4YDhQODA4MDkAMAA7MBnQG5AbIBsgG4AQCAUQFcAY4BjgHHAekBJwIoA5sDeQN5A20DcQN4A3oDfgODA4MDhgOJA4gDhwOEA4MDgwODA4UDhgOHA4UDhgOFA4UDigMYA+ABdgGiAbYBtgG9AQCAWgFbAZMBkwHPAdMBRwI1A5IDfgN+A3UDdgN4A3oDewOAA4UDhQOHA4cDhgOEA4EDgQODA4MDgwODA38DgAOEA4QDgwMUA+UBdAG+AeMB4wHTAQCANQEgAWEBYQG7AdkBYgJAA4wDgQOBA3kDdgN3A3kDegN9A4EDgQOBA4EDhgOEA38DggOCA4YDhAOBA30DeQN6A3oDiAMFA8IBlQHoAfQB9AHaAQCAHQEMATgBOAGUAe8BUgI3A5MDggOCA3wDewN+A4ADhAOFA4cDhwOEA4MDiAOFA4EDgwODA4YDggOBA30DewN8A3wDmAMCA7ABtAHeAc8BwAHAAQCAFwEbAS0BLQFfAbkBFwIiA50DhgOCA4IDggODA4MDhwOHA4kDiQOJA4MDgAOAA4IDgwODA4ADfwN+A3oDegOBA4EDlwMPA88BsQHOAcUBtgG2AQCADwEXAR0BHQEsAVIBDgItA5gDhgOBA4EDfwOCA4MDgAN+A4EDgQOHA4MDegN6A4ADhAOEA4MDgQOCA4IDfwOAA4ADhgMIA+IBkgHLAckBvwG/AQCA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.633,
+            "min": 0.011,
+            "max": 0.946,
+            "pixeles": 1230,
+            "valor_lote": 0.633
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2026-06-23 con 2.0 % de nubes en la tesela"
+        }
       },
       {
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2025-05-20",
-        "fecha": "2025-05-20",
-        "mapa": null
+        "item": "HLS.S30.T20HLJ.2025200T141111.v2.0",
+        "fecha": "2025-07-19",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Julio 2025",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS S30 (Sentinel-2) · 30 m",
+          "fecha": "2025-07-19",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAABS0lEQVR42tVYO47CQAx9WO7SIKUiSDRpFikXyDH2HpyDW3CCvQEXSEWDVgtNGiSgWokmNVSJHO8kE9DCGHfjfObNs5/tZLRZL68QVlQlACCP0pZPrp9l9d7aFp+rEWnnKwA9YjT0VKGNuxi1Bpj6LuZRaiYVeDL7AACcD/uGxe/fk/3QA0AWJw1YM4yeD/tm8bX9wXw6xu54wXw6ts3o7njprQJ5lHqFJlNHRsfnGwxUspjFSQvUPXmrN5Xr+p21b2iVYXmD3qCoyj/s/EfePvI8u5iSgOSJQwqLXSBdgEKrn+5J6GeajwhyqbWoyvdooRYnKJLh1mXkleaLIFns64N7fUhBdTUYUxN+X/g5ZEnyzQnmP0Vc5LG1ktQVYZJMWiryWZy0QBPexNhK2PVArkXFWkChQHsHZ6v9XYvKjJh8/xBM1VHZPnWO3gAXQJmGH7I8CAAAAABJRU5ErkJggg==",
+          "valores": "zwDPAM8ACQE1AUIBAwEeAR4BXAH2AM4AwwDGAMUAxQDIAMAAwwDBAMMAwwDBAMEAxQDGAMQAwgDDAMIAwgDCAMIAwgAcAZQBagFqAU0BXQFaAQCA1QDVANYABwEoAUgB+QAKAQoBUwH4ANIAzADKAMcAxwDIAMQAxwDKAL0AwwDFAMUAvQDFAMMAwADDAMMAwwDBAL8AwwAKAXgBRAFEAUgBXAE5AQCA2wDbAN0ABAE5AU8BHAEfAR8BUAHzANYAywDIAM0AxADEAMcAvgDEAMIAxQDBAMEAwgDCAMcAyADCAMYAxgDHAMEAwgD9AG0BTQFNATsBWwFJAQCA1gDWAOsA8gD/APkARwE5ATkBVwEHAdQAzQDPAMQAxgDGAMYAvwDHAMkAvwDGAMYAwwDFAL4AwwDDAMcAxwDAAMMAvwD3AEcBfgF+AV0BfAFIAQCA4wDjAO4A6AD8AAUBOAEoASgBXwEKAdAAzADGAMAAxQDFAMQAwQDAAMEAxADEAMQAvADBAMAAwADAAL8AvwC/AL8AwADqADUBVQE+AT4BsAFfAQCAjgCOAPQAiwGwAeoB+QFjAWsBawEVAc0AyQDIAMsAwwDDAMIAxwDAAMAAwAC/AL8AvgC+AL0AwQDAAMIAwgC+AL0AwgD8AG0BXwFcAVwBlAFyAQCALQAtABwBtQFfAYcBxgF3ARkBGQEDAdEAyADJAMMAxwDHAMYAxwDLAMgAxwDCAMIAwQC8ALwAvQDAAMEAwQDCAL0AxwAOAZsBeAFtAW0BewF1AQCA1wDXAOQAXQI7AogCwwG5AfMA8wDvAOMA0gDNAM4A0QDRANQA0QDVANAA0wDaANoAzgDNAM8AzADPANIA3ADcANsA2AAPAXgBYAFFAUUBfgGhAQCAuwDOAM4AZgKUAogCIAJzAUEBQQGkAY4BGQFFAZsBvgG+Ab4BqAGkAZkB2wHNAc0BuAHtAc8B0wHhAYYBJgImAvEB3QFqAYoBdQGPAY8BoAGNAQCAwwALAQsBxQESAg4CpAEBAa0BrQEzAgwCgQEwAS8BiAGIAZ4BmwFcAUgBlwGUAZQBNgFRAUwBPQEKATMBaQFpARMBCwFzAXkBZAF1AXUBhQFeAQCAoAHBAcEBdwGQAaUBTgF6ARICEgJUArEBNwHcAMYAxQDFAMQAywDEAMcAywDDAMIAwgDHAMMAxgDFAMUAywDLAMEAyQBkAWkBcQFXAVcBcAGXAQCA5wEOAg4C0AHNAWcBWAHXACUBJQE6ARoBCAHYAMIAwQDBAMUAyADHAMoAygDFAMgAyADHAMcAxADGAMMAwgDCALwAwQA4AU8BVgFMAUwBfQF+AQCAEALkAeQBwwGZASoBGwHVAMoAygDNAMkAxgDIAMUAxwDHAMcAwwDHAMgAxQDFAMoAygDGAMQAxQDDAMMAwQDBAL8AxwAtAVcBYgFfAV8BaAGMAQCAKQL8AfwBqQFfAQUBGAHVAMMAwwDGAMQAxwDGAMsAwwC9AL0AwwDBAMEAxAC9ALwAvADEAMkAxQDDAL4AwwDDAMUAxwAeAXABfgGJAYkBkgGSAQCABQIaAhoC/QGgATsBNAHXAMYAxgDIAMgAygDEAMwAzwC/AL8AvQDEAMAAwQC/AL4AvgDGAMcAxwDBALoAwQDBAMMAxwAcAWwBjAGLAYsBdgFxAQCA4gEMAgwCywFOAQkBMAHQAMYAxgDFAMMAxQC+AMQAxQDCAMIAwwDEANEAzwDKAMMAwwDEAMYAxQC9AL8AwwDDAMwAxAApAWoBggGBAYMBgwGFAQCAuQH9Af0BtwFTAQIBDwHYAMQAvwC/ALkAvgC8ALsAwQC8ALwAxAC+AMAAvgC4ALwAvAC7AMAAwgC9ALsAwADAAMMAxwA1AWwBaQGGAaEBoQGdAQCA1QHuAe4BjAFWAfgADgHQALsAvAC8ALsAuAC8AL8AwQDCAMIAxwC9AMEAvwC7AL0AvQDKALoAwQC5AL8AwADAAMAAzQBTAaYBhgGSAcABwAGxAQCA7AHrAesBngFEAfMABwHRALsAswCzALcAuAC7ALwAwwDAAMAAwADCAMUAvgC+AMAAwADLAMkAwADAAL0AwwDMAMwA0wBRAREBZAG5AcwBzAHGAQCA8wHUAdQBYAEnAesA8QDIALwAtgC2ALwAswC9ALYAugC4ALgAvgDAAMAAwwC+AL4AvgDDAMEAwQC/AMQAygDMAMwA0gBcAVoBrQG+AckByQHsAQCAgAFcATIBMgEOAesA9wDAALsAuQC5ALgAuAC0ALkAuQC8ALwAuwC6ALYAuwC6ALgAuADBAL0AvAC8AMAA0gDMAMwA0gBcAakB5AHWAd4B3gH0AQCAYwFOAUMBQwEuAecA8ADJAL0AtAC0ALsAsQC3ALoAuQC5ALkAvgC6ALkAugDBALwAvAC8AL8AugC8AMAAyADLAMsAzQBhAakBxQG9AdIB0gHyAQCAPAEyAScBJwEiAfEA+gDNAL8AuAC4ALIAuQC4ALoAvwC/ALYAugC9ALwAuQC5AMAAwADAAMkAuwDDAMMAwQDDAMMAzwBKAYQBrwGuAdIB0gEBAgCARQFMATQBNAEeAf0ABwHPALwAvwC/ALwAuAC/ALsAvwC+AL4AyADAAMMAxQC/AMYAwwDDAMgAxgDIAMQAwADAAMAAzgA0AWUBnwGRAacBpwHxAQCAVgFFATEBMQElAQQB5QC/AL4AsgCyALgAugC/AMIAvAC+AL4AwAC+AMkAxgDAAMkAwwDDAMgAxADLAMoAyADNAM0AzQA/AW8BqAFvAb4BvgHdAQCARwEgARsBGwEhAQEB1gDAALwAugC6ALUAtgC7AL0AvADHAMYAxgC9AMAAwADDAL8AzADJAMMAwgDDAMIAygDOAM4AxgAlAVwBjwGIAekB6QHjAQCALgExASwBLAEbAf8A2ADCAL4AvAC8ALgAuQC6ALsAwQDQAMkAyQDBAMIAwgC3AMMAwQDBALsAvQDEAMYAvwDNAM0AygA6AVEBdQGnAeIB4gHoAQCAOQE2ASsBKwEWAfIA2QC/ALgAtAC0ALQAugC7AL4AwQDDAMEAwQDAAMsAxQC/ALwAvQC9ALsAwADGAMUAzADIAMgAywA9AUUBsQGmAZUBgQGBAQCAUAE5ATMBMwElAQcB4gDAAL0AtwC4ALgAugC3ALgAvQC9AL0AvQDCAMUAxwDHAMAAugC6ALkAuQC/AL8AxwDFAMUAzQAlARsBiwGiAY0BcQFxAQCANAE6ATQBNAEvARkBCwHGALkAtgC5ALkAuQC4ALkAtQC6AL0AvQDFAMcAxADHAM0A0ADQANAAzQDMAM8AzADJAMkA0QAeATcBkQHVAc8BuAG4AQCA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.264,
+            "min": 0.045,
+            "max": 0.66,
+            "pixeles": 1230,
+            "valor_lote": 0.264
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2025-07-19 con 0.0 % de nubes en la tesela"
+        }
       },
       {
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2025-06-14",
-        "fecha": "2025-06-14",
-        "mapa": null
+        "item": "HLS.S30.T20HLJ.2025240T141101.v2.0",
+        "fecha": "2025-08-28",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Agosto 2025",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS S30 (Sentinel-2) · 30 m",
+          "fecha": "2025-08-28",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAABcUlEQVR42tVXMU7DMBR9tbxlQcrUIGUJQ5GyMmQoN2DoIdiY2LgAIxdAnIKNtUMGxFYpHchSKWWqlCUzLDV13G8roCb+eVMS2/Hzf9/v25OPt8dv7JE3JbIgcT73hbwpsdptkYbRUdvd4mUibAP7JvZXCNvqhkYWJGQ0FaTZWZEcQm4Kq9229a7IS1tH1+r6hD6vTlqakquO5sp8RFP/JqbxDNN45n0TUfsiDaOD9F+bdYu9Kb0P4pSq0iWDni9qxbq3nkJmai9QKSD1SdMwOvrBff4KAPgsm/2QdzwsrloOYaZNF8cw2583S2d0pSJiw4Fg96Lwn3TR5aZ2vqSIXCQBiqrGU3YDXC8HrVpmKlh9VOHy/AwAcBvP+ZZQRZJ9rS+qehxEOcIqva9aP4qIus4XgrImX3A5DKuIusqy5BDJzjnKnSQACO4kfw/Oo/ZRX1cRF2TXU4xvT2UrvX5fGkWOKrKCOjgXVc0vRznaExWkH88QmbVT/BRvAAAAAElFTkSuQmCC",
+          "valores": "xQDFAMsAQAEKARYBLwEEAQQBNwHqAMsAxQDGAMoAygDAAMIAygDCAL4AuwC9AL0AvQC9AMMAvwDAAMEAwQDIAMQAywA0AckBrwGvAZMBqAGgAQCAxwDHAM8ANgENASoBAwEKAQoBNQHkAMkAzADIAMcAxwC+AMIAxAC9AMEAvwDAAMAAvQDFALwAuADBAL8AvwC/AMAAyAAyAcgBgwGDAYsBrAGNAQCAyADIAM8ANwESAS8BEgEOAQ4BNwHeAMoA5QDsAO8AxADEANEAxQC8AL0AugC7ALsAvQC9ALoAvQDDAL0AvQC8AMYAxwAeAaoBngGeAZIBpAGUAQCAywDLAPwAGgG9AWwBPwEQARABMwHxAMwAzwDcAMsAwwDDANUAwwC6AL4AvQC9AL0AugC9ALoAvQC8ALsAuwC7AMEAwwAOAYUB9AH0AdwB1QGMAQCA7wDvABIB5gDNAdIBTAEaARoBPQH9AMoA1gDYAMUAvwC/ALwAvQC8ALsAugC6ALoAuQC9ALcAuQC9ALsAuwC6AMAAxAAIAYoBugG2AbYBMwKyAQCAmACYAPcAWAF2AawB3AE2AT4BPgH7AMcA1wDWAMYAvwC/AL8AvAC6ALkAvQC4ALgAvgC7ALoAugC9AL4AvgC/AMEAwwAkAeIBwwHIAcgB4wHLAQCAdgB2AB0BaAEcAV4B0wFnAWoBagH0AM0AzwDFAMYAwgDCAMAAwwC/AL0AvADAAMAAwQC/AL0AvADBAMIAwgDHAMYAzgA8ARQC6AHzAfMBvwG8AQCA0QDRANsAxgHqAS8CogF+Ae4A7gDoANkAzgDBAMQAyADIAMwAywDIAMcAygDHAMcAyQDJAMgAyQDMAMoA0ADQAM4A0gAxAfcB6QG+Ab4B4QHjAQCArADIAMgA+gE8Ak0C4QFNASABIAFwAXQBHAEiAWEBcAFwAW4BYQFfAVoBjQGHAYcBeQGdAYUBggGXAVEBxAHEAakBlwGGASYCAwL+Af4B8AHPAQCA4wAzATMBvwH9ARwCtgFVAagCqAIDAy0D/QK7ASgBMgEyAVABSQEeARABUwEjASMBCgEZAQoBDQH5AP0AEAEQAQcBAAHKAQIC3QHGAcYBxAGbAQCAvALjAuMCuwLDAugCNgJMAkIDQgNbA0EDDAOSAcIAvQC9AMUAuwDAAL8AvgC6AL8AvwC9AL4AvQC7ALwAvwC/ALwAvwCqAcEBzAGLAYsBqgHHAQCANgNIA0gDJAP9AuACYwIcAc0BzQH0AdUByQEeAcYAvwC/AL0AuQC6ALkAvQC9ALkAuQC3ALcAtgC0ALkAtQC1ALoAvgCMAZwBfgFoAWgBowGSAQCAVQNeA14DTQMiA44COALfANIA0gDTAM0AywDGAL8AwQDBAL0AvgC3ALsAuwC8ALUAtQC3ALYAswC1ALcAtgC2ALYAvwB5AZkBdwF3AXcBaQFgAQCAaANpA2kDUAMRA0IC+wHYANIA0gDKAMQAwAC7ALwAvAC1ALUAuQC8ALQAtQCxAKsAqwCvALYAuAC1ALYAtgC2ALMAvAByAbIBfwGGAYYBhwFxAQCAXgNmA2YDYgNDA+MC+AHkAMoAygDCAL4AvwC8ALoAvAC3ALcAugC0ALQAsgC4ALIAsgC0ALYAswC1ALUAuAC4ALkAvgBxAasBmwGMAYwBVwFJAQCARQNaA1oDUQMGA3gC4QHoAMcAxwDAAMQAuAC4ALkAuwC3ALcAsgC5AL4AuQC5ALYAtgC0ALkAuQC1AK8AtQC1ALsAvAB5AYgBfQGBAYIBggFDAQCAOQNVA1UDSQMLA0YCrQHoAMUAuwC7ALoAtwC3ALgAtwC1ALUAuQC0ALIAtgCzALQAtAC1ALgAswCyALQAuAC4ALcAvACEAX4BcAGEAY4BjgFdAQCATQNeA14DPwP+Ah4CvgHiAMUAvAC8ALoAuAC7ALgAuAC5ALkAuAC2ALgAugC4ALgAuAC7ALMArwC1ALMAtQC1ALgAvQCiAdABowGjAbUBtQGFAQCAWwNiA2IDQwPXAvkBugHZAMIAuQC5ALsAtgC2ALoAuAC4ALgAtwC8ALsAuAC5ALcAtwC7ALcAuwC8ALwAvAC/AL8AxQCDAf4ARQGaAZwBnAGAAQCASwNGA0YDBAPDAvMBsAHfAMcAvgC+ALsAvAC5ALgAugC6ALoAuAC4ALwAvQC7ALwAvAC9ALcAvwC6ALoAwgC9AL0AxQCVATABZgGmAZcBlwGuAQCAHwPvAqACoAJfAs0BpwHbAMQAwQDBAMIAuwC7ALsAuwC7ALsAvQC6ALgAuwC7ALkAuQC4ALwAugC9ALoAvgDDAMMAyQCIAWEBpAG5AbcBtwGsAQCAEQPoArMCswKJAtkBlQHZAMQAxwDHAMEAwQDCAL8AwAC6ALoAtwC8AL0AuAC6ALkAvAC8ALkAuwC5ALkAvQDDAMMAygCWAbkBwAG0Aa4BrgG9AQCA0QK1ApcClwKKAv8BrQHbAMcAwwDDAMMAwgDAALwAvAC/AMAAvAC+AMMAwQDAALoAwgDCAMAAugC1ALkAugC/AL8AwgCEAaQBqwGmAa0BrQHPAQCAygLAAqgCqAKbAlQCtwHjAMYAwwDDAMAAwgDAAMQAvgC9AL0AwwDAAL4AvQDFAMQAwADAAMMAvwC/AL8AugC9AL0AxgB3AZcBlgGdAakBqQHCAQCAzQK5ApQClAKKAkkCzAHcAMsAwQDBAL0AvAC9AL0AuwDEAMQAwAC9ALwAvADDAMgAvwC/AMEAwgDAAMMAwADEAMQAzACFAaABpwGWAb4BvgHGAQCAyQKYAoYChgJ5Aj0CqQHTAMcAvgC+AMAAvgC+AMIAwADBALkAuQC7AL8AuwC8ALkAvAC4AL0AvgC7ALwAvgDHAMcAzABhAZIBnQGVAcMBwwHOAQCAxwK7ApgCmAJnAhEChAHPAMYAwADAAMAAuwC7ALwAwADBALwAvAC8ALkAuAC4ALYAugC6ALkAwQC/AL4AvwDAAMAAwwB4AY8BlwGcAb4BvgHTAQCA5QK7ApcClwJ6AhMCkgHIAMEAuwC7ALQAtgC3ALgAvAC4AL4AvgC5ALcAtwC3ALUAuAC4ALQAtAC3ALkAvwDBAMEAvwB6AYUBpwGsAa4BsgGyAQCAAQPfAq4CrgKVAmUCzgHPAMEAuwCzALMAugC0ALUAswCzALQAtAC1ALMAtwC1ALUAswCzALMAtAC3ALYAugC9AL0AvgBWAUoBqwG+AbQBowGjAQCAzwLUAqMCowKkAnQCIALSAL4AuAC4ALgAtwC5ALUAtAC0ALoAugC2ALcAtwC5ALwAtgC2ALkAtwC2ALgAvgDAAMAAxQBVAWEBqAHUAdYBwwHDAQCA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.307,
+            "min": 0.118,
+            "max": 0.873,
+            "pixeles": 1230,
+            "valor_lote": 0.307
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2025-08-28 con 0.0 % de nubes en la tesela"
+        }
       },
       {
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2024-07-22",
-        "fecha": "2024-07-22",
-        "mapa": null
+        "item": "HLS.S30.T20HLJ.2025268T140721.v2.0",
+        "fecha": "2025-09-25",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Septiembre 2025",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS S30 (Sentinel-2) · 30 m",
+          "fecha": "2025-09-25",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAArklEQVR42mM8u6vtPwMBcPzrXQZLbmWGgQLGblWMTAxDBIw6dMQ6lEVSToOBgYGB4fmjGwzHv95lYGBgYLjy9hkDAwMDQ6qcLVxsUIaojrAUPLcPmhB9/ugGigAsNGFgIIslFIcS60hY6MLEsIW2JbcyUbGASx2+QGHBJQGLfnIsQxbHZTmpMcVITM000GC0Zhp16KhDRx066tBRh446dNShow4ddeioQ0cdOkAAAGCXNbIqUzk+AAAAAElFTkSuQmCC",
+          "valores": "vQC9AL8AwgAMARQB8QAAAQABLgHeALsAvAC5AMYAxgCxAK4AtgCwAKwAqwCuAK4ArACsAK8ArwCwAK0ArQC5ALAAsgDSANQA1ADUAMsAywDiAACAwgDCAMMAwAACASEB/wD+AP4ALQHfAL8AvwC5ALsAuwCyALIAsQCsAKwArwCvAK8ArACxALAAqwCwAK0ArQCzALEAtADMANUAxgDGAMUAzADlAACAwADAAMcAuwAPAR8BAgEFAQUBLQHeAL4A6QDjAPUAtQC1AMIAtACrAKsArwCtAK0AqwCsAK4AqACvAK0ArQCtALQAtADMANgAxwDHAMoAzADqAACAvwC/AMIArQDlAOsAGwEDAQMBMgHrAMAAxQDYAMIAtgC2AMMAsACxAKsAsQCyALIAsACwAK0ArAC0AK0ArQCuAK4ArwDJANAA3QDdANcA0gDhAACAvAC8ALEAuwC/AMwA9gAKAQoBMQHzALcAzwDWALQArwCvAK4ArgCqAK4ArgCsAKwArwCqAKsAqQCsAK0ArQCsAK0AsgDMAOUA5ADcANwA7QDrAACAggCCAOAAkgG9AdAB0QEnAS8BLwHzAMEAxwDYALUArwCvAKoArACtAKsAqwCtAK0AsACxAKsAsACxAK8ArwCxAKwAtADWAPMA8AD1APUA3gDoAACAcQBxABoBhwGNAYoBFgJJAWIBYgHzAMYAwQC+ALkAswCzALIArgCyALEAtACzALMAsACzALQAsQC2ALUAtQC1ALMAuQDiAPMA5wDpAOkA1QDeAACAuQC5AM8AkwHhAQIC6AFZAeIA4gDdANYAxwC8ALcAvQC9ALoAtwC1ALUAuQC8ALwAuQC6ALgAugC9AL8AwADAAL8AwQD8ANoA1gDKAMoA0gDfAACAmQCsAKwA7QEJAgcC2AElAecA5wA3AT0BAwEUAUMBRAFEATcBLQEeATMBZgFTAVMBSgFgAVABSgFcASUBhQGFAZQBZgFOAeYA1ADRANEA0ADYAACAqADiAOIAxgHsAd4BcQHJAPAA8ABHAVgBDAEGARwBMAEwAVYBTAEnAQkBSQE3ATcBEwEgAQ0BFAEAAfIAGAEYAQkB8QDlAN4A0QDGAMYAxwDOAACA0gDcANwA4ADhAOcA2AC7AMsAywDSANwA1wDJALsAvAC8AL0AvQC7ALsAwAC+AL4AvgC7ALsAuwC/ALwAwADAAL0AvADTAMwAygDAAMAAwgDpAACA4ADsAOwA6ADoAN4AzgC3AMkAyQDNAMoAzAC/ALcAtQC1ALYAtQC1ALUAtACzALMAswCxALgAtgC1ALcAtgC2ALQAuADJAMUAxAC3ALcAwwDsAACA5gD1APUA9AD0ANoAxgC8AL8AvwC5ALgAtwC2ALgAsQCxALEAswCuALEAtACxAK8ArwCyALgAtgC3ALYAtQC1ALUAtQDKAMoAwgC+AL4AvADZAACA8QDzAPMA7QDkANEA0gC/ALgAuAC3ALYAtQC2ALYArwCvAK8AsACuALEArgCtAK4ArgC0ALYAtgC3ALEAtAC0ALAAuADEAMoAxwDFAMUAxgDXAACA6gDvAO8A7wDoANcABAHcALgAuACyALQAtgCyALEAswCxALEAsQCxALMArwCwAK4ArgC2ALAAsQCyALIAswCzALIAtwDAAMgAxwDAAMAAugDQAACA3gDoAOgA5QDbAM8AFAHrALwAvACwALQAtgCzALYAsQCxALEAswC2ALUAtQC2ALQAtACzALQAswCyALIAtQC1ALQAtwC9AL8AvgC/AMsAywDFAACA2wDnAOcA4ADZAMsA/wDqALUArwCvALQAsQC1ALAArwCyALIAsACyALIAsACwALIAsgCyALQAswCyALEAsgCyALIAsgDDAL4AuwC/AMwAzADHAACA4ADmAOYA3gDUAMcA4ADLALcAswCzALAAtACxALIAtACuAK4AsgCuALcAsgCxALIAsgCzALQAtQC0ALEAsACwALEAtgDJANMAwADDAM8AzwDDAACA4wDsAOwA4QDMAMEA3QDAALUAtgC2ALEAtAC0ALEAtACwALAAsgCzALMAsgCvALUAtQC1ALQAtQC4ALYAtAC2ALYAtwDHALIAsgC+AMEAwQC9AACA4ADiAOIA1wDQAMAA3AC3ALgAswCzALUAswCyALIAswCzALMAsQCzALcAswC2ALQAtAC2ALUAtgC1ALYAuACzALMAugDHAK4AuwC7AL4AvgDDAACA1ADRAMoAygDGAMEA7QC+ALwAtwC3ALIAsAC2ALEAsgC1ALUAsgC2ALMAswCzALUAtQC0ALYAswCzALUAtgCyALIAtgDKALwAuwDAAMIAwgDFAACA0ADMAMoAygDEAMYA5gDIAL0AuAC4ALgAtgC2ALMAswCyALIAsQC3ALQAuQC2ALYAtAC0ALUAtAC0ALYAtwC3ALcAuwDMAMcAuwDEAMQAxADEAACAywDJAMUAxQDHAMkA7ADDALYAtQC1ALUAvAC7ALUAtAC3ALYAswC3ALcAtwC4ALcAtAC0ALUAtQC2ALUAswC0ALQAtQDFAMIAuwC4AL0AvQDFAACAxwDJAMYAxgDFAMIA4wDOALcAuQC5ALYAuQC5ALgAuAC0ALQAtQC1ALQAtwC8ALkAtwC3ALQAuwC4ALYAtAC0ALQAtQC/ALwAuwC5ALkAuQDDAACAyADJAMYAxgDCAMQAxAC6ALcAswCzALEAswC1ALUAuQC2ALYAtQC0ALUAsgC3ALoAtAC0ALUAuAC6ALgAtQC4ALgAuADGALoAuwC1ALwAvADCAACAxwDHAMQAxADEAMMAvQC6ALgAswCzALIAtQC1ALEAsgC1ALgAuAC2ALMAsQCxALUAsgCxALYAsgC1ALUAuAC4ALgAuQDCALkAuwCyAL8AvwDAAACAyQDHAMQAxADFAMgAvQDCALkAtQC1ALAArwCxALcAswCyALUAtQCzALMAtQCyALIAsQCxALcAtQC1ALcAtACyALIAuADBALwAtQC6AMIAwgDEAACAywDJAMYAxgDGAMYAywDGALsAswCzALIAtgCyALQAtwC0ALQAtAC2ALcAtACxALIAsgCyALIAsgC0ALcAuAC8ALwAtwDCALsAuQC5AL0AvAC8AACAzgDIAMQAxADEAMgAxwDJAL0AuwC4ALgAsQC4ALYAtwCxALcAtwC0ALQAswC2ALMArwCvALEAsgC1ALQAsQC2ALYAuADCALYAuQC2ALsAtgC2AACAxwDHAMMAwwDDAMQA1gDgALYAtQC0ALQAswC2ALIAsgCzALQAtAC3ALUAswCxALEAsACwALEAtQCyALIAsgCzALMAtQDGAMMAvADBAL8AvgC+AACA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.202,
+            "min": 0.113,
+            "max": 0.534,
+            "pixeles": 1230,
+            "valor_lote": 0.202
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2025-09-25 con 0.0 % de nubes en la tesela"
+        }
+      },
+      {
+        "coleccion": "hls2-l30",
+        "item": "HLS.L30.T20HLJ.2025299T140848.v2.0",
+        "fecha": "2025-10-26",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Octubre 2025",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m",
+          "fecha": "2025-10-26",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAABDElEQVR42mOcsj75PwMWYMmtzHD8610GBgYGhitvnzHoCEsxWHIrM9AbHP96lyEncC4jEz4FgwkwEaNIR1hqwB3Kgh7dgzVEWYhxHCyN0iM94soHLMiKrrx9xsDAwMBw/ekHBk1pAXi00zPqkQML2dEsknIaENZ11NC8/vQDQ6ieFl2jF1+pwvL80Q0MB2LTTMs0CzMbm0NhYizICpEdCYt6WhVZsGSmIyxFVB5AyfXIjoMV8LQKSWSHEZMHWJCDdyBqHmKTBRPDEAHDw6GDoXaCJcdB3ygZdGmUUEZmGmy5G2+BT6xPBzI5sFDi20FVPA2WTDVa4I86dMiWo4OtJTXoC/zRNDrq0KHiUABwFWbl7hz5lgAAAABJRU5ErkJggg==",
+          "valores": "SwFLAVwBOQE8AZABIgFIAUgB+gExAfEA7wDsAOkA6QDnAOcA5gDkAOAA3wDfAN8A4QDhAOEA4wDiAOMA4wDlAN8A6AAFAQUB+QD5APcA6gBOAQCAYgFiAWABMwFRAa8BQgFjAWMByAExAfcA8QDuAOwA7ADpAOYA5QDkAOQA4gDgAOAA4ADgAOEA4gDhAOEA4QDiAN4A7AAFAQIB/QD9APgA3ABxAQCAYgFiAVsBQgFYAZsBeAGPAY8BrAExAfoA8wDwAO4A6gDqAOYA4wDjAOQA4wDjAOMA5ADkAOQA4wDkAOMA4wDiAN8A6gD/APkA8gDyAPcAzwCEAQCAWAFYATAB9wD4ACsBdgGOAY4BsgE8AfcA8QDuAOkA5wDnAOgA5ADhAOMA5wDoAOgA5ADhAOMA5QDmAOUA5QDkAN8A5AD/AA4BAgECAfkA1gBzAQCAFAEUAQYBOwFfAVMBaQGZAZkB3gFOAf0A9wDwAOsA5gDmAOUA4wDiAOMA5gDlAOUA4wDjAOMA4gDkAOYA5gDiANwA5AANAS0BKwEcARwB9gBTAQCArgCuADABEAJEAlwCJwLFAboBugFjAQEB7QDuAO0A6QDpAOYA5wDnAOQA5QDnAOcA5wDnAOcA5gDnAOYA5gDjAN0A7QAbAS8BNgE1ATUB/wBPAQCAkACQAFgBQQJHAqsCjQLAAV4BXgE0AfcA7QDxAOkA5QDlAOkA5gDfAOIA5wDkAOQA3wDfAOUA5wDiAOEA4QDiANsA9wAiARsBEQERAREB5gBLAQCAzwDPAC8BKAJgAnUCmQKaARQBFAExASYBCQEBAQ4BAQEBAeoA9QAJAQIB+QAAAQABDwEKAfUA+QAOARIBIgEiARgBYAF6AQcB7ADzAPMA3gArAQCA3gBBAUEBkgLPArACRwJKASABIAF5AX0BUQFTAWYBegF6AYEBeQFdAWMBmgGKAYoBbgF7AYABdwFnAXUByAHIAbYB0QG4AQoB4wDxAPEA5QAIAQCA5wBfAV8B6QEVAhsCbgELAU4BTgGFAYYBegF2AW8BigGKAaYBnAF1AXYBrgGhAaEBgAGHAZMBhgFtAXwBrQGtAaABigFkAQkB6QDrAOsA4AAoAQCA+QAMAQwBCAEUAR8BDQENATcBNwFDAT4BRwFHAUUBPQE9ATUBRAFUAUYBNQFJAV4BXgFMATYBPAFMAVEBSAFIAUcBTQEuAf8A7wDqAOoA3QBzAQCA0wDNAM0A1ADZANEA3QATAT8BPwE+ATkBQQFFAUQBRwFHAU0BRQE+AUUBSgFMAVABUAFSAVQBUAFMAVQBWAFYAU8BTgEyAQAB7QDnAOcA4gB/AQCA0ADSANIA1wDrAPAA5gAdAVABUAFSAUUBPwFCAUgBRQFFAT4BOwFBAUUBRgFLAVUBVQFcAVUBSwFKAU8BTwFPAUQBPQEyAQsB+QD1APUA8QBFAQCA0ADOAM4A0QDnAOMACgFGAUUBRQFFAToBOwFBAUYBQQE3ATcBNgFBAUcBRwFJAU4BTgFPAUkBRgFGAUYBRwFHAUIBNwEzAREB/gD/AP8A+AAjAQCA0ADLAMsA0QDbAN8AVgF2ATABMAFDAT8BPgFCAUYBQwE6AToBNgE/AUYBQwFCAUQBRAE/ATwBQgFCAUABQQFBAT8BOgEtAQUB7gD0APQA6wBKAQCA0ADKAMoAzADUAAgBmAGSATMBMwE3ATsBOgE8AUEBQgE7ATsBNwE8AUIBQQE/AT4BPgE8ATsBPwE+ATwBOgE6AToBPgEoAf4A7gD0AOMA4wBJAQCAywDLAMsAygDWAAgBjAGLATQBLQEtATYBOQE7AT8BPwE8ATwBPAE7ATwBPgE8ATsBOwE7AToBPgE6ATYBNQE1ATQBQAEuAQEB9AD9AOwA7AAGAQCAygDHAMcAxwDgAPEATgFmASsBKwErATIBOAE7AT0BPgE9AT0BPQE/ATwBOwE8ATcBNwE5AUEBRAE/ATsBOAE4ATYBRAE8AQ4B7wDzAPUA9QDrAACAyQDPAM8A0ADYAPMARwFeAScBLQEtATABMgEyATYBOwE7ATsBOwE/AUEBQwFAATgBOAE9AUsBTQFHAUgBQgE6AToBSwFHAQkB5QDsAO8A7wDrAACAyQDOAM4A3ADlABUBTQE+ATIBMgEyATEBMgEzATcBOgE9AT0BQgFFAUUBSgFLAUUBRQFGAUwBTwFMAUgBQAE6AToBVwFIAfwA4wDsAOoA6gDrAACA0gDYAOEA4QDoABgBawFjATsBNgE2ATYBOAE2ATgBPAE+AT4BQQFGAUYBSwFPAUwBTAFKAUkBSgFMAUcBPAE4ATgBVgE/Af0A6QDoAOwA7ADxAACA0gDfAOIA4gDqAPwAXgF3AT8BQgFCAT8BQwFDAToBPAFBAUEBRQFHAUYBSwFPAU0BSwFLAUoBSgFMAUkBQgFCAUIBTgE8AQYB6gDsAOoA6gDuAACA1ADfAOEA4QDiAPMAVwFlATQBTAFMAUkBQwFBAT4BQgFDAUUBRwFKAVABVQFRAUsBSwFLAUwBSQFHAUUBQwFEAUQBQAE3AQoB4wDqAOkA6QDtAACA2wDhAOIA4gDdAPIASQFaAUIBTgFOAUQBPgE/AUIBRAFIAUgBRgFFAU8BVgFYAVMBSgFKAU4BTQFIAUYBQwE/AT8BNgEqAQAB4ADlAOgA6ADsAACA2wDdAOIA4gDoAO0ADgE8AU8BRAFEATwBPQE9AUEBRwFLAUsBTQFRAVABUQFYAVUBSgFKAU0BUAFNAUsBRwFHAUcBTAErAfIA4wDnAOkA6QDpAACA3gDlAOYA5gDsAOwAAQE3AUwBQAFAAT8BPgE+AT8BQQFEAUkBSQFKAUYBSAFJAUwBUAFOAUwBSwFKAUoBSAFSAVIBXQE1AfcA4gDpAO4A7gDqAACA3ADlAOgA6ADtAPcAHAFPAVUBQwFDAUABPgE9ATsBPgE+AUIBQgFDAT8BQAFBAUQBSgFKAUsBTAFJAUUBRQFRAVEBUQE5AQQB4QDmAOsA6wDqAACA2QDhAOQA5ADpAPgAHwFSAWIBTwFPAUIBPwE+AT8BQQFCAUABQAFCAUcBSwFLAUkBSgFKAUsBSgFGAUYBRQFJAUkBTAE5Af8A4wDrAOYA5gDmAACA2ADdAOMA4wDnAPAAGAFWAWUBUgFKAUoBRwFFAUcBRgFDAT0BPQE8AUYBSQFHAUkBRwFHAUUBRgFHAUUBQQFDAUMBVAFAAQAB5QDpAOgA6ADoAACA3QDbAOQA5ADqAOoAJgFpAVoBSQFLAUsBTAFIAUQBQwFFAUYBRgFBATwBQQFCAUABPwE/AUABQwFEAUMBQAFHAUcBTAE7AQsB5gDpAO0A6QDpAACA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.298,
+            "min": 0.144,
+            "max": 0.719,
+            "pixeles": 1230,
+            "valor_lote": 0.298
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2025-10-26 con 0.0 % de nubes en la tesela"
+        }
+      },
+      {
+        "coleccion": "hls2-l30",
+        "item": "HLS.L30.T20HLJ.2025323T140852.v2.0",
+        "fecha": "2025-11-19",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Noviembre 2025",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS L30 (Landsat 8/9) · 30 m",
+          "fecha": "2025-11-19",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAABSElEQVR42u1XvQ6CMBA+mttYSNh0ZCLhBXgER9/CwUfSJ/BBuhsjU0fcTFg662JJOQtF/loSL2GhcD2++77vaHA47V7wiSzeQB4mwKUAGnmYgIvgUsBxfw5YUVZQlFVjwcdgsJLAdBs12u4rqpjFm5qDXQVyKZzxFAAA9c1vz0djUX2ESzHVhZpEpMSl08EbMbksiEvRSjtVF9IFhaYS2RK2pSjXBRa2cZKaP+XvlFGU1RcwFCCkMOtfxaWoC1TJ9OEwZeggjTb8uYpczWRqa/uqRqiiIuuyDF/QNNqTyTZowrFc7Vvc6NYP2chrMaXbqL5s7mHzabR5mynBr603PU/v2bo0a+vp6WHx1rsw/l6qdzmRvJtMtlmPY7i5JNJoG12X690onqXpwIYofOoi++RjfS1GTzbHZLIZPhvysnf29P9xHnAUeQNo+5srbOqpFgAAAABJRU5ErkJggg==",
+          "valores": "QAJAAhsCdQErAVMBNAFLAUsBeAEeAfQA9wD0APIA8gDwAO8A7gDvAOwA6wDtAO0A7wDvAOwA7QDtAO0A7QDvAO8A9gAAAe8A5QDlAOUA1ABHAQCAaAJoAhsCegFHAWEBRwFKAUoBXAEiAfkA9QD1APIA8gDxAPAA7wDtAOwA7QDtAO0A7QDtAO0A7QDrAO0A7QDuAOkA9wACAeoA6gDqAO0AzABsAQCAZQJlAv8BbwE9AW0BaAFVAVUBYgEoAfkA9gD1APMA8QDxAO0A7QDuAO8A7wDvAO8A7gDuAPEA8ADtAO4A7gDwAOsA8AADAfMA5gDmAO4AxQBoAQCAHgIeApYBJAERATYBZwFxAXEBeQElAfEA+QD1APIA7wDvAO0A7QDuAO8A8ADxAPEA7gDuAPAA8QDwAPAA8ADyAO4A6gAEAQgB7wDvAPEA0wBHAQCAYAFgAScBSwFmAVIBZQFzAXMBjQEuAfMA/AD2APMA8ADwAO4A7ADtAO4A8ADvAO8A7QDtAO4A7gDuAPAA8ADyAOwA7gAIAQ4BBAEAAQAB4wA2AQCAsQCxACAB8gEPAg8C+AGiAW4BbgEkAfoA+wD1APMA7wDvAO0A7wDxAO4A7gDwAPAA8gDwAO8A8QDxAPAA8ADxAOwA9gAJAQcBBgEDAQMB3gA4AQCAsQCxAEoBAQIOAoQCfQKaARYBFgEAAe8A7gDoAOcA6gDqAO4A8QDtAOkA7ADwAPAA7gDoAOsA8wDxAOsA6wDoAOEA8gAQAQoB+QD0APQA1gA0AQCA1wDXAA4B+AFIAmwCfQJpAeAA4AD6AAAB3gDcAPQAAQEBAfkA7wD2AAQBBQH5APkA/gANAQMB9wADAQwBEwETAQoBRwGCASEB3gDqAOoA2wAaAQCAtwDxAPEAMQKtAnUCFgI1AREBEQFjAXYBZAFmAXkBbgFuAWsBcAFgAVsBgAGGAYYBfwGJAYABewGFAXwBlwGXAbYB+gHyASwB0ADrAOsA2wAHAQCA2wAlASUBrgEEAvYBcgEaAY8BjwEYAhECJQIyAjECMgIyAjQCOQI0AigCPgJRAlECUwJOAjMCIwIqAioCLQItAkUCWgLfAREB3ADqAOoA0gAsAQCA+gAPAQ8BDAEfASABDgFZAQkCCQJYAk8CXAJqAngCigKKAoACdAKLApoChgJ/Ap4CngKyApYCcQKAAp8CkAKQAn4CcAK7AfcA4gDoAOgA2gBhAQCA3QDWANYA3QDeAM4A1wBTASECIQJtAloCZQJvAnQCcgJyAnUCeQJ5AoEChwJ/AocChwKqArwCtwKyArcCugK6ApwCWwKjAfYA4ADgAOAA3wBeAQCA4wDlAOUA5gDqAOUA4wBXAUICQgKHAmQCbQJ2AnUCbgJuAmMCZAJ6AoUCfwKFApgCmAK3AroCqAKkAqUCmwKbAncCOQKfAf8A4QDjAOMA5AAtAQCA2gDbANsA3wDtAN0AGwGQASwCLAJ5AmECYQJmAmsCdAJsAmwCZwKBApMCiAKIApoCmgKmAqICkwKGAoQCgwKDAm8COgKvAQIB2gDsAOwA5gATAQCA2QDbANsA4ADfAOAAdAG+AfIB8gFkAmMCXQJbAmUCawJiAmICYAJ1AoICdAJrAnYCdgJ0Am4CeAJzAmUCXgJeAlECOAKtAfoA1ADpAOkA3AAhAQCA1gDbANsA3ADNAA4BvgH9AfwB/AE3AlUCVwJdAm0CbAJhAmECWwJqAm8CaQJmAmgCaAJhAlwCdAJvAlUCRQJFAkECQwKiAewA3gDoAN8A3wAXAQCA1QDXANcA3QDSAAABrwEBAvABAwIDAjACSgJVAmkCbwJjAmMCYgJjAloCXgJmAmUCZQJcAlsCbgJnAkwCOgI6AjUCSQKyAfAA4QDvAOkA6QDpAACA1QDZANkA2gDWANgAYAHOAe4BFQIVAjACUAJVAmICeAJ1AnUCcwJvAmICYAJiAlACUAJRAm0CdAJsAmICTQJNAjoCRgLFAQIB4QDvAOwA7ADfAACA0gDYANgA3ADgAOcAPgGsAesBOQI5AkECUQJZAmYCfAJ/An8CfgJ/AnsCfQJ3AlcCVwJgApMCmQKCAn4CbgJZAlkCYALSAf8A0wDnAOkA6QDoAACA1QDdAN0A4gDZAAABOAGHAQcCQAJAAkICSgJWAmsCewJ7AnsCgQKJAosCnAKbAocChwKNAqECoQKMAnsCZAJlAmUCkALgAfMAzwDfAOAA4ADhAACA2QDcAN4A3gDaAPoAXAG0ASECVgJWAlQCUwJeAmMCcgJ+An4ChAKLAowCnAKmApwCnAKYApICjwKQAoECXgJiAmICmgLUAesA2QDeAN0A3QDhAACA1gDZAN4A3gDkAOQAZAHdASUCdQJ1AnECgQKCAmgCcQKFAoUCkQKXApAClgKlApsClwKXApkClAKVApACeAJ0AnQCiQLOAe0A1QDgAN8A3wDfAACA2QDcAN0A3QDhAOgAVgHCARECeQJ5AnECbQJyAmgCaQJrAoQCiwKYAqECpwKmApcClgKWAqECmAKQAokChQJ/An8CTgKxAfsAzwDiAN4A3gDeAACA2QDaANsA2wDaAPQATwHDATcCbAJsAk4CRQJNAlcCYwJoAmgCZQJ0Ao8CpQKqApUChwKHApMClgKLAoECgAJrAmsCEwKGAfoAzQDdAN0A3QDcAACA2QDcAN4A3gDfAOcAHgG/AVoCUAJQAjQCPgJUAmICcAJ9An0CigKbApcClwKeAoQCdAJ0AoACjQKNAnoCagJxAnECWAKeAegA0wDbAN8A3wDdAACA2QDcAN0A3QDmAOMABwGsAVYCSAJIAjYCSAJhAmUCYgJwAo8CjwKcAoMCfQKBAoACkQJ9AooCigKQAngCaAKPAo8CjwK/AegA0gDeAOEA4QDfAACA2wDfAOMA4wDoAOoAGAHBAW4CYwJjAkkCSQJXAmICXgJjAoACgAKKAnkCdgJ1An4ClwKXAqMClwKPAoICagJ8AnwCbALDAfUAyQDdANwA3ADeAACA3ADeAOUA5QDqAOwAGAHJAX0CcwJzAlcCVwJnAnUCcAJwAnUCdQJ5AosCnAKYApIClgKWApQCjwKMAogCaQJsAmwCcgLJAfEAyQDdANkA2QDZAACA2gDbAN4A3gDjAOMAGQHWAW4CZwJbAlsCYgJxAnQCbAJoAmICYgJbAnYCjAKGAoQCfAJ8AnYCdwJ5AnkCdgJ8AnwChwLFAfMA0ADZANkA2QDZAACA2gDhAOIA4gDgANkAJwHyAWYCZQJnAmcCaAJsAmYCZQJtAnoCegJ4Am0CagJnAmQCXwJfAl8CYwJvAnQCcwJwAnACYAK0AfYA0gDbANwA2wDbAACA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.431,
+            "min": 0.177,
+            "max": 0.7,
+            "pixeles": 1230,
+            "valor_lote": 0.431
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2025-11-19 con 0.0 % de nubes en la tesela"
+        }
       },
       {
         "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2024-08-16",
-        "fecha": "2024-08-16",
-        "mapa": null
-      },
-      {
-        "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2024-09-10",
-        "fecha": "2024-09-10",
-        "mapa": null
-      },
-      {
-        "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2024-10-28",
-        "fecha": "2024-10-28",
-        "mapa": null
-      },
-      null,
-      {
-        "coleccion": "hls2-s30",
-        "item": "MOCK-HLS-2024-12-17",
-        "fecha": "2024-12-17",
-        "mapa": null
+        "item": "HLS.S30.T20HLJ.2025353T140709.v2.0",
+        "fecha": "2025-12-19",
+        "mapa": {
+          "id": "ndvi",
+          "titulo": "NDVI · Diciembre 2025",
+          "unidad": "NDVI",
+          "fuente": "NASA HLS S30 (Sentinel-2) · 30 m",
+          "fecha": "2025-12-19",
+          "campana": "2025/26",
+          "resolucion_nativa": "30 m",
+          "resolucion_grilla": "1″ (~30 m)",
+          "bounds": [
+            [
+              -33.251805555555556,
+              -64.23819444444445
+            ],
+            [
+              -33.24347222222222,
+              -64.22652777777778
+            ]
+          ],
+          "ancho": 42,
+          "alto": 30,
+          "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAABiUlEQVR42tVXMY7CMBAcIndpItFhicY0kdA1V6WgvWdcd5+4r/AcivsAkpujQQodUhrqo1prz3KwY5zEbBVpYXc8O7NOFvLz7Q8ANqpELSt8rXcAgJ/bCU2pzDMAHK8XjBXb5cr0s+P943tRuBIELIcgLMI+FQeZA2BiWWxU6UzkxCoAiFpWvRrhoJtSjapRL1AyDwDszwcAgG470AFsacwFVnA9bpcrk9Bt99CJQ0K3nXl2ETAIaFMq7M8HU7SvYAyrfdPhK+94vTwkpQgpmtpcdFgCyRn3MsoL1LIyY+e6fTZqWUG33T8PhNYVtss5/VwKPH5Ptyig/H92DZ92RWwjunb7fsNzvoO56kQDdTXjoOx8LOvBZhoSxISL6RCWkgC1XW43drHI2cyG0dRAooG6lnrqcSYByq/TsSNkOkVooalHHbWe5hx5kvWUBaPcTFOMXbcdsI40U4oXkVBp+e76IuYmykqj9BY1xdhDeohXcHwQ0Ln358utpyK1e1N8qY4O9BmZ+NbTHfuOu4tlvDuVAAAAAElFTkSuQmCC",
+          "valores": "+gL6AswCywEiARoBOwEnAScBQgFKAQ4C+QH2AegB6AEJAv4BAgIRAhUCEwIRAhECHgIvAiwCJQIgAhkCGQIbAhUC9wF2AeQA6gDqAN4A3AAeAQCABwMHA9sC4AEYAS0BNAEZARkBPgFFAQACDgIXAhACEAILAg8CDAIbAhwCDAIMAgwCCgIXAiYCJgIfAhECEQILAgwCDgJ7AeMA4gDiANgA2wAzAQCA/gL+AtMCsQEuATsBRQEwATABQgE2AQoC/wESAgwCDwIPAhQCGgIYAioCLQIlAiUCFgIsAkYCQAI2AhwCHAIQAhMCEAJ/AekA2ADYAOYA2wAqAQCAwALAApACMAEZASgBjAEuAS4BRQEyAQgCFQIlAhkCAgICAgECFQIiAjUCMgIuAi4CKgI/AkkCRQJJAjoCOgI+AjsCKwJ5Ae8A5gDmAOEA2gAZAQCAMQIxAqYB+wAQASQBPQEmASYBUQEbAc8BCQIjAh0CEQIRAiUCHwI7AjwCMwI6AjoCOQJMAk4CPQI4AjkCOQI7Ai8CFwJ+AQAB/QDqAOoA5QAZAQCAwwDDACQB6wEsAlwCLAJcAUwBTAECAaIB7gEKAhICDAIMAikCOgJHAjsCPgI2AjYCQwJTAlQCRAJBAkcCRwI/Ai8CDQKPAQgBCAEFAQUB6AAPAQCArwCvAFkBrQGxAQUCiwKcASUBJQH/AGMB0wEUAhQCCgIKAi8CSAJPAkUCPwJLAksCTAJkAmcCXQJLAkICQgI3AjkCIAKjAf8A7ADrAOsA3wD8AACAygDKAPAA4wFbAmMCTQKZAeIA4gAMAUIBjAHYAfMBGAIYAi8CRgJGAj8CIgJFAkUCRgJGAkwCSgI1AvYBrQGtAcoB6wHWAekA3wDaANoA2wD9AACAvgC5ALkAIAJCAlwC9AFOAR8BHwG3AbMBtwHoASICAgICAusB5gHmAQMC/QEHAgcCIgIEAh8CMAJBAq0B+QH5ATACiQJLAucA3QDiAOIA1gD+AACA0AARAREBtAHuAe8BmAEMAQwCDAJzAogCwgLiArECogKiAncCaAJxAqoCZgJrAmsCuAKlAnMCOgKnAqcCVQJVAnQC1gIvAugA3ADYANgA2wAIAQCA7gDyAPIA+gAFAQQBFQHGAZwCnAK0AsUCvQIAAxEDCwMLA/QC8QL9AggDBQMFAwkDCQMVAw0DBwMEAxMDAAMAA/QC8AJAAuQA3wDZANkA3QAiAQCA8AD2APYA9gD+AP4A9gD8Aa4CrgLqAvIC7gLyAvUC6QLpAtUC3ALoAvQC9ALhAukC6QIFAxMDGgMWAw8DAAMAA/UC0wIwAuYA2QDUANQA1gArAQCA6gDzAPMA+QD8APMA5wD+AdEC0QIFAwsDDwMJA/4C8gLyAugC9AL5AvsC9ALwAvsC+wIRAyADGwMaAxADAQMBA+8C4wI5AuoA5gDVANUA2gAWAQCA6gDuAO4A+gD9AO4AKwEKAs0CzQL8AgsDCgP+AvAC6gL4AvgC+AIBA/0C7ALsAvwC/AIQAyADEQMWAw8DBAMEA/oC6QI3AusA5gDaANoA4AAXAQCA6QDrAOsA8wD9APEAfQH3AcECwQLpAgUDAwP3AusC9gL3AvcCAwMLAwID7wLvAvoC+gIFAwoDBQMFAwYD/AL8AvQC5AI2AuUA3QDWANYA3wABAQCA7ADsAOwA9QD5APQAuAFLAsMCwwLmAgADAQP2AvUC+gIAAwADCgMKAwEDAAMCAwgDCAMMAwoDDQMSAwoD9gL2AvEC5QI+AuMA2ADbAOcA5wDqAACA5gDoAOgA8AD2APkAxwFMAq4CqQKpAuMC9AL5AgADBAMFAwUDBAMFAwYDAQMKAxcDFwMNAw0DFgMaAxUDAAMAA/0C7AI6AuUA1gDVANcA1wDiAACA5wDkAOQA7gDzAPEAtgEhArYC0wLTAuwC8gIBAwsDCAMEAwQDCgMIA/kC/gIJAw0DDQMJAwsDGAMeAxMDCgMKAwYD+gJOAusA2wDYANkA2QDdAACA6QDoAOgA8ADvAO4AkQH/AcsC8QLxAuoC7wIHAxADCgMCAwIDBAMNAwcDCwMJAwMDAwMBAwsDHgMhAxQDCwP+Av4C+AJJAuIA0ADMAM8AzwDQAACA5wDoAOgA7wDxAPQAjgENAs0C6wLrAucC9AIMAxYDCwMBAwED/gISAxEDHAMiAyMDIwMbAx0DJQMfAxIDBQP3AvcCAgNFAtkAzgDFAMkAyQDIAACA5wDoAOkA6QDtAPIApgENAtIC6wLrAuIC9wIOAxIDCwMKAwoDEwMVAxcDHgMgAx0DHQMZAxoDHQMfAw8DBQP9Av0CCANRAt4AzADHAMcAxwDHAACA5gDqAOgA6ADuAPUAwwFSAt0CAQMBA/0CDwMZAxsDCwMRAxEDGwMcAxYDIwMiAxoDFQMVAxcDGQMXAwkDDgMKAwoDCQNZAtsAzgDJAMcAxwDDAACA4wDnAOMA4wDtAPMAUAFoAtUC+AL4Av0CBwMUAxEDDgMHAxYDGAMeAyQDJAMeAxoDFQMVAx0DGAMSAxEDEgMXAxcD4AJJAtsAygDDAMYAxgDCAACA3wDiAOIA4gDrAOoAeQGHAuoC8ALwAuwC8QIBAwwDDAMKAwoDDQMbAyYDKAMgAx4DGQMZAx8DHwMcAxkDEQMUAxQD0AI9AtwAygDFAMUAxQDEAACA3gDcAOIA4gDoAOkAGAGwAu4C8gLyAugC8wIQAxwDGQMUAxQDIQMkAycDHwMdAxIDDgMOAxcDHgMhAxsDDQMDAwMD/QJJAtoAxgDDAMcAxwDDAACA4QDiAOQA5ADpAPEA/QCMAucC7ALsAt4C9QIOAxUDDAMOAyEDIQMhAxoDFQMSAxQDGQMWAxwDJQMkAx0DDQMPAw8DBgNKAtsAygDDAMgAyAC/AACA5gDgAOUA5QDqAPMACgGXAvIC7wLvAvEC/wIRAxkDEAMSAyIDIgMeAxsDFwMZAxwDJgMmAywDIgMiAxkDDgMQAxADAANMAtwAyQDEAMUAxQC/AACA5ADlAOYA5gDmAPMADwGZAvkC9AL0AvcCCwMaAxoDGQMfAyUDJQMpAykDKwMmAyYDKQMpAyMDJwMlAyUDGwMUAxQD/gJVAtoAywDCAMUAvAC8AACA6ADgAN8A3wDjAPMACAGeAvYC9AL5AvkCDQMbAxsDFwMVAx8DHwPpAh8DKQMiAx8DFwMXAxYDFwMXAxkDGAMWAxYDCQNfAucAxwDCAL8AwADAAACA5ADlAOUA5QDnAPUAEwGuAvkC+AIEAwQDCQMTAxcDFQMcAyIDIgMsAyUDJAMXAxYDEQMRAwsDCQMUAx8DGAMUAxQD+gJTAvUAywDDAL0AvwC/AACA",
+          "factor": 0.001,
+          "nodata": -32768,
+          "escala": {
+            "cortes": [
+              0,
+              0.15,
+              0.3,
+              0.45,
+              0.6,
+              0.75
+            ],
+            "colores": [
+              "#E6D8AE",
+              "#CDBA86",
+              "#94AF63",
+              "#689C49",
+              "#3F8139",
+              "#1B5E2E"
+            ],
+            "etiquetas": [
+              "< 0,15",
+              "0,15–0,3",
+              "0,3–0,45",
+              "0,45–0,6",
+              "0,6–0,75",
+              "≥ 0,75"
+            ]
+          },
+          "resumen": {
+            "media": 0.549,
+            "min": 0.175,
+            "max": 0.812,
+            "pixeles": 1230,
+            "valor_lote": 0.549
+          },
+          "confianza": "alta",
+          "nota": "NDVI medio del lote = media de esta capa dentro del lote (1230 píxeles de la grilla). Umbral de cobertura baja: 0,3. Escena del 2025-12-19 con 0.0 % de nubes en la tesela"
+        }
       }
     ],
     "agua_regional_mensual": null,
     "heladas_regional_mensual": null,
     "no_disponibles": [
-      "erosion",
       "agua_regional_mensual",
       "heladas_regional_mensual"
     ],
     "grilla": {
       "bounds": [
         [
-          -33.25180555555556,
+          -33.251805555555556,
           -64.23819444444445
         ],
         [
@@ -2845,7 +3638,7 @@ export const RIO_CUARTO: Salida = {
     },
     "pendiente_mapa": {
       "id": "pendiente",
-      "titulo": "Pendiente",
+      "titulo": "Pendiente del terreno",
       "unidad": "%",
       "fuente": "NASADEM · NASA, vía Planetary Computer",
       "fecha": "estática",
@@ -2854,7 +3647,7 @@ export const RIO_CUARTO: Salida = {
       "resolucion_grilla": "1″ (~30 m)",
       "bounds": [
         [
-          -33.25180555555556,
+          -33.251805555555556,
           -64.23819444444445
         ],
         [
@@ -2864,8 +3657,8 @@ export const RIO_CUARTO: Salida = {
       ],
       "ancho": 42,
       "alto": 30,
-      "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAAPUlEQVR42u3OAQ0AEBAAwH8xpBJDJDGkUoMUNra7BJd1tB2PW31miU+IioqKioqKioqKioqKioqKiorecgBRRgQ8V84fjQAAAABJRU5ErkJggg==",
-      "valores": "LgAwADIANAA2ADgAOQA6ADsAPAA8ADwAPAA7ADoAOQA4ADYANAAyADAALgAsACoAKAAmACQAIwAhACAAHwAfAB8AHwAfAB8AIAAiACMAJQAmAACALgAwADIANAA2ADgAOQA6ADsAPAA8ADwAPAA7ADsAOQA4ADcANQAzADEALwAtACsAKQAnACUAJAAiACEAIAAgACAAIAAgACEAIgAjACQAJgAoAACALgAwADIANAA2ADcAOQA6ADsAPAA8ADwAPAA7ADoAOQA4ADcANQAzADEALwAuACwAKgAoACYAJQAkACMAIgAhACEAIQAiACIAIwAkACYAJwApAACALgAwADIANAA1ADcAOAA5ADoAOwA7ADsAOwA7ADoAOQA4ADcANQA0ADIAMAAuACwAKwApACgAJgAlACQAIwAjACMAIwAjACQAJQAmACcAKQArAACALgAwADIAMwA1ADYAOAA5ADoAOgA7ADsAOwA6ADoAOQA4ADcANQA0ADIAMQAvAC0ALAAqACkAKAAnACYAJQAlACUAJQAlACYAJwAoACkAKwAsAACALgAwADEAMwA0ADYANwA4ADkAOQA6ADoAOgA6ADkAOAA3ADYANQA0ADIAMQAwAC4ALQAsACoAKQAoACgAJwAnACcAJwAnACgAKQAqACsALAAuAACALgAvADEAMgA0ADUANgA3ADgAOAA5ADkAOQA5ADgAOAA3ADYANQA0ADMAMgAwAC8ALgAtACwAKwAqACoAKQApACkAKQAqACoAKwAsAC0ALgAwAACALgAvADAAMgAzADQANQA2ADYANwA3ADcAOAA3ADcANwA2ADUANQA0ADMAMgAxADAALwAuAC4ALQAsACwALAAsACwALAAsAC0ALQAuAC8AMAAyAACALgAvADAAMQAyADMANAA0ADUANQA2ADYANgA2ADYANgA1ADUANAA0ADMAMwAyADEAMQAwAC8ALwAvAC4ALgAuAC4ALwAvAC8AMAAxADIAMwA0AACALQAuAC8AMAAxADIAMgAzADMANAA0ADUANQA1ADUANQA1ADQANAA0ADMAMwAzADIAMgAyADEAMQAxADEAMQAxADEAMQAyADIAMwAzADQANQA2AACALQAuAC8ALwAwADAAMQAxADIAMgAzADMAMwAzADMANAA0ADQANAA0ADQAMwAzADMAMwAzADMAMwAzADMANAA0ADQANAA1ADUANQA2ADYANwA4AACALQAuAC4ALgAvAC8AMAAwADAAMQAxADEAMgAyADIAMgAzADMAMwAzADQANAA0ADQANQA1ADUANQA2ADYANgA3ADcANwA3ADgAOAA5ADkAOQA6AACALQAtAC0ALgAuAC4ALgAuAC8ALwAvADAAMAAwADEAMQAyADIAMwAzADQANAA1ADUANgA3ADcAOAA4ADkAOQA5ADoAOgA6ADsAOwA7ADsAPAA8AACALQAtAC0ALQAtAC0ALQAtAC0ALQAuAC4ALgAvAC8AMAAxADIAMgAzADQANQA2ADcANwA4ADkAOgA6ADsAPAA8AD0APQA9AD4APgA+AD4APgA+AACALQAsACwALAAsACsAKwArACsALAAsACwALQAtAC4ALwAwADEAMgAzADQANQA2ADgAOQA6ADsAPAA9AD4APgA/AD8AQABAAEAAQABAAEAAQABAAACALQAsACwAKwArACoAKgAqACoAKgAqACsAKwAsAC0ALgAvADAAMgAzADQANgA3ADkAOgA7AD0APgA/AEAAQQBCAEIAQwBDAEMAQwBDAEMAQgBCAACALQAsACsAKgAqACkAKQApACkAKQApACkAKgArACwALQAuADAAMQAzADUANgA4ADoAOwA9AD4AQABBAEIAQwBEAEUARQBFAEYARQBFAEUARABEAACALQAsACsAKgApACgAKAAoACcAJwAoACgAKQAqACsALAAuAC8AMQAzADUANwA5ADsAPQA+AEAAQgBDAEQARgBGAEcASABIAEgASABIAEcARgBGAACALAArACoAKQAoACgAJwAnACYAJgAnACcAKAApACoALAAtAC8AMQAzADUANwA5ADwAPgBAAEIAQwBFAEYASABJAEkASgBKAEoASgBKAEkASABHAACALAArACoAKQAoACcAJgAmACYAJgAmACYAJwAoACoAKwAtAC8AMQAzADUAOAA6ADwAPwBBAEMARQBHAEgASgBLAEsATABMAEwATABMAEsASgBJAACALAArACoAKAAnACYAJgAlACUAJQAlACYAJwAoACkAKwAtAC8AMQAzADYAOAA7AD0AQABCAEQARgBIAEoASwBMAE0ATgBOAE4ATgBNAE0ATABLAACALAArACkAKAAnACYAJQAlACUAJQAlACUAJgAoACkAKwAtAC8AMQA0ADYAOQA7AD4AQQBDAEUASABKAEsATQBOAE8ATwBQAFAATwBPAE4ATQBMAACALAArACkAKAAnACYAJQAlACQAJAAlACUAJgAoACkAKwAtAC8AMQA0ADcAOQA8AD8AQgBEAEYASQBLAEwATgBPAFAAUQBRAFEAUQBQAFAATwBNAACALAArACkAKAAnACYAJQAlACQAJQAlACYAJwAoACkAKwAtAC8AMgA1ADcAOgA9AEAAQgBFAEcASgBMAE0ATwBQAFEAUgBSAFIAUgBRAFEAUABPAACALAArACkAKAAnACYAJgAlACUAJQAlACYAJwAoACoALAAuADAAMgA1ADgAOwA9AEAAQwBGAEgASgBMAE4AUABRAFIAUwBTAFMAUwBSAFIAUQBQAACALAArACoAKQAnACcAJgAmACUAJgAmACcAKAApACsALAAuADEAMwA2ADgAOwA+AEEAQwBGAEgASwBNAE8AUABRAFIAUwBUAFQAVABTAFMAUgBRAACALAArACoAKQAoACcAJwAmACYAJgAnACgAKQAqACwALQAvADIANAA3ADkAPAA/AEEARABGAEkASwBNAE8AUABSAFMAUwBUAFQAVABUAFMAUgBRAACALAArACoAKQApACgAKAAnACcAKAAoACkAKgArAC0ALgAwADMANQA3ADoAPQA/AEIARABHAEkASwBNAE8AUABSAFMAVABUAFQAVABUAFQAUwBSAACALQAsACsAKgApACkAKQApACkAKQApACoAKwAtAC4AMAAyADQANgA4ADsAPQBAAEIARQBHAEkASwBNAE8AUABSAFMAUwBUAFQAVABUAFQAUwBTAACALQAsACsAKwAqACoAKgAqACoAKgArACwALQAuADAAMQAzADUANwA5ADwAPgBAAEMARQBHAEkASwBNAE4AUABRAFIAUwBUAFQAVABUAFQAVABTAACA",
+      "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAABvUlEQVR42r1YO04DMRC1Vy5oIuUSaSmQyAHoyQk4CiiK4CicYOk5wCJRpM0lVkpDFypbw6znZ08YaSVr/ZnnmXnjsePty90lANlt1yGEEMZpXvyTZJxmdixcEws37+3xMybNYAmARllt4zXgh825tPenVWkPlJLddv3n3zjN5auBoPo4S0qbh6CTNAGDlVyIrd8SQjVJlsnW+M3jtDqgBRdAWxRoFbda8Of9K9w83ctArSSyCg4drAODJIFCF9fisQd8DSTlcsj6xLmZSiM1wnCpzUMSF9R5RxoLSmHC9e1PK5ZIJFBo8l7SWHIl55F0DbJoRQIJZeBI4wEkf1bP4b4EAVrAenkCxycFPuLqySpegA+b8wJkNtzx9Tsmr+StzQzUJiHImmfTf5DGElK1zRxhmdfjUi/3UyVkoIB6gvTKJkOPNXqrflx4c3Pi88fDRVNjShWPhmCt1i2s1yxgueC1lIncPaq5cJYUthwiXDnJsr7HVR5ZAK8xXOOM9wZZ0hO+GnOM1LKXWpPTJVZP1gcEa1xncD3pLEF2tjy5SC8gmlSnMdTQQ5zW96mmk8kjhrQvI9yhkduw0IYx/wvCGCqqcK6uWwAAAABJRU5ErkJggg==",
+      "valores": "PwBOAFQAWwBmAGwAUgAjAEIAdwCaAKsAsACxAKwApACJAHQAawBgAGQAiACqAL0AswCYAHAAQgAlADUAOAAtADQAYQCsAN4A+QD4AOYAtwCEAACAFwAcADwAawB8AHQAVQAmADAATwBsAIcApQDBAMoAwQCeAHoAbgBuAHsAoAC9AMAApwB+AEsALQBOAG8AbwBSADAAWACxAO8AEAEUAQIB2wCqAACAJQA8AHQAqQCuAJkAggBnAFoARwA0ADQAWQCEAJkAkgBwAEoAQgBWAGsAjwCoAKEAegBMAB4AMQBhAIEAiABwAD8APwCaAOYAHwE4ASwBBQHLAACASgBuAKMAzgDLALAApQChAKMAoACNAGIAKAAcADcAQAA5ACMAMgBOAF0AdwCBAGcALAANAEIAcgCRAJsAlgB5AD0APwCcAPAAOwFhAVMBJgHdAACAcACXALYAzwDCAJwAlgCrAMMA2gDeAMMAiwBZAD8ASQBqAHoAgQCCAHsAfwBzAEsAPwBmAJMAswDBALcApQB9ADsASwCjAP4AUQGAAW4BQQH0AACAmwC+AMgAxgCnAGQAVwCLALcA2wDsAN4ArwCFAHcAgwCiALUAtACtAKIAoACNAHAAegCRAKUArQCtAKEAkQBzAEIAVQCoAAgBYAGRAXkBQwHtAACAqgDPANIAzACrAFkABwBNAIEAqQC9ALkAnACQAJoAsADIANcA0gDPANMA0wC7AKAAogCoAKMAjgB4AGAASgA5AFUAnADhACoBaAF3AUwBCQG1AACAeACgAK4AvADDAKMAeABSAEgAVQBiAGMAWwB4AJ4AtQC/AMYAyQDYAOoA6ADGAJ8AmACTAIcAbQBKACkAIgBWAKUA+wA1AWABbwFdAR4B2gCLAACALABOAH4AvQDpAPYA4gC0AIkAYQA6ABgAJABZAH4AhQBuAGIAdgCkAMUAwQCgAG8ASgAwACwANgA8ADEANQBgAKoAAAFLAXsBfwFfASQB3QCBAACAGQAlAGsAugDzABABCQHiALoAlwCAAHMAdwCMAKMAnwBuADEASgCDAKYAqACPAGoAVABWAHYAlAClAKAApAClAL4A9QBAAXcBgAFgASYB1QBvAACAWwBTAG8AowDRAPEA9QDjAMUAqQCiAKMAowCvAMMAxACtAJQAlwClALAAsQCpAKAApgC2AM8A5QD1AO8A9AD0AP0ADQE7AWMBagFJAQ4BwABiAACAdQBoAHcAjgCfALkAyADIALgApQCjAJ8AmAChALoAxgDKAMsAygDEAL8AwQDKANUA4gDsAPAA8ADyAOsA8AD8AA0BEwEoAUIBSgEyAf8AuABjAACAZgBUAF4AbwByAHoAiwCRAIcAfQB/AHsAdACBAKEAuADQAOIA5ADXANIA2wDpAP4ADAEMAfgA4gDSAMYAzQDiAAEBDwETARkBIQEJAd0AoQBdAACATgAxADYARwA6ABsAKwA5AD4AQQBOAFEAVQBkAH8AjQCpAMQAzADNANkA5gD1AAUBDAEAAeQAwwCvAKUApwC+AOkAAwEGAf0A8wDPAKEAbwBFAACAPwAjAB4ANgAzACoANgBCAEwARwA5ACIAJgA5AEQASQBkAIMAmQCtAMgA2ADlAOwA5QDQAKwAigBzAG8AcQCOAMYA8QD7AOcAxgCVAGkASgA+AACANAAoABQAFQAhADYASgBWAFgATgA8ACIAEQAfACMAHAAxAFQAegCcAL0A0QDWAMgArQCNAGgASgA4AD0ASwBxAKYA1wDcAL0AjABSADwASABaAACAFAAeAB4AFwAiAEMAXABdAFUAQwA5ADIAFgAXABwAGQAsAFMAgQCmAMIA0gDNAK4AhgBdAD4ANAAvADIARwBtAJcAvQC1AIQARgAdAEAAWwBnAACAJQAYACEANABGAF8AbQBgAFEAPABCAEQAJwAIAAMAHQA9AGYAmAC2AMYAyADBAJoAaAA5ACcANwA9ADcARABqAI8ApwCWAF4AIgAuAEYATABIAACARwAoAB4APABaAHIAcwBWADoAIwA9AFAASAA3ADsASQBnAIcAqgC4AK0AoACTAHoATgAqAA4AFgAjAC8ATgBwAIYAiABtAC8AJwBJAEkAOAAdAACAagBNACUALQBYAH0AgQBfADoAGgA3AFgAXQBYAFcAaAB+AJIApQCmAIsAewB5AHgAZgBTAEEAKwAoAD4AWQBqAG8AZABIADAAVQBpAFoAOgAcAACAeQBnAEEAJQBJAHsAiwCBAHQAZgBbAF4AXwBhAGYAgACSAJkAlgCNAGgAUgBhAH0AhQB7AGcAQwAsADIAQQBLAFYAWgBaAFcAYABeAE0ANAA2AACAaABdAEYAMABAAGoAhQCSAJsAmQCJAHgAbAB0AIQAoQCzAK0AmwCJAF0AKwAqAFYAcgB3AGcAQgAoACcALwA4AE8AYgBtAGYAVwBFADwARABbAACAcQBaAEMALwAwAEsAZAB+AJoApQCgAIsAdwB9AJgAugDSAM8AtwCiAH4ATAAZACIASgBeAFwAPwApACQAJAAjADkAVQBiAFQAOAAwAEsAaACCAACAbwBUADsAKQAhACMANwBeAIcAnwCoAJwAigCLAKkAyQDkAOIAvwCfAIgAZwA/ACYAMABFAEoANQAfABwAHwAWAA4ANQBKADwAJQBIAG8AggCRAACAYABUAEMAMgAhABkAIwBLAHIAjQCfAKMAnwCpAMkA4gDvANsAnwBtAGcAawBiAE4ANgAzADgAOQA2ADwAPwA0ABsAKAA+ADYAPgBpAIsAlACRAACAYQBnAGYAVgA8ACMAHAA+AFUAXwBvAIQAmgC5AOAA7gDkALcAZwA5AGMAgQCFAHMAWgBQAFMAYABnAGUAVwBFACkAJAAwADYAWgCKALAAuQCkAACAVQBmAHEAaQBJACgAHgBFAFoAVABYAG4AjwC3ANoA2wC4AHoALgBLAHQAfQB5AG0AZABkAGkAcwB5AG8AVAA9ACEAGAAsAEgAegCpAM0A0gCzAACAQABYAGYAYgBOADQAHQA8AFgAXQBnAHoAkgCtALkAoABiABoAQwB3AHIAUwBAAFQAdQB+AHYAbwBrAFsAQwA7ACMAEgA7AG0AogDEAMkAvgCbAACANQBLAFsAXwBdAFUANwAQADEAVgB9AJYAowCoAJEAVQANAFoAkgCgAHUAJQArAF8AigCWAIMAaQBbAEoARQBOADAAGABTAJoAzwDcALgAkABvAACARABMAFQAWABnAG4AVwAkACUAXQCUAK0ArwCiAHUANABdAJ4AtwCaAFEAHQBbAHoAkgCPAHMAVgBPAEoAYQBtAEMAMAB5AM0ABwEFAb0AZAA/AACA",
       "factor": 0.01,
       "nodata": -32768,
       "escala": {
@@ -2877,14 +3670,14 @@ export const RIO_CUARTO: Salida = {
           6
         ],
         "colores": [
-          "#1A9850",
-          "#91CF60",
-          "#FEE08B",
-          "#FC8D59",
-          "#D73027"
+          "#2E7D32",
+          "#7CB342",
+          "#FDD835",
+          "#F57C00",
+          "#C62828"
         ],
         "etiquetas": [
-          "0–1 %",
+          "< 1 %",
           "1–2,5 %",
           "2,5–4 %",
           "4–6 %",
@@ -2892,27 +3685,27 @@ export const RIO_CUARTO: Salida = {
         ]
       },
       "resumen": {
-        "media": 0.535,
-        "min": 0.305,
-        "max": 0.843,
+        "media": 1.3,
+        "min": 0.03,
+        "max": 4.01,
         "pixeles": 1230,
         "valor_lote": 0.6
       },
       "confianza": "media",
-      "nota": "Ejemplo ilustrativo del mock (no son datos de NASA): para probar el mapa en el front"
+      "nota": "Pendiente por píxel: diferencias a ±90 m sobre la elevación suavizada (±60 m), es ruidosa. El valor del lote (0,6 %) es el plano ajustado sobre los mismos píxeles"
     },
     "cultivo_mapa": {
       "id": "cultivo",
       "titulo": "Cultivo (ESA WorldCover)",
-      "unidad": "clase",
-      "fuente": "ESA WorldCover 2021 v200",
+      "unidad": "%",
+      "fuente": "ESA WorldCover 2021 v200, vía Planetary Computer",
       "fecha": "2021",
       "campana": null,
-      "resolucion_nativa": "10 m (moda a 30 m)",
+      "resolucion_nativa": "10 m",
       "resolucion_grilla": "1″ (~30 m)",
       "bounds": [
         [
-          -33.25180555555556,
+          -33.251805555555556,
           -64.23819444444445
         ],
         [
@@ -2922,35 +3715,92 @@ export const RIO_CUARTO: Salida = {
       ],
       "ancho": 42,
       "alto": 30,
-      "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAAQklEQVR42u3OwQnAIBQFsGf38Ooshc789xI86BSFFpIJ0qpqJ8mYd76qP6td+QlRUVFRUVFRUVFRUVFRUVFRUdG3HEK6Bjx7x4UMAAAAAElFTkSuQmCC",
-      "valores": "AAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACA",
+      "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAAhklEQVR42mP8dNLnPwMaWHM1CF2IIUR7HcNAAT7zLYxMxDhyMACmwRRyJDl0sAKsDh2MocoyWNMkWVE/GEKYKIeuuRo04KUBCymKkR1L71BmQbYQPdTQHQOTH4ikwIitZhpsAGvNNKRz/ahDRx066tBRh446dNShow4ddeioQ0cdOurQIQIAHUsgQa4GylMAAAAASUVORK5CYII=",
+      "valores": "ZABkAGQAZABkAAAAAAAAAAAAAABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZAAAAAAAAAAAAAAAAABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAAAAAAAAAAAAAABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAAAAAAAAAAAAAABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAAAAAAAAAAABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAAAAAAAAAAAAAAAAAAAAAAAAAAABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAAAAAAAAAAAAAAAAAAAAAAAAAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAAAAAAAAAAABkAGQAZABkAAAAAABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAGQAZABkAACA",
       "factor": 1,
       "nodata": -32768,
       "escala": {
         "cortes": [
           0,
-          1
+          100
         ],
         "colores": [
-          "#BDBDBD",
-          "#E3B505"
+          "#9E9E9E",
+          "#F2C94C"
         ],
         "etiquetas": [
-          "Otro uso",
+          "Otra cobertura",
           "Cultivo (clase 40)"
         ]
       },
       "resumen": {
-        "media": 0.951,
+        "media": 93.9,
         "min": 0,
-        "max": 1,
+        "max": 100,
         "pixeles": 1230,
-        "valor_lote": 95.1
+        "valor_lote": 93.9
       },
       "confianza": "alta",
-      "nota": "Ejemplo ilustrativo del mock (no son datos de NASA): para probar el mapa en el front"
+      "nota": "Clase mayoritaria de ESA WorldCover 2021 (10 m) en cada píxel de la grilla; 100 = cultivo, 0 = otra cobertura. La media dentro del lote es el % de cultivo"
     },
-    "erosion_mapa": null
+    "erosion_mapa": {
+      "id": "erosion",
+      "titulo": "Riesgo de erosión (índice)",
+      "unidad": "% × meses",
+      "fuente": "Pendiente: NASADEM · NASA, vía Planetary Computer · Cobertura: NASA HLS 30 m (Landsat + Sentinel-2) y MODIS MOD13Q1 250 m de respaldo en 1 mes, vía Planetary Computer",
+      "fecha": null,
+      "campana": "2025/26",
+      "resolucion_nativa": "30 m (pendiente NASADEM × NDVI HLS)",
+      "resolucion_grilla": "1″ (~30 m)",
+      "bounds": [
+        [
+          -33.251805555555556,
+          -64.23819444444445
+        ],
+        [
+          -33.24347222222222,
+          -64.22652777777778
+        ]
+      ],
+      "ancho": 42,
+      "alto": 30,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAC6UlEQVR42rVYu2rjUBA9ehRpDPoJQbrggGy2db+q0kU/srAgxAbyI1a3lbZ3GyxDzLpa0E8I1Kgx2UIZZ3Q19yFn94IK3zueOfM6cyXv+6/NG9gq4g55swAAVHWLdBWhqlscHwP02wMXxU2WQLe4LMmRXnUVcaf9X94s8PR15/lV3aKqW7ismywZgVOBmxaBLOLu8picU3/7AJCuopFnVd2iiLvLPhkiYwSYR0qKFsnkzUIMBtnjenUyIQdJHhyzBMvyjHQlK6WSkKJGctwJkqczsmMqHTUTofTn4bBl6YnQb3cD4CxBEQfIm2l96YwM9b1DvzeDMpVS2G8P+P3zFncPwBfvHijPAIY0Lcvzu1iLb0zZTZYYG0DNgq2WeTa1QG2hp5T12ykQSbnJoJpqKhVy3hhRALh7+GP01rWebMBUijKVDf2/QIcnAOHzemMNva5r4d2bkV5Kh68PPVXN9JRnvNhSvyzPOGbJRPHL2yvyZqMtCRU8MYHklMQSE4raT8voeb35ADoo6XB8DEQh1dCgvEMRB4rZ7v08ECB15k5fb8TUV2U7piert/9hzZlsvksj6EaeCxB6XJtNdxZK0dJNHmkCfXYRLRVxh34/Bpg3C6Qr4ATAo9uTCk4CS02i7s8B7UpP/AZ3+vHqhS5ApIiPV+Rs2CUzXDZdRTgBmHXNMzngClJni8a1jrN9bjxdRZeRaYuqC3g1hTZ57WDhPGqKKq9XyZAumipIbsMEWO2VC48O3RXNbgydvFqP6sRSL+Q0Wk1s46vGpK60jT9TV3MZW5lI57QX2urL5oSZFSLjuWsfaCcTfxGTImgbu6bLiZnmpvtky5fogx6J+1xr+FqwvE65LU99r5c60xXcNZcXHRNwm8HtYZhMYyBTqtKVgm00Xnvrkuz4c0hcZ1gi6n99NfQ/q0B6z1dBzuFmnWyop51oRCM6zlQ/LvDo8n3+Teua4RFe4zVXoHNCLR8dSBrf9Do0/RAyrL/q5wixTV4IKAAAAABJRU5ErkJggg==",
+      "valores": "/AA4AVABEQH+AbABSAGvAEoBAAACAwIEIAQmBAgE2AM2A7gCggJAAlgCMAP8A24EMgSQA6ACzgEDAT4BUAEOATgBpwKwAngD3QTYBH4E3AIIAQCAXABwAPAAQQHoAugAVAG+APAAAAAcAioD3gOGBLwEhgS0A9wClAKUAuICwANuBIAE6gP0AsIBOwEiApoCmgLsASABaAJ1A6sEUAVkBQoFRwRUAQCAlADwANAB+wEKApkACAKcAWgBAAAEATgBFgIYA5YDbAOgArwBjAEEAoICWgPwA8YD3ALIAbQAVwFGAgYDMAMQA3oBegGcA5gDmwUYBrAEGQVhAgCAKAG4AYwCogUjB3ADpQDjAekBAADBAkwC8ACoAEoBgAFWAdIALAHUAS4CygIGA2oCCAFbAM4BHgNmAz0EGgRPA6sBegGoA8ADJwblBp8GvgW6AQCAMALzAkQE2gQIA9QBlgBXA88D2gBWBJIEQgMWAnoBtgF8AtwCBgMMA+IC+gKyAsIBuQHKAgUE5QRHBQEFgwRrA50BwgEvA/gDRAWAByYHRQboAQCAqQYqCHgFAAAAAAAAAACLAAAAAACIBTQFGgQeA8oCEgPMAz4EOAQOBMwDwAPbAxADVgP3A4MEuwS7BGcE9wMlA84BUwLwAyAEIAREBuQFTwbaAQCApAYWCL4FAACrAAAAAAAAAIMB+wFuBFYEqANgA5wDIASwBAoF7ATaBMUFxQUdBWAEbgSYBHUE4gNIA6ACBgKPAagC4ASEA9IFCAdTB3wGJARqAQCAsARABh4GAAAAAAAAAAAAAEACqAJMAlICIgLQArQDPgR6BKQEtgQQBXwFcAWkBLoDkANyAyoDjgK8AfYAzAAEAjkD7ANqAoAFKwfRBpYFaAMsAgCA5AFwAvADAAAAAAAAAAC0AK0C5QEAAAAAbACyAAAAAAAAAAAAAACkAAAAAAAAAAAAAAAAAAAAAAAAADEAAAAAAAAAAAAAAOwFewfbBrQFdAMEAgCA+gC5ABcCAAAAAAAAAABMBXQBLgEAAAAAdwCMAEYBAAAAAAAAAAAGAUwBAACPAGoAqACsAOwAKAHvAUABSAFKAToC3wJAAdwFAAbgBr4FKQRNAQCAxwGfASsCLwNEA8QDyQTGAYoBUgFEAUYBRgENAgwDEAO0AlACXAKUAsACxAKkAoACmALYAjwDlAPUA7wD0APQA/QDNAQ7AYwFqAUkBTgEwAPEAACASQIIAlMCxgIbA50D6AMgAygC7wFGAd0ByAGEAugCGAMoAywDKAMQA/wCBAMoA1QDiAOwA8ADwAPIA6wDwAPwAzQETAQoAQgFKAXIBPwDmAPGAACA/gH4ATQCmgI6AmICtwLVAhwC9AH8AewB0AEEAoQC4AJAA4gDkANcA0gDbAOkA/gDMAQwBOADiANIAxgDNAOIAwQEPAQTAWQEhAQkBHQDhAK6AACA1AEmAUQBqgEiAYcA1wDkAPgABAE4AUQBVAGQAfwBNAKkAhADMAM0A2QDmAPUAxQEMAQABJADDAO8ApQCnAL4AqQDDAQMAvQDzAM8A4QCvAEUAQCAOwHSALQARAH/ANIANgAIATABHAHkAIgAmADkABABJAGQAQwCZAK0AiADYAOUA7ADlANAA7ACKALMAbwBxAE4AhgDxAP2AZwDGANUAqQBKAG6AACAOAHwAHgAfgClAEQBSgACAWABOAHwAIgARAB8AIwAcADEAFAB6AFwAvQCRANYAyADtAI0AqABKAHgAPQALAHEAZgCXAOUAvQCMAJIAfAAIAEOAQCAeAC0ALQAigCqAJIBuAAXAVQBDAHkAMgAWABcAHAAZACwAEwBBAKYAggDSAM0A7gCGAJ0AfgA0AC8AMgAHAG0AVwC9AK1ABACGAF0AAABbAGcAQCA3gCQAMYAOAFeAZkC2gAgAZUBLAFKARABnAAgAAwAdAD0AJgBYALYAhgDIAMEA2gCoAHkAJwA3AD0ANwAEAGoATwCnAKWAHgBiAC4ABgBMAEgAQCAqgHwALQAaAHCAR4D5gBYASIBjAD0AEABIAHcAOwAJAGcARwCqALgArQCgAJMAugBOAGoADgAWACMALwAOAHAARgCIAJtABoBnAAkASQB4AB0AACAfALOAd4ADgEQAu4CAgF8AegAaADcAGABdAFgAVwBoAH4AUgClAKYAiwC7AHkAeABmAFMAQQBrACgAPgAZAGoAbwBkAFIAMAAVAGkAWgB6ABwAACA1gJqAoYB3gC2AV0DoQEEAtABmAFsAXgBfAGEAZgBAAJIAmQCWAI0AqABSAGEAfQBFALsAZwBDAGwAMgABAEsAVgBaAFaAFwBgAF4ATQB0ADYAACAcAIuAqQBIAGAAeYCCgG2AWwCZAIkAuABsAHQARAChALMArQCbAIkAnQBrACoAFgByAHcAZwBCAGgAJwAvADgADwBiAFtAJgBXAEUAfAAEAFsAQCApgIcApIBGgEgAcIByAD4AWgClAKAAiwC3AH0AWAC6AJIAzwD3AKIAvgBMAFkAIgAKAF4AXAB/ACkAJAAkACMAOQAVAFiAFAB4ADAACwBoAEIAgCAKwKkAScBzQDGAK8AbgAaARwCfAKgAnACKAIsAqQCJAOQA4gD/AJ8AiACnAH8AJgAwAAUASgB1AB8AHAAfABYADgA1ACUAPAAlAAgAbwBCAJEAgCA4AGkAU8B+gDGAH0ArwAsAcgBNAJ8AowCfAKkAiQDiAO8A2wDfAK0AZwBrAGIATgB2ADMAOAA5ADYAPAA/ADQAGwAoAB8ANgA+ACkASwCUAJEAgCA5QFqAmQCBAJoAa8AjAD4AFQBfAG8ARACaALkAoADuAOQA9wCnAHkAIwBBAIUAswBaAFAAUwBgAGcAZQBXAEUAaQAkABgANgAaAEoAsAC5AKQAgCAqQFkAjUCDQK2AcgAlgAUAWgBUAFgAbgBPALcAmgDbAPgAugBuAAsAdAB9AHkAbQBkAGQAaQBzAHkAbwBUAH0AIQAYAAsACAB6AGkAjQDSAPMAgCAgAEQAmQCTALUATgBkQDwAGABdAGcAegBSAK0AuQCgAKIAWgADAHcAcgBTAEAAVAB1AH4AdgBvAGsAWwBDAHsAIwASAA7ALQBiAIQAyQD+AJsAgCAPgHCAccB2wEuAv4BEwFAAMQAWAH0AVgCjAKgAkQCVAE0AGgBSAKAAtQBlACsAHwBKAJYAgwCpAFsASgBFAE4AcAAYACmAAIDPANwA+ACQAK8AQCAmAHIAfgBEAIDApQCswGQAJQAdAFQArQCvAKIAtQB0AB0AXgC3AJoAkQBdABsAegBSAI8AswBWAE8ASgBhAG0AQwBwADyADQDHAQUBPQCkAH8AACA",
+      "factor": 0.01,
+      "nodata": -32768,
+      "escala": {
+        "cortes": [
+          0,
+          2,
+          5,
+          10,
+          20
+        ],
+        "colores": [
+          "#2E7D32",
+          "#7CB342",
+          "#FDD835",
+          "#F57C00",
+          "#C62828"
+        ],
+        "etiquetas": [
+          "< 2",
+          "2–5",
+          "5–10",
+          "10–20",
+          "≥ 20"
+        ]
+      },
+      "resumen": {
+        "media": 5.5,
+        "min": 0,
+        "max": 20.9,
+        "pixeles": 1230,
+        "valor_lote": 2.6
+      },
+      "confianza": "baja",
+      "nota": "Valor del lote: pendiente general 0,6 % (plano) × 4,3 meses con NDVI < 0,3 en promedio por píxel (1230 píxeles de la grilla de 1″ (~30 m), campaña 2025/26). El mapa muestra dónde: pendiente del píxel × meses del píxel (media 5,5); la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases propuesta, a validar por la persona 3"
+    }
   },
   "estrategias": [
     {
@@ -2973,56 +3823,59 @@ export const RIO_CUARTO: Salida = {
         "soja",
         "soja"
       ],
-      "resumen": "Línea de base: 6 meses con el lote pelado.",
+      "resumen": "Tu rotación: soja + barbecho. 6 meses con el lote pelado; cercanía 50 % con tus prioridades.",
       "valores": {
-        "agua_mm": -224,
+        "agua_mm": -332,
         "meses_cobertura_baja": 6,
         "aporte_n": 5,
         "rastrojo": 5,
-        "erosion": 48,
-        "ingreso": 50,
+        "erosion": 69,
+        "ingreso": 32,
         "conflictos_helada_calor": {
           "meses_helada_frecuente": [
-            4,
             5,
             6,
-            7
+            7,
+            8
           ],
           "meses_conflicto_helada": [],
           "meses_calor": [
             0,
+            1,
+            2,
+            10,
             11
           ]
         }
       },
       "puntos": {
         "agua": {
-          "seco": 21,
-          "normal": 53,
-          "humedo": 72
+          "seco": 50,
+          "normal": 65,
+          "humedo": 82
         },
         "suelo": 32,
-        "erosion": 48,
-        "ingreso": 50
+        "erosion": 69,
+        "ingreso": 32
       },
       "valores_por_tipo_anio": {
         "seco": {
-          "agua_mm": -413,
-          "lluvia_mm": 569,
-          "uso_mm": 840,
-          "cercania": 38
-        },
-        "normal": {
-          "agua_mm": -224,
-          "lluvia_mm": 769,
-          "uso_mm": 800,
+          "agua_mm": -485,
+          "lluvia_mm": 656,
+          "uso_mm": 977,
           "cercania": 46
         },
-        "humedo": {
-          "agua_mm": -34,
-          "lluvia_mm": 969,
-          "uso_mm": 760,
+        "normal": {
+          "agua_mm": -332,
+          "lluvia_mm": 814,
+          "uso_mm": 942,
           "cercania": 50
+        },
+        "humedo": {
+          "agua_mm": -166,
+          "lluvia_mm": 988,
+          "uso_mm": 907,
+          "cercania": 54
         }
       },
       "diferencia_vs_actual": {
@@ -3031,12 +3884,12 @@ export const RIO_CUARTO: Salida = {
         "erosion": 0,
         "ingreso": 0
       },
-      "cercania": 46,
+      "cercania": 50,
       "cercania_objetivos": {
-        "agua": 53,
+        "agua": 65,
         "suelo": 32,
-        "erosion": 48,
-        "ingreso": 50
+        "erosion": 69,
+        "ingreso": 32
       },
       "que_le_falta": [],
       "sensible_clima": false,
@@ -3044,23 +3897,23 @@ export const RIO_CUARTO: Salida = {
         {
           "regla": "agua",
           "efecto": {
-            "agua": 20.506515130214723
+            "agua": 50.3
           },
-          "dato": "Años secos: lluvia 569 mm, uso estimado 840 mm (kc × ET0), balance −413 mm · NASA POWER, 10 campañas"
+          "dato": "Años secos: lluvia 656 mm × 0,75 (suelo franco) cubre el 50 % del uso 977 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "agua",
           "efecto": {
-            "agua": 53.202210663198954
+            "agua": 64.7
           },
-          "dato": "Años normales: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance −224 mm · NASA POWER, 10 campañas"
+          "dato": "Años normales: lluvia 814 mm × 0,75 (suelo franco) cubre el 65 % del uso 942 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "agua",
           "efecto": {
-            "agua": 72.40444454765002
+            "agua": 81.7
           },
-          "dato": "Años húmedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance −34 mm · NASA POWER, 10 campañas"
+          "dato": "Años húmedos: lluvia 988 mm × 0,75 (suelo franco) cubre el 82 % del uso 907 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "suelo_base",
@@ -3095,7 +3948,7 @@ export const RIO_CUARTO: Salida = {
           "efecto": {
             "suelo": -10
           },
-          "dato": "Repite soja de la campaña pasada"
+          "dato": "Repite soja de la campaña pasada · dato del productor"
         },
         {
           "regla": "erosion_base",
@@ -3107,9 +3960,9 @@ export const RIO_CUARTO: Salida = {
         {
           "regla": "meses_pelados",
           "efecto": {
-            "erosion": -51.839999999999996
+            "erosion": -30.8
           },
-          "dato": "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM"
+          "dato": "6 meses pelados (mayo, junio, julio, agosto, septiembre, octubre) con pendiente 0,6 % y 178 mm de lluvia en esos meses en años normales (NASA POWER)"
         },
         {
           "regla": "ingreso",
@@ -3117,61 +3970,58 @@ export const RIO_CUARTO: Salida = {
             "ingreso": 50
           },
           "dato": "Cultivos que se venden: Soja · sin precios"
+        },
+        {
+          "regla": "riesgo_calor",
+          "efecto": {
+            "ingreso": -17.7
+          },
+          "dato": "Máxima ≥ 35 °C en floración: enero 97 % de los años, febrero 80 % de los años · NASA POWER"
         }
       ],
       "probabilidades": [
         {
-          "evento": "helada",
-          "mes": 10,
-          "cultivo": "soja",
-          "anios": 1,
-          "de": 30,
-          "pct": 3,
-          "texto": "Helada en noviembre con soja en el lote: 1 de 30 años (3 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
-          "contraste": null
-        },
-        {
           "evento": "siembra_seca",
           "mes": 10,
           "cultivo": "soja",
-          "anios": 4,
+          "anios": 3,
           "de": 30,
-          "pct": 13,
-          "texto": "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "pct": 10,
+          "texto": "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
           "contraste": null
         },
         {
           "evento": "calor",
           "mes": 0,
           "cultivo": "soja",
-          "anios": 20,
+          "anios": 29,
           "de": 30,
-          "pct": 67,
-          "texto": "Máxima de 35 °C o más en enero con soja: 20 de 30 años (67 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "pct": 97,
+          "texto": "Máxima de 35 °C o más en enero con soja: 29 de 30 años (97 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
           "contraste": null
         }
       ],
       "por_que": [
-        "6 meses con el lote pelado"
+        "6 meses con el lote pelado (mayo, junio, julio, agosto, septiembre, octubre)",
+        "Tus prioridades: agua 3, suelo 3, erosión 3, ingreso 3 (pesan al cuadrado en la cercanía)"
       ],
       "evidencia": [
-        "Años húmedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance −34 mm · NASA POWER, 10 campañas",
-        "Años normales: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance −224 mm · NASA POWER, 10 campañas",
-        "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM",
-        "Cultivos que se venden: Soja · sin precios"
+        "Años normales: lluvia 814 mm × 0,75 (suelo franco) cubre el 65 % del uso 942 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas",
+        "Cultivos que se venden: Soja · sin precios",
+        "6 meses pelados (mayo, junio, julio, agosto, septiembre, octubre) con pendiente 0,6 % y 178 mm de lluvia en esos meses en años normales (NASA POWER)",
+        "Máxima ≥ 35 °C en floración: enero 97 % de los años, febrero 80 % de los años · NASA POWER",
+        "Soja continua (soja + barbecho) durante 15 años: infiltración de 73 mm/h contra ~106 mm/h y materia orgánica de 2,5 % contra 3,4 a 3,9 % con trigo/soja o cobertura/soja · INTA Marcos Juárez (Gudelj et al., 2024)"
       ],
       "beneficios": [],
       "vacios": [
-        "Precios",
-        "Materia orgánica"
+        "Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios"
       ],
       "riesgos": [
-        "Poca reserva de agua en años secos",
         "Repite el cultivo de la campaña pasada",
-        "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)"
+        "Máxima de 35 °C o más en la mitad de los años con cultivo de verano: enero, febrero, marzo, noviembre, diciembre",
+        "Lo que vio el satélite no coincide con la rotación cargada: 3 meses con el lote pelado en 2025/26, contra 6 según el calendario"
       ]
     },
     {
@@ -3194,94 +4044,97 @@ export const RIO_CUARTO: Salida = {
         "soja",
         "soja"
       ],
-      "resumen": "Gana en suelo y erosión; pierde en agua; cuesta ~124 mm en años secos.",
+      "resumen": "Sube en salud del suelo +55, erosión +18; baja en agua −10 frente a lo que hacés hoy. Balance de agua en años secos: −170 mm.",
       "valores": {
-        "agua_mm": -342,
+        "agua_mm": -497,
         "meses_cobertura_baja": 1,
         "aporte_n": 35,
         "rastrojo": 20,
-        "erosion": 91,
-        "ingreso": 45,
+        "erosion": 87,
+        "ingreso": 27,
         "conflictos_helada_calor": {
           "meses_helada_frecuente": [
-            4,
             5,
             6,
-            7
+            7,
+            8
           ],
           "meses_conflicto_helada": [],
           "meses_calor": [
             0,
+            1,
+            2,
+            10,
             11
           ]
         }
       },
       "puntos": {
         "agua": {
-          "seco": 4,
-          "normal": 42,
-          "humedo": 64
+          "seco": 43,
+          "normal": 55,
+          "humedo": 69
         },
         "suelo": 87,
-        "erosion": 91,
-        "ingreso": 45
+        "erosion": 87,
+        "ingreso": 27
       },
       "valores_por_tipo_anio": {
         "seco": {
-          "agua_mm": -537,
-          "lluvia_mm": 569,
-          "uso_mm": 964,
-          "cercania": 57
+          "agua_mm": -655,
+          "lluvia_mm": 656,
+          "uso_mm": 1147,
+          "cercania": 61
         },
         "normal": {
-          "agua_mm": -342,
-          "lluvia_mm": 769,
-          "uso_mm": 918,
-          "cercania": 66
+          "agua_mm": -497,
+          "lluvia_mm": 814,
+          "uso_mm": 1107,
+          "cercania": 64
         },
         "humedo": {
-          "agua_mm": -146,
-          "lluvia_mm": 969,
-          "uso_mm": 872,
-          "cercania": 72
+          "agua_mm": -329,
+          "lluvia_mm": 988,
+          "uso_mm": 1070,
+          "cercania": 68
         }
       },
       "diferencia_vs_actual": {
-        "agua": -11,
+        "agua": -10,
         "suelo": 55,
-        "erosion": 43,
+        "erosion": 18,
         "ingreso": -5
       },
-      "cercania": 66,
+      "cercania": 64,
       "cercania_objetivos": {
-        "agua": 42,
+        "agua": 55,
         "suelo": 87,
-        "erosion": 91,
-        "ingreso": 45
+        "erosion": 87,
+        "ingreso": 27
       },
       "que_le_falta": [],
-      "sensible_clima": true,
+      "sensible_clima": false,
       "reglas_aplicadas": [
         {
           "regla": "agua",
           "efecto": {
-            "agua": 4.176954099743412
+            "agua": 42.9
           },
-          "dato": "Años secos: lluvia 569 mm, uso estimado 964 mm (kc × ET0), balance −537 mm · NASA POWER, 10 campañas"
+          "dato": "Años secos: lluvia 656 mm × 0,75 (suelo franco) cubre el 43 % del uso 1147 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "agua",
           "efecto": {
-            "agua": 41.69375812743823
+            "agua": 55.1
           },
-          "dato": "Años normales: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance −342 mm · NASA POWER, 10 campañas"
+          "dato": "Años normales: lluvia 814 mm × 0,75 (suelo franco) cubre el 55 % del uso 1107 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "agua",
           "efecto": {
-            "agua": 63.727436683385974
+            "agua": 69.2
           },
-          "dato": "Años húmedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance −146 mm · NASA POWER, 10 campañas"
+          "dato": "Años húmedos: lluvia 988 mm × 0,75 (suelo franco) cubre el 69 % del uso 1070 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "suelo_base",
@@ -3330,7 +4183,7 @@ export const RIO_CUARTO: Salida = {
           "efecto": {
             "suelo": -10
           },
-          "dato": "Repite soja de la campaña pasada"
+          "dato": "Repite soja de la campaña pasada · dato del productor"
         },
         {
           "regla": "erosion_base",
@@ -3342,9 +4195,9 @@ export const RIO_CUARTO: Salida = {
         {
           "regla": "meses_pelados",
           "efecto": {
-            "erosion": -8.64
+            "erosion": -13
           },
-          "dato": "1 meses pelados (oct) con pendiente 0.6 % · SRTM"
+          "dato": "1 meses pelados (octubre) con pendiente 0,6 % y 88 mm de lluvia en esos meses en años normales (NASA POWER)"
         },
         {
           "regla": "ingreso",
@@ -3352,6 +4205,13 @@ export const RIO_CUARTO: Salida = {
             "ingreso": 45
           },
           "dato": "Cultivos que se venden: Soja · sin precios"
+        },
+        {
+          "regla": "riesgo_calor",
+          "efecto": {
+            "ingreso": -17.7
+          },
+          "dato": "Máxima ≥ 35 °C en floración: enero 97 % de los años, febrero 80 % de los años · NASA POWER"
         }
       ],
       "probabilidades": [
@@ -3363,63 +4223,65 @@ export const RIO_CUARTO: Salida = {
           "de": 30,
           "pct": 47,
           "texto": "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
           "contraste": null
         },
         {
           "evento": "siembra_seca",
           "mes": 10,
           "cultivo": "soja",
-          "anios": 4,
+          "anios": 3,
           "de": 30,
-          "pct": 13,
-          "texto": "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "pct": 10,
+          "texto": "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
           "contraste": null
         },
         {
           "evento": "calor",
           "mes": 0,
           "cultivo": "soja",
-          "anios": 20,
+          "anios": 29,
           "de": 30,
-          "pct": 67,
-          "texto": "Máxima de 35 °C o más en enero con soja: 20 de 30 años (67 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "pct": 97,
+          "texto": "Máxima de 35 °C o más en enero con soja: 29 de 30 años (97 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
           "contraste": null
         }
       ],
       "por_que": [
-        "Cubre el suelo 11 meses",
-        "La vicia fija nitrógeno"
+        "Elegida por tus prioridades y el clima del lote: Vicia: prioridad suelo 3 y erosión 3, pendiente 0,6 %, lluvia de invierno en años secos 123 mm",
+        "Cubre el suelo 11 meses (hoy 6)",
+        "La vicia fija nitrógeno",
+        "Tus prioridades: agua 3, suelo 3, erosión 3, ingreso 3 (pesan al cuadrado en la cercanía)"
       ],
       "evidencia": [
-        "Años húmedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance −146 mm · NASA POWER, 10 campañas",
+        "Años normales: lluvia 814 mm × 0,75 (suelo franco) cubre el 55 % del uso 1107 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas",
         "Cultivos que se venden: Soja · sin precios",
-        "Años normales: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance −342 mm · NASA POWER, 10 campañas",
-        "Vicia fija nitrógeno · tabla de cultivos"
+        "Vicia fija nitrógeno · tabla de cultivos",
+        "11 meses con cultivo vivo · calendario",
+        "Vicia como antecesor: ~110 a 130 kg N/ha disponibles para el cultivo siguiente · ensayos INTA Marcos Juárez y General Villegas",
+        "Con cultivos de cobertura, el uso de herbicidas en 6 años de soja y maíz bajó de 31 a 13 kg/ha de principio activo · INTA Marcos Juárez"
       ],
       "beneficios": [
-        "5 meses más de cobertura que hoy",
-        "Suelo: +55 puntos frente a hoy",
-        "Erosión: +43 puntos frente a hoy"
+        "Salud del suelo: +55 puntos frente a lo que hacés hoy",
+        "Erosión: +18 puntos frente a lo que hacés hoy",
+        "5 meses más con el suelo cubierto"
       ],
       "vacios": [
-        "Precios",
-        "Materia orgánica"
+        "Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios"
       ],
       "riesgos": [
-        "Poca reserva de agua en años secos",
         "Repite el cultivo de la campaña pasada",
-        "Secado ~30 días antes de la siembra",
-        "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)",
-        "El resultado cambia mucho entre años secos y húmedos: sensible al clima"
+        "Secado de la cobertura ~30 días antes de la siembra de verano",
+        "Máxima de 35 °C o más en la mitad de los años con cultivo de verano: enero, febrero, marzo, noviembre, diciembre",
+        "En años secos la vicia consumió más agua que el centeno y afectó al maíz siguiente · INTA Manfredi"
       ]
     },
     {
       "id": "B",
       "nombre": "Cultivo de invierno",
-      "especies": "Trigo + soja 2ª",
+      "especies": "Trigo + soja de 2ª",
       "disponible": true,
       "motivo_descarte": null,
       "calendario": [
@@ -3436,70 +4298,72 @@ export const RIO_CUARTO: Salida = {
         "trigo",
         "soja2"
       ],
-      "resumen": "Gana en suelo, erosión y ingreso; cuesta ~53 mm en años secos.",
+      "resumen": "Sube en salud del suelo +30, erosión +27, ingreso +40 frente a lo que hacés hoy. Balance de agua en años secos: −55 mm.",
       "valores": {
-        "agua_mm": -274,
+        "agua_mm": -388,
         "meses_cobertura_baja": 1,
         "aporte_n": 5,
         "rastrojo": 25,
-        "erosion": 91,
-        "ingreso": 85,
+        "erosion": 96,
+        "ingreso": 72,
         "conflictos_helada_calor": {
           "meses_helada_frecuente": [
-            4,
             5,
             6,
-            7
+            7,
+            8
           ],
           "meses_conflicto_helada": [],
           "meses_calor": [
             0,
+            1,
+            2,
             11
           ]
         }
       },
       "puntos": {
         "agua": {
-          "seco": 14,
-          "normal": 48,
-          "humedo": 69
+          "seco": 48,
+          "normal": 61,
+          "humedo": 76
         },
         "suelo": 62,
-        "erosion": 91,
-        "ingreso": 85
+        "erosion": 96,
+        "ingreso": 72
       },
       "valores_por_tipo_anio": {
         "seco": {
-          "agua_mm": -466,
-          "lluvia_mm": 569,
-          "uso_mm": 893,
-          "cercania": 63
+          "agua_mm": -540,
+          "lluvia_mm": 656,
+          "uso_mm": 1032,
+          "cercania": 70
         },
         "normal": {
-          "agua_mm": -274,
-          "lluvia_mm": 769,
-          "uso_mm": 850,
-          "cercania": 72
+          "agua_mm": -388,
+          "lluvia_mm": 814,
+          "uso_mm": 998,
+          "cercania": 73
         },
         "humedo": {
-          "agua_mm": -81,
-          "lluvia_mm": 969,
-          "uso_mm": 808,
-          "cercania": 77
+          "agua_mm": -227,
+          "lluvia_mm": 988,
+          "uso_mm": 969,
+          "cercania": 76
         }
       },
       "diferencia_vs_actual": {
-        "agua": -5,
+        "agua": -4,
         "suelo": 30,
-        "erosion": 43,
-        "ingreso": 35
+        "erosion": 27,
+        "ingreso": 40
       },
-      "cercania": 72,
+      "cercania": 73,
       "cercania_objetivos": {
-        "agua": 48,
+        "agua": 61,
         "suelo": 62,
-        "erosion": 91,
-        "ingreso": 85
+        "erosion": 96,
+        "ingreso": 72
       },
       "que_le_falta": [],
       "sensible_clima": false,
@@ -3507,23 +4371,23 @@ export const RIO_CUARTO: Salida = {
         {
           "regla": "agua",
           "efecto": {
-            "agua": 13.587209608828573
+            "agua": 47.6
           },
-          "dato": "Años secos: lluvia 569 mm, uso estimado 893 mm (kc × ET0), balance −466 mm · NASA POWER, 10 campañas"
+          "dato": "Años secos: lluvia 656 mm × 0,75 (suelo franco) cubre el 48 % del uso 1032 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "agua",
           "efecto": {
-            "agua": 48.325747724317296
+            "agua": 61.1
           },
-          "dato": "Años normales: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance −274 mm · NASA POWER, 10 campañas"
+          "dato": "Años normales: lluvia 814 mm × 0,75 (suelo franco) cubre el 61 % del uso 998 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "agua",
           "efecto": {
-            "agua": 68.7277463000805
+            "agua": 76.5
           },
-          "dato": "Años húmedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance −81 mm · NASA POWER, 10 campañas"
+          "dato": "Años húmedos: lluvia 988 mm × 0,75 (suelo franco) cubre el 77 % del uso 969 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "suelo_base",
@@ -3537,14 +4401,14 @@ export const RIO_CUARTO: Salida = {
           "efecto": {
             "suelo": 5
           },
-          "dato": "Soja 2ª fija nitrógeno · tabla de cultivos"
+          "dato": "Soja de 2ª fija nitrógeno · tabla de cultivos"
         },
         {
           "regla": "rastrojo",
           "efecto": {
             "suelo": 5
           },
-          "dato": "Soja 2ª deja rastrojo (5) · tabla de cultivos"
+          "dato": "Soja de 2ª deja rastrojo (5) · tabla de cultivos"
         },
         {
           "regla": "rastrojo",
@@ -3565,7 +4429,7 @@ export const RIO_CUARTO: Salida = {
           "efecto": {
             "suelo": -10
           },
-          "dato": "Repite soja de la campaña pasada"
+          "dato": "Repite soja de la campaña pasada · dato del productor"
         },
         {
           "regla": "erosion_base",
@@ -3577,30 +4441,26 @@ export const RIO_CUARTO: Salida = {
         {
           "regla": "meses_pelados",
           "efecto": {
-            "erosion": -8.64
+            "erosion": -4.3
           },
-          "dato": "1 meses pelados (may) con pendiente 0.6 % · SRTM"
+          "dato": "1 meses pelados (mayo) con pendiente 0,6 % y 20 mm de lluvia en esos meses en años normales (NASA POWER)"
         },
         {
           "regla": "ingreso",
           "efecto": {
             "ingreso": 85
           },
-          "dato": "Cultivos que se venden: Soja 2ª, Trigo · sin precios"
+          "dato": "Cultivos que se venden: Soja de 2ª, Trigo · sin precios"
+        },
+        {
+          "regla": "riesgo_calor",
+          "efecto": {
+            "ingreso": -13.3
+          },
+          "dato": "Máxima ≥ 35 °C en floración: febrero 80 % de los años, marzo 53 % de los años · NASA POWER"
         }
       ],
       "probabilidades": [
-        {
-          "evento": "siembra_seca",
-          "mes": 5,
-          "cultivo": "trigo",
-          "anios": 13,
-          "de": 30,
-          "pct": 43,
-          "texto": "Siembra de trigo (junio) con menos de la mitad de la lluvia normal: 13 de 30 años (43 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
-          "contraste": null
-        },
         {
           "evento": "siembra_seca",
           "mes": 11,
@@ -3608,45 +4468,58 @@ export const RIO_CUARTO: Salida = {
           "anios": 3,
           "de": 30,
           "pct": 10,
-          "texto": "Siembra de soja 2ª (diciembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "texto": "Siembra de soja de 2ª (diciembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+          "contraste": null
+        },
+        {
+          "evento": "siembra_seca",
+          "mes": 5,
+          "cultivo": "trigo",
+          "anios": 17,
+          "de": 30,
+          "pct": 57,
+          "texto": "Siembra de trigo (junio) con menos de la mitad de la lluvia normal: 17 de 30 años (57 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
           "contraste": null
         },
         {
           "evento": "calor",
           "mes": 0,
           "cultivo": "soja2",
-          "anios": 20,
+          "anios": 29,
           "de": 30,
-          "pct": 67,
-          "texto": "Máxima de 35 °C o más en enero con soja 2ª: 20 de 30 años (67 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "pct": 97,
+          "texto": "Máxima de 35 °C o más en enero con soja de 2ª: 29 de 30 años (97 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
           "contraste": null
         }
       ],
       "por_que": [
-        "Suma un cultivo que se vende en invierno"
+        "Elegida por tus prioridades y el clima del lote: Trigo: prioridad agua 3, lluvia de invierno en años secos 123 mm",
+        "Cubre el suelo 11 meses (hoy 6)",
+        "Suma un cultivo que se vende en invierno (trigo)",
+        "Tus prioridades: agua 3, suelo 3, erosión 3, ingreso 3 (pesan al cuadrado en la cercanía)"
       ],
       "evidencia": [
-        "Cultivos que se venden: Soja 2ª, Trigo · sin precios",
-        "Años húmedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance −81 mm · NASA POWER, 10 campañas",
-        "Años normales: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance −274 mm · NASA POWER, 10 campañas",
-        "11 meses con cultivo vivo · calendario"
+        "Años normales: lluvia 814 mm × 0,75 (suelo franco) cubre el 61 % del uso 998 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas",
+        "Cultivos que se venden: Soja de 2ª, Trigo · sin precios",
+        "11 meses con cultivo vivo · calendario",
+        "Trigo deja rastrojo (20) · tabla de cultivos"
       ],
       "beneficios": [
-        "5 meses más de cobertura que hoy",
-        "Suelo: +30 puntos frente a hoy",
-        "Erosión: +43 puntos frente a hoy",
-        "Ingreso: +35 puntos frente a hoy"
+        "Salud del suelo: +30 puntos frente a lo que hacés hoy",
+        "Erosión: +27 puntos frente a lo que hacés hoy",
+        "Ingreso: +40 puntos frente a lo que hacés hoy",
+        "5 meses más con el suelo cubierto"
       ],
       "vacios": [
-        "Precios",
-        "Materia orgánica"
+        "Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios"
       ],
       "riesgos": [
-        "Poca reserva de agua en años secos",
         "Repite el cultivo de la campaña pasada",
-        "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)"
+        "Máxima de 35 °C o más en la mitad de los años con cultivo de verano: enero, febrero, marzo, diciembre",
+        "Soja de 2ª: efecto secante del trigo antecesor; en el centro-oeste y sur de Córdoba depende de las lluvias de diciembre a febrero · INTA Manfredi"
       ]
     },
     {
@@ -3669,69 +4542,72 @@ export const RIO_CUARTO: Salida = {
         "sorgo",
         "sorgo"
       ],
-      "resumen": "Gana en agua, suelo y erosión.",
+      "resumen": "Sube en agua +22, salud del suelo +30, erosión +20, ingreso +18 frente a lo que hacés hoy. Balance de agua en años secos: +251 mm.",
       "valores": {
-        "agua_mm": -18,
+        "agua_mm": -90,
         "meses_cobertura_baja": 6,
         "aporte_n": 0,
         "rastrojo": 30,
-        "erosion": 68,
+        "erosion": 89,
         "ingreso": 50,
         "conflictos_helada_calor": {
           "meses_helada_frecuente": [
-            4,
             5,
             6,
-            7
+            7,
+            8
           ],
           "meses_conflicto_helada": [],
           "meses_calor": [
             0,
+            1,
+            2,
+            10,
             11
           ]
         }
       },
       "puntos": {
         "agua": {
-          "seco": 49,
-          "normal": 73,
-          "humedo": 87
+          "seco": 68,
+          "normal": 87,
+          "humedo": 100
         },
         "suelo": 62,
-        "erosion": 68,
+        "erosion": 89,
         "ingreso": 50
       },
       "valores_por_tipo_anio": {
         "seco": {
-          "agua_mm": -198,
-          "lluvia_mm": 569,
-          "uso_mm": 625,
-          "cercania": 57
+          "agua_mm": -234,
+          "lluvia_mm": 656,
+          "uso_mm": 726,
+          "cercania": 67
         },
         "normal": {
-          "agua_mm": -18,
-          "lluvia_mm": 769,
-          "uso_mm": 595,
-          "cercania": 63
+          "agua_mm": -90,
+          "lluvia_mm": 814,
+          "uso_mm": 700,
+          "cercania": 72
         },
         "humedo": {
-          "agua_mm": 161,
-          "lluvia_mm": 969,
-          "uso_mm": 565,
-          "cercania": 67
+          "agua_mm": 66,
+          "lluvia_mm": 988,
+          "uso_mm": 675,
+          "cercania": 75
         }
       },
       "diferencia_vs_actual": {
-        "agua": 20,
+        "agua": 22,
         "suelo": 30,
         "erosion": 20,
-        "ingreso": 0
+        "ingreso": 18
       },
-      "cercania": 63,
+      "cercania": 72,
       "cercania_objetivos": {
-        "agua": 73,
+        "agua": 87,
         "suelo": 62,
-        "erosion": 68,
+        "erosion": 89,
         "ingreso": 50
       },
       "que_le_falta": [],
@@ -3740,23 +4616,23 @@ export const RIO_CUARTO: Salida = {
         {
           "regla": "agua",
           "efecto": {
-            "agua": 48.87566776789792
+            "agua": 67.7
           },
-          "dato": "Años secos: lluvia 569 mm, uso estimado 625 mm (kc × ET0), balance −198 mm · NASA POWER, 10 campañas"
+          "dato": "Años secos: lluvia 656 mm × 0,75 (suelo franco) cubre el 68 % del uso 726 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "agua",
           "efecto": {
-            "agua": 73.19570871261378
+            "agua": 87.1
           },
-          "dato": "Años normales: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance −18 mm · NASA POWER, 10 campañas"
+          "dato": "Años normales: lluvia 814 mm × 0,75 (suelo franco) cubre el 87 % del uso 700 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "agua",
           "efecto": {
-            "agua": 87.478907362685
+            "agua": 100
           },
-          "dato": "Años húmedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas"
+          "dato": "Años húmedos: lluvia 988 mm × 0,75 (suelo franco) cubre el 110 % del uso 675 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas"
         },
         {
           "regla": "suelo_base",
@@ -3789,9 +4665,9 @@ export const RIO_CUARTO: Salida = {
         {
           "regla": "meses_pelados",
           "efecto": {
-            "erosion": -51.839999999999996
+            "erosion": -30.8
           },
-          "dato": "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM"
+          "dato": "6 meses pelados (mayo, junio, julio, agosto, septiembre, octubre) con pendiente 0,6 % y 178 mm de lluvia en esos meses en años normales (NASA POWER)"
         },
         {
           "regla": "rastrojo_protege",
@@ -3813,46 +4689,48 @@ export const RIO_CUARTO: Salida = {
           "evento": "siembra_seca",
           "mes": 10,
           "cultivo": "sorgo",
-          "anios": 4,
+          "anios": 3,
           "de": 30,
-          "pct": 13,
-          "texto": "Siembra de sorgo (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "pct": 10,
+          "texto": "Siembra de sorgo (noviembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
           "contraste": null
         },
         {
           "evento": "calor",
           "mes": 0,
           "cultivo": "sorgo",
-          "anios": 20,
+          "anios": 29,
           "de": 30,
-          "pct": 67,
-          "texto": "Máxima de 35 °C o más en enero con sorgo: 20 de 30 años (67 %)",
-          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "pct": 97,
+          "texto": "Máxima de 35 °C o más en enero con sorgo: 29 de 30 años (97 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
           "contraste": null
         }
       ],
       "por_que": [
-        "Sorgo corta el ciclo de plagas y tolera la sequía"
+        "Elegida por tus prioridades y el clima del lote: Sorgo: prioridad agua 3, lluvia de verano en años secos 468 mm",
+        "Sorgo corta el ciclo de plagas de soja y tolera sequía y calor",
+        "Tus prioridades: agua 3, suelo 3, erosión 3, ingreso 3 (pesan al cuadrado en la cercanía)"
       ],
       "evidencia": [
-        "Años húmedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas",
-        "Años normales: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance −18 mm · NASA POWER, 10 campañas",
-        "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM",
-        "Cultivos que se venden: Sorgo · sin precios"
+        "Años normales: lluvia 814 mm × 0,75 (suelo franco) cubre el 87 % del uso 700 mm (kc × ET0 de NASA POWER (Hargreaves)); lluvia de NASA POWER, 10 campañas",
+        "Cultivos que se venden: Sorgo · sin precios",
+        "6 meses pelados (mayo, junio, julio, agosto, septiembre, octubre) con pendiente 0,6 % y 178 mm de lluvia en esos meses en años normales (NASA POWER)",
+        "Sorgo deja rastrojo (30) · tabla de cultivos"
       ],
       "beneficios": [
-        "+215 mm de balance de agua en años secos",
-        "Agua: +20 puntos frente a hoy",
-        "Suelo: +30 puntos frente a hoy",
-        "Erosión: +20 puntos frente a hoy"
+        "Agua: +22 puntos frente a lo que hacés hoy",
+        "Salud del suelo: +30 puntos frente a lo que hacés hoy",
+        "Erosión: +20 puntos frente a lo que hacés hoy",
+        "Ingreso: +18 puntos frente a lo que hacés hoy",
+        "+251 mm de balance de agua en años secos"
       ],
       "vacios": [
-        "Precios",
-        "Materia orgánica"
+        "Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios"
       ],
       "riesgos": [
-        "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)"
+        "Máxima de 35 °C o más en la mitad de los años con cultivo de verano: enero, febrero, marzo, noviembre, diciembre"
       ]
     }
   ],
@@ -3861,12 +4739,9 @@ export const RIO_CUARTO: Salida = {
     "objetivos": [],
     "texto": ""
   },
-  "periodo_clima": "1995/96–2024/25",
+  "periodo_clima": "1996/97 a 2025/26",
   "informacion_falta": [
-    "Respuesta de prueba (mock): valores ilustrativos, no son datos de NASA",
-    "NDVI de noviembre de 2024: sin escena HLS limpia ni compuesto MODIS",
-    "Capa de erosión",
-    "Serie por campaña"
+    "Mock del front: se muestra la respuesta precalculada del lote de la demo (Río Cuarto); solo la superficie y la ubicación siguen al lote dibujado"
   ],
   "aviso": "Herramienta de apoyo: no reemplaza el criterio del productor ni del agrónomo.",
   "es_mock": true
