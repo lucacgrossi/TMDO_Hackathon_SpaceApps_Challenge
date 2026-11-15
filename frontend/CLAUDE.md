@@ -2,7 +2,7 @@
 
 Contexto, principios y alcance: `../CLAUDE.md` (no se repiten acá). Producto y requerimientos: `../docs/mvp-alcance.md`. **Diseño visual: `./DESIGN.md` y el Figma [AgroPixel · Rediseño del front](https://www.figma.com/design/uQbWWU8RVCaWDeVma4Padn)** (página 03: qué componente y qué store usa cada pantalla). El prototipo `../docs/prototipo/field-shift-prototipo.html` queda solo como referencia de comportamiento del mapa.
 
-Dueños: persona 4 (mapa, entradas y carga) y persona 5 (dashboard: Clima histórico, Rotaciones y PDF). Coordinar antes de tocar archivos del otro.
+Dueños y reparto del rediseño (persona 4, persona 5 y Luca): **`./PLAN.md`**. Coordinar antes de tocar archivos de otro.
 
 ## Stack
 **Next.js (App Router) + TypeScript + Tailwind + react-leaflet + recharts + zustand**, con vitest para los tests (ver `package.json`). El contrato de la API lo define la persona 1 en `../backend/app/api/contrato.py`.
