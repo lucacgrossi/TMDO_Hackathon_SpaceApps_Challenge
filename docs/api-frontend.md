@@ -209,7 +209,8 @@ Las columnas con `disponible: false` no tienen `puntos` y no se recalculan. Lo q
 
 - `clima_mensual` (12 meses, 0 = enero): `lluvia_mm`, `minima_media_c`, `maxima_media_c`, `t_media_c?`, `amplitud_diaria_c?`, `et0_mm`, `balance_mm`, `anios_con_helada`, `anios_con_35c`, `helada_frecuente` + `n_anios`, `periodo`, `fuente`, `resolucion`.
 - `tipos_de_anio`: `metodo` (`terciles_balance` o `terciles_lluvia`), listas de campañas `seco`/`normal`/`humedo` (ej. `"2008/09"`), `umbral_seco_mm`, `umbral_humedo_mm`.
-- `serie_anual` (puede ser `null`): `campanas` = `[{campana, lluvia_mm, balance_mm, tipo}]`, más `ultimas_10_mm`, `previas_20_mm`, `secos_en_ultimas_10`.
+- `serie_anual` (puede ser `null`): `campanas` = `[{campana, lluvia_mm, balance_mm, tipo, mensual}]`, más `ultimas_10_mm`, `previas_20_mm`, `secos_en_ultimas_10`.
+  - `mensual` (4.5, para elegir una campaña en Clima histórico): `{lluvia_mm[12], t_min_c[12], t_max_c[12], et0_mm[12] | null, balance_mm[12] | null}`, redondeados a 0,1. **Índice 0 = enero**, como el resto del contrato: en la campaña `2024/25`, el índice 0 es enero de 2025 y el 6 es julio de 2024; para dibujarla de julio a junio, rotar con `[6..11, 0..5]`. `et0_mm` y `balance_mm` van `null` si falta la ET0. Se compara contra `clima_mensual` (media de las 30 campañas, misma celda y período): `t_min_c` y `t_max_c` son la mínima más baja y la máxima más alta del mes (extremos de POWER), así que van contra `minima_media_c` y `maxima_media_c`, no contra `t_media_c`. Puede venir `null`: en ese caso, deshabilitar la selección.
 - `clima_celda.bbox` = `[oeste, sur, este, norte]` (**ojo: orden distinto a `bounds` de las capas**).
 
 ### 4.8 `visto_por_satelite`
