@@ -1,6 +1,16 @@
 import { describe, expect, it } from "vitest";
 import { LOTE_DEMO, type LatLng } from "@/lib/entradas";
-import { COLORES_SATELITE, grillaDelLote, PASO_GRILLA, SATELITE, tonosFranjas, trazosGrilla } from "@/lib/momentos";
+import {
+  aperturaNubes,
+  COLORES_SATELITE,
+  fechaNubes,
+  grillaDelLote,
+  PASO_GRILLA,
+  SATELITE,
+  tonosFranjas,
+  trazosGrilla,
+  urlNubes,
+} from "@/lib/momentos";
 
 describe("satélite pixel", () => {
   it("todas las filas miden lo mismo y solo usan colores conocidos", () => {
@@ -77,5 +87,31 @@ describe("tonosFranjas", () => {
     const t = tonosFranjas([null, 10, 20, 30]);
     expect(t[0]).toBeNull();
     expect(t[1]?.lado).toBe("seco");
+  });
+});
+
+describe("nubes de la intro", () => {
+  it("usa la imagen de ayer en UTC", () => {
+    expect(fechaNubes(new Date("2026-11-15T02:00:00Z"))).toBe("2026-11-14");
+    expect(fechaNubes(new Date("2026-03-01T12:00:00Z"))).toBe("2026-02-28");
+  });
+
+  it("la URL es la teselas de GIBS de esa fecha", () => {
+    expect(urlNubes("2026-11-14")).toBe(
+      "https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_NOAA20_CorrectedReflectance_TrueColor/default/2026-11-14/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg",
+    );
+  });
+
+  it("se abren entre el 15 % y el 80 % del vuelo, sin retroceder", () => {
+    expect(aperturaNubes(0)).toBe(0);
+    expect(aperturaNubes(0.15)).toBe(0);
+    expect(aperturaNubes(0.8)).toBeCloseTo(1);
+    expect(aperturaNubes(1)).toBe(1);
+    let antes = -1;
+    for (let t = 0; t <= 1; t += 0.05) {
+      const a = aperturaNubes(t);
+      expect(a).toBeGreaterThanOrEqual(antes);
+      antes = a;
+    }
   });
 });

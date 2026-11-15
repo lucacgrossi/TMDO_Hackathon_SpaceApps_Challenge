@@ -130,6 +130,8 @@ export default function Mapa() {
             maxZoom={ZOOM_MAX}
             maxNativeZoom={ZOOM_NATIVO_ESRI}
             opacity={0.85}
+            // La intro de la órbita la esconde durante el vuelo (ver IntroOrbita).
+            className="capa-nombres"
           />
           {/* Abajo a la izquierda: arriba están la caja de S1 y las herramientas del mapa. */}
           <ZoomControl position="bottomleft" />

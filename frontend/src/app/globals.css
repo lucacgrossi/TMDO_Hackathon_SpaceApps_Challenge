@@ -59,6 +59,8 @@ button,select,input{font:inherit;color:inherit}
 #map{position:fixed;inset:0;background:#0d120f}
 .leaflet-container{font-family:var(--f)}
 .leaflet-control-attribution{font-size:10px}
+/* Nombres del mapa: vuelven con un fundido al terminar la intro de la órbita */
+.capa-nombres{transition:opacity .5s var(--ease-out)}
 /* Controles del mapa al costado de la caja (no debajo); el crédito de las imágenes siempre visible */
 @media (min-width:901px){.leaflet-top.leaflet-left{top:64px;left:6px}.leaflet-bottom.leaflet-right{right:376px;transition:bottom .35s}
   body.sheet-open .leaflet-bottom.leaflet-right{bottom:calc(min(62vh,620px) + 22px)}}

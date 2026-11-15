@@ -19,20 +19,24 @@ interface Pixelado {
   grilla: GrillaLote;
 }
 
-/** La grilla como imagen: un cuadrado por celda de ~30 m dentro del lote, con 1 px de junta. */
-function imagenGrilla(g: GrillaLote): string | null {
+/**
+ * La grilla como imagen: un cuadrado por celda de ~30 m dentro del lote, con
+ * 1 px de junta. Se codifica con `toBlob` (asíncrono, fuera del hilo
+ * principal): `toDataURL` trababa la pantalla ~90 ms al cerrar el lote.
+ */
+function imagenGrilla(g: GrillaLote): Promise<string | null> {
   const k = Math.max(2, Math.min(12, Math.floor(LADO_MAXIMO / Math.max(g.columnas, g.filas))));
   const lienzo = document.createElement("canvas");
   lienzo.width = g.columnas * k;
   lienzo.height = g.filas * k;
   const ctx = lienzo.getContext("2d");
-  if (!ctx) return null;
+  if (!ctx) return Promise.resolve(null);
   const junta = k >= 4 ? 1 : 0;
   const color = getComputedStyle(document.documentElement).getPropertyValue("--hoja-brillo").trim() || "#4CAF50";
   ctx.fillStyle = color;
   ctx.globalAlpha = 0.6;
   for (const [f, c] of g.dentro) ctx.fillRect(c * k, f * k, k - junta, k - junta);
-  return lienzo.toDataURL("image/png");
+  return new Promise((resolver) => lienzo.toBlob((b) => resolver(b ? URL.createObjectURL(b) : null), "image/png"));
 }
 
 /**
@@ -54,8 +58,10 @@ export default function PixelarLote() {
         if (actual.cierres <= anterior.cierres) return;
         if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
         const grilla = grillaDelLote(useEntradas.getState().poligono);
-        const url = grilla && grilla.dentro.length ? imagenGrilla(grilla) : null;
-        if (grilla && url) setPixelado({ clave: actual.cierres, url, grilla });
+        if (!grilla || !grilla.dentro.length) return;
+        void imagenGrilla(grilla).then((url) => {
+          if (url) setPixelado({ clave: actual.cierres, url, grilla });
+        });
       }),
     [],
   );
@@ -63,7 +69,10 @@ export default function PixelarLote() {
   useEffect(() => {
     if (!pixelado) return;
     const t = window.setTimeout(() => setPixelado(null), MS_TOTAL);
-    return () => window.clearTimeout(t);
+    return () => {
+      window.clearTimeout(t);
+      URL.revokeObjectURL(pixelado.url);
+    };
   }, [pixelado]);
 
   if (!pixelado) return null;
