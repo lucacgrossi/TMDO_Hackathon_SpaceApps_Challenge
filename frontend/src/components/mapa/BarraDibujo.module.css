@@ -47,12 +47,20 @@
   flex-shrink: 0;
 }
 
+/* Celu: la barra va justo debajo del mapa, en el flujo de la página. */
+@media (max-width: 900px) {
+  .barra {
+    position: static;
+    transform: none;
+    max-width: none;
+    margin: var(--space-3) var(--space-3) 0;
+  }
+}
+
 @media (max-width: 767px) {
   .barra {
     flex-direction: column;
     align-items: stretch;
-    width: calc(100% - 2 * var(--space-4));
-    bottom: var(--space-3);
   }
 
   .botones {

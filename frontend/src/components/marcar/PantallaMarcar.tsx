@@ -40,8 +40,11 @@ export default function PantallaMarcar() {
     if (cierres > cierresAlEntrar.current) loteListo();
   }, [cierres, loteListo]);
 
+  // En celular el mapa va arriba y lo demás debajo, en el orden del DOM: la
+  // barra de dibujo justo bajo el mapa y después la caja de buscar.
   return (
     <>
+      <BarraDibujo />
       <section className={estilos.caja} aria-labelledby="titulo-marcar">
         <div className={estilos.marca}>
           {/* eslint-disable-next-line @next/next/no-img-element -- logo chico y fijo, sin optimizar */}
@@ -57,7 +60,6 @@ export default function PantallaMarcar() {
         <BuscadorLote />
         <p className={estilos.fuente}>Imagen satelital y búsqueda de lugares: Esri.</p>
       </section>
-      <BarraDibujo />
     </>
   );
 }

@@ -55,13 +55,22 @@
   color: var(--muted);
 }
 
+/* Celu (mismo corte que el mapa, 900 px): el mapa queda arriba a la vista y la
+   caja pasa debajo, en el flujo de la página, sin taparlo. */
+@media (max-width: 900px) {
+  .caja {
+    position: static;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    margin: var(--space-3);
+  }
+}
+
 @media (max-width: 767px) {
   .titulo {
     font-size: 24px;
     line-height: 32px;
-  }
-
-  .caja {
-    max-height: calc(100vh - 220px);
   }
 }
