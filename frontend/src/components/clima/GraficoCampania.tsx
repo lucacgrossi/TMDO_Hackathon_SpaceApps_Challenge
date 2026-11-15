@@ -1,6 +1,6 @@
 "use client";
 
-import { Bar, CartesianGrid, ComposedChart, Legend, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { Bar, CartesianGrid, ComposedChart, Line, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ETIQUETA_TMAX, ETIQUETA_TMIN, type FilaGrafico } from "@/lib/climaHistorico";
 import { conSigno, fmt } from "@/lib/formato";
 import css from "./GraficoCampania.module.css";
@@ -72,6 +72,61 @@ function TooltipMes({ active, payload, series }: { active?: boolean; payload?: {
   );
 }
 
+/** Muestra de la leyenda: barra (cuadrado), línea llena con punto (la campaña) o punteada (la media). */
+function Muestra({ tipo, color }: { tipo: "barra" | "llena" | "punteada"; color: string }) {
+  return (
+    <svg className={css.muestra} width="28" height="12" viewBox="0 0 28 12" aria-hidden="true">
+      {tipo === "barra" && <rect x="8" y="0" width="12" height="12" fill={color} />}
+      {tipo === "llena" && (
+        <>
+          <line x1="0" y1="6" x2="28" y2="6" stroke={color} strokeWidth="2" />
+          <circle cx="14" cy="6" r="3.5" fill="#fff" stroke={color} strokeWidth="2" />
+        </>
+      )}
+      {tipo === "punteada" && <line x1="0" y1="6" x2="28" y2="6" stroke={color} strokeWidth="1.5" strokeDasharray="4 3" />}
+    </svg>
+  );
+}
+
+/**
+ * Leyenda propia, en dos filas: "Esta campaña" (barra oscura y líneas llenas
+ * con punto) y "Media de 30 años" (barra clara y líneas punteadas). La de
+ * recharts dibujaba igual la línea de la campaña y la de su media, y no se
+ * distinguían.
+ */
+function Leyenda({ conCampania }: { conCampania: boolean }) {
+  const items = (lluvia: string, linea: "llena" | "punteada") => (
+    <>
+      <li>
+        <Muestra tipo="barra" color={lluvia} />
+        Lluvia
+      </li>
+      <li>
+        <Muestra tipo={linea} color={COLOR.tmax} />
+        {ETIQUETA_TMAX}
+      </li>
+      <li>
+        <Muestra tipo={linea} color={COLOR.tmin} />
+        {ETIQUETA_TMIN}
+      </li>
+    </>
+  );
+  return (
+    <div className={css.leyenda}>
+      {conCampania && (
+        <div className={css.filaLeyenda}>
+          <span className={css.grupoLeyenda}>Esta campaña</span>
+          <ul>{items(COLOR.lluvia, "llena")}</ul>
+        </div>
+      )}
+      <div className={css.filaLeyenda}>
+        <span className={css.grupoLeyenda}>Media de 30 años</span>
+        <ul>{items(COLOR.lluviaMedia, "punteada")}</ul>
+      </div>
+    </div>
+  );
+}
+
 const ejeX = { dataKey: "corto", tick: { fill: COLOR.eje, fontSize: 12 }, stroke: COLOR.grilla };
 
 export default function GraficoCampania({ filas, conCampania }: { filas: FilaGrafico[]; conCampania: boolean }) {
@@ -90,7 +145,6 @@ export default function GraficoCampania({ filas, conCampania }: { filas: FilaGra
             <YAxis yAxisId="mm" tick={{ fill: COLOR.eje, fontSize: 12 }} stroke={COLOR.grilla} width={60} unit=" mm" />
             <YAxis yAxisId="c" orientation="right" tick={{ fill: COLOR.eje, fontSize: 12 }} stroke={COLOR.grilla} width={44} unit=" °C" />
             <Tooltip content={<TooltipMes series={seriesArriba} />} />
-            <Legend wrapperStyle={{ fontSize: 12 }} />
             <Bar yAxisId="mm" dataKey="lluviaMedia" name={NOMBRE.lluviaMedia} fill={COLOR.lluviaMedia} isAnimationActive={false} />
             {conCampania && <Bar yAxisId="mm" dataKey="lluvia" name={NOMBRE.lluvia} fill={COLOR.lluvia} isAnimationActive={false} />}
             <Line yAxisId="c" dataKey="tmaxMedia" name={NOMBRE.tmaxMedia} stroke={COLOR.tmax} strokeDasharray="4 4" dot={false} isAnimationActive={false} />
@@ -99,6 +153,7 @@ export default function GraficoCampania({ filas, conCampania }: { filas: FilaGra
             {conCampania && <Line yAxisId="c" dataKey="tmin" name={NOMBRE.tmin} stroke={COLOR.tmin} strokeWidth={2} isAnimationActive={false} />}
           </ComposedChart>
         </ResponsiveContainer>
+        <Leyenda conCampania={conCampania} />
         <figcaption className={css.pie}>
           {conCampania
             ? "Barras: lluvia del mes de la campaña (oscuro) contra la media de 30 años (claro). Líneas: la máxima más alta y la mínima más baja del mes (llenas) contra su media de 30 años (punteadas)."

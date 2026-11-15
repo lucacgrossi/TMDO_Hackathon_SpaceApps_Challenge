@@ -15,6 +15,47 @@
   color: var(--muted, #5a6560);
 }
 
+.leyenda {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--noche, #14202b);
+}
+
+.filaLeyenda {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+}
+
+.filaLeyenda ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.filaLeyenda li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.grupoLeyenda {
+  min-width: 112px;
+  font-weight: 600;
+}
+
+.muestra {
+  flex: none;
+}
+
 .tooltip {
   background: var(--papel, #fff);
   border: 1px solid var(--line, #dce2d6);
