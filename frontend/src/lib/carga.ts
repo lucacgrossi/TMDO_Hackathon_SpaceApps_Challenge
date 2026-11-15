@@ -69,8 +69,17 @@ export interface TextosError {
  * Qué pasó y cómo seguir según el código de `/analizar` (api-frontend.md §4.2).
  * 422: el polígono no es un lote agrícola. 503: NASA POWER no respondió.
  * Cualquier otro (500, red caída): error genérico con "Probar de nuevo".
+ * `deLaApp` (422 con `{detail}`): el pedido no cumplió el esquema; reintentar
+ * no lo arregla, así que se ofrece el lote de ejemplo o marcar de nuevo.
  */
-export function textosError(codigo: number): TextosError {
+export function textosError(codigo: number, deLaApp = false): TextosError {
+  if (deLaApp) {
+    return {
+      titulo: "No se pudo armar el pedido del análisis",
+      comoSeguir: "Probá con el lote de ejemplo de Río Cuarto o volvé a marcar el lote.",
+      acciones: ["ejemplo", "marcar"],
+    };
+  }
   if (codigo === 422) {
     return {
       titulo: "Este polígono no parece un lote agrícola",

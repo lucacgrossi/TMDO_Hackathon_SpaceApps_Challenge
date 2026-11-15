@@ -1,6 +1,7 @@
 /* S3b · Error del análisis. Botones: components/comunes/Boton. */
 
 .card {
+  position: relative;
   display: flex;
   gap: var(--space-4);
   align-items: flex-start;
@@ -16,6 +17,13 @@
   line-height: 21px;
 }
 
+/* "Cerrar", arriba a la derecha; el título le deja lugar. */
+.cerrar {
+  position: absolute;
+  top: var(--space-2);
+  right: var(--space-2);
+}
+
 .semilla {
   flex: none;
   display: block;
@@ -24,6 +32,7 @@
 
 .texto {
   min-width: 0;
+  padding-right: var(--space-8);
 }
 
 .titulo {

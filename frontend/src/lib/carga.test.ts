@@ -33,6 +33,12 @@ describe("CONSULTAS", () => {
 });
 
 describe("textosError", () => {
+  it("422 de esquema (error de la app): no ofrece reintentar ni habla del polígono", () => {
+    const t = textosError(422, true);
+    expect(t.titulo).not.toContain("polígono");
+    expect(t.acciones).toEqual(["ejemplo", "marcar"]);
+  });
+
   it("422: el polígono no es un lote agrícola", () => {
     const t = textosError(422);
     expect(t.titulo).toBe("Este polígono no parece un lote agrícola");
