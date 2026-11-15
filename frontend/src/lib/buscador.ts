@@ -40,6 +40,15 @@ export const MENSAJES = {
 } as const;
 
 /**
+ * true si el texto es uno de los errores del buscador de S1 (no encontró el
+ * lugar, sin red, GPS denegado…). Al mostrar uno, el "Tu lote está acá"
+ * anterior se borra: ese lugar ya no es lo que el productor buscó (QA H-015).
+ */
+export function esMensajeDeError(texto: string): boolean {
+  return (Object.values(MENSAJES) as string[]).includes(texto);
+}
+
+/**
  * Mensajes del buscador del mapa (`mSug` del prototipo): más cortos, porque la
  * caja flotante es angosta y el productor ya está en el paso 2.
  */
@@ -101,6 +110,13 @@ const RE_PARAMETRO =
 const RE_SUELTO = /^(-?\d{1,2}\.\d+)\s*[,; ]\s*(-?\d{1,3}\.\d+)$/;
 
 /**
+ * Lo mismo con coma decimal, como se escribe en español: "-33,2477 -64,2325",
+ * "-33,2477; -64,2325" o "-33,2477, -64,2325" (QA H-015). Como la coma es el
+ * decimal, entre los dos números va espacio, punto y coma, o coma + espacio.
+ */
+const RE_SUELTO_COMA = /^(-?\d{1,2},\d+)(?:\s*;\s*|,?\s+)(-?\d{1,3},\d+)$/;
+
+/**
  * Grados, minutos y segundos: 33°14'51.7"S 64°13'57.0"W (como lo muestra
  * Google Maps en la ficha de un punto). Acepta "º" (o ordinal, que sale en
  * teclados en español), comillas tipográficas, segundos con coma decimal,
@@ -129,10 +145,10 @@ export function parsearCoordenadas(texto: string): PuntoEncontrado | null {
   let lat: number;
   let lng: number;
 
-  const m = t.match(RE_ARROBA) || t.match(RE_PARAMETRO) || t.match(RE_SUELTO);
+  const m = t.match(RE_ARROBA) || t.match(RE_PARAMETRO) || t.match(RE_SUELTO) || t.match(RE_SUELTO_COMA);
   if (m) {
-    lat = Number(m[1]);
-    lng = Number(m[2]);
+    lat = Number(m[1].replace(",", "."));
+    lng = Number(m[2].replace(",", "."));
   } else {
     const d = t.match(RE_GMS);
     if (!d) return null;
