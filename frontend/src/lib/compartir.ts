@@ -11,7 +11,7 @@ import { cercania, cercaniaPorTipo, esSensibleAlClima, type Pesos } from "./cerc
 import { esDisponible, type ContrasteMedicion, type Estrategia, type Salida } from "./contrato";
 import { AVISO_PRECALCULADO, fmt, metadatosHoja } from "./formato";
 
-export const ASUNTO_MAIL = "Comparación de rotaciones · Field Shift";
+export const ASUNTO_MAIL = "Comparación de rotaciones · AgroPixel";
 export const AVISO_APOYO = "Herramienta de apoyo: no reemplaza el criterio del productor ni del agrónomo.";
 
 const ETIQUETA = { actual: "Actual", A: "A", B: "B", C: "C" } as const;
@@ -65,7 +65,7 @@ function lineaSatelite(salida: Salida): string | null {
 export function resumenComparacion(salida: Salida, pesos: Pesos, fecha: Date): string {
   const area = `${fmt(salida.lote.area_ha)} ha`;
   const L: string[] = [
-    "Field Shift · comparación de rotaciones",
+    "AgroPixel · comparación de rotaciones",
     `Lote: ${area} · ${metadatosHoja(salida, fecha)}`,
     `Objetivos (0 a 5): agua ${pesos.agua} · suelo ${pesos.suelo} · erosión ${pesos.erosion} · ingreso ${pesos.ingreso}`,
     "",
@@ -96,7 +96,7 @@ export function resumenComparacion(salida: Salida, pesos: Pesos, fecha: Date): s
 export const LARGO_MAX_MAILTO = 1800;
 
 export const CIERRE_MAIL =
-  "El resumen completo, con probabilidades e información que falta, se copia con «Copiar resumen» en Field Shift.";
+  "El resumen completo, con probabilidades e información que falta, se copia con «Copiar resumen» en AgroPixel.";
 
 /**
  * Versión corta para "Enviar por mail" (el link `mailto:` tiene que entrar en
@@ -105,7 +105,7 @@ export const CIERRE_MAIL =
  */
 export function resumenMail(salida: Salida, pesos: Pesos): string {
   const L: string[] = [
-    "Field Shift: comparación de rotaciones",
+    "AgroPixel: comparación de rotaciones",
     `Lote: ${fmt(salida.lote.area_ha)} ha${salida.lote.localidad_aprox ? `, ${salida.lote.localidad_aprox}` : ""}`,
     `Objetivos (0 a 5): agua ${pesos.agua}, suelo ${pesos.suelo}, erosión ${pesos.erosion}, ingreso ${pesos.ingreso}`,
     "",

@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import Boton from "@/components/comunes/Boton";
 import { linkMail, resumenComparacion, resumenMail } from "@/lib/compartir";
 import type { Salida } from "@/lib/contrato";
 import { useEntradas } from "@/lib/store";
 import { useToast } from "@/lib/toast";
-import { useVista } from "@/lib/vista";
-import css from "./compartir.module.css";
+import css from "./MenuCompartir.module.css";
 
 /**
  * Respaldo para cuando el navegador bloquea la API del portapapeles (permiso
@@ -30,36 +30,33 @@ function copiarConTextarea(texto: string): boolean {
 }
 
 /**
- * Menú Compartir del encabezado de la hoja (RF20, CU5): el `.menu` del prototipo.
+ * Menú Compartir del encabezado de Rotaciones (RF20, CU5), al lado de
+ * "Exportar PDF":
  * - Enviar por mail: `mailto:` con la versión corta (`resumenMail`), para que
  *   el link no pase de `LARGO_MAX_MAILTO` y Outlook no lo corte.
  * - Copiar resumen: el resumen completo al portapapeles, con aviso.
- * - El PDF ya no está acá: es "Exportar PDF" del dashboard (HojaImpresion).
- * - Nueva comparación: vuelve al paso 1 con las entradas iniciales.
+ * Los dos textos se arman con las prioridades actuales (RF13).
  *
  * Teclado: Enter o flecha abajo abre y enfoca la primera opción; flechas,
  * Inicio y Fin recorren; Escape cierra y devuelve el foco al botón.
- * Sin `salida` (cargando o error) solo queda "Nueva comparación".
  */
-export default function MenuCompartir({ salida }: { salida: Salida | null }) {
+export default function MenuCompartir({ salida }: { salida: Salida }) {
   const [abierto, setAbierto] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
-  const boton = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLDivElement>(null);
   const idMenu = useId();
   const objetivos = useEntradas((s) => s.objetivos);
-  const reiniciar = useEntradas((s) => s.reiniciar);
-  const cerrarHoja = useVista((s) => s.cerrarHoja);
 
-  // El texto se arma con las barras actuales: si se mueven, el resumen cambia (RF13)
-  const resumen = salida && abierto ? resumenComparacion(salida, objetivos, new Date()) : "";
-  const mail = salida && abierto ? linkMail(resumenMail(salida, objetivos)) : "";
+  const resumen = abierto ? resumenComparacion(salida, objetivos, new Date()) : "";
+  const mail = abierto ? linkMail(resumenMail(salida, objetivos)) : "";
 
   const opciones = () => Array.from(menu.current?.querySelectorAll<HTMLElement>("[role=menuitem]") ?? []);
+  // El botón es el `Boton` común (no expone ref): se lo busca dentro de la raíz
+  const enfocarBoton = () => raiz.current?.querySelector<HTMLButtonElement>("button[aria-haspopup]")?.focus();
 
   function cerrar(devolverFoco = true) {
     setAbierto(false);
-    if (devolverFoco) boton.current?.focus();
+    if (devolverFoco) enfocarBoton();
   }
 
   useEffect(() => {
@@ -68,7 +65,6 @@ export default function MenuCompartir({ salida }: { salida: Salida | null }) {
     const alClickAfuera = (e: PointerEvent) => {
       if (!raiz.current?.contains(e.target as Node)) cerrar(false);
     };
-    // Escape en captura: cierra el menú sin cerrar también la hoja (que escucha Escape en window)
     const alEscape = (e: KeyboardEvent) => {
       if (e.key !== "Escape") return;
       e.stopPropagation();
@@ -104,23 +100,15 @@ export default function MenuCompartir({ salida }: { salida: Salida | null }) {
     } catch {
       ok = copiarConTextarea(resumen);
       // El textarea se lleva el foco: vuelve al botón
-      boton.current?.focus();
+      enfocarBoton();
     }
     useToast.getState().mostrar(ok ? "Resumen copiado" : "No se pudo copiar");
   }
 
-  function nuevaComparacion() {
-    setAbierto(false);
-    cerrarHoja();
-    reiniciar();
-  }
-
   return (
     <div ref={raiz} className={css.raiz}>
-      <button
-        ref={boton}
-        type="button"
-        className="ghost"
+      <Boton
+        variante="secundario"
         aria-haspopup="menu"
         aria-expanded={abierto}
         aria-controls={abierto ? idMenu : undefined}
@@ -133,22 +121,14 @@ export default function MenuCompartir({ salida }: { salida: Salida | null }) {
         }}
       >
         Compartir
-      </button>
+      </Boton>
       {abierto && (
-        <div ref={menu} id={idMenu} className="menu" role="menu" aria-label="Compartir la comparación" onKeyDown={alTeclaMenu}>
-          {salida && (
-            <>
-              <a role="menuitem" tabIndex={-1} href={mail} onClick={() => cerrar()}>
-                Enviar por mail
-              </a>
-              <button role="menuitem" tabIndex={-1} type="button" onClick={copiar}>
-                Copiar resumen
-              </button>
-              <hr className={css.separador} />
-            </>
-          )}
-          <button role="menuitem" tabIndex={-1} type="button" onClick={nuevaComparacion}>
-            Nueva comparación
+        <div ref={menu} id={idMenu} className={css.menu} role="menu" aria-label="Compartir la comparación" onKeyDown={alTeclaMenu}>
+          <a role="menuitem" tabIndex={-1} className={css.opcion} href={mail} onClick={() => cerrar()}>
+            Enviar por mail
+          </a>
+          <button role="menuitem" tabIndex={-1} type="button" className={css.opcion} onClick={copiar}>
+            Copiar resumen
           </button>
         </div>
       )}

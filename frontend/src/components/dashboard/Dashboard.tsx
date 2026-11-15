@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import ClimaHistorico from "@/components/clima/ClimaHistorico";
 import SeccionMapa from "@/components/mapa/SeccionMapa";
 import HojaImpresion from "@/components/resultados/HojaImpresion";
+import MenuCompartir from "@/components/resultados/MenuCompartir";
 import Rotaciones from "@/components/resultados/Rotaciones";
 import Boton from "@/components/comunes/Boton";
 import type { Seccion } from "@/lib/app";
@@ -68,7 +69,14 @@ export default function Dashboard({ seccion, onCambiarSeccion, onEditar, salida,
           titulo={item.titulo}
           ficha={fichaDelLote(salida)}
           esMock={salida.es_mock}
-          accion={seccion === "rotaciones" ? <BotonExportar /> : undefined}
+          accion={
+            seccion === "rotaciones" ? (
+              <div className={css.acciones}>
+                <MenuCompartir salida={salida} />
+                <BotonExportar />
+              </div>
+            ) : undefined
+          }
         />
         <section className={css.seccion} aria-labelledby={idTitulo}>
           {contenido(seccion, salida)}
