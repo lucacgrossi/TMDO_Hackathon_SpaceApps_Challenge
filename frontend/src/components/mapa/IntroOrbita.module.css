@@ -82,6 +82,15 @@
   transition: opacity 0.5s var(--ease-out);
 }
 
+/* Durante el vuelo la escala de cada nivel de teselas cambia en cada cuadro.
+   Sin esto el navegador vuelve a pintar todas las teselas (satélite y nubes)
+   en cada cuadro, y eso es lo que trababa el zoom. Con will-change cada nivel
+   es una capa del compositor con su imagen fija, que la GPU solo agranda. Se
+   saca al aterrizar y el nivel final se pinta nítido. */
+.volando :global(.leaflet-tile-container) {
+  will-change: transform;
+}
+
 /* El productor cortó el vuelo: las nubes se van en 0,4 s. */
 .irse {
   opacity: 0 !important;
