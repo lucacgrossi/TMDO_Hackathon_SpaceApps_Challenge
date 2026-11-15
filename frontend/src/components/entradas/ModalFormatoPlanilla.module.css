@@ -1,0 +1,275 @@
+/*
+ * S2b · Modal "Formato de la planilla". Tokens de DESIGN.md; los nuevos llevan
+ * un valor de respaldo hasta que la base común (tokens en globals.css) esté
+ * en dev.
+ */
+
+.fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 2000; /* por encima de los controles de Leaflet (1000) */
+  display: grid;
+  place-items: center;
+  padding: var(--space-6, 24px);
+  background: rgba(20, 32, 43, 0.45); /* --noche al 45 % */
+}
+
+.caja {
+  display: flex;
+  flex-direction: column;
+  width: min(680px, 100%);
+  max-height: min(86vh, 820px);
+  background: var(--papel, #ffffff);
+  color: var(--noche, #14202b);
+  border: 1px solid var(--line, #dce2d6);
+  border-radius: 6px;
+  font-family: var(--f);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.caja:focus {
+  outline: none;
+}
+
+.caja:focus-visible {
+  outline: 2px solid var(--cielo, #1c7c93);
+  outline-offset: 2px;
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4, 16px);
+  padding: var(--space-4, 16px) var(--space-6, 24px);
+  border-bottom: 1px solid var(--line, #dce2d6);
+}
+
+.titulo {
+  margin: 0;
+  font-family: var(--f-titulo, "Pixelify Sans", system-ui, sans-serif);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.cuerpo {
+  overflow-y: auto;
+  padding: var(--space-4, 16px) var(--space-6, 24px) var(--space-6, 24px);
+}
+
+.intro {
+  margin: 0 0 var(--space-4, 16px);
+  max-width: 80ch;
+}
+
+/* Pestañas: chips de capa (forma de tecla, radio 0, borde inferior de 3 px) */
+.pestanas {
+  display: flex;
+  gap: var(--space-2, 8px);
+  margin-bottom: var(--space-3, 12px);
+}
+
+.chip {
+  border: 1px solid var(--line, #dce2d6);
+  border-bottom-width: 3px;
+  border-radius: 0;
+  background: var(--soft, #e8ece2);
+  color: var(--noche, #14202b);
+  padding: var(--space-1, 4px) var(--space-4, 16px);
+  font-family: var(--f);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 21px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--hoja, #2f7a2e);
+}
+
+/* Activo: además del color, el borde inferior de la tecla pasa a --hoja y el
+   texto a negrita marcada; aria-pressed lo anuncia. */
+.chip[aria-pressed="true"] {
+  background: var(--hoja-suave, #e3f0dc);
+  border-color: var(--hoja, #2f7a2e);
+  color: var(--hoja, #2f7a2e);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.chip:focus-visible,
+.cerrar:focus-visible,
+.descargar:focus-visible {
+  outline: 2px solid var(--cielo, #1c7c93);
+  outline-offset: 2px;
+}
+
+/* Tablas: ejemplo y valores válidos */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.tabla th,
+.tabla td {
+  text-align: left;
+  padding: 6px var(--space-2, 8px);
+  border-bottom: 1px solid var(--line, #dce2d6);
+}
+
+.tabla thead th {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted, #5a6560);
+  background: var(--soft, #e8ece2);
+}
+
+.tabla tbody th {
+  font-weight: 400;
+}
+
+.tabla code,
+.pie code,
+.pares code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+}
+
+.leyenda {
+  caption-side: top;
+  text-align: left;
+  padding-bottom: var(--space-2, 8px);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted, #5a6560);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.vacio {
+  color: var(--muted, #5a6560);
+  font-style: italic;
+}
+
+.notas {
+  margin: var(--space-3, 12px) 0 0;
+  padding-left: 18px;
+}
+
+.notas li + li {
+  margin-top: var(--space-1, 4px);
+}
+
+.bloque {
+  margin-top: var(--space-6, 24px);
+}
+
+.subtitulo {
+  margin: 0 0 var(--space-2, 8px);
+  font-family: var(--f);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+/* Pares etiqueta / valor */
+.pares {
+  margin: 0;
+}
+
+.par {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: var(--space-3, 12px);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line, #dce2d6);
+}
+
+.par dt {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 21px;
+  color: var(--muted, #5a6560);
+}
+
+.par dd {
+  margin: 0;
+}
+
+.pie {
+  margin: var(--space-2, 8px) 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted, #5a6560);
+}
+
+.pieModal {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4, 16px);
+  padding: var(--space-3, 12px) var(--space-6, 24px);
+  border-top: 1px solid var(--line, #dce2d6);
+}
+
+.pieModal .pie {
+  margin: 0;
+}
+
+/* Botones: estilo Secundario y Fantasma de DESIGN.md hasta que llegue
+   components/comunes/Boton a dev. */
+.descargar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2, 8px) var(--space-4, 16px);
+  background: var(--papel, #ffffff);
+  border: 1px solid var(--line, #dce2d6);
+  border-radius: 2px;
+  color: var(--noche, #14202b);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.descargar:hover {
+  border-color: var(--hoja, #2f7a2e);
+  color: var(--hoja, #2f7a2e);
+}
+
+.cerrar {
+  border: 0;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--hoja, #2f7a2e);
+  padding: var(--space-1, 4px) var(--space-2, 8px);
+  font-family: var(--f);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cerrar:hover {
+  background: var(--hoja-suave, #e3f0dc);
+}
+
+@media (max-width: 560px) {
+  .fondo {
+    padding: var(--space-2, 8px);
+  }
+
+  .par {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .pieModal {
+    flex-wrap: wrap;
+  }
+}
