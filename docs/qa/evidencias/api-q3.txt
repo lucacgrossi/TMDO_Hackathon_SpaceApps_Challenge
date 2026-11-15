@@ -1,0 +1,103 @@
+=== vacio -> 200 (5.3s)
+  actual cerc: 49 agua_mm: -332 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Repite soja de la campaña pasada · dato del productor']
+  riesgos: []
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== lluvia 790 anios 1 -> 200 (4.0s)
+  contraste: Tu pluviómetro: 790 mm/año · NASA: 819 mm (−4 %) · coinciden: confianza alta | conf: alta
+  actual cerc: 50 agua_mm: -255 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 790 mm/año (40 %, 1 año) contra NASA POWER en las últimas 1 campaña (2025/26) 601 mm (+31 %) → NASA de las 30 campañas (819 mm) con ese +31 % al 40 %: 922 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: ['Tu registro de lluvia tiene 1 año: pesa 40 % frente a NASA']
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== lluvia 790 anios 2 -> 200 (4.0s)
+  contraste: Tu pluviómetro: 790 mm/año · NASA: 819 mm (−4 %) · coinciden: confianza alta | conf: alta
+  actual cerc: 49 agua_mm: -326 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 790 mm/año (40 %, 2 años) contra NASA POWER en las últimas 2 campañas (2024/25 a 2025/26) 770 mm (+3 %) → NASA de las 30 campañas (819 mm) con ese +3 % al 40 %: 828 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: ['Tu registro de lluvia tiene 2 años: pesa 40 % frente a NASA']
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== lluvia 790 anios 3 -> 200 (4.1s)
+  contraste: Tu pluviómetro: 790 mm/año · NASA: 819 mm (−4 %) · coinciden: confianza alta | conf: alta
+  actual cerc: 49 agua_mm: -328 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 790 mm/año (50 %, 3 años) contra NASA POWER en las últimas 3 campañas (2023/24 a 2025/26) 778 mm (+2 %) → NASA de las 30 campañas (819 mm) con ese +2 % al 50 %: 825 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: []
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== lluvia 790 anios 4 -> 200 (4.1s)
+  contraste: Tu pluviómetro: 790 mm/año · NASA: 819 mm (−4 %) · coinciden: confianza alta | conf: alta
+  actual cerc: 49 agua_mm: -330 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 790 mm/año (50 %, 4 años) contra NASA POWER en las últimas 4 campañas (2022/23 a 2025/26) 784 mm (+1 %) → NASA de las 30 campañas (819 mm) con ese +1 % al 50 %: 822 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: []
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== lluvia 790 anios 5 -> 200 (4.0s)
+  contraste: Tu pluviómetro: 790 mm/año · NASA: 819 mm (−4 %) · coinciden: confianza alta | conf: alta
+  actual cerc: 50 agua_mm: -306 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 790 mm/año (60 %, 5 años) contra NASA POWER en las últimas 5 campañas (2021/22 a 2025/26) 737 mm (+7 %) → NASA de las 30 campañas (819 mm) con ese +7 % al 60 %: 855 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: []
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== lluvia 790 anios 9 -> 200 (4.1s)
+  contraste: Tu pluviómetro: 790 mm/año · NASA: 819 mm (−4 %) · coinciden: confianza alta | conf: alta
+  actual cerc: 50 agua_mm: -303 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 790 mm/año (60 %, 9 años) contra NASA POWER en las últimas 9 campañas (2017/18 a 2025/26) 732 mm (+8 %) → NASA de las 30 campañas (819 mm) con ese +8 % al 60 %: 858 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: []
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== lluvia 790 anios 10 -> 200 (4.1s)
+  contraste: Tu pluviómetro: 790 mm/año · NASA: 819 mm (−4 %) · coinciden: confianza alta | conf: alta
+  actual cerc: 50 agua_mm: -297 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 790 mm/año (75 %, 10 años) contra NASA POWER en las últimas 10 campañas (2016/17 a 2025/26) 734 mm (+8 %) → NASA de las 30 campañas (819 mm) con ese +8 % al 75 %: 866 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: []
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== lluvia 790 anios 25 -> 200 (3.5s)
+  contraste: Tu pluviómetro: 790 mm/año · NASA: 819 mm (−4 %) · coinciden: confianza alta | conf: alta
+  actual cerc: 49 agua_mm: -335 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 790 mm/año (75 %, 25 años) contra NASA POWER en las últimas 25 campañas (2001/02 a 2025/26) 795 mm (−1 %) → NASA de las 30 campañas (819 mm) con ese −1 % al 75 %: 815 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: []
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios', 'NDVI del lote · Marzo 2026: sin escena HLS con < 30 % de nubes; MODIS de respaldo: no se pudo buscar en MODIS: Planetary Computer respondió con error HTTP 429']
+=== lluvia -20% (650) 3 anios + MO 2.5 -> 200 (4.0s)
+  contraste: Tu pluviómetro: 650 mm/año · NASA: 819 mm (−21 %) · difieren más de 15 %: confianza baja en agua | conf: baja
+  contraste: Materia orgánica: 2,5 % (dato del productor) · sin fuente NASA de materia orgánica para comparar | conf: None
+  actual cerc: 48 agua_mm: -383 | lluvia_anual conf: baja
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 650 mm/año (50 %, 3 años) contra NASA POWER en las últimas 3 campañas (2023/24 a 2025/26) 778 mm (−16 %) → NASA de las 30 campañas (819 mm) con ese −16 % al 50 %: 752 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: ['Tu pluviómetro difiere 21 % de NASA POWER (650 contra 819 mm/año): el dato de agua tiene confianza baja']
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios', 'Cobertura agrícola del lote (ESA WorldCover): No se pudo consultar ESA WorldCover: Planetary Computer respondió con error HTTP 429', 'ET real del lote (MODIS): No se pudo consultar MODIS ET: Planetary Computer respondió con error HTTP 429']
+=== lluvia +20% (990) 3 anios -> 200 (4.6s)
+  contraste: Tu pluviómetro: 990 mm/año · NASA: 819 mm (+21 %) · difieren más de 15 %: confianza baja en agua | conf: baja
+  actual cerc: 50 agua_mm: -249 | lluvia_anual conf: baja
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 990 mm/año (50 %, 3 años) contra NASA POWER en las últimas 3 campañas (2023/24 a 2025/26) 778 mm (+27 %) → NASA de las 30 campañas (819 mm) con ese +27 % al 50 %: 931 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: ['Tu pluviómetro difiere 21 % de NASA POWER (990 contra 819 mm/año): el dato de agua tiene confianza baja']
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== solo lluvia sin anios -> 200 (4.3s)
+  contraste: Tu pluviómetro: 700 mm/año · NASA: 819 mm (−15 %) · coinciden: confianza alta | conf: alta
+  actual cerc: 50 agua_mm: -292 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 700 mm/año (40 %, 1 año) contra NASA POWER en las últimas 1 campaña (2025/26) 601 mm (+17 %) → NASA de las 30 campañas (819 mm) con ese +17 % al 40 %: 873 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: ['Tu registro de lluvia tiene 1 año: pesa 40 % frente a NASA']
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== solo anios -> 200 (4.0s)
+  actual cerc: 49 agua_mm: -332 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Repite soja de la campaña pasada · dato del productor']
+  riesgos: []
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== solo MO 2.5 -> 200 (4.1s)
+  contraste: Materia orgánica: 2,5 % (dato del productor) · sin fuente NASA de materia orgánica para comparar | conf: None
+  actual cerc: 49 agua_mm: -332 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Repite soja de la campaña pasada · dato del productor']
+  riesgos: []
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== lluvia 0 -> 422 (2.0s)
+   {"detail": [{"type": "greater_than", "loc": ["body", "mediciones_propias", "lluvia_anual_mm"], "msg": "Input should be greater than 0", "input": 0, "ctx": {"gt": 0.0}}]}
+=== lluvia neg -> 422 (2.1s)
+   {"detail": [{"type": "greater_than", "loc": ["body", "mediciones_propias", "lluvia_anual_mm"], "msg": "Input should be greater than 0", "input": -5, "ctx": {"gt": 0.0}}]}
+=== lluvia 99999 -> 200 (5.1s)
+  contraste: Tu pluviómetro: 99.999 mm/año · NASA: 819 mm (+12110 %) · difieren más de 15 %: confianza baja en agua | conf: baja
+  actual cerc: 51 agua_mm: -180 | lluvia_anual conf: baja
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 99999 mm/año (50 %, 3 años) contra NASA POWER en las últimas 3 campañas (2023/24 a 2025/26) 778 mm (+12751 %) → NASA de las 30 campañas (819 mm) con ese +12751 % al 50 %: 1024 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: ['Tu pluviómetro difiere 12110 % de NASA POWER (99.999 contra 819 mm/año): el dato de agua tiene confianza baja']
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== anios 0 -> 422 (2.0s)
+   {"detail": [{"type": "greater_than_equal", "loc": ["body", "mediciones_propias", "anios_registro"], "msg": "Input should be greater than or equal to 1", "input": 0, "ctx": {"ge": 1}}]}
+=== anios 150 -> 200 (4.2s)
+  contraste: Tu pluviómetro: 700 mm/año · NASA: 819 mm (−15 %) · coinciden: confianza alta | conf: alta
+  actual cerc: 48 agua_mm: -399 | lluvia_anual conf: media
+  evid/reglas c/productor: ['Lluvia: tu pluviómetro 700 mm/año (75 %, 150 años) contra NASA POWER en las últimas 30 campañas (1996/97 a 2025/26) 819 mm (−15 %) → NASA de las 30 campañas (819 mm) con ese −15 % al 75 %: 730 mm/año para las reglas', 'Repite soja de la campaña pasada · dato del productor']
+  riesgos: []
+  vacios: ['Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios']
+=== MO 150 -> 422 (2.0s)
+   {"detail": [{"type": "less_than_equal", "loc": ["body", "mediciones_propias", "materia_organica_pct"], "msg": "Input should be less than or equal to 100", "input": 150, "ctx": {"le": 100.0}}]}
