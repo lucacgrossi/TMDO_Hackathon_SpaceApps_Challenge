@@ -47,6 +47,18 @@ describe("transicion", () => {
     expect(e).toMatchObject({ etapa: "dashboard", seccion: "rotaciones" });
   });
 
+  it("'Volver al análisis anterior' vuelve a la sección que estaba abierta, no siempre a Mapa", () => {
+    const panel = transicion(en({ etapa: "dashboard", seccion: "rotaciones", hayResultado: true }), {
+      tipo: "volverAEditar",
+    });
+    // El panel guarda la sección y la pasa a irA (PanelEntradas).
+    expect(panel.seccion).toBe("rotaciones");
+    expect(transicion(panel, { tipo: "irA", seccion: panel.seccion })).toMatchObject({
+      etapa: "dashboard",
+      seccion: "rotaciones",
+    });
+  });
+
   it("irA desde el panel vuelve al dashboard solo si ya hubo un análisis", () => {
     expect(transicion(en({ etapa: "configurar" }), { tipo: "irA", seccion: "clima" }).etapa).toBe("configurar");
     const e = transicion(en({ etapa: "configurar", hayResultado: true }), { tipo: "irA", seccion: "clima" });

@@ -17,6 +17,8 @@ import {
   ORDEN_CAMPANA,
   calendario,
   describirSegmento,
+  nombreTramo,
+  notaCalendario,
   segmentos,
 } from "@/lib/calendario";
 import estilos from "./Campos.module.css";
@@ -31,6 +33,8 @@ export default function SeccionRotacion() {
 
   // El calendario no se guarda: se deriva de verano + invierno en cada render (es barato, 12 meses).
   const tramos = segmentos(calendario(verano, invierno));
+  // Si un cultivo sale de su ventana típica (verano de 2ª, cobertura que se seca antes), se dice (QA H-003).
+  const nota = notaCalendario(verano, invierno);
 
   return (
     <div>
@@ -100,8 +104,8 @@ export default function SeccionRotacion() {
             <div className="row2" role="list" aria-label="Calendario de la rotación, de julio a junio">
               {tramos.map((t) => {
                 const g = C[t.cultivo].g;
-                // Como en el prototipo, el barbecho se rotula "Pelado": es lo que se ve en el lote.
-                const nombre = g === "barbecho" ? "Pelado" : C[t.cultivo].n;
+                // "Barbecho (pelado)": el mismo término en el rótulo, el title y el aria-label (QA H-027).
+                const nombre = nombreTramo(t.cultivo);
                 return (
                   <span
                     key={t.desde}
@@ -120,6 +124,11 @@ export default function SeccionRotacion() {
         </div>
         <div className="cap">Campaña de julio a junio, armada con lo que elegiste.</div>
       </div>
+      {nota && (
+        <p className={estilos.nota} role="status">
+          {nota}
+        </p>
+      )}
     </div>
   );
 }
