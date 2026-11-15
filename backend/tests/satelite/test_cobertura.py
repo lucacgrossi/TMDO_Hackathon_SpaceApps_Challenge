@@ -61,7 +61,7 @@ def test_lote_demo(monkeypatch):
     stats = [p for p in pedidos if p.url.path.endswith("/item/statistics")]
     assert len(stats) == 1
     assert "2021_v200" in stats[0].url.params["item"] and stats[0].url.params["categorical"] == "true"
-    assert r["mapa"] is None and "HTTP 404" in r["mapa_motivo"] and "sin capa" in r["cultivo_pct"]["nota"]
+    assert r["mapa"] is None and "no devolvió el dato pedido" in r["mapa_motivo"] and "sin capa" in r["cultivo_pct"]["nota"]
 
 
 def _con_histograma(monkeypatch, *histogramas):
