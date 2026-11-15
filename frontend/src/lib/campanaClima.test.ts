@@ -5,7 +5,7 @@ import { RIO_CUARTO } from "@/mocks/rio-cuarto";
 
 /** La serie del mock trae `mensual` en las 30 campañas (PR #86). */
 const SERIE = RIO_CUARTO.serie_anual!;
-const SIN_MENSUAL: SerieAnual = { ...SERIE, campanas: SERIE.campanas.map(({ mensual: _m, ...c }) => c) };
+const SIN_MENSUAL: SerieAnual = { ...SERIE, campanas: SERIE.campanas.map((c) => ({ ...c, mensual: undefined })) };
 
 describe("selección de campaña de la serie anual", () => {
   it("por defecto, la última campaña de la serie", () => {
