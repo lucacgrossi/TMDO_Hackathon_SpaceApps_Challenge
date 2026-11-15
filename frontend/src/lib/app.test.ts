@@ -30,9 +30,11 @@ describe("transicion", () => {
     expect(e).toMatchObject({ etapa: "configurar", error: ERROR_503 });
   });
 
-  it("un fallo después de un análisis previo no pierde el resultado anterior", () => {
+  it("un fallo reemplaza al resultado anterior: ya no se ofrece volver a él", () => {
     const e = transicion(en({ etapa: "cargando", hayResultado: true }), { tipo: "analisisFallo", error: ERROR_503 });
-    expect(e.hayResultado).toBe(true);
+    expect(e.hayResultado).toBe(false);
+    // y "Volver al análisis anterior" (irA desde el panel) no abre un dashboard vacío
+    expect(transicion(e, { tipo: "irA", seccion: "mapa" }).etapa).toBe("configurar");
   });
 
   it("'Editar lote y entradas' vuelve a configurar sin perder el resultado", () => {
@@ -87,6 +89,6 @@ describe("useApp", () => {
     a.volverAEditar();
     a.analizar();
     a.analisisFallo(ERROR_503);
-    expect(useApp.getState()).toMatchObject({ etapa: "configurar", error: ERROR_503, hayResultado: true });
+    expect(useApp.getState()).toMatchObject({ etapa: "configurar", error: ERROR_503, hayResultado: false });
   });
 });

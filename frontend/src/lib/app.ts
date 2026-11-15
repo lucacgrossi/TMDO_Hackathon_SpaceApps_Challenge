@@ -67,7 +67,10 @@ export function transicion(e: EstadoApp, ev: Evento): EstadoApp {
       // Cada análisis nuevo abre el dashboard en el Mapa (DESIGN.md, flujo).
       return e.etapa === "cargando" ? { ...e, etapa: "dashboard", seccion: "mapa", hayResultado: true } : e;
     case "analisisFallo":
-      return e.etapa === "cargando" ? { ...e, etapa: "configurar", error: ev.error } : e;
+      // El pedido fallido reemplazó al resultado anterior en `useResultadoStore`:
+      // ya no hay análisis al que volver (sin esto, "Volver al análisis anterior"
+      // abría un dashboard vacío).
+      return e.etapa === "cargando" ? { ...e, etapa: "configurar", error: ev.error, hayResultado: false } : e;
     case "volverAEditar":
       return e.etapa === "dashboard" ? { ...e, etapa: "configurar", error: null } : e;
     case "irA":
@@ -81,7 +84,7 @@ export function transicion(e: EstadoApp, ev: Evento): EstadoApp {
 }
 
 interface Acciones {
-  /** S1: el polígono quedó cerrado o se eligió el lote de ejemplo. */
+  /** S1: el polígono quedó cerrado. */
   loteListo: () => void;
   /** S2: "Volver a marcar el lote". */
   volverAMarcar: () => void;
