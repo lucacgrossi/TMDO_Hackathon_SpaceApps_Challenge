@@ -21,6 +21,7 @@ import {
   textoEfecto,
   tramosCalendario,
 } from "@/lib/formato";
+import { meses } from "@/lib/plural";
 import { useEntradas } from "@/lib/store";
 import CeldaDato, { HuellaDato, type Origen } from "./CeldaDato";
 import ContrasteMediciones, { MateriaOrganicaProductor } from "./ContrasteMediciones";
@@ -57,7 +58,8 @@ interface Grupo {
 function frenteALaActual(e: EstrategiaDisponible, valor: number, base: number | undefined, unidad: string) {
   if (e.id === "actual" || base == null) return null;
   const d = valor - base;
-  return d === 0 ? "igual que la actual" : `${conSigno(d)} ${unidad} frente a la actual`;
+  const u = unidad === "meses" ? meses(d) : unidad;
+  return d === 0 ? "igual que la actual" : `${conSigno(d)} ${u} frente a la actual`;
 }
 
 function Lista({ items, vacio }: { items: readonly ReactNode[]; vacio: string }) {
@@ -115,7 +117,7 @@ const GRUPOS: Grupo[] = [
             <div className={css.celda}>
               <CeldaDato
                 valor={fmt(e.valores.meses_cobertura_baja)}
-                unidad="meses"
+                unidad={meses(e.valores.meses_cobertura_baja)}
                 diferencia={frenteALaActual(e, e.valores.meses_cobertura_baja, actual?.valores.meses_cobertura_baja, "meses")}
                 origen={{ fuente: e.id === "actual" ? "Calendario cargado" : "Calendario de la alternativa", regla: true }}
               />
@@ -123,7 +125,7 @@ const GRUPOS: Grupo[] = [
                 <div className={css.observado}>
                   <p className={css.detalle}>
                     <b>Visto por satélite{sat.campana ? ` en ${sat.campana}` : ""}:</b> {sat.meses_ndvi_bajo} de{" "}
-                    {sat.meses_con_dato} meses con NDVI menor a {fmt(sat.umbral, 1)}
+                    {sat.meses_con_dato} {meses(sat.meses_con_dato)} con NDVI menor a {fmt(sat.umbral, 1)}
                   </p>
                   <HuellaDato
                     origen={{ fuente: sat.fuente, anios: sat.campana, confianza: sat.confianza, motivo: sat.motivo }}
@@ -187,7 +189,7 @@ const GRUPOS: Grupo[] = [
               diferencia={frenteALaActual(e, e.puntos.erosion, actual?.puntos.erosion, "pts")}
               origen={p}
             >
-              {e.valores.meses_cobertura_baja} meses con cobertura baja × pendiente{" "}
+              {e.valores.meses_cobertura_baja} {meses(e.valores.meses_cobertura_baja)} con cobertura baja × pendiente{" "}
               {typeof p.valor === "number" ? `${fmt(p.valor, 1)} %` : "sin dato"}
             </CeldaDato>
           );

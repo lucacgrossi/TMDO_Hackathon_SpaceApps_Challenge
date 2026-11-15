@@ -3,6 +3,7 @@
 import type { EstrategiaDisponible, Salida } from "@/lib/contrato";
 import { fmt, MESES, mesesConAnios, NOMBRE_CULTIVO, rangoMeses, tramosCalendario } from "@/lib/formato";
 import { colorNdvi, mesesLinea } from "@/lib/linea";
+import { meses as unidadMeses } from "@/lib/plural";
 import css from "./linea.module.css";
 
 /** Inicial de cada mes (0 = enero), como el eje del prototipo. */
@@ -108,7 +109,7 @@ export default function LineaCampania({
           {sat.meses_ndvi_bajo != null ? (
             <>
               <b>Visto por satélite{sat.campana ? ` ${sat.campana}` : ""}:</b> pelado {sat.meses_ndvi_bajo} de{" "}
-              {sat.meses_con_dato} meses con escena
+              {sat.meses_con_dato} {unidadMeses(sat.meses_con_dato)} con escena
             </>
           ) : (
             "Visto por satélite: sin datos"
