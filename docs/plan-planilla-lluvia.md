@@ -43,8 +43,8 @@ En el formato mensual, `t_min_c` es **la mínima más baja del mes** y `t_max_c`
 
 | Aspecto | Acepta | Cómo se detecta |
 |---|---|---|
-| Codificación | UTF-8, UTF-8 con BOM, Latin-1 / Windows-1252 | Intentar UTF-8 (quitando el BOM); si falla, Latin-1 |
-| Separador | `;` `,` tabulación | `csv.Sniffer` sobre las primeras líneas; con empate, gana `;` |
+| Codificación | UTF-8, UTF-8 con BOM, Latin-1 / Windows-1252 | Intentar UTF-8 (quitando el BOM); si falla, Windows-1252; si falla, Latin-1 |
+| Separador | `;` `,` tabulación | Se prueba en orden `;`, tab, `,`: gana el primero que da la misma cantidad de campos (más de 1) en las primeras líneas no vacías; si ninguno, el primero que aparezca (`_separador` en `planilla.py`) |
 | Decimal | `12,5` o `12.5` | Si el separador es `;` o tab, se acepta coma decimal; si es `,`, solo punto |
 | Fecha diaria | `dd/mm/aaaa`, `dd-mm-aaaa`, `aaaa-mm-dd`, `d/m/aa` (años 00–69 → 2000s) | Por expresión regular, **siempre día/mes** (nunca el orden de Estados Unidos). Si una fecha solo tiene sentido como mes/día (`07/13/2023`), o más del 20 % de las filas tienen una fecha que no existe, el archivo se rechaza: "Las fechas parecen estar en formato mes/día; usá día/mes" (H-016) |
 | Mes | `aaaa-mm`, `mm/aaaa`, `mm-aaaa` | Por expresión regular |
@@ -65,7 +65,7 @@ El parser es **extensible**: tiene una tabla de variables reconocidas, cada una 
 | `t_max_c` | °C | −10 a 50 | −10 a 50 | **máximo** del mes |
 
 1. **Diario → mensual:** según la tabla. Varios registros de lluvia del mismo día se suman (son varias lluvias). Para las temperaturas del mismo día se toma el mínimo de las mínimas y el máximo de las máximas.
-2. **Lluvia, meses sin registros dentro del período:** el productor anota solo los días que llueve, así que un mes sin filas de lluvia entre la primera y la última fecha cuenta como **0 mm**, con un aviso: "N meses sin registros dentro del período: se tomaron como 0 mm (en invierno es normal)". Si son más de 6 meses seguidos con 0, se avisa como posible hueco del registro.
+2. **Lluvia, meses sin registros dentro del período:** el productor anota solo los días que llueve, así que un mes sin filas de lluvia entre la primera y la última fecha cuenta como **0 mm**, con un aviso: "N meses sin registros de lluvia dentro del período: se tomaron como 0 mm (en invierno es normal)". Si son más de 6 meses seguidos con 0, se avisa como posible hueco del registro.
 3. **Temperaturas, meses incompletos:** a diferencia de la lluvia, la falta de datos de temperatura **no** cuenta como 0. Un mes de temperatura vale solo si tiene registros en al menos **20 días**. Si tiene menos, ese mes queda sin dato, con aviso (una helada se puede perder justo en los días que faltan).
 4. **Celda vacía o `-`:** el día o mes **no se registró** para esa variable. Las otras variables de la fila se usan igual.
 5. **Mensual:** un mes repetido es un **error** (no se suma, porque no se sabe cuál vale).
@@ -113,7 +113,7 @@ SeriePlanilla:
 - En la tabla, la fila del contraste ya existe (#45). Se suman las filas de helada y calor si llegan, y si llega `detalle_campanas`, una mini tabla por campaña (Could).
 
 ### 4.3 CI (Back 2)
-- `.github/scripts/fronteras_dominios.py`: sumar `"mediciones"` a `DOMINIOS`.
+- `.github/scripts/fronteras_dominios.py`: sumar `"mediciones"` a `DOMINIOS` (hecho).
 - Fixtures CSV en `backend/tests/mediciones/fixtures/`, todas de menos de 5 KB.
 
 ## 5. Lo que tiene que hacer Benja (Back 1), paso a paso
@@ -146,12 +146,12 @@ Todo es **compatible hacia atrás**: los campos nuevos son opcionales, el mock n
                 responses={413: {"model": Error}, 422: {"model": ResultadoPlanilla}})
    async def subir_planilla(archivo: UploadFile) -> ResultadoPlanilla: ...
    ```
-   - Lee como mucho **1 MB + 1 byte**. Si se pasa, responde **413** "La planilla supera 1 MB".
-   - Llama a `app.mediciones.planilla.leer_planilla(contenido, archivo.filename)`. Hasta que el parser esté en `dev`, devuelve un stub con `ok: false` y "Lectura de planillas en preparación".
+   - Lee como mucho **1 MiB + 1 byte** (`MAX_BYTES_PLANILLA = 1024 * 1024` en `rutas.py`). Si se pasa, responde **413** "La planilla supera 1 MB". El parser, por su lado, rechaza con 422 lo que pase de 1.000.000 bytes (`MAX_BYTES` en `planilla.py`).
+   - Llama a `app.mediciones.planilla.leer_planilla(contenido, archivo.filename)`. El stub con `ok: false` (`PARSER_PENDIENTE`) solo sale si no se puede importar el parser; desde #55 no debería verse.
    - Responde **200** si `ok` y **422** con el `ResultadoPlanilla` si no.
    - No guarda el archivo ni llama a NASA.
 3. Agregar la ruta al mock del front (un `ResultadoPlanilla` de ejemplo), para que Front 1 arranque sin esperar.
-4. Tests en `tests/api/test_rutas.py`: un CSV chico válido da 200, un CSV inválido da 422, más de 1 MB da 413, y un archivo vacío da 422.
+4. Tests en `tests/api/test_planilla.py`: un CSV chico válido da 200, un CSV inválido da 422, más de 1 MB da 413, y un archivo vacío da 422.
 
 ### 5.3 Contraste de lluvia con la serie · `app/clima/correccion.py`
 Si `mediciones.serie_mensual` trae lluvia:
@@ -171,7 +171,7 @@ Si `serie_mensual` trae `t_min_c` o `t_max_c`:
 2. **Calor por mes:** igual, con `t_max_c >= UMBRAL_CALOR_C` (35 °C).
 3. Por cada mes en el que el productor o NASA tienen al menos una campaña con helada, contar `productor_k de n` y `nasa_k de n` en las **mismas** campañas.
 4. **Filas de contraste:** `indicador="helada"`, `unidad="campañas con helada"`, con texto fijo por mes: "Heladas en mayo: tu estación, 4 de 6 campañas · NASA en las mismas campañas, 2 de 6". Lo mismo para el calor.
-5. **Regla de confianza** *(implementada en #54)*: si en algún mes la diferencia entre productor y NASA llega a **1 de cada 3 campañas en común** (mínimo 1; con 6 campañas da 2), la confianza de `meses_helada_frecuente` baja a "baja", con el motivo y un riesgo para "A revisar con el agrónomo": "Tu estación registra heladas que NASA POWER no ve (mayo: 4 contra 2 de 6 campañas): revisar fechas de siembra con datos locales". Lo mismo para el calor. Es el mismo criterio que la "helada frecuente" de `indicadores.py`.
+5. **Regla de confianza** *(implementada en #54)*: si en algún mes la diferencia entre productor y NASA llega a **1 de cada 3 campañas en común** (mínimo 1; con 6 campañas da 2), la confianza de `meses_helada_frecuente` baja a "baja", con el motivo y un riesgo para "A revisar con el agrónomo": "Tu estación registra heladas que NASA POWER no ve (mayo: 4 contra 2 de 6 campañas): revisar fechas de siembra con datos locales". Con el calor, la misma diferencia marca la fila del contraste como "baja" y suma el riesgo ("revisar el calor en floración con datos locales"), pero no baja la confianza de ningún indicador. Es el mismo criterio que la "helada frecuente" de `indicadores.py`.
 6. **El contraste no cambia ninguna probabilidad:** las probabilidades siguen saliendo de las 30 campañas de NASA. `servicio.py` completa `Probabilidad.contraste` con la línea del productor para el mismo mes y evento. Los puntajes sí cambian, pero por la mezcla del motor (sección 1), no por el contraste.
 7. Nueva constante `INDICADORES_HELADA = ("meses_helada_frecuente",)`, igual que `INDICADORES_AGUA`.
 
@@ -226,12 +226,12 @@ En `tests/clima/test_correccion.py` y `tests/api/test_servicio.py`:
 
 Los pasos 2 y 4 son independientes. El 3 junta los dos. El front puede arrancar con el mock de `ResultadoPlanilla`. Si falta tiempo, el paso 5 se corta sin afectar al resto.
 
-**Estado (14/11, a la noche):**
+**Estado (15/11):** todos los pasos están en `dev`.
 - Paso 0: aprobado, MVP 4.3.
-- Pasos 1, 3, 4 y 5: en `dev` (#50, #51, #52 y #54).
-- Paso 2: parser en PR #55.
-- Paso 6: pendiente (Front 1).
-- Paso 7: después de mergear #55.
+- Pasos 1 a 5: en `dev` (#50, #51, #52, #54 y el parser #55). El parser rechaza fechas mes/día desde #120.
+- Paso 6: en `dev` (`frontend/src/lib/planilla.ts` y el modal del formato); sin carga a mano desde #121.
+- Paso 7: la demo se regeneró con el motor nuevo (#139).
+- Los tests de la ruta quedaron en `backend/tests/api/test_planilla.py` y el CI ya cuenta `mediciones` como dominio (`.github/scripts/fronteras_dominios.py`).
 
 ## 8. Decisiones
 **Resueltas (14/11):**
@@ -242,8 +242,7 @@ Los pasos 2 y 4 son independientes. El 3 junta los dos. El front puede arrancar 
 - La materia orgánica **no se usa para puntuar** (el motor no la recibe).
 - La ruta es de Benja, con `python-multipart`.
 
-**Abiertas:**
-- **Front 1:** quién toma la UI y cómo convive con #18 y #45, que siguen abiertos.
+**Abiertas:** ninguna. La UI de la planilla la hizo el front y está en `dev`.
 
 ## 9. Próximos pasos (fuera de esta propuesta)
 - **Humedad del suelo** (sensores): no hay contraparte de NASA comparable (SMAP quedó descartado, y el índice de POWER es de 0 a 1 a 50 km), ningún indicador de la app la usa todavía y los sensores no son comparables entre sí (% volumétrico, kPa, índices; distintas profundidades y calibraciones). El parser ya queda preparado para sumarla como variable nueva.

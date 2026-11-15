@@ -4,7 +4,8 @@
 Nunca lanza: los problemas van a `errores` (archivo rechazado) o a `serie.avisos` (se descartó algo y el resto
 sigue). Sin red ni disco: los bytes (y la fecha de hoy, para descartar fechas futuras) determinan el resultado.
 
-Las mediciones del productor se muestran al lado de NASA y no cambian ningún puntaje.
+Las mediciones del productor se muestran al lado de NASA (`clima/correccion.py`) y, además, el motor las
+mezcla con NASA en los puntajes según los años de registro (`motor/mezcla.py`).
 
 Uso suelto, desde backend/:  py -m app.mediciones.planilla <archivo.csv>
 """
@@ -31,7 +32,7 @@ from app.api.contrato import (
     SeriePlanilla,
 )
 
-MAX_BYTES = 1_000_000  # 1 MB
+MAX_BYTES = 1024 * 1024  # 1 MB; el mismo tope que usa la ruta (`api/rutas.py` lo importa de acá)
 MAX_FILAS = 20_000  # filas de datos, sin el encabezado
 MAX_MESES = 480  # 40 años
 MIN_MESES = 12  # alguna variable tiene que llegar a 12 meses con dato
@@ -308,7 +309,8 @@ class _Lector:
         if not contenido.strip():
             raise _Rechazo("El archivo está vacío")
         if len(contenido) > MAX_BYTES:
-            raise _Rechazo(f"La planilla pesa {len(contenido) / 1e6:.1f} MB: el máximo es 1 MB".replace(".", ","))
+            # Sin redondear el peso: con 1,02 MB decía "pesa 1,0 MB: el máximo es 1 MB".
+            raise _Rechazo("La planilla supera 1 MB, el máximo: guardá menos años o solo las columnas que se usan")
         if contenido.startswith(b"PK\x03\x04") or (nombre or "").lower().endswith((".xlsx", ".xls", ".ods")):
             raise _Rechazo("La planilla tiene que ser CSV: en Excel o Google Sheets, guardarla como CSV")
 

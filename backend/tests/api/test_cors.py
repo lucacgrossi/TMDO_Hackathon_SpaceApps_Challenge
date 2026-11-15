@@ -41,3 +41,22 @@ def test_regex_acepta_las_urls_de_vercel(cliente):
     assert _origen_permitido(c, "https://field-shift-git-dev-equipo.vercel.app") is not None
     assert _origen_permitido(c, "https://otro.com") is None
     assert _origen_permitido(c, "http://localhost:3000") is None
+
+
+def test_el_500_inesperado_lleva_cors_y_el_mensaje(cliente, monkeypatch):
+    """Si el 500 sale sin CORS, el navegador lo bloquea y el front dice "el servidor no contestó"."""
+    import json
+    from pathlib import Path
+
+    from app import servicio
+
+    def falla(_entrada):
+        raise RuntimeError("falla inesperada")
+
+    monkeypatch.setattr(servicio, "analizar", falla)
+    c = cliente()
+    entrada = json.loads((Path(__file__).parents[1] / "ejemplos" / "entrada_demo.json").read_text(encoding="utf-8"))
+    r = c.post("/analizar", json=entrada, headers={"Origin": "http://localhost:3000"})
+    assert r.status_code == 500
+    assert r.json() == {"mensaje": app.main.MENSAJE_ERROR_INESPERADO}
+    assert r.headers.get("access-control-allow-origin") == "http://localhost:3000"

@@ -98,12 +98,13 @@ En `nasa-space-app-fieldchange` ya está hecho (14/11). Servicio: https://field-
 ```bash
 py -m pip install -r requirements.txt
 py -m uvicorn app.main:app --port 8080        # en otra terminal, los curl de abajo contra localhost:8080
-git grep -n -i -E "api[_-]?key|secret|token"  # no tiene que aparecer ninguna clave
+git grep -n -i -E "api[_-]?key|secret|token"  # salen nombres (p. ej. `id-token: write` del workflow), pero ningún valor de clave
 ```
 - `/analizar` del lote demo responde en menos de 30 s.
 - La URL del front está en `CORS_ORIGINS` (paso 3).
 
-## 3. Deploy
+## 3. Primer deploy (solo si el servicio no existe)
+`field-shift-api` ya existe: para redeployar o cambiar variables se usa [Deploy manual](#deploy-manual-cambiar-variables-instancias-o-permisos), con la lista completa de `CORS_ORIGINS`. Este comando es para crear el servicio en un proyecto nuevo:
 ```bash
 gcloud run deploy $SERVICIO \
   --source . \
@@ -121,9 +122,9 @@ gcloud run deploy $SERVICIO \
 ## 4. Prueba desde una branch (sin tocar el tráfico)
 ```bash
 gcloud run deploy $SERVICIO --source . --region $REGION --allow-unauthenticated \
-  --memory 1Gi --timeout 60 --no-traffic --tag prueba \
-  --set-env-vars "^@^CORS_ORIGINS=http://localhost:3000"
+  --memory 1Gi --timeout 60 --no-traffic --tag prueba
 ```
+Sin `--set-env-vars`, la revisión de prueba conserva las variables de la anterior. **No pisar `CORS_ORIGINS` acá:** el próximo deploy automático desde `main` copia las variables de la última revisión creada (aunque no tenga tráfico), así que un `CORS_ORIGINS` recortado llegaría a producción.
 La revisión queda en `https://prueba---<servicio>-<hash>.<region>.run.app` y la URL principal no cambia. `--no-traffic` no se puede usar si el servicio todavía no existe: el primer deploy va sin `--no-traffic` ni `--tag` (toma el 100 %, porque no hay otra revisión). Para sacar la etiqueta: `gcloud run services update-traffic $SERVICIO --region $REGION --remove-tags prueba`.
 
 ## 5. Prueba después de cada deploy

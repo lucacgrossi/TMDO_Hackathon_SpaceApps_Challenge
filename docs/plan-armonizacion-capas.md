@@ -1,9 +1,9 @@
 # Plan · Armonización de las capas del mapa
 
-**Estado:** propuesta de Back 2 (Luca), 14/11. Toca el contrato (Benja) y las capas del front (Front 1, PR #25 abierto): hay que acordarlo antes de mergear #25.
+**Estado:** propuesta de Back 2 (Luca), 14/11. **Implementada (15/11):** los pasos 1 a 7 de la sección 9 están en `dev`. Queda abierta solo la escala de clases de erosión (sección 10).
 
 ## 1. El problema
-Hoy el mapa y la tabla calculan **por separado** y pueden mostrar cosas distintas sobre el mismo lote:
+*Diagnóstico del 14/11, ya resuelto:* el mapa y la tabla calculaban **por separado** y podían mostrar cosas distintas sobre el mismo lote:
 
 | Capa | Tabla / panel (back) | Mapa (front, PR #25) | Riesgo |
 |---|---|---|---|
@@ -27,9 +27,9 @@ Una sola fuente de verdad: **el backend arma todas las capas sobre una grilla co
 ### 3.1 Espacio: una grilla por lote
 - **Sistema de coordenadas:** EPSG:4326 (lat/lon).
 - **Paso:** **1 segundo de arco** (1/3600°), que es la grilla nativa de NASADEM: ~30 m de norte a sur y ~26 m de este a oeste en Córdoba. Así la pendiente no se remuestrea.
-- **Extensión:** el bbox del polígono, **ajustado a los bordes de los píxeles de NASADEM** (piso y techo a múltiplos de 1/3600°). Ancho y alto se calculan una vez y se usan para todas las capas.
+- **Extensión:** el bbox del polígono, **ajustado a los bordes de los píxeles de NASADEM**, que caen en (j + ½)″ porque NASADEM centra cada píxel en el segundo entero (`ORIGEN_SEGUNDOS = 0.5` en `grilla.py`). Ancho y alto se calculan una vez y se usan para todas las capas.
 - **Máscara del lote:** un píxel está adentro si su centro cae dentro del polígono (point-in-polygon con `numpy`, sin shapely). Es **la misma máscara** para todas las capas y todos los resúmenes.
-- **Tamaño máximo:** 250.000 píxeles por capa. Un lote de 20.000 ha da ~540 × 430: entra. Si un lote lo supera, la grilla pasa a 2 segundos de arco (~60 m) y la nota lo dice.
+- **Tamaño máximo:** 250.000 píxeles por capa. Un lote de 20.000 ha da ~540 × 430: entra. Si un lote lo supera, el paso sube de a 1″ (2″ ≈ 60 m, 3″…) hasta que entre, y la nota lo dice. Con más de 1″, NASADEM se remuestrea con `average`.
 - **Verificado el 14/11 en el lote demo** (41 × 30 píxeles, `dst_crs=epsg:4326`):
 
 | Fuente | Pedido a Planetary Computer | Resultado |
@@ -39,12 +39,12 @@ Una sola fuente de verdad: **el backend arma todas las capas sobre una grilla co
 | MODIS 13Q1 | `GET /data/v1/item/crop/{bbox}/{W}x{H}.npy?…&assets=250m_16_days_NDVI&resampling=nearest` | (30, 41), 1,0 s |
 | HLS (NDVI) | `GET /data/v1/item/bbox/{bbox}/{W}x{H}.npy?…&expression=(B08-B04)/(B08+B04)&asset_as_band=true` (con `crop` da **404**; también anda `POST /item/crop/{W}x{H}.npy` con el polígono) | (30, 41), 1,5 s |
 
-Todas vuelven **alineadas píxel a píxel**: la misma forma y los mismos bordes.
+Todas vuelven **alineadas píxel a píxel**: la misma forma y los mismos bordes. En el código, `pc.raster_en_grilla` usa `item/bbox` para las cuatro fuentes (sección 7).
 
 **Remuestreo por fuente:**
-- NASADEM: ninguno, porque la grilla es la suya.
+- NASADEM: ninguno (`nearest`), porque la grilla es la suya; `average` si el paso sube a 2″ o más.
 - HLS (UTM, 30 m): `bilinear`, porque es un índice continuo de resolución parecida.
-- WorldCover (10 m): `mode` (la clase mayoritaria de cada píxel de 30 m). Si `mode` no está disponible, `nearest`.
+- WorldCover (10 m): `mode` (la clase mayoritaria de cada píxel de 30 m), verificado el 14/11 en `item/bbox`.
 - MODIS (250 m): `nearest`, para que se vean los bloques.
 
 **Distorsión en el mapa:** Leaflet estira la imagen lat/lon linealmente entre sus bordes en Web Mercator. Para 0,15° de latitud (un lote de 20.000 ha) a −33°, el error es de ~0,1 píxel: no se nota.
@@ -62,8 +62,9 @@ Un módulo `satelite/escalas.py` con **una sola definición** de cada escala, qu
 |---|---|---|---|
 | NDVI | 0 · 0,15 · **0,3** · 0,45 · 0,6 · 0,75 | `#E6D8AE #CDBA86 #94AF63 #689C49 #3F8139 #1B5E2E` | MVP 4.2 ("Mapa interactivo"); 0,3 = umbral de cobertura baja (`ndvi.UMBRAL_NDVI_BAJO`) |
 | Pendiente (%) | 0 · 1 · 2,5 · 4 · 6 | verde → amarillo → rojo, como `slopeColor` del prototipo | Prototipo |
-| Erosión (índice) | Por clases de pendiente × meses bajos | Misma rampa que la pendiente | `capas.py` |
-| Cultivo | Clase 40 sí / no | Contorno o rayado | WorldCover |
+| Meses con cobertura baja | 0 · 1 · 3 · 5 · 7 | `#1B5E2E #94AF63 #E6D8AE #CDA35F #8D5524` | `escalas.MESES_BAJOS` |
+| Erosión (índice, % × meses) | 0 · 2 · 5 · 10 · 20 (**provisoria**, ver sección 10) | Misma rampa que la pendiente | `escalas.EROSION` |
+| Cultivo | Clase 40 sí / no (el píxel vale 100 o 0) | Relleno gris (`#9E9E9E`) u amarillo (`#F2C94C`) | `escalas.CULTIVO` (WorldCover) |
 
 El umbral 0,3 y los cortes se leen **de la capa**, no se repiten en el front.
 
@@ -72,7 +73,7 @@ Sobre la grilla y la máscara del lote:
 - **Pendiente por píxel** (gradiente del modelo de elevación con un suavizado chico) para la capa. La **pendiente general** sigue siendo el plano por mínimos cuadrados **sobre la misma grilla**: es el número de la tabla.
 - **NDVI por mes:** 12 rasters (uno por escena). El **NDVI medio del lote** de cada mes pasa a ser la media del raster dentro de la máscara, en lugar de `item/statistics`, para que el número sea **exactamente** el promedio de lo que se ve.
 - **Meses con cobertura baja por píxel:** cuántos meses ese píxel estuvo bajo 0,3.
-- **Erosión por píxel** = pendiente del píxel × meses bajos del píxel. El valor del lote es su media dentro de la máscara: se ve **dónde** está el riesgo.
+- **Erosión por píxel** = pendiente del píxel × meses bajos del píxel: se ve **dónde** está el riesgo. El **valor del lote** es la pendiente general (plano) × la media de los meses bajos por píxel, no la media del mapa: la pendiente por píxel de NASADEM es ruidosa y sesgada hacia arriba en terreno llano (en el lote demo daba 5,5 contra 2,6). `resumen.valor_lote` de la capa es ese valor y `resumen.media` sigue siendo la media por píxel (`capas.erosion_por_pixel`).
 - **Cultivo por píxel** (WorldCover). El % del lote es la proporción dentro de la máscara.
 
 **Regla de coherencia:** todo número del lote que también es una capa se calcula **como resumen del raster de esa capa**. Si un raster falla, el número sale de su método anterior y la capa va a `no_disponibles`.
@@ -110,7 +111,7 @@ En `Capas`, solo se **agregan** campos opcionales:
 **Demo sin internet:** como las capas viajan en la respuesta, `demo/rio_cuarto.json` **incluye el mapa completo**. Hoy, sin internet, las teselas de NDVI de Planetary Computer no cargan.
 
 ## 6. Front (Front 1)
-- `CapaNdvi`, `CapaPendiente`, `CapaErosion` y `CapaCultivo` pasan a ser `ImageOverlay` con `png` y `bounds` de la respuesta, `className="px"` y `image-rendering: pixelated`. **Todas con los mismos `bounds`**, así que los píxeles se superponen exactamente.
+- Las capas del lote (NDVI, pendiente, erosión y cultivo) se dibujan con un solo componente, `CapaRasterLote` (`ImageOverlay` con `png` y `bounds` de la respuesta), `className="px"` y `image-rendering: pixelated`. **Todas con los mismos `bounds`**, así que los píxeles se superponen exactamente.
 - Se sacan el cálculo de pendiente del navegador (`lib/pendiente.ts`) y el valor ilustrativo de 1,6 %. Sin dato, la capa no se dibuja y la leyenda dice "sin dato" con el motivo.
 - NDVI: el mes sale de `capas.ndvi_mensual[mes].mapa`. Si un mes no tiene raster, se usa GIBS MODIS **de la fecha que dice el back** (no un año calculado en el front), y la leyenda lo aclara.
 - `Leyenda` usa `escala` y `resumen` de la capa. Tocar un píxel (RF18) lee `valores[fila][columna]` y muestra el valor, la fuente, la fecha y la resolución.
@@ -121,9 +122,9 @@ En `Capas`, solo se **agregan** campos opcionales:
 | Pieza | Qué hace |
 |---|---|
 | `satelite/grilla.py` | `Grilla` (bounds ajustados a 1″, ancho, alto, paso) a partir del polígono; `mascara(grilla, poligono)`; regla de 250.000 píxeles → 2″ |
-| `satelite/pc.py` | `raster_en_grilla(coleccion, item, grilla, assets=… o expression=…, resampling=…)` → `numpy` con NaN fuera de datos. Usa `item/bbox/{bbox}/{W}x{H}.npy` con `dst_crs=epsg:4326` (anda para las 4 fuentes, y HLS lo necesita) |
+| `satelite/pc.py` | `raster_en_grilla(coleccion, item, grilla, assets=… o expresion=…, resampling=…)` → `numpy` con NaN fuera de datos. Usa `item/bbox/{bbox}/{W}x{H}.npy` con `dst_crs=epsg:4326` (anda para las 4 fuentes, y HLS lo necesita) |
 | `satelite/escalas.py` | Las escalas de la tabla 3.3 y el umbral |
-| `satelite/raster.py` | `pintar(array, mascara, escala) → png base64` (Pillow, transparente fuera del lote) y `cuantizar(array) → (base64, factor, nodata)` |
+| `satelite/raster.py` | `pintar(array, mascara, escala) → png base64` (Pillow, transparente fuera del lote) y `cuantizar(array, mascara, factor=0.01) → (base64, factor, nodata)` |
 | `elevacion.py` | El DEM sobre la grilla; pendiente por píxel para la capa; la pendiente general con el mismo plano sobre la misma grilla |
 | `ndvi.py` | Por mes, el raster de la escena elegida sobre la grilla; la media del lote desde el raster (en lugar de `item/statistics`); MODIS de respaldo con `nearest` |
 | `cobertura.py` | El raster de WorldCover sobre la grilla y el % desde la máscara |
@@ -135,27 +136,28 @@ En `Capas`, solo se **agregan** campos opcionales:
 ## 8. Tests
 - **Alineación:** todos los rasters de un lote tienen la misma forma y los mismos `bounds` que la `grilla`.
 - **Máscara:** un polígono en L deja afuera los píxeles del hueco, y un píxel en el borde se decide por su centro.
-- **Coherencia:** la media del raster NDVI dentro de la máscara es igual al `ndvi_medio` del mes; la media de erosión es igual al valor del lote; el % de cultivo es igual a `cobertura_agricola_pct`.
+- **Coherencia:** la media del raster NDVI dentro de la máscara es igual al `ndvi_medio` del mes; el `resumen.valor_lote` de erosión es igual al valor del lote (pendiente general × media de meses bajos); el % de cultivo es igual a `cobertura_agricola_pct`.
 - **PNG:** es transparente fuera de la máscara, y el color de un píxel corresponde a su clase de la escala.
 - **Cuantización:** ida y vuelta con un error menor que `factor / 2`.
-- **Lote grande:** más de 250.000 píxeles → grilla de 2″ con nota.
+- **Lote grande:** más de 250.000 píxeles → grilla de 2″ (o más) con nota.
 - **Sin red:** fixtures `.npy` chicas de las 4 fuentes (de menos de 10 KB cada una).
 
 ## 9. Orden y dueños
-| Paso | Qué | Dueño | Depende de |
-|---|---|---|---|
-| 0 | Acordar este plan y qué pasa con #25 (mergear tal cual y reemplazar las capas después, o ajustarlo antes) | Luca + Benja + Front 1 | — |
-| 1 | Contrato: `CapaRaster`, campos `*_mapa`, `grilla` (sección 5) | Benja | 0 |
-| 2 | `grilla.py`, `pc.raster_en_grilla`, `escalas.py`, `raster.py` + tests | Luca | — (con modelos locales hasta el paso 1) |
-| 3 | Pendiente y cultivo en la grilla + `capas.py` | Luca | 1, 2 |
-| 4 | NDVI × 12 en la grilla, con la media desde el raster | Luca | 2 |
-| 5 | Erosión por píxel | Luca | 3, 4 |
-| 6 | Front: `ImageOverlay` con la respuesta, leyenda desde `escala`, RF18 | Front 1 | 1 (con un mock de `CapaRaster` antes) |
-| 7 | Regenerar `demo/rio_cuarto.json` con el mapa completo | Luca | 3–5 |
+| Paso | Qué | Dueño | Depende de | Estado (15/11) |
+|---|---|---|---|---|
+| 0 | Acordar este plan y qué pasa con #25 (mergear tal cual y reemplazar las capas después, o ajustarlo antes) | Luca + Benja + Front 1 | — | Hecho |
+| 1 | Contrato: `CapaRaster`, campos `*_mapa`, `grilla` (sección 5) | Benja | 0 | En `dev` (`contrato.py`: `CapaRaster`, `GrillaLote`, `Capas`) |
+| 2 | `grilla.py`, `pc.raster_en_grilla`, `escalas.py`, `raster.py` + tests | Luca | — (con modelos locales hasta el paso 1) | En `dev` |
+| 3 | Pendiente y cultivo en la grilla + `capas.py` | Luca | 1, 2 | En `dev` |
+| 4 | NDVI × 12 en la grilla, con la media desde el raster | Luca | 2 | En `dev` |
+| 5 | Erosión por píxel | Luca | 3, 4 | En `dev` (`capas.erosion_por_pixel`) |
+| 6 | Front: `ImageOverlay` con la respuesta, leyenda desde `escala`, RF18 | Front 1 | 1 (con un mock de `CapaRaster` antes) | En `dev` (`lib/capaRaster.ts`, `CapaRasterLote.tsx`) |
+| 7 | Regenerar `demo/rio_cuarto.json` con el mapa completo | Luca | 3–5 | En `dev` (#139) |
 
 **Si falta tiempo, se recorta en este orden:** erosión por píxel → cultivo por píxel → `valores` (RF18) → NDVI × 12 (queda el front con las teselas de Planetary Computer **usando el `item` del back**). **Lo mínimo para que todo sea coherente:** la pendiente desde el back (sin el cálculo en el navegador ni el 1,6 %) y el NDVI con la escena del back.
 
-## 10. Decisiones abiertas
-- **Front 1 (Tobias):** qué hacer con el PR #25: mergearlo y migrar las capas después, o ajustarlo antes para que use la escena del back y saque el 1,6 % ilustrativo.
-- **Benja:** OK al contrato aditivo de la sección 5.
-- **Persona 3:** la escala de clases de erosión (sección 3.3).
+## 10. Decisiones
+**Resueltas:** el PR #25 se mergeó y las capas se migraron después (el front ya no calcula la pendiente ni muestra el 1,6 % ilustrativo: `CapaPendiente.tsx`); el contrato aditivo de la sección 5 está en `contrato.py`.
+
+**Abierta:**
+- **Persona 3:** la escala de clases de erosión (sección 3.3). Hoy usa los cortes propuestos por Back 2 y la nota de la capa dice "Escala de clases provisoria".

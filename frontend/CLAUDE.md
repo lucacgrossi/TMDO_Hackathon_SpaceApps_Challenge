@@ -15,7 +15,7 @@ Dueños y reparto del rediseño (persona 4, persona 5 y Luca): **`./PLAN.md`**. 
 **Could:** RF19 capas regionales · RF23 tooltips.
 
 ## Flujo y estado
-- El flujo tiene cuatro etapas: `etapa: 'marcar' | 'configurar' | 'cargando' | 'dashboard'`, y el dashboard tres secciones: `seccion: 'mapa' | 'clima' | 'rotaciones'`. Las dos viven en un store `useApp` (`src/lib/app.ts`) y reemplazan a `paso`, `body.onb` (`ClaseBody`) y `hojaAbierta`.
+- El flujo tiene cuatro etapas: `etapa: 'marcar' | 'configurar' | 'cargando' | 'dashboard'`, y el dashboard tres secciones: `seccion: 'mapa' | 'clima' | 'rotaciones'`. Las dos viven en un store `useApp` (`src/lib/app.ts`) y reemplazan a `paso` y `body.onb` (`ClaseBody`). `hojaAbierta` sigue en `useVista` (`src/lib/vista.ts`) porque la leen `encuadre.ts` y `comparacion.ts`; las reglas `body.onb` que quedan en `globals.css` son CSS del prototipo sin uso.
 - `marcar`: mapa solo. Al cerrar el polígono pasa a `configurar`. No hay lote de ejemplo: el productor siempre marca el suyo.
 - `configurar`: mapa + panel de entradas; las esquinas del lote se arrastran para ajustarlo (`EsquinasLote`). "Analizar lote" pasa a `cargando` y dispara `/analizar`.
 - `cargando`: pantalla de carga. Con respuesta OK pasa a `dashboard` (sección `mapa`); con error vuelve a `configurar` mostrando el error (422 / 503).
@@ -29,7 +29,7 @@ Dueños y reparto del rediseño (persona 4, persona 5 y Luca): **`./PLAN.md`**. 
 - **Capas del mapa: el back calcula, el front dibuja.** Cada capa llega como `CapaRaster` (PNG + `bounds` comunes + `escala` + `valores` por píxel; `src/lib/capaRaster.ts`) y se dibuja como `ImageOverlay` con `image-rendering: pixelated`, recortado al contorno del lote (`lib/recorteRaster.ts`). La leyenda lee `capa.escala` y el inspector de píxel lee `valores[fila][columna]`. Nada de búsquedas de escenas propias, cálculos en el navegador ni valores ilustrativos. Todas las capas usan la campaña del back y el mismo `mes` (índice 0 = enero; la línea de tiempo se muestra de julio a junio). Detalle en `../docs/plan-armonizacion-capas.md`.
 - **Estilos:** tokens en `:root` de `src/app/globals.css` (los de `DESIGN.md`, un solo tema claro) y **un CSS module por componente**. El CSS del prototipo que hoy está en `globals.css` se borra a medida que cada pantalla se migra; no se agregan clases globales nuevas.
 - **Fuentes:** Pixelify Sans (títulos) e IBM Plex Sans (todo lo demás) por `next/font/local` en `layout.tsx`, con los `woff2` en `src/app/fuentes/` (licencia OFL). No se usa `next/font/google`: el build de Vercel fallaba seguido al bajarlas.
-- **Meses:** todo array de 12 de la API tiene índice 0 = enero. Lo que se muestra como campaña (línea de tiempo, calendarios, gráficos) va de julio a junio rotando `[6..11, 0..5]` con un solo helper de `src/lib/`; nadie rota a mano en un componente.
+- **Meses:** todo array de 12 de la API tiene índice 0 = enero. Lo que se muestra como campaña (línea de tiempo, calendarios, gráficos) va de julio a junio rotando `[6..11, 0..5]` con `ORDEN_CAMPANIA` de `src/lib/contrato.ts` (`calendario.ts` tiene una copia, `ORDEN_CAMPANA`, para sus helpers); nadie rota a mano en un componente.
 - **`null` es "sin dato"**, nunca 0. Los textos que manda el back (`resumen`, `texto`, `motivo`…) se muestran tal cual.
 - **El color nunca es la única señal:** terciles con letra, barbecho con patrón, confianza con texto, descartadas con el motivo.
 - **Compu primero.** En celular, la tabla hace scroll horizontal y la barra lateral pasa a una barra inferior.
@@ -68,14 +68,15 @@ gcloud run deploy agropixel-web --source . --region southamerica-east1 --allow-u
 ## Estructura
 - `src/app/` · `layout.tsx` (fuentes, CSS de Leaflet y tokens), `page.tsx` (elige la pantalla según `etapa`), `icon.png` y `apple-icon.png` (favicon recortado del logo).
 - `src/lib/` · estado (`app.ts`, `store.ts`, `mapa.ts`, `capas.ts`, `dibujo.ts`, `comparacion.ts`, `resultado.ts`), contrato y conexión con el back (`contrato.ts`, `api.ts`, `aEntrada.ts`) y lógica pura con tests.
-- `src/components/marcar/` · persona 4: `PantallaMarcar` (buscador y GPS) y la barra de dibujo.
+- `src/components/marcar/` · persona 4: `PantallaMarcar` (buscador y GPS; usa `BuscadorLote` de `entradas/` y `BarraDibujo` de `mapa/`).
 - `src/components/entradas/` · persona 4: `PanelEntradas` y una sección por archivo (`SeccionRotacion`, `SeccionObjetivos`, `SeccionRestricciones`, `SeccionDatosLote`, `SeccionMediciones`, `SubirPlanilla`, `ModalFormatoPlanilla`).
 - `src/components/carga/` · persona 4: `PantallaCarga` (planta pixel) y `ErrorAnalisis`.
-- `src/components/mapa/` · persona 4: `Mapa` (siempre vía `MapaDinamico`), capas, `SelectorCapas`, `LineaTiempo`, `Leyenda`, `InspectorPixel`, `FichaLote`.
+- `src/components/mapa/` · persona 4: `Mapa` (siempre vía `MapaDinamico`), `BarraDibujo`, `CapaDibujo`, `EsquinasLote` y las capas del mapa de dibujo. `SelectorCapas`, `LineaTiempo` y `Leyenda` ya no los importa nadie: se borran.
+- En el rediseño del 15/11, la sección Mapa del dashboard (`SeccionMapa`, `MapaLote`, `InspectorPixel`, `FichaLote` y los componentes `*Lote`) y `src/components/clima/` los tomó Luca (`PLAN.md`); el mapa de dibujo sigue siendo de persona 4.
 - `src/components/dashboard/` · persona 5: `Dashboard`, `BarraLateral`, `Encabezado`.
-- `src/components/clima/` · persona 5: `ClimaHistorico`, `SelectorCampanias`, `GraficoCampania` (recharts), `HeladasCalor`, `ContrasteMediciones`.
-- `src/components/resultados/` · persona 5: `Rotaciones`, `TarjetaEstrategia`, `TablaTecnica`, `ChoqueObjetivos`, `HojaImpresion`.
-- `src/components/comunes/` · `AvisoApoyo`, `Boton`, `IconoPixel`, `PildoraConfianza`, `Toast`.
+- `src/components/clima/` · persona 5: `ClimaHistorico`, `SelectorCampanias`, `GraficoCampania` (recharts), `HeladasCalor`.
+- `src/components/resultados/` · persona 5: `Rotaciones`, `TarjetaEstrategia`, `PanelTrazabilidad`, `TablaTecnica`, `ChoqueObjetivos`, `ContrasteMediciones` (lo usa Clima histórico), `PildoraConfianza`, `HojaImpresion`.
+- `src/components/comunes/` · `AvisoApoyo`, `Boton`, `IconoPixel`, `Toast`, `ListaSugerencias`, `AtajoEtapa`, `PantallaPendiente`.
 - `public/img/agropixel-logo.png` · logo. `public/plantillas/mediciones.csv` · plantilla de la planilla.
 
 ## Fuera de alcance
