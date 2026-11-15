@@ -1,7 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { SECCIONES, type Seccion } from "@/lib/dashboard";
+import AvisoApoyo from "@/components/comunes/AvisoApoyo";
+import IconoPixel from "@/components/comunes/IconoPixel";
+import type { Seccion } from "@/lib/app";
+import { MENU_SECCIONES } from "@/lib/dashboard";
 import css from "./BarraLateral.module.css";
 
 interface Props {
@@ -9,8 +12,6 @@ interface Props {
   onCambiarSeccion: (s: Seccion) => void;
   /** "Editar lote y entradas": vuelve a `configurar` sin perder el resultado. */
   onEditar: () => void;
-  /** Aviso de apoyo, tal cual lo manda el back (`Salida.aviso`). */
-  aviso: string;
   /** `lote.localidad_aprox`; null = no se muestra. */
   lugar: string | null;
 }
@@ -19,10 +20,8 @@ interface Props {
  * Barra lateral del dashboard (`--noche`, 232 px): logo, las 3 secciones,
  * "Editar lote y entradas" y el aviso de apoyo, siempre visible (RF22).
  * En celular pasa a una barra inferior fija (ver el CSS).
- *
- * Los íconos son un marcador hasta que llegue `IconoPixel` (paso 0 de persona 4).
  */
-export default function BarraLateral({ seccion, onCambiarSeccion, onEditar, aviso, lugar }: Props) {
+export default function BarraLateral({ seccion, onCambiarSeccion, onEditar, lugar }: Props) {
   return (
     <aside className={css.barra}>
       <Image
@@ -35,7 +34,7 @@ export default function BarraLateral({ seccion, onCambiarSeccion, onEditar, avis
       />
       <nav className={css.nav} aria-label="Secciones del análisis">
         <ul className={css.lista}>
-          {SECCIONES.map((s) => (
+          {MENU_SECCIONES.map((s) => (
             <li key={s.id}>
               <button
                 type="button"
@@ -43,7 +42,7 @@ export default function BarraLateral({ seccion, onCambiarSeccion, onEditar, avis
                 aria-current={s.id === seccion ? "page" : undefined}
                 onClick={() => onCambiarSeccion(s.id)}
               >
-                <span className={css.icono} aria-hidden="true" />
+                <IconoPixel nombre={s.icono} className={css.icono} />
                 {s.menu}
               </button>
             </li>
@@ -51,13 +50,13 @@ export default function BarraLateral({ seccion, onCambiarSeccion, onEditar, avis
         </ul>
         <div className={css.separador} role="presentation" />
         <button type="button" className={css.item} onClick={onEditar}>
-          <span className={css.icono} aria-hidden="true" />
+          <IconoPixel nombre="editar" className={css.icono} />
           Editar lote y entradas
         </button>
       </nav>
       <div className={css.relleno} />
       {lugar && <p className={css.lugar}>{lugar}</p>}
-      <p className={css.aviso}>{aviso}</p>
+      <AvisoApoyo tono="oscuro" className={css.aviso} />
     </aside>
   );
 }

@@ -1,8 +1,11 @@
 "use client";
 
 import type { ReactNode } from "react";
+import ClimaHistorico from "@/components/clima/ClimaHistorico";
+import SeccionMapa from "@/components/mapa/SeccionMapa";
+import type { Seccion } from "@/lib/app";
 import type { Salida } from "@/lib/contrato";
-import { TEXTO_DESACTUALIZADO, datosSeccion, fichaDelLote, type Seccion } from "@/lib/dashboard";
+import { TEXTO_DESACTUALIZADO, fichaDelLote, itemMenu } from "@/lib/dashboard";
 import BarraLateral from "./BarraLateral";
 import Encabezado from "./Encabezado";
 import SeccionPendiente from "./SeccionPendiente";
@@ -13,7 +16,7 @@ export interface PropsDashboard {
   seccion: Seccion;
   /** Cambia de sección (`useApp().irA`). */
   onCambiarSeccion: (s: Seccion) => void;
-  /** "Editar lote y entradas": vuelve a `configurar` sin perder el resultado. */
+  /** "Editar lote y entradas": vuelve a `configurar` sin perder el resultado (`useApp().volverAEditar`). */
   onEditar: () => void;
   /** La respuesta de /analizar. */
   salida: Salida;
@@ -25,12 +28,12 @@ export interface PropsDashboard {
  * Contenido de cada sección. Cada dueño cambia SOLO su línea:
  * Mapa y Clima histórico (Luca) y Rotaciones (persona 5).
  */
-function contenido(seccion: Seccion): ReactNode {
+function contenido(seccion: Seccion, salida: Salida): ReactNode {
   switch (seccion) {
     case "mapa":
-      return <SeccionPendiente nombre="Mapa del lote" />;
+      return <SeccionMapa salida={salida} />;
     case "clima":
-      return <SeccionPendiente nombre="Clima histórico" />;
+      return <ClimaHistorico salida={salida} />;
     case "rotaciones":
       return <SeccionPendiente nombre="Rotaciones" />;
   }
@@ -38,11 +41,10 @@ function contenido(seccion: Seccion): ReactNode {
 
 /**
  * Esqueleto del dashboard (persona 5): barra lateral + encabezado + la sección
- * activa. Recibe todo por props: no depende de `useApp` (paso 0 de persona 4),
- * que lo conecta desde `page.tsx`.
+ * activa. Recibe todo por props; `page.tsx` lo conecta con `useApp` y el resultado.
  */
 export default function Dashboard({ seccion, onCambiarSeccion, onEditar, salida, desactualizado }: PropsDashboard) {
-  const datos = datosSeccion(seccion);
+  const item = itemMenu(seccion);
   const idTitulo = `titulo-${seccion}`;
 
   return (
@@ -51,7 +53,6 @@ export default function Dashboard({ seccion, onCambiarSeccion, onEditar, salida,
         seccion={seccion}
         onCambiarSeccion={onCambiarSeccion}
         onEditar={onEditar}
-        aviso={salida.aviso}
         lugar={salida.lote.localidad_aprox}
       />
       <main className={css.principal}>
@@ -60,9 +61,9 @@ export default function Dashboard({ seccion, onCambiarSeccion, onEditar, salida,
             {TEXTO_DESACTUALIZADO}
           </p>
         )}
-        <Encabezado id={idTitulo} titulo={datos.titulo} ficha={fichaDelLote(salida)} esMock={salida.es_mock} />
+        <Encabezado id={idTitulo} titulo={item.titulo} ficha={fichaDelLote(salida)} esMock={salida.es_mock} />
         <section className={css.seccion} aria-labelledby={idTitulo}>
-          {contenido(seccion)}
+          {contenido(seccion, salida)}
         </section>
       </main>
     </div>

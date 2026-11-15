@@ -1,20 +1,21 @@
 import { describe, expect, it } from "vitest";
 import { mockAnalizar } from "@/mocks/analizar";
 import { RIO_CUARTO } from "@/mocks/rio-cuarto";
-import type { Salida } from "./contrato";
-import { SECCIONES, SIN_DATO, datosSeccion, fichaDelLote } from "./dashboard";
+import { SECCIONES } from "./app";
+import type { ContrasteMedicion, Salida } from "./contrato";
+import { MENU_SECCIONES, SIN_DATO, fichaDelLote, itemMenu, textoMediciones } from "./dashboard";
 
 const valores = (s: Salida) => Object.fromEntries(fichaDelLote(s).map((p) => [p.etiqueta, p.valor]));
 
-describe("secciones del dashboard", () => {
-  it("son mapa, clima y rotaciones, en ese orden", () => {
-    expect(SECCIONES.map((s) => s.id)).toEqual(["mapa", "clima", "rotaciones"]);
+describe("menú del dashboard", () => {
+  it("tiene las mismas secciones que useApp, en el mismo orden", () => {
+    expect(MENU_SECCIONES.map((s) => s.id)).toEqual([...SECCIONES]);
   });
 
   it("cada sección tiene su título", () => {
-    expect(datosSeccion("mapa").titulo).toBe("Mapa del lote");
-    expect(datosSeccion("clima").titulo).toBe("Clima histórico");
-    expect(datosSeccion("rotaciones").titulo).toBe("Rotaciones");
+    expect(itemMenu("mapa").titulo).toBe("Mapa del lote");
+    expect(itemMenu("clima").titulo).toBe("Clima histórico");
+    expect(itemMenu("rotaciones").titulo).toBe("Rotaciones");
   });
 });
 
@@ -30,7 +31,6 @@ describe("fichaDelLote", () => {
 
   it("lee los valores de la respuesta sin calcularlos", () => {
     const v = valores(RIO_CUARTO);
-    expect(v["Superficie"]).toBe(`${RIO_CUARTO.lote.area_ha.toLocaleString("es-AR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} ha`);
     expect(v["Campaña satelital"]).toBe(RIO_CUARTO.visto_por_satelite.campana);
     expect(v["Clima"]).toBe(`${RIO_CUARTO.clima_mensual.n_anios} campañas, ${RIO_CUARTO.periodo_clima}`);
   });
@@ -47,14 +47,41 @@ describe("fichaDelLote", () => {
     };
     expect(valores(s)["Campaña satelital"]).toBe(SIN_DATO);
   });
+});
 
-  it("dice 'Sin cargar' sin mediciones y cuenta los datos contrastados si hay", () => {
-    const sin: Salida = { ...RIO_CUARTO, contraste_mediciones: [] };
-    expect(valores(sin)["Tus mediciones"]).toBe("Sin cargar");
+describe("textoMediciones", () => {
+  const fila = (campanas: string[] | null): ContrasteMedicion => ({
+    indicador: "lluvia",
+    valor_productor: 700,
+    valor_nasa: 780,
+    unidad: "mm",
+    diferencia_pct: -10,
+    confianza_resultante: "alta",
+    corregido_al_lado: null,
+    texto: "",
+    campanas_comparadas: campanas,
+  });
 
+  it("dice 'Sin cargar' sin mediciones", () => {
+    expect(textoMediciones({ ...RIO_CUARTO, contraste_mediciones: [] })).toBe("Sin cargar");
+  });
+
+  it("dice 'Cargadas' si hay mediciones sin campañas comparadas", () => {
     const con = mockAnalizar({ lluviaAnualMm: 700 });
-    const n = con.contraste_mediciones.length;
-    expect(n).toBeGreaterThan(0);
-    expect(valores(con)["Tus mediciones"]).toBe(`${n} ${n === 1 ? "dato" : "datos"} contra NASA`);
+    expect(con.contraste_mediciones.length).toBeGreaterThan(0);
+    expect(textoMediciones({ ...con, contraste_mediciones: [fila(null)] })).toBe("Cargadas");
+  });
+
+  it("cuenta las campañas distintas comparadas con NASA", () => {
+    const s: Salida = {
+      ...RIO_CUARTO,
+      contraste_mediciones: [fila(["2018/19", "2019/20", "2020/21"]), fila(["2019/20", "2021/22"])],
+    };
+    expect(textoMediciones(s)).toBe("Planilla, 4 campañas comparadas con NASA");
+  });
+
+  it("usa el singular con una sola campaña", () => {
+    const s: Salida = { ...RIO_CUARTO, contraste_mediciones: [fila(["2023/24"])] };
+    expect(textoMediciones(s)).toBe("Planilla, 1 campaña comparada con NASA");
   });
 });

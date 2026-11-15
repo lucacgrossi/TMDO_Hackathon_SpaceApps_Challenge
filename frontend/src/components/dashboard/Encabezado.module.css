@@ -15,7 +15,7 @@
 /* Título/H1: Pixelify Sans 600, 32/40. */
 .titulo {
   margin: 0;
-  font-family: var(--font-pixelify), sans-serif;
+  font-family: var(--f-titulo);
   font-size: 32px;
   line-height: 40px;
   font-weight: 600;

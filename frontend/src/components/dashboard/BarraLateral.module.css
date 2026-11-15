@@ -66,13 +66,9 @@
   outline-offset: 2px;
 }
 
-/* Marcador del ícono pixel (16 × 16, escalones). Se reemplaza por IconoPixel. */
+/* IconoPixel 16 × 16 (toma el color del texto). */
 .icono {
   flex: none;
-  width: 16px;
-  height: 16px;
-  background: currentColor;
-  clip-path: polygon(0 0, 40% 0, 40% 40%, 100% 40%, 100% 100%, 0 100%);
 }
 
 .separador {
@@ -92,15 +88,9 @@
   line-height: 16px;
 }
 
-/* Aviso de apoyo (RF22): siempre visible, sin botón de cerrar. */
+/* Aviso de apoyo (AvisoApoyo, tono oscuro): solo se ajusta en celular. */
 .aviso {
-  margin: 0;
-  padding: var(--space-2) var(--space-3);
-  border: 1px dashed var(--cielo-brillo);
-  border-radius: 2px;
-  color: var(--cielo-brillo);
-  font-size: 12px;
-  line-height: 16px;
+  flex: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -159,11 +149,11 @@
     flex: 1;
   }
 
-  .aviso {
+  /* `.barra .aviso` gana sobre el estilo de AvisoApoyo sin depender del orden de los CSS. */
+  .barra .aviso {
     padding: var(--space-1) var(--space-3);
-    border: 0;
+    border-left: 0;
     border-bottom: 1px dashed var(--cielo-brillo);
-    border-radius: 0;
     font-size: 11px;
     line-height: 14px;
   }
