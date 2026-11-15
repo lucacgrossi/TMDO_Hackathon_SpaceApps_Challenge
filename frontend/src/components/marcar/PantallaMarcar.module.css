@@ -30,8 +30,7 @@
 }
 
 .logo {
-  border-radius: var(--radio-dato);
-  image-rendering: pixelated;
+  display: block;
 }
 
 .titulo {

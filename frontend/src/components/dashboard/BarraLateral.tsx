@@ -28,8 +28,8 @@ export default function BarraLateral({ seccion, onCambiarSeccion, onEditar, luga
         className={css.logo}
         src="/img/agropixel-logo.png"
         alt="AgroPixel"
-        width={200}
-        height={154}
+        width={168}
+        height={159}
         priority
       />
       <nav className={css.nav} aria-label="Secciones del análisis">

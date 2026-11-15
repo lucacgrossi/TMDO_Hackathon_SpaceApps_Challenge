@@ -45,7 +45,7 @@ export default function PantallaMarcar() {
       <section className={estilos.caja} aria-labelledby="titulo-marcar">
         <div className={estilos.marca}>
           {/* eslint-disable-next-line @next/next/no-img-element -- logo chico y fijo, sin optimizar */}
-          <img src="/img/agropixel-logo.png" alt="" width={48} height={37} className={estilos.logo} />
+          <img src="/img/agropixel-logo.png" alt="" width={40} height={38} className={estilos.logo} />
           <span>AgroPixel</span>
         </div>
         <h1 id="titulo-marcar" className={estilos.titulo}>
