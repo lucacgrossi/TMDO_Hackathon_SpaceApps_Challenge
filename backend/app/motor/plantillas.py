@@ -63,6 +63,14 @@ def _inta(s: dict) -> tuple[list[str], list[str]]:
     return evidencia, revisar
 
 
+ANEGABLE_TEXTO = {"si": "sí", "a_veces": "a veces"}
+
+
+def _y(cosas: list[str]) -> str:
+    """"soja, maíz y vicia"."""
+    return " y ".join([", ".join(cosas[:-1]), cosas[-1]]) if len(cosas) > 1 else "".join(cosas)
+
+
 def _signo(x: float) -> str:
     return f"+{x:.0f}" if x > 0 else f"{x:.0f}".replace("-", "−")
 
@@ -185,8 +193,13 @@ def _revisar(s: dict, entradas: dict, ind: dict, clima: dict) -> list[str]:
         lineas.append(f"Poca reserva de agua en años secos ({agua_seco['dato']})")
     if s.get("repite"):
         lineas.append("Repite el cultivo de la campaña pasada")
-    if "vicia" in cult and entradas.get("anegable") in ("si", "a_veces"):
-        lineas.append("Lote que se encharca: riesgo de mala implantación de la vicia")
+    anegable = entradas.get("anegable")
+    sensibles = [x for x in cult if C[x].get("sensible_anegamiento")]
+    if anegable in ANEGABLE_TEXTO and sensibles:
+        lineas.append(f"Lote que se encharca ({ANEGABLE_TEXTO[anegable]}, dato del productor): "
+                      f"{_y([nombre(x).lower() for x in sensibles])} "
+                      f"{'es sensible' if len(sensibles) == 1 else 'son sensibles'} al anegamiento"
+                      + (", con riesgo de mala implantación de la vicia" if "vicia" in sensibles else ""))
     cob = next((x for x in cult if C[x]["grupo"] == "cobertura"), None)
     ver = next((x for x in cult if C[x]["grupo"] == "verano"), None)
     if cob and ver:
@@ -220,6 +233,9 @@ def _falta(resultado: dict, entradas: dict, clima: dict) -> list[str]:
     lineas = ["Precios de los cultivos (fuera de alcance): el ingreso es una escala sin precios"]
     if (entradas.get("textura") or "no_se") == "no_se":
         lineas.append("Textura del suelo: se usó franco para la lluvia efectiva")
+    if (entradas.get("anegable") or "no_se") == "no_se":
+        lineas.append("Si el lote se encharca: sin dato, no se evaluó el anegamiento (agua en años húmedos "
+                      "y cultivos sensibles)")
     if not resultado["pendiente_real"]:
         lineas.append(f"Pendiente del lote: se usó {dec(reglas.PENDIENTE_DEFECTO)} % por defecto")
     if not clima["hay_et0"]:

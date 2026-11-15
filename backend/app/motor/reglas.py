@@ -97,7 +97,7 @@ def regla_agua(cal: list[str], clima: dict, entradas: dict) -> list[dict]:
         if t == "humedo" and anegable in ANEGABLE_CASTIGO and a["cubre"] >= ANEGABLE_COBERTURA:
             castigo = ANEGABLE_CASTIGO[anegable]
             extra = _aporte("anegamiento", "agua", -castigo,
-                            f"Lote que se encharca ({anegable.replace('_', ' ')}) con agua de sobra en años "
+                            f"Lote que se encharca ({'sí' if anegable == 'si' else 'a veces'}) con agua de sobra en años "
                             f"húmedos · dato del productor")
             extra["tipo"] = t
             aportes.append(extra)

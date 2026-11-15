@@ -125,6 +125,21 @@ def test_anegable_castiga_agua_en_anios_humedos(ind):
     assert c_si["agua_por_tipo"]["seco"] == c_no["agua_por_tipo"]["seco"]
 
 
+def test_anegable_aparece_en_revisar_y_no_se_va_a_falta(ind):
+    """H-010: "¿Se encharca?" se ve en el resultado; "No sé" va a "Información que falta" como la textura."""
+    si = _correr(ind, anegable="si")
+    actual, c = _col(si, "actual"), _col(si, "C")
+    assert any(x.startswith("Lote que se encharca (sí, dato del productor): soja es sensible") for x in actual["revisar"])
+    assert not any("se encharca" in x for x in c["revisar"])  # sorgo tolera el anegamiento
+    a = _col(_correr(ind, anegable="a_veces"), "A")
+    assert any("(a veces, dato del productor): soja y vicia son sensibles" in x and "vicia" in x for x in a["revisar"])
+    for s in _correr(ind, anegable="no")["estrategias"]:
+        assert not any("encharca" in x for x in s["revisar"] + s["falta"])
+    no_se = _correr(ind, anegable="no_se")
+    assert all(any(x.startswith("Si el lote se encharca: sin dato") for x in s["falta"]) for s in no_se["estrategias"]
+               if s["on"])
+
+
 def test_textos_sin_lenguaje_prohibido(ind):
     prohibido = re.compile(r"recomend|deber[ií]as|la mejor", re.IGNORECASE)
     for kwargs in ({}, {"no_sembrar": ["sorgo", "girasol"]}, {"pesos": {"agua": 5, "suelo": 4, "ingreso": 1, "erosion": 1}},
