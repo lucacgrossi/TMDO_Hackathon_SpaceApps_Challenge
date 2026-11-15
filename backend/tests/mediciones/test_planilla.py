@@ -310,9 +310,7 @@ def test_cli(capsys):
 def test_h016_fechas_mes_dia_se_rechazan():
     # 01/01 a 12/01 se leen como día/mes; 01/13/2023 delata el orden de Estados Unidos.
     filas = ["fecha;lluvia_mm"] + [f"01/{d:02d}/2023;{d}" for d in range(1, 20)]
-    r = leer_bytes(("
-".join(filas) + "
-").encode())
+    r = leer_bytes(("\n".join(filas) + "\n").encode())
     assert not r.ok and r.serie is None
     assert r.errores[0].fila == 14
     assert r.errores[0].motivo.startswith("Las fechas parecen estar en formato mes/día; usá día/mes")
@@ -323,32 +321,22 @@ def test_h016_mas_del_20_por_ciento_de_fechas_inexistentes_se_rechaza():
     # 12 meses válidos y 4 fechas que no existen (31/02, 30/02...): 4 de 16 = 25 %.
     filas = ["fecha;lluvia_mm"] + [f"15/{m:02d}/2022;{m * 10}" for m in range(1, 13)]
     filas += ["31/02/2022;5", "30/02/2022;5", "31/04/2022;5", "31/06/2022;5"]
-    r = leer_bytes(("
-".join(filas) + "
-").encode())
+    r = leer_bytes(("\n".join(filas) + "\n").encode())
     assert not r.ok
     assert "Las fechas parecen estar en formato mes/día; usá día/mes: 4 de 16 filas" in motivos(r.errores)
 
 
 def test_h016_pocas_fechas_inexistentes_se_descartan_y_sigue():
     filas = ["fecha;lluvia_mm"] + [f"15/{m:02d}/2022;{m * 10}" for m in range(1, 13)] + ["31/02/2022;5"]
-    r = leer_bytes(("
-".join(filas) + "
-").encode())
+    r = leer_bytes(("\n".join(filas) + "\n").encode())
     assert r.ok, motivos(r.errores)
     assert 'la fecha "31/02/2022" no existe: fila descartada' in motivos(r.serie.avisos)
 
 
 def test_h022_mensaje_de_pocos_meses_en_singular_y_con_varias_variables():
-    r = leer_bytes(b"fecha;lluvia_mm
-15/01/2023;32,5
-")
+    r = leer_bytes(b"fecha;lluvia_mm\n15/01/2023;32,5\n")
     assert motivos(r.errores) == "None: Tu planilla tiene lluvia en 1 mes: hacen falta al menos 12 meses"
-    r = leer_bytes(b"mes;lluvia_mm;t_min_c
-2023-01;10;
-2023-02;20;15
-2023-03;30;14
-")
+    r = leer_bytes(b"mes;lluvia_mm;t_min_c\n2023-01;10;\n2023-02;20;15\n2023-03;30;14\n")
     assert (
         "Tu planilla tiene lluvia en 3 meses y temperatura mínima en 2 meses: hacen falta al menos 12 meses "
         "de alguna de ellas"
@@ -370,9 +358,7 @@ def test_h023_filas_leidas_no_cuenta_el_encabezado():
 def test_mensajes_sin_comillas_invertidas():
     filas = ["fecha;lluvia_mm;napa"] + [f"15/{m:02d}/2022;{m * 10};1" for m in range(1, 13)]
     filas += ["15/01/2022;mucho;1", "xx;3;1", "15/01/2030;1;1"]
-    r = leer_bytes(("
-".join(filas) + "
-").encode())
+    r = leer_bytes(("\n".join(filas) + "\n").encode())
     assert r.ok, motivos(r.errores)
     assert "`" not in motivos(r.serie.avisos)
 
