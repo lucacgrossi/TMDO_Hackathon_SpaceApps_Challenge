@@ -117,8 +117,10 @@ class MedicionMes(BaseModel):
 class MedicionesPropias(BaseModel):
     """Mediciones del productor (RF15). Se muestran al lado de NASA; no cambian puntajes."""
 
-    lluvia_anual_mm: float | None = Field(None, gt=0)
-    anios_registro: int | None = Field(None, ge=1)
+    # Topes de sentido común agronómico: más de 4000 mm/año o más de 100 años de registro es un
+    # error de carga, no una medición (con 99999 mm el contraste daba +12110 %).
+    lluvia_anual_mm: float | None = Field(None, gt=0, le=4000)
+    anios_registro: int | None = Field(None, ge=1, le=100)
     materia_organica_pct: float | None = Field(None, ge=0, le=100)
     serie_mensual: list[MedicionMes] | None = Field(
         None, max_length=480,
