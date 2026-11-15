@@ -1,6 +1,6 @@
 name: Checks del proyecto
 
-# Reglas propias de Field Shift (scripts simples en .github/scripts/, solo librería estándar de Python).
+# Reglas propias de AgroPixel (scripts simples en .github/scripts/, solo librería estándar de Python).
 # Cada paso corre aunque falle otro, para ver todos los problemas de una vez.
 on:
   pull_request:

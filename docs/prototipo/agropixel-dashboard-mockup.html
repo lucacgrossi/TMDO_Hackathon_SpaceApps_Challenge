@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="es-AR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AgroPixel · Mockup del dashboard</title>
+<!--
+  Mockup BÁSICO de las pantallas del dashboard que no llegaron al Figma (S4 Mapa, S5 Clima histórico,
+  S6 Rotaciones, S6b Hoja de impresión). Sirve para ver estructura y jerarquía, no es el diseño final:
+  el estilo manda frontend/DESIGN.md y el Figma (página 01). Datos: lote de ejemplo de Río Cuarto,
+  backend/app/demo/rio_cuarto.json y capas reales del back (14/11). Se abre directo en el navegador.
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Pixelify+Sans:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --rastrojo:#F2F4EE; --papel:#FFFFFF; --soft:#E8ECE2; --line:#DCE2D6; --noche:#14202B; --muted:#5A6560;
+  --hoja:#2F7A2E; --hoja-brillo:#4CAF50; --hoja-suave:#E3F0DC; --suelo:#8A5A34; --suelo-suave:#F1E4D6;
+  --cielo:#1C7C93; --cielo-brillo:#7FD6E6; --good:#2E7D32; --bad:#B42318; --warn:#A86A0F;
+  --s-actual:#4B5563; --s-a:#0F8A7A; --s-b:#B8860B; --s-c:#B5502A;
+  --verano:#3E8E4B; --invierno:#C9A23A; --cobertura:#3FA597; --barbecho:#CDBA86;
+  --seco:#C0703A; --normal:#A8A29E; --humedo:#2C7FB8;
+  --sombra:3px 3px 0 rgba(20,32,43,.15);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--rastrojo);color:var(--noche);font:14px/1.5 "IBM Plex Sans",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+h1,h2,h3{font-family:"Pixelify Sans",sans-serif;margin:0;font-weight:600}
+h1{font-size:32px;line-height:40px} h2{font-size:24px;line-height:32px} h3{font-size:18px;line-height:24px;font-weight:500}
+.muted{color:var(--muted)} .pie{font-size:12px;line-height:16px} .lab{font-size:12px;font-weight:600;color:var(--muted)}
+button{font:inherit}
+:focus-visible{outline:2px solid var(--cielo);outline-offset:2px}
+
+.app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+.side{background:var(--noche);color:var(--papel);padding:20px 16px 16px;display:flex;flex-direction:column;gap:4px;position:sticky;top:0;height:100vh}
+.side img{width:200px;border-radius:2px;margin-bottom:16px}
+.nav{display:flex;align-items:center;gap:12px;padding:8px 12px;border-radius:2px;color:var(--papel);background:none;border:0;text-align:left;cursor:pointer;font-weight:600}
+.nav[aria-current=page]{background:var(--cielo-brillo);color:var(--noche)}
+.nav i{width:16px;height:16px;display:inline-block;background:currentColor;clip-path:polygon(0 0,40% 0,40% 40%,100% 40%,100% 100%,0 100%)}
+.sep{height:1px;background:rgba(255,255,255,.15);margin:8px 0}
+.side .fill{flex:1}
+.aviso{border:1px dashed var(--cielo-brillo);color:var(--cielo-brillo);border-radius:2px;padding:8px 12px;font-size:12px;line-height:16px}
+
+.main{min-width:0}
+.head{display:flex;justify-content:space-between;align-items:center;padding:20px 32px 16px}
+.facts{display:flex;gap:32px;margin-top:8px}
+.facts div{display:flex;flex-direction:column}
+.facts b{font-weight:600}
+.cta{font-family:"Pixelify Sans",sans-serif;font-size:18px;background:var(--hoja);color:var(--papel);border:0;padding:12px 16px;box-shadow:var(--sombra);cursor:pointer;
+  clip-path:polygon(2px 0,calc(100% - 2px) 0,calc(100% - 2px) 2px,100% 2px,100% calc(100% - 2px),calc(100% - 2px) calc(100% - 2px),calc(100% - 2px) 100%,2px 100%,2px calc(100% - 2px),0 calc(100% - 2px),0 2px,2px 2px)}
+.sec{padding:0 32px 32px}
+.panel{background:var(--papel);border-radius:6px;padding:16px}
+.wip{background:var(--suelo-suave);border-left:3px solid var(--suelo);padding:8px 12px;margin:0 32px 16px;font-size:12px}
+
+/* Mapa */
+.mapa-grid{display:grid;grid-template-columns:1fr 280px;gap:16px}
+.mapa{position:relative;height:640px;border-radius:6px;overflow:hidden;background:#6f6a55 linear-gradient(90deg,#7c7559 0 30%,#5f6b47 30% 60%,#8a8063 60%)}
+.raster{position:absolute;left:50%;top:46%;width:544px;height:464px;transform:translate(-50%,-50%);image-rendering:pixelated;outline:2px solid #fff}
+.chips{position:absolute;left:16px;top:16px;display:flex;gap:4px;background:var(--papel);padding:4px;border-radius:2px;box-shadow:var(--sombra)}
+.chip{border:1px solid var(--line);border-bottom-width:3px;background:var(--papel);padding:6px 12px;font-weight:600;cursor:pointer;border-radius:0}
+.chip[aria-pressed=true]{background:var(--noche);color:var(--papel);border-color:var(--noche)}
+.insp{position:absolute;left:calc(50% + 0px);top:calc(46% - 40px);background:var(--noche);color:var(--papel);padding:8px 12px;box-shadow:var(--sombra)}
+.insp b{font-family:"Pixelify Sans";font-size:18px}
+.insp .pie{color:var(--cielo-brillo)}
+.tl{position:absolute;left:16px;bottom:16px;display:flex;gap:6px;align-items:flex-end;background:var(--papel);padding:10px 12px 8px;border-radius:6px;box-shadow:var(--sombra)}
+.tl .m{display:flex;flex-direction:column;align-items:center;gap:4px;font-size:12px;color:var(--muted);padding:4px 4px 2px}
+.tl .m.on{background:var(--soft);border-bottom:2px solid var(--noche);color:var(--noche);font-weight:600}
+.tl .m span{width:22px;display:block}
+.play{background:var(--noche);color:var(--papel);border:0;padding:6px 10px}
+.ley{position:absolute;right:16px;bottom:16px;width:260px;background:var(--papel);border:1px solid var(--line);border-radius:6px;padding:12px}
+.esc{display:flex;margin:8px 0 4px}.esc div{flex:1}.esc i{display:block;height:12px}
+.ficha .row{padding:12px 0;border-bottom:1px solid var(--line)}
+.ficha .val{font-size:20px;font-weight:600;margin-right:8px}
+.pill{display:inline-flex;align-items:center;gap:4px;background:var(--soft);border-radius:2px;padding:2px 8px;font-size:12px}
+.pill::before{content:"";width:6px;height:6px;background:var(--c,var(--good))}
+
+/* Clima */
+.camps{display:flex;gap:4px;align-items:flex-end;height:120px;margin:12px 0 4px}
+.camps button{flex:1;border:0;padding:0;cursor:pointer;position:relative;background:var(--c)}
+.camps button[aria-pressed=true]{outline:2px solid var(--noche);outline-offset:2px}
+.camps-lab{display:flex;gap:4px;font-size:10px;color:var(--muted)} .camps-lab span{flex:1;text-align:center}
+.clima-grid{display:grid;grid-template-columns:1fr 280px;gap:16px;margin-top:16px}
+svg text{font:12px "IBM Plex Sans";fill:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:12px;color:var(--muted);font-weight:600}
+.freq td{text-align:center}
+
+/* Rotaciones */
+.prio{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;margin-bottom:16px}
+.prio .bl{display:flex;gap:4px;margin-top:4px}.prio .bl i{flex:1;height:12px;background:var(--soft)}.prio .bl i.on{background:var(--hoja)}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:var(--papel);border-radius:6px;border:1px solid var(--line);border-top:4px solid var(--s);padding:16px;display:flex;flex-direction:column;gap:12px}
+.badge{background:var(--s);color:#fff;font-weight:600;padding:2px 8px;margin-right:8px}
+.cal{display:flex;gap:3px}.cal i{width:18px;height:18px;border-radius:2px}
+.cal i.b{background:var(--barbecho) radial-gradient(var(--suelo) 1px,transparent 1.5px) 0 0/6px 6px}
+.cal i.v{background:var(--verano)}.cal i.w{background:var(--invierno)}.cal i.c{background:var(--cobertura)}
+.big{font-size:32px;font-weight:600}
+.cinco div{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding:6px 0;font-size:12px;font-weight:600}
+.tabla{margin-top:32px}
+.tabla td.s-actual{border-top:3px solid var(--s-actual)} .tabla td.s-a{border-top:3px solid var(--s-a)} .tabla td.s-b{border-top:3px solid var(--s-b)} .tabla td.s-c{border-top:3px solid var(--s-c)}
+.grupo td{background:var(--soft);font-weight:600;font-size:12px}
+.src{display:block;font-size:11px;color:var(--muted)}
+
+/* Hoja de impresión (vista previa en pantalla) */
+.hoja{background:#fff;width:1123px;max-width:100%;min-height:794px;padding:40px;border:1px solid var(--line);box-shadow:var(--sombra)}
+.hoja header{display:flex;gap:16px;align-items:center;border-bottom:2px solid var(--noche);padding-bottom:12px;margin-bottom:16px}
+.hoja header img{width:72px}
+.hoja footer{margin-top:24px;font-size:11px;color:var(--muted);border-top:1px solid var(--line);padding-top:8px;display:flex;justify-content:space-between}
+
+[hidden]{display:none!important}
+@media print{ .side,.head,.wip,#mapa,#clima,#rotaciones{display:none!important} #pdf{display:block!important} .app{display:block} .hoja{border:0;box-shadow:none;width:auto} @page{size:A4 landscape;margin:12mm} }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav class="side" aria-label="Secciones">
+    <img src="../../frontend/public/img/agropixel-logo.png" alt="AgroPixel">
+    <button class="nav" data-s="mapa" aria-current="page"><i></i>Mapa</button>
+    <button class="nav" data-s="clima"><i></i>Clima histórico</button>
+    <button class="nav" data-s="rotaciones"><i></i>Rotaciones</button>
+    <div class="sep"></div>
+    <button class="nav" data-s="pdf"><i></i>Hoja de impresión (vista)</button>
+    <button class="nav"><i></i>Editar lote y entradas</button>
+    <div class="fill"></div>
+    <div class="pie" style="color:var(--cielo-brillo)">Lote de ejemplo, Río Cuarto</div>
+    <div class="aviso">Herramienta de apoyo: no reemplaza el criterio del productor ni del agrónomo.</div>
+  </nav>
+
+  <div class="main">
+    <header class="head">
+      <div>
+        <h1 id="titulo">Mapa del lote</h1>
+        <div class="facts">
+          <div><span class="lab">Superficie</span><b>94,9 ha</b></div>
+          <div><span class="lab">Campaña satelital</span><b>2025/26</b></div>
+          <div><span class="lab">Clima</span><b>30 campañas, 1996/97 a 2025/26</b></div>
+          <div><span class="lab">Tus mediciones</span><b>Sin cargar</b></div>
+        </div>
+      </div>
+      <button class="cta" id="pdfBtn" hidden onclick="window.print()">Exportar PDF</button>
+    </header>
+    <p class="wip">Mockup básico: estructura, jerarquía y datos. Lo visual final está en <code>frontend/DESIGN.md</code> y el Figma.</p>
+
+    <!-- S4 · Mapa -->
+    <section class="sec" id="mapa">
+      <div class="mapa-grid">
+        <div class="mapa" aria-label="Mapa del lote (en la app: Esri + Leaflet)">
+          <img class="raster" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAB1UlEQVR42s1XMW6DQBBco+tokKgCkhtcBIkPUCR5QZ6Rd0R5R56RFyQp/AFLuDANEnZliYY6aXLWsbm73YMzZiVL9nE+z83Ozq5XT2/lD/xFnkZQxAnoYnc+wsdXC3PHJgvh83W7CmBBsclC47NFAbXFAGgRJ1CG2c1ZlS81RJ5Gg4VtX1sPOdT9TS4gXtYPA4C783HAsPq+artZQOnIEHfrewAAKBuA9+YbAOACyOQAN9HoqdnDqdkPFrEcqHWsKVv1Ulo0SUvgBcmmCdTzY/pPAnJvnkZQtR3kaXRZ08lFPbtqO9bFhKpPrEls+DZm5f4iTsi9GLR6GVPBCqlLUzeyhUnDct30fck6ZfwqYKG2RbmBYoEbKuCpjhFgIR/qnnXoFEfARHCIERQYKv1jwdnkodNoYNOnC0hfFzLZ0+KHEglcuBg7ZhBLY2wGODUhptzWV7qpmbR1TX0RJ6R3Yr/EbKmfdc/ZgzOnnfmsfvaY52LcrjLw1Ti0jGJ7sPX8WQdnKuWyujkgqcnLxDhHp4FuJrxG2/SeegqcDaw6h14t9ZSxY42a0jUGKB6k2YzO9SfOqTPhKtfpFReR7WD1mY1dVzIC0x80Xz/gy/jFtToRB4gL2F+0wOHzYMcIcAAAAABJRU5ErkJggg==" alt="NDVI de enero 2026 sobre el lote, 42 × 30 píxeles de 1″">
+          <div class="chips">
+            <button class="chip" aria-pressed="false">Satélite</button><button class="chip" aria-pressed="true">NDVI</button><button class="chip" aria-pressed="false">Pendiente</button><button class="chip" aria-pressed="false">Cultivo</button><button class="chip" aria-pressed="false">Erosión</button><button class="chip" aria-pressed="false">Celda NASA POWER</button>
+          </div>
+          <div class="insp"><b>NDVI 0,41</b><div class="pie">Este píxel (1″, ~30 m): fila 12, columna 20</div><div class="pie" style="color:#fff">NASA HLS L30, 22/01/2026, confianza alta</div></div>
+          <div class="tl" id="tl"><button class="play" aria-label="Reproducir">▶</button></div>
+          <div class="ley">
+            <b>NDVI, enero 2026</b>
+            <div class="esc"><div><i style="background:#E6D8AE"></i><span class="pie">&lt;0,15</span></div><div><i style="background:#CDBA86"></i><span class="pie">0,15</span></div><div><i style="background:#94AF63"></i><span class="pie">0,3</span></div><div><i style="background:#689C49"></i><span class="pie">0,45</span></div><div><i style="background:#3F8139"></i><span class="pie">0,6</span></div><div><i style="background:#1B5E2E"></i><span class="pie">≥0,75</span></div></div>
+            <div class="pie muted">NASA HLS L30, 22/01/2026, 30 m. Media del lote 0,62. Colores y cortes: <code>capa.escala</code>.</div>
+          </div>
+        </div>
+        <aside class="panel ficha">
+          <h3>Ficha técnica del lote</h3><p class="pie muted" style="margin:4px 0 0">Cada valor con su fuente, resolución y confianza.</p>
+          <div class="row"><div class="lab">Pendiente general</div><span class="val">0,6 %</span><span class="pill">Confianza alta</span><div class="pie muted">NASADEM, 30 m. Plano ajustado sobre 1230 píxeles.</div></div>
+          <div class="row"><div class="lab">Pendiente máxima</div><span class="val">2,6 %</span><span class="pill" style="--c:var(--warn)">Confianza media</span><div class="pie muted">Percentil 95 de la pendiente por píxel; ruidoso.</div></div>
+          <div class="row"><div class="lab">Cobertura agrícola</div><span class="val">93,9 %</span><span class="pill">Confianza alta</span><div class="pie muted">ESA WorldCover 2021, 10 m: 1155 de 1230 píxeles.</div></div>
+          <div class="row"><div class="lab">Meses con NDVI bajo (&lt; 0,3)</div><span class="val">3 meses</span><span class="pill" style="--c:var(--bad)">Confianza baja</span><div class="pie muted">HLS 30 m, 2025/26: julio, septiembre y octubre.</div></div>
+          <div class="row"><div class="lab">Riesgo de erosión</div><span class="val">2,6 % × meses</span><span class="pill" style="--c:var(--bad)">Confianza baja</span><div class="pie muted">Pendiente por meses con cobertura baja.</div></div>
+          <div class="row" style="border:0"><div class="lab">ET real anual, contexto regional</div><span class="val">607 mm/año</span><span class="pill" style="--c:var(--warn)">Confianza media</span><div class="pie muted">MODIS MOD16A3GF, 500 m, 2025.</div></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- S5 · Clima histórico -->
+    <section class="sec" id="clima" hidden>
+      <div class="panel">
+        <h2>30 campañas de lluvia</h2>
+        <p class="pie muted" style="margin:0">NASA POWER mensual, ~50 km, julio a junio. Color y letra por tercio de balance de agua: S seco, N normal, H húmedo. Elegí una campaña para ver sus meses.</p>
+        <div class="camps" id="camps"></div>
+        <div class="camps-lab" id="campsLab"></div>
+      </div>
+      <div class="clima-grid">
+        <div class="panel">
+          <h3 id="campTitulo">Campaña 2021/22: seca, 546 mm</h3>
+          <p class="pie muted" style="margin:0 0 8px">Barras: lluvia del mes (oscuro) contra la media de 30 años (claro). Líneas: T máx y T mín medias. Necesita <code>serie_anual.campanas[i].mensual</code> (pedido a Back 1).</p>
+          <svg id="graf" viewBox="0 0 760 300" width="100%" role="img" aria-label="Lluvia y temperaturas por mes de la campaña elegida"></svg>
+        </div>
+        <aside class="panel ficha">
+          <h3>Campaña 2021/22</h3>
+          <div class="row"><div class="lab">Lluvia</div><span class="val">546 mm</span><div class="pie muted">Media de 30 años: 819 mm.</div></div>
+          <div class="row"><div class="lab">ET0 (Hargreaves)</div><span class="val">1497 mm</span><div class="pie muted">Media de 30 años: 1447 mm.</div></div>
+          <div class="row"><div class="lab">Balance de agua</div><span class="val">−952 mm</span><div class="pie muted">Umbral del tercio seco: −731 mm.</div></div>
+          <div class="row" style="border:0"><div class="lab">Meses con helada frecuente</div><span class="val">4</span><div class="pie muted">Junio a septiembre, en 30 campañas.</div></div>
+        </aside>
+      </div>
+      <div class="panel" style="margin-top:16px">
+        <h3>Heladas y calor por mes, en 30 campañas</h3>
+        <table class="freq" style="margin-top:8px"><thead><tr><th></th><th>jul</th><th>ago</th><th>sep</th><th>oct</th><th>nov</th><th>dic</th><th>ene</th><th>feb</th><th>mar</th><th>abr</th><th>may</th><th>jun</th></tr></thead>
+        <tbody><tr><th>Años con mínima &lt; 0 °C</th><td>26</td><td>20</td><td>11</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>8</td><td>25</td></tr>
+        <tr><th>Años con máxima ≥ 35 °C</th><td>0</td><td>2</td><td>5</td><td>14</td><td>25</td><td>26</td><td>29</td><td>24</td><td>16</td><td>1</td><td>0</td><td>0</td></tr></tbody></table>
+        <p class="pie muted">Siempre como "N de 30 años", no solo porcentaje. Fuente: <code>clima_mensual.anios_con_helada</code> y <code>anios_con_35c</code>.</p>
+      </div>
+      <div class="panel" style="margin-top:16px"><h3>Tus mediciones contra NASA</h3><p class="muted">Sin planilla cargada. Con planilla: "Tu pluviómetro (2018/19 a 2023/24, 6 campañas): 702 mm/año; NASA en las mismas campañas: 781 mm (−10 %)", de <code>contraste_mediciones</code>.</p></div>
+    </section>
+
+    <!-- S6 · Rotaciones -->
+    <section class="sec" id="rotaciones" hidden>
+      <div class="panel" style="margin-bottom:16px">
+        <div class="prio">
+          <div><div style="display:flex;justify-content:space-between"><b>Agua</b><b style="color:var(--hoja)">3 de 5</b></div><div class="bl"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+          <div><div style="display:flex;justify-content:space-between"><b>Salud del suelo</b><b style="color:var(--hoja)">4 de 5</b></div><div class="bl"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></div></div>
+          <div><div style="display:flex;justify-content:space-between"><b>Erosión</b><b style="color:var(--hoja)">3 de 5</b></div><div class="bl"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+          <div><div style="display:flex;justify-content:space-between"><b>Ingreso</b><b style="color:var(--hoja)">3 de 5</b></div><div class="bl"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></div></div>
+        </div>
+        <p class="pie muted" style="margin:0">Mover una prioridad recalcula la cercanía en el navegador (Σ p²·v / Σ p²); no vuelve a consultar a NASA.</p>
+      </div>
+      <div class="cards" id="cards"></div>
+
+      <div class="panel tabla">
+        <h2>Tabla comparativa</h2>
+        <table style="margin-top:8px" id="tabla"></table>
+      </div>
+    </section>
+
+    <!-- S6b · Hoja de impresión -->
+    <section class="sec" id="pdf" hidden>
+      <div class="hoja">
+        <header><img src="../../frontend/public/img/agropixel-logo.png" alt=""><div><h2>Comparación de rotaciones</h2><div class="pie muted">Lote de ejemplo cerca de Río Cuarto. Superficie 94,9 ha. Centro 33,248° S, 64,233° O. Campaña satelital 2025/26. Clima 1996/97 a 2025/26.</div></div></header>
+        <table id="tablaPdf"></table>
+        <p class="pie muted">Fuentes: NASA POWER mensual (~50 km, 1996/97 a 2025/26); NASA HLS (30 m, 2025/26) con MODIS MOD13Q1 de respaldo (250 m); NASADEM (30 m); ESA WorldCover 2021 (10 m); MODIS MOD16A3GF (500 m). Reglas fijas del motor; sin IA.</p>
+        <footer><span>Herramienta de apoyo: no reemplaza el criterio del productor ni del agrónomo. Compara datos: no indica qué hacer.</span><span>Generado el 15/11/2026</span></footer>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+// --- navegación
+const titulos={mapa:'Mapa del lote',clima:'Clima histórico',rotaciones:'Rotaciones',pdf:'Hoja de impresión'};
+document.querySelectorAll('.nav[data-s]').forEach(b=>b.onclick=()=>{
+  const s=b.dataset.s;
+  document.querySelectorAll('.nav[data-s]').forEach(x=>x.toggleAttribute('aria-current',x===b));
+  document.querySelectorAll('.nav[data-s]').forEach(x=>{ if(x===b) x.setAttribute('aria-current','page'); });
+  for (const id of Object.keys(titulos)) document.getElementById(id).hidden = id!==s;
+  document.getElementById('titulo').textContent=titulos[s];
+  document.getElementById('pdfBtn').hidden = !(s==='rotaciones'||s==='pdf');
+});
+
+// --- línea de tiempo (NDVI medio del lote por mes, campaña 2025/26)
+const esc=[[0,'#E6D8AE'],[.15,'#CDBA86'],[.3,'#94AF63'],[.45,'#689C49'],[.6,'#3F8139'],[.75,'#1B5E2E']];
+const col=v=>esc.filter(([t])=>v>=t).pop()[1];
+const ndvi=[['jul',.264],['ago',.307],['sep',.202],['oct',.298],['nov',.431],['dic',.549],['ene',.62],['feb',.51],['mar*',.685],['abr',.478],['may',.509],['jun',.633]];
+const tl=document.getElementById('tl');
+ndvi.forEach(([m,v])=>{ const d=document.createElement('div'); d.className='m'+(m==='ene'?' on':''); d.innerHTML=`${v.toFixed(2).replace('.',',')}<span style="height:${Math.round(v*44)}px;background:${col(v)}"></span>${m}`; tl.appendChild(d); });
+
+// --- 30 campañas
+const camps=[['1996/97',678,'seco'],['1997/98',1156,'humedo'],['1998/99',933,'humedo'],['1999/00',1088,'humedo'],['2000/01',850,'normal'],['2001/02',734,'normal'],['2002/03',814,'normal'],['2003/04',1065,'humedo'],['2004/05',898,'humedo'],['2005/06',619,'seco'],['2006/07',959,'humedo'],['2007/08',894,'humedo'],['2008/09',632,'seco'],['2009/10',815,'normal'],['2010/11',754,'normal'],['2011/12',674,'seco'],['2012/13',834,'normal'],['2013/14',889,'normal'],['2014/15',942,'humedo'],['2015/16',1007,'humedo'],['2016/17',747,'normal'],['2017/18',651,'seco'],['2018/19',902,'normal'],['2019/20',621,'seco'],['2020/21',732,'seco'],['2021/22',546,'seco'],['2022/23',803,'seco'],['2023/24',795,'normal'],['2024/25',939,'humedo'],['2025/26',601,'seco']];
+const letra={seco:'S',normal:'N',humedo:'H'};
+const cw=document.getElementById('camps'), cl=document.getElementById('campsLab');
+camps.forEach(([c,mm,t])=>{ const b=document.createElement('button'); b.style.height=(mm/1156*100)+'%'; b.style.setProperty('--c',`var(--${t})`); b.title=`${c}: ${mm} mm, ${t}`; b.setAttribute('aria-pressed',c==='2021/22'); b.onclick=()=>{ cw.querySelectorAll('button').forEach(x=>x.setAttribute('aria-pressed',x===b)); document.getElementById('campTitulo').textContent=`Campaña ${c}: ${t==='humedo'?'húmeda':t==='seco'?'seca':'normal'}, ${mm} mm`; }; cw.appendChild(b); const s=document.createElement('span'); s.textContent=letra[t]; cl.appendChild(s); });
+
+// --- gráfico de la campaña 2021/22 (valores reales de NASA POWER) contra la media de 30 años
+const M=['jul','ago','sep','oct','nov','dic','ene','feb','mar','abr','may','jun'];
+const lluvia=[2.9,.1,50.6,53.7,117.2,93.5,88.9,70.8,46.5,17.2,3.9,.6];
+const media=[9.7,14.5,31.2,78.6,114.2,117.5,130.8,105.2,103.2,75.3,25.8,13];
+const tmax=[25.3,31.5,29.4,39.2,37,38,41.2,37.2,35.1,32.2,27.6,25.7];
+const tmin=[-1.9,.1,1.5,4.3,6.8,11.8,11.9,6.7,4.2,2.1,-1.6,-2.8];
+const g=document.getElementById('graf'); let s='';
+const X=i=>50+i*58, Y=mm=>260-mm*1.6, YT=t=>260-(t+5)*4.5;
+[0,50,100,150].forEach(v=>s+=`<line x1="40" x2="740" y1="${Y(v)}" y2="${Y(v)}" stroke="#DCE2D6"/><text x="6" y="${Y(v)+4}">${v} mm</text>`);
+M.forEach((m,i)=>{ s+=`<rect x="${X(i)}" y="${Y(media[i])}" width="20" height="${260-Y(media[i])}" fill="#DDF3F7"/><rect x="${X(i)+20}" y="${Y(lluvia[i])}" width="20" height="${260-Y(lluvia[i])}" fill="#1C7C93"/><text x="${X(i)+8}" y="282">${m}</text>`; });
+const line=(a,c)=>`<polyline fill="none" stroke="${c}" stroke-width="2" points="${a.map((t,i)=>`${X(i)+20},${YT(t)}`).join(' ')}"/>`;
+s+=line(tmax,'#B42318')+line(tmin,'#2C7FB8');
+s+=`<text x="${X(11)+44}" y="${YT(tmax[11])}">T máx</text><text x="${X(11)+44}" y="${YT(tmin[11])}">T mín</text>`;
+g.innerHTML=s;
+
+// --- cards y tabla (lote de ejemplo, backend/app/demo/rio_cuarto.json)
+const E=[
+ {id:'Hoy',s:'--s-actual',n:'Lo que hacés hoy',e:'Soja + barbecho',cal:'bbbbvvvvvvbb',pel:6,cer:50,ty:[-485,-332,-166],p:'Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)',v:{agua:-332,cob:6,n:5,ras:5,ero:69,ing:32},d:null},
+ {id:'A',s:'--s-a',n:'Cobertura de invierno',e:'Soja + vicia',cal:'cccbvvvvvvcc',pel:1,cer:64,ty:[-655,-497,-329],p:'Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)',v:{agua:-497,cob:1,n:35,ras:20,ero:87,ing:27},d:{agua:-10,suelo:55,erosion:18,ingreso:-5}},
+ {id:'B',s:'--s-b',n:'Cultivo de invierno',e:'Trigo + soja de 2ª',cal:'wwwwwvvvvvbw',pel:1,cer:73,ty:[-540,-388,-227],p:'Siembra de trigo (junio) con menos de la mitad de la lluvia normal: 17 de 30 años (57 %)',v:{agua:-388,cob:1,n:5,ras:25,ero:96,ing:72},d:{agua:-4,suelo:30,erosion:27,ingreso:40}},
+ {id:'C',s:'--s-c',n:'Diversificar el verano',e:'Sorgo, rota con soja',cal:'bbbbvvvvvvbb',pel:6,cer:72,ty:[-234,-90,66],p:'Siembra de sorgo (noviembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)',v:{agua:-90,cob:6,n:0,ras:30,ero:89,ing:50},d:{agua:22,suelo:30,erosion:20,ingreso:18}},
+];
+const mm=n=>(n>0?'+':n<0?'−':'')+Math.abs(n)+' mm';
+const sg=n=>n===0?'igual':(n>0?'+':'−')+Math.abs(n);
+document.getElementById('cards').innerHTML=E.map(x=>`<article class="card" style="--s:var(${x.s})">
+  <div><span class="badge">${x.id}</span><h3 style="display:inline">${x.n}</h3><div class="pie muted">${x.e}</div></div>
+  <div><div class="cal">${[...x.cal].map(c=>`<i class="${c}"></i>`).join('')}</div><div class="pie muted" style="letter-spacing:13px">JASONDEFMAMJ</div><div class="pie">${x.pel} ${x.pel===1?'mes':'meses'} con el lote pelado</div></div>
+  <div><span class="big">${x.cer} %</span> <span class="pie muted">cercanía con tus prioridades</span></div>
+  <div><div class="lab">Balance de agua de la rotación</div>${['S · Seco','N · Normal','H · Húmedo'].map((l,i)=>`<div style="display:flex;justify-content:space-between;font-size:13px"><span><i style="display:inline-block;width:8px;height:8px;background:var(--${['seco','normal','humedo'][i]})"></i> ${l}</span><span>${mm(x.ty[i])}</span></div>`).join('')}</div>
+  <div class="pie">${x.p}</div>
+  <div class="cinco">${['Por qué','Evidencia','Beneficios','Información que falta','A revisar con el agrónomo'].map(t=>`<div>${t}<span>▾</span></div>`).join('')}</div>
+</article>`).join('');
+
+const fila=(lab,fn,src)=>`<tr><th>${lab}${src?`<span class="src">${src}</span>`:''}</th>${E.map((x,i)=>`<td class="${['s-actual','s-a','s-b','s-c'][i]}">${fn(x)}</td>`).join('')}</tr>`;
+const grupo=t=>`<tr class="grupo"><td colspan="5">${t}</td></tr>`;
+const dif=(x,k)=>x.d?`<span class="src" style="color:${x.d[k]>0?'var(--good)':x.d[k]<0?'var(--bad)':'var(--muted)'}">${sg(x.d[k])} contra hoy</span>`:'<span class="src">base</span>';
+const filas=
+ `<thead><tr><th>Indicador</th>${E.map(x=>`<th>${x.id} · ${x.n}</th>`).join('')}</tr></thead><tbody>`+
+ grupo('Cómo se arma')+
+ fila('Especies',x=>x.e)+
+ fila('Meses con cobertura baja',x=>x.v.cob+' meses',' HLS 30 m (actual) y calendario')+
+ grupo('Valores de la campaña')+
+ fila('Balance de agua',x=>mm(x.v.agua)+dif(x,'agua'),'NASA POWER ~50 km, motor')+
+ fila('Aporte de N (índice)',x=>x.v.n+dif(x,'suelo'),'Tabla de cultivos')+
+ fila('Rastrojo (índice)',x=>x.v.ras,'Tabla de cultivos')+
+ fila('Erosión (puntaje)',x=>x.v.ero+dif(x,'erosion'),'NASADEM + HLS')+
+ fila('Ingreso (puntaje)',x=>x.v.ing+dif(x,'ingreso'),'Tabla de cultivos, sin precios')+
+ grupo('Objetivos e incertidumbre')+
+ fila('Cercanía con tus prioridades',x=>x.cer+' %','Reglas de puntaje')+
+ fila('Balance en años secos',x=>mm(x.ty[0]),'Tercio seco de 30 campañas')+
+ fila('Probabilidad climatológica',x=>x.p,'30 campañas de NASA POWER')+
+ grupo('Trazabilidad')+
+ fila('Información que falta',()=>'—')+
+ fila('A revisar con el agrónomo',()=>'Ver detalle en la card')+'</tbody>';
+document.getElementById('tabla').innerHTML=filas;
+document.getElementById('tablaPdf').innerHTML=filas;
+</script>
+</body>
+</html>

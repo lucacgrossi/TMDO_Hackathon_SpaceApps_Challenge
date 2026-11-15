@@ -1,4 +1,4 @@
-# CI de Field Shift
+# CI de AgroPixel
 
 GitHub Actions corre en cada PR a `dev` y `main` y en cada push a `dev`. Nada usa secretos del repo y la CI nunca modifica código.
 
