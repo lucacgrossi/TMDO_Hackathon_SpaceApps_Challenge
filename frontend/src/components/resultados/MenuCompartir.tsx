@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import Boton from "@/components/comunes/Boton";
+import { pausarAvisoRecarga } from "@/lib/avisoRecarga";
 import { linkMail, resumenComparacion, resumenMail } from "@/lib/compartir";
 import type { Salida } from "@/lib/contrato";
 import { useEntradas } from "@/lib/store";
@@ -124,7 +125,17 @@ export default function MenuCompartir({ salida }: { salida: Salida }) {
       </Boton>
       {abierto && (
         <div ref={menu} id={idMenu} className={css.menu} role="menu" aria-label="Compartir la comparación" onKeyDown={alTeclaMenu}>
-          <a role="menuitem" tabIndex={-1} className={css.opcion} href={mail} onClick={() => cerrar()}>
+          <a
+            role="menuitem"
+            tabIndex={-1}
+            className={css.opcion}
+            href={mail}
+            onClick={() => {
+              // El mailto: no sale de la página: que no salte el aviso de recarga
+              pausarAvisoRecarga();
+              cerrar();
+            }}
+          >
             Enviar por mail
           </a>
           <button role="menuitem" tabIndex={-1} type="button" className={css.opcion} onClick={copiar}>
