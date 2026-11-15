@@ -13,7 +13,7 @@
 2. **El dato manda.** Todo valor muestra unidad. Fuente, años, resolución y confianza están siempre visibles o a un clic.
 3. **Comparar, no concluir.** No hay ganador: ningún sello de "mejor" ni color que premie una columna. Las diferencias contra lo actual van con signo y color semántico.
 4. **El color nunca es la única señal.** Siempre hay forma, letra, patrón o texto además del color (terciles con S/N/H, barbecho con puntos, confianza con texto).
-5. **Aviso de apoyo siempre visible**, sin botón de cerrar: vive en la barra lateral y en el pie de la hoja de impresión.
+5. **Aviso de apoyo siempre visible**, sin botón de cerrar, en todas las etapas (`AvisoApoyo`): al pie de la caja de "Marcá tu lote" (S1), en el panel de entradas (S2), al pie de la pantalla de carga (S3), en la barra lateral del dashboard y al pie de la hoja de impresión.
 6. **Pixel con función.** Acentos pixel solo donde dicen algo (marca, navegación, CTA, carga). Nunca dentro de tablas ni gráficos.
 
 ## Tokens
@@ -69,7 +69,7 @@ Dos familias, guardadas en el repo (`src/app/fuentes/`, `next/font/local`):
 ## Flujo y pantallas
 El flujo pasa por cuatro etapas (`etapa` en el estado): **marcar → configurar → cargando → dashboard**. Pantallas de escritorio a 1440 × 900.
 
-1. **Marcar lote (S1).** Solo el mapa (Esri) a pantalla completa. Arriba a la izquierda, una caja con la marca, "Marcá tu lote", el buscador (lugar, coordenadas o link de Google Maps) y "Usar mi ubicación". No hay lote de ejemplo: el productor siempre marca el suyo, y el mapa arranca en la región pampeana sin ningún lote. Abajo al centro, la barra de dibujo: ayuda + Deshacer · Cancelar · Listo. Las esquinas marcadas son cuadrados de 10 px (pixel), el tramo hacia el cursor va punteado.
+1. **Marcar lote (S1).** Solo el mapa (Esri) a pantalla completa. Arriba a la izquierda, una caja con la marca, "Marcá tu lote", el buscador (lugar, coordenadas o link de Google Maps), "Usar mi ubicación" y, al pie, el aviso de apoyo. No hay lote de ejemplo: el productor siempre marca el suyo, y el mapa arranca en la región pampeana sin ningún lote. Abajo al centro, la barra de dibujo: ayuda + Deshacer · Cancelar · Listo. Las esquinas marcadas son cuadrados de 10 px (pixel), el tramo hacia el cursor va punteado.
 2. **Lote marcado + panel de entradas (S2).** El mapa queda a la izquierda con el lote cerrado ("Lote de 94,9 ha") y "Volver a marcar el lote". Las esquinas del lote se pueden arrastrar para ajustar el borde; al soltar se valida igual que el dibujo y, si no cumple, vuelve atrás con el motivo. A la derecha, un panel de 400 px con scroll y **pie fijo**:
    - Encabezado "Tu lote" con superficie y centro.
    - Secciones plegables, cada una con el resumen de lo cargado cuando está cerrada: Rotación actual · Prioridades (4 sliders 1–5 en bloques) · Restricciones y "No sembrar" · Datos del lote · Mediciones propias.
@@ -96,7 +96,7 @@ Una por columna, siempre las 4, en el orden y color de la tabla.
 - **Descartada:** borde y badge en gris, sin datos, con el motivo ("Descartada por tu restricción: no sembrar sorgo. Se muestra para mantener las 4 columnas.").
 
 ## Pantalla de carga
-- Fondo `--rastrojo`, todo centrado: planta pixel (16 × 16 a ×12), "Analizando tu lote", "Lote de 94,9 ha cerca de Río Cuarto. Suele tardar hasta 30 s; van 12 s." y la lista **"Qué se consulta, en un solo pedido"** (Clima, Vegetación, Relieve, Uso del suelo, Comparación), con la fuente y la resolución de cada una.
+- Fondo `--rastrojo`, todo centrado: planta pixel (16 × 16 a ×12), "Analizando tu lote", "Lote de 94,9 ha cerca de Río Cuarto. Suele tardar hasta 30 s; van 12 s." y la lista **"Qué se consulta, en un solo pedido"** (Clima, Vegetación, Relieve, Uso del suelo, Comparación), con la fuente y la resolución de cada una. Al pie, el aviso de apoyo.
 - **Sin barra ni porcentaje, y sin tildes de "listo" por fuente:** la API no informa progreso, así que mostrar avance sería inventar. El único indicador es la planta y el tiempo transcurrido.
 - **Animación:** 5 fotogramas (semilla → brote → 2 hojas → 4 hojas → con vainas), uno cada 0,3 s (la planta entera en 1,2 s, porque muchas respuestas llegan en 2 o 3 s); en bucle: el 5 queda 0,6 s y vuelve a la semilla, hasta la respuesta. Con `prefers-reduced-motion` se muestra solo el 4.
 - **Errores (S3b):** card con borde superior `--bad`, la semilla pixel, qué pasó y cómo seguir. 422: "Este polígono no parece un lote agrícola" + Marcar otro lote. 503 o sin conexión: "NASA POWER no responde" / "No se pudo terminar el análisis" + Probar de nuevo.
@@ -147,7 +147,7 @@ Los nombres son los del Figma (página 01); cada uno es un archivo en `src/compo
 | Fila de ficha | Etiqueta, Valor, Fuente | Ficha técnica del lote y de la campaña |
 | Leyenda de capa | Título, Fuente | Mapa; colores desde `capa.escala` |
 | Inspector de píxel | Valor, Píxel, Fuente | Mapa (RF18) |
-| Aviso de apoyo | — | Barra lateral, PDF |
+| Aviso de apoyo | Claro · Oscuro | S1, panel de entradas, carga, barra lateral (oscuro) y PDF |
 | Card de estrategia | Actual · A · B · C × Disponible · Descartada | Rotaciones |
 | Ítem de sidebar | Activo · Inactivo; Etiqueta, Ícono | Navegación |
 | Sidebar del dashboard | Mapa · Clima histórico · Rotaciones | Las 3 secciones |

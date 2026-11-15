@@ -94,6 +94,6 @@ const salida = useSalidaDashboard(); // null mientras carga o con error
 - [ ] Las 4 columnas siempre presentes; la descartada en gris con el motivo.
 - [ ] Usa los tokens y componentes de `DESIGN.md` (sin colores sueltos, sin mayúsculas en etiquetas, sin flechas en botones). Las escalas de las capas vienen del back.
 - [ ] El color nunca es la única señal; foco visible; `prefers-reduced-motion`.
-- [ ] Aviso de apoyo visible en el dashboard y en el PDF.
+- [ ] Aviso de apoyo visible en todas las etapas: marcar, panel, carga, dashboard y PDF.
 - [ ] No toca carpetas de otra persona sin avisar; no agrega clases globales nuevas.
 - [ ] Pasa la CI y anda con el mock y con un lote marcado contra la API real.

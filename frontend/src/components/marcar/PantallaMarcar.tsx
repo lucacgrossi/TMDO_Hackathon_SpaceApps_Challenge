@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import AvisoApoyo from "@/components/comunes/AvisoApoyo";
 import BuscadorLote from "@/components/entradas/BuscadorLote";
 import BarraDibujo from "@/components/mapa/BarraDibujo";
 import { useApp } from "@/lib/app";
@@ -19,6 +20,8 @@ import estilos from "./PantallaMarcar.module.css";
  * Sale a `configurar` (S2) al cerrar un lote válido (Listo, tocar la primera
  * esquina o Enter): `useDibujo.cierres` sube y acá se escucha. No hay lote de
  * ejemplo: el productor siempre marca el suyo.
+ *
+ * El aviso de apoyo (RF22) va al pie de la caja, como en todas las etapas.
  */
 export default function PantallaMarcar() {
   const loteListo = useApp((s) => s.loteListo);
@@ -59,6 +62,8 @@ export default function PantallaMarcar() {
         </p>
         <BuscadorLote />
         <p className={estilos.fuente}>Imagen satelital y búsqueda de lugares: Esri.</p>
+        {/* RF22: el aviso de apoyo, siempre visible desde la primera pantalla (QA H-005). */}
+        <AvisoApoyo />
       </section>
     </>
   );
