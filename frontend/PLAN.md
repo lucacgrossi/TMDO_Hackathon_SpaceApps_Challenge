@@ -50,7 +50,7 @@ Carpetas: `components/mapa/` (solo la sección del dashboard: `SeccionMapa`, `In
 4. Al final: cambiar "Field Shift" por "AgroPixel" en `compartir.ts` y su test, y borrar el CSS del prototipo que quede sin uso.
 
 ### Punto de montaje de Mapa y Clima histórico (para el `Dashboard` de persona 5)
-Mapa está en `dev` (PR #88) y Clima histórico en el PR #89. Las dos son autocontenidas: reciben la respuesta de `/analizar` por props y no tocan `page.tsx`, `globals.css` ni `layout.tsx`. El `Dashboard` las monta así:
+Las dos secciones ya están en `dev` (Mapa en el PR #88, Clima histórico en el #89) y son autocontenidas: reciben la respuesta de `/analizar` por props y no tocan `page.tsx`, `globals.css` ni `layout.tsx`. El `Dashboard` las monta así:
 
 ```tsx
 import ClimaHistorico from "@/components/clima/ClimaHistorico";
