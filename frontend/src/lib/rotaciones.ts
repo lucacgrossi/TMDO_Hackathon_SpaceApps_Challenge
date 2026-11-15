@@ -10,7 +10,7 @@
 import { C, INICIALES_MES, type GrupoCultivo } from "./calendario";
 import { choqueObjetivos, textoChoque, type Pesos } from "./cercania";
 import { TIPOS_DE_ANIO, type CultivoMes, type Estrategia, type EstrategiaDisponible, type IdEstrategia, type Salida, type TipoAnio } from "./contrato";
-import { conSigno, fmt } from "./formato";
+import { conSigno, fmt, NOMBRE_CULTIVO } from "./formato";
 import { mesesCampania } from "./ordenCampania";
 
 /** Texto del badge de cada columna (DESIGN.md, "Card de estrategia"). */
@@ -43,7 +43,8 @@ export function celdasCalendario(calendario: readonly CultivoMes[]): CeldaCalend
       inicial: INICIALES_MES[m.mes],
       nombreMes: m.nombre,
       cultivo,
-      nombreCultivo: C[cultivo].n,
+      // Mismo nombre que el title de los tramos de la tabla ("Barbecho (pelado)").
+      nombreCultivo: NOMBRE_CULTIVO[cultivo],
       grupo: C[cultivo].g,
     };
   });

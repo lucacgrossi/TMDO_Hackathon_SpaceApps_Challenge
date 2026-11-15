@@ -1,7 +1,8 @@
 "use client";
 
 import type { EstrategiaDisponible, Salida } from "@/lib/contrato";
-import { fmt, MESES, mesesConAnios, NOMBRE_CULTIVO, rangoMeses, tramosCalendario } from "@/lib/formato";
+import { C } from "@/lib/calendario";
+import { ETIQUETA_TRAMO, fmt, MESES, mesesConAnios, NOMBRE_CULTIVO, rangoMeses, tramosCalendario } from "@/lib/formato";
 import { colorNdvi, mesesLinea } from "@/lib/linea";
 import { meses as unidadMeses } from "@/lib/plural";
 import css from "./linea.module.css";
@@ -68,15 +69,20 @@ export default function LineaCampania({
         <div className="r">
           <div className="row2">
             {tramos.map((t) => {
-              const pelado = t.cultivo === "barbecho";
+              const et = ETIQUETA_TRAMO[t.cultivo];
               return (
+                // Mismo alto y tamaño de letra en todos los tramos: se ve el nombre completo, la
+                // abreviatura o la inicial según el ancho (container query), nunca una palabra cortada.
                 <span
                   key={t.desde}
-                  className={`seg${pelado ? " bare" : ""}${t.meses < 2 ? " hide" : ""}`}
+                  className={css.tramo}
+                  data-grupo={C[t.cultivo].g}
                   style={{ flex: t.meses }}
-                  title={`${NOMBRE_CULTIVO[t.cultivo]}: ${MESES[t.desde]} a ${MESES[t.hasta]}`}
+                  title={`${NOMBRE_CULTIVO[t.cultivo]}: ${rangoMeses(t)} (${t.meses} ${t.meses === 1 ? "mes" : "meses"})`}
                 >
-                  {pelado ? "Pelado" : NOMBRE_CULTIVO[t.cultivo]}
+                  <span className={css.completa}>{et.completa}</span>
+                  <span className={css.corta}>{et.corta}</span>
+                  <span className={css.inicial}>{et.inicial}</span>
                 </span>
               );
             })}
@@ -121,7 +127,7 @@ export default function LineaCampania({
 }
 
 function nombreTramo(c: keyof typeof NOMBRE_CULTIVO) {
-  return c === "barbecho" ? "pelado" : NOMBRE_CULTIVO[c].toLowerCase();
+  return NOMBRE_CULTIVO[c].toLowerCase();
 }
 
 function tituloMes(m: ReturnType<typeof mesesLinea>[number], n: number): string {
