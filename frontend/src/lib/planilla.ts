@@ -54,6 +54,11 @@ export interface ResultadoPlanilla {
   errores: AvisoFila[];
   /** Solo en el front: true = respuesta de ejemplo, no se leyó el archivo. */
   ejemplo?: boolean;
+  /**
+   * Solo en el front: true = el servidor no respondió (sin conexión o error 5xx).
+   * El archivo no se revisó, así que no se le pide al productor que lo corrija.
+   */
+  sinServidor?: boolean;
 }
 
 /** Límite del backend: más de 1 MB responde 413. Se avisa antes de mandar. */
@@ -105,9 +110,29 @@ export function resumenPlanilla(s: SeriePlanilla): string[] {
   return lineas;
 }
 
-/** ¿La planilla trae lluvia? Si es así, el campo manual de lluvia se deshabilita (4.2). */
+/** ¿La planilla trae lluvia? */
 export function traeLluvia(r: ResultadoPlanilla | null): boolean {
   return !!r?.ok && !!r.serie?.variables.includes("lluvia_mm");
+}
+
+/**
+ * Lluvia de los 12 meses de ejemplo de `public/plantillas/mediciones.csv`
+ * (campaña 2024/25). Si cambia la plantilla, se cambia acá.
+ */
+const LLUVIA_PLANTILLA = [4, 9.5, 22, 61, 88.5, 104, 120.5, 98, 87, 55.5, 18, 6];
+
+/**
+ * ¿Es la plantilla descargable subida sin reemplazar los datos de ejemplo?
+ * Esos números no son del productor (principio "nada inventado"): la vista
+ * previa los rechaza y pide cargar los propios.
+ */
+export function esPlantillaDeEjemplo(s: SeriePlanilla): boolean {
+  return (
+    s.periodo.desde === "2024-07" &&
+    s.periodo.hasta === "2025-06" &&
+    s.meses.length === LLUVIA_PLANTILLA.length &&
+    s.meses.every((m, i) => m.lluvia_mm === LLUVIA_PLANTILLA[i])
+  );
 }
 
 /** Respuesta de EJEMPLO, con la forma de `ResultadoPlanilla`. Solo hasta la auditoría. */

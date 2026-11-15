@@ -206,7 +206,8 @@ export default function ModalFormatoPlanilla({ abierto, onCerrar }: Props) {
             Descargar plantilla
           </a>
           <span className={estilos.pie}>
-            CSV con el encabezado <code>fecha;lluvia_mm;t_min_c;t_max_c</code> y tres filas de ejemplo.
+            CSV mensual con el encabezado <code>mes;lluvia_mm;t_min_c;t_max_c</code> y 12 meses de ejemplo (campaña
+            2024/25): reemplazalos por tus datos antes de subirla.
           </span>
         </footer>
       </div>
@@ -255,7 +256,10 @@ const ACEPTA: [string, string][] = [
   ["Codificación", "UTF-8 (con o sin BOM) y Latin-1 / Windows-1252."],
   ["Separador", "Punto y coma, coma o tabulación. Con empate al detectarlo, gana el punto y coma."],
   ["Decimales", "Coma o punto. Si el separador es la coma, solo punto."],
-  ["Fechas", "Diarias o mensuales, sin mezclar: un archivo con las dos da error. Siempre día antes que mes."],
+  [
+    "Fechas",
+    "Diarias o mensuales, sin mezclar: un archivo con las dos da error. Siempre día antes que mes: si una fecha solo tiene sentido como mes/día (07/13/2023), o más del 20 % de las fechas no existen, el archivo se rechaza.",
+  ],
   [
     "Encabezado",
     "Opcional. Sin encabezado, la columna 1 es la fecha y la 2 la lluvia. Nombres reconocidos, sin distinguir mayúsculas ni tildes: fecha, dia, mes o periodo; lluvia, lluvia_mm, mm, precipitacion o pp; t_min_c, tmin, minima o temp_min; t_max_c, tmax, maxima o temp_max.",
