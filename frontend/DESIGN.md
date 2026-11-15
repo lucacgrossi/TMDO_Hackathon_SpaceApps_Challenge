@@ -98,7 +98,7 @@ Una por columna, siempre las 4, en el orden y color de la tabla.
 ## Pantalla de carga
 - Fondo `--rastrojo`, todo centrado: planta pixel (16 × 16 a ×12), "Analizando tu lote", "Lote de 94,9 ha cerca de Río Cuarto. Suele tardar hasta 30 s; van 12 s." y la lista **"Qué se consulta, en un solo pedido"** (Clima, Vegetación, Relieve, Uso del suelo, Comparación), con la fuente y la resolución de cada una.
 - **Sin barra ni porcentaje, y sin tildes de "listo" por fuente:** la API no informa progreso, así que mostrar avance sería inventar. El único indicador es la planta y el tiempo transcurrido.
-- **Animación:** 5 fotogramas (semilla → brote → 2 hojas → 4 hojas → con vainas), uno cada 1,2 s; el 5 queda fijo hasta la respuesta. Con `prefers-reduced-motion` se muestra solo el 4.
+- **Animación:** 5 fotogramas (semilla → brote → 2 hojas → 4 hojas → con vainas), uno cada 0,3 s (la planta entera en 1,2 s, porque muchas respuestas llegan en 2 o 3 s); el 5 queda fijo hasta la respuesta. Con `prefers-reduced-motion` se muestra solo el 4.
 - **Errores (S3b):** card con borde superior `--bad`, la semilla pixel, qué pasó y cómo seguir. 422: "Este polígono no parece un lote agrícola" + Marcar otro lote. 503 o sin conexión: "NASA POWER no responde" / "No se pudo terminar el análisis" + Probar de nuevo.
 
 ## Exportar PDF (hoja de impresión)

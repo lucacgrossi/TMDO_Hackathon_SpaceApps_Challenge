@@ -9,7 +9,8 @@
  *   b  borde de hoja --hoja-brillo
  *   p  vaina         --invierno
  *
- * Un fotograma cada 1,2 s; el último queda fijo hasta la respuesta. Con
+ * Un fotograma cada 0,3 s (la planta entera en 1,2 s: muchas respuestas
+ * llegan en 2 o 3 s); el último queda fijo hasta la respuesta. Con
  * `prefers-reduced-motion` se muestra solo el de 4 hojas (DESIGN.md,
  * "Pantalla de carga"). No hay barra ni porcentaje: la API no informa
  * progreso, así que el único indicador es la planta y el tiempo.
@@ -84,14 +85,14 @@ export const FOTOGRAMAS_PLANTA: readonly Grilla[] = [
 ];
 
 /** Milisegundos entre fotogramas. */
-export const MS_POR_FOTOGRAMA = 1200;
+export const MS_POR_FOTOGRAMA = 300;
 
 /** Fotograma que se muestra con `prefers-reduced-motion` (4 hojas). */
 export const FOTOGRAMA_QUIETO = 3;
 
 /**
  * Índice del fotograma (0 a 4) según el tiempo desde que empezó el análisis.
- * Avanza uno cada 1,2 s y se queda en el último. Con movimiento reducido,
+ * Avanza uno cada 0,3 s y se queda en el último. Con movimiento reducido,
  * siempre el de 4 hojas.
  */
 export function fotogramaPlanta(msTranscurridos: number, movimientoReducido: boolean): number {

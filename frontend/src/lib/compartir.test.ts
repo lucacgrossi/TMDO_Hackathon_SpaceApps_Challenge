@@ -35,7 +35,7 @@ describe("resumen para compartir", () => {
     // Los datos del lote salen del mock: si cambia el período de clima, el test sigue valiendo
     expect(lote).toBe(`Lote: ${fmt(MOCK_BASE.lote.area_ha)} ha · ${metadatosHoja(MOCK_BASE, FECHA)}`);
     expect(lote).toContain(`Clima NASA POWER ${MOCK_BASE.periodo_clima}`);
-    expect(objetivos).toBe("Objetivos (0 a 5): agua 3 · suelo 3 · erosión 3 · ingreso 3");
+    expect(objetivos).toBe("Prioridades (1 a 5): agua 3 · suelo 3 · erosión 3 · ingreso 3");
   });
 
   it("tiene una línea por columna con cercanía, cobertura baja y el trío", () => {
