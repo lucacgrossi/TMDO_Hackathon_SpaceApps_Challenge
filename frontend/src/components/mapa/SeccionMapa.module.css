@@ -5,8 +5,15 @@
   align-items: start;
 }
 
+/* El mapa con sus paneles. El lienzo es el mapa en sí: los paneles flotan
+   encima y el encuadre deja el lote en la zona libre (H-020). */
 .mapa {
   position: relative;
+  min-width: 0;
+  border-radius: 6px;
+}
+
+.lienzo {
   height: 640px;
   border-radius: 6px;
   overflow: hidden;
@@ -67,10 +74,20 @@
 
   .arribaDer {
     top: auto;
-    bottom: 220px;
+    bottom: 16px;
+    left: 16px;
   }
 
+  /* Línea de tiempo y leyenda van debajo del mapa: no tapan el lote ni se cortan. */
+  .abajoIzq,
   .abajoDer {
-    display: none;
+    position: static;
+    margin-top: 12px;
+  }
+}
+
+@media (max-width: 600px) {
+  .lienzo {
+    height: 480px;
   }
 }

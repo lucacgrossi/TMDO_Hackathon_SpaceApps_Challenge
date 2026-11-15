@@ -75,6 +75,23 @@
   outline: 1px dashed var(--muted, #5a6560);
 }
 
+/* Debajo del mapa (menos de 1100 px): todo el ancho y los meses con scroll horizontal. */
+@media (max-width: 1100px) {
+  .linea {
+    max-width: none;
+  }
+
+  .fila {
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .play,
+  .meses {
+    flex-shrink: 0;
+  }
+}
+
 .pie {
   margin: 6px 0 0;
   font-size: 12px;

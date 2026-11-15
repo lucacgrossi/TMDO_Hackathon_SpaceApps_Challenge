@@ -8,6 +8,7 @@ import { boundsCelda, boundsPixel, dibujoNdvi, type IdCapaLote, rasterDeCapa } f
 import type { Bounds, Salida } from "@/lib/contrato";
 import type { LatLng } from "@/lib/entradas";
 import { dentroDelPoligono } from "@/lib/geo";
+import { aspectoLote, type Margenes } from "@/lib/margenesMapa";
 import css from "./MapaLote.module.css";
 import { useImagenRecortada } from "./useImagenRecortada";
 
@@ -39,21 +40,38 @@ interface Props {
   poligono: LatLng[];
   pixel: Pixel | null;
   onPixel: (p: Pixel | null) => void;
+  /** Padding de `fitBounds` para que los paneles flotantes no tapen el lote (lo mide SeccionMapa). */
+  margenes: (aspecto: number) => Margenes;
 }
 
-/** Al cambiar de capa, la cámara va a su escala: el lote, o la celda de ~50 km. */
-function Encuadre({ capa, lote, celda }: { capa: IdCapaLote; lote: L.LatLngBounds; celda: Bounds }) {
+/**
+ * Al cambiar de capa, la cámara va a su escala: el lote, o la celda de ~50 km.
+ * Encuadra en la zona que dejan libre la línea de tiempo, la leyenda y los
+ * controles (H-020): los mide en el momento, ya con la leyenda de la capa nueva.
+ */
+function Encuadre({
+  capa,
+  lote,
+  celda,
+  margenes,
+}: {
+  capa: IdCapaLote;
+  lote: L.LatLngBounds;
+  celda: Bounds;
+  margenes: Props["margenes"];
+}) {
   const mapa = useMap();
   useEffect(() => {
     mapa.invalidateSize();
     // latLngBounds nuevo: extend() modifica el objeto.
-    if (capa === "celda") mapa.fitBounds(L.latLngBounds(celda).extend(lote), { padding: [24, 24], maxZoom: 12 });
-    else mapa.fitBounds(lote.pad(0.25), { maxZoom: 17 });
-  }, [capa, mapa, lote, celda]);
+    const destino = capa === "celda" ? L.latLngBounds(celda).extend(lote) : lote.pad(0.1);
+    const aspecto = aspectoLote(destino.getSouth(), destino.getWest(), destino.getNorth(), destino.getEast());
+    mapa.fitBounds(destino, { ...margenes(aspecto), maxZoom: capa === "celda" ? 12 : 17 });
+  }, [capa, mapa, lote, celda, margenes]);
   return null;
 }
 
-/** Lee el píxel bajo el mouse en la capa raster activa; fuera del lote, nada. */
+/** Lee el píxel bajo el mouse (o el que se toca, en pantallas táctiles) en la capa raster activa; fuera del lote, nada. */
 function LecturaMouse({
   capaRaster,
   poligono,
@@ -63,12 +81,15 @@ function LecturaMouse({
   poligono: LatLng[];
   onPixel: Props["onPixel"];
 }) {
+  const leer = (e: L.LeafletMouseEvent) => {
+    if (!capaRaster?.valores) return;
+    const { lat, lng } = e.latlng;
+    onPixel(dentroDelPoligono(lat, lng, poligono) ? pixelEn(capaRaster, lat, lng) : null);
+  };
   useMapEvents({
-    mousemove(e) {
-      if (!capaRaster?.valores) return;
-      const { lat, lng } = e.latlng;
-      onPixel(dentroDelPoligono(lat, lng, poligono) ? pixelEn(capaRaster, lat, lng) : null);
-    },
+    mousemove: leer,
+    // En táctil no hay mousemove: el toque llega como click
+    click: leer,
     mouseout() {
       onPixel(null);
     },
@@ -76,7 +97,7 @@ function LecturaMouse({
   return null;
 }
 
-export default function MapaLote({ salida, capa, mes, poligono, pixel, onPixel }: Props) {
+export default function MapaLote({ salida, capa, mes, poligono, pixel, onPixel, margenes }: Props) {
   const lote = useMemo(() => L.latLngBounds(poligono), [poligono]);
   const celdaB = useMemo(() => boundsCelda(salida.clima_celda.bbox), [salida.clima_celda.bbox]);
 
@@ -97,7 +118,7 @@ export default function MapaLote({ salida, capa, mes, poligono, pixel, onPixel }
     >
       <TileLayer url={ESRI} maxZoom={18} maxNativeZoom={17} keepBuffer={4} attribution="Imagen © Esri, Maxar, Earthstar Geographics" />
       <ZoomControl position="bottomright" />
-      <Encuadre capa={capa} lote={lote} celda={celdaB} />
+      <Encuadre capa={capa} lote={lote} celda={celdaB} margenes={margenes} />
       <LecturaMouse capaRaster={raster} poligono={poligono} onPixel={onPixel} />
 
       {raster && imagen && (
