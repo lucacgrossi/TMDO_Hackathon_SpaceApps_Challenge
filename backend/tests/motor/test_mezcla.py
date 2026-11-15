@@ -119,7 +119,8 @@ def test_productor_mide_menos_el_valor_de_las_reglas_baja_y_cierra_con_el_texto(
 def test_productor_mide_mas_el_valor_de_las_reglas_sube(ind):
     c = mezcla.mezclar(entradas(mediciones={"serie_mensual": _planilla_otra_estacionalidad(ULTIMAS_6, 1.1)}), ind)
     assert c["diferencia_lluvia_pct"] == 10
-    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * (1 + 0.6 * 0.10)) > c["lluvia_nasa_mm"]
+    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * (1 + 0.6 * 0.10))
+    assert c["lluvia_mm"] > c["lluvia_nasa_mm"]
 
 
 # --- H-007: los años de registro son campañas completas -----------------------
