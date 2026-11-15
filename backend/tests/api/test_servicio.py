@@ -195,6 +195,36 @@ def test_lote_no_agricola_da_422_con_el_aviso(monkeypatch):
     assert r.json() == {"mensaje": aviso}
 
 
+def _en(lat: float, lon: float, d: float = 0.004) -> dict:
+    """Entrada dibujada con un cuadrado de ~2 × d grados centrado en (lat, lon)."""
+    e = _dibujado()
+    anillo = [[lon - d, lat + d], [lon + d, lat + d], [lon + d, lat - d], [lon - d, lat - d], [lon - d, lat + d]]
+    e["lote"]["poligono"]["coordinates"] = [anillo]
+    e["lote"]["centro"] = [lat, lon]
+    e["lat"], e["lon"] = lat, lon
+    return e
+
+
+def test_lote_en_el_hemisferio_norte_da_422_sin_pedir_a_power(monkeypatch):
+    """H-014: Iowa (42,03, −93,75). Se rechaza antes de pedir datos a NASA POWER o al satélite."""
+    pedidos = []
+
+    def no_llamar(*args, **kwargs):
+        pedidos.append(args)
+        raise AssertionError("no debería pedir datos")
+
+    monkeypatch.setattr(power, "pedir_power", no_llamar)
+    monkeypatch.setattr(cobertura, "calcular", no_llamar)
+    r = cliente.post("/analizar", json=_en(42.03, -93.75))
+    assert r.status_code == 422
+    assert r.json() == {"mensaje": servicio.MENSAJE_HEMISFERIO_NORTE}
+    assert pedidos == []
+
+
+def test_lote_en_el_hemisferio_sur_sigue():
+    assert cliente.post("/analizar", json=_en(-35.0, -61.0)).status_code == 200
+
+
 def test_cobertura_sin_dato_no_bloquea(monkeypatch):
     def caida(poligono, **_):
         raise RuntimeError("sin red")
