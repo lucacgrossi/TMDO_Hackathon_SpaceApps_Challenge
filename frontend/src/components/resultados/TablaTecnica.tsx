@@ -399,7 +399,7 @@ export default function TablaTecnica({ salida }: { salida: Salida }) {
                 style={orden(k)}
               >
                 <div className={css.cabeceraFila}>
-                  <InsigniaEstrategia id={e.id} />
+                  <InsigniaEstrategia id={e.id} descartada={!e.disponible} />
                   <div>
                     <div className={css.nombre}>{e.nombre}</div>
                     <div className={css.especies}>{e.especies}</div>

@@ -1,29 +1,26 @@
 "use client";
 
-import { choqueObjetivos, textoChoque } from "@/lib/cercania";
-import type { Estrategia } from "@/lib/contrato";
-import { useEntradas } from "@/lib/store";
-import css from "./resultados.module.css";
+import type { Pesos } from "@/lib/cercania";
+import type { Salida } from "@/lib/contrato";
+import { textoBandaChoque } from "@/lib/rotaciones";
+import css from "./ChoqueObjetivos.module.css";
 
 /**
- * Aviso de que los dos objetivos con más peso chocan (RF13): en cada uno queda
- * más cerca una alternativa distinta. Es el `clash()` del prototipo, con su
- * clase `.clash`. Se recalcula al mover las barras, con los puntos que ya
- * llegaron: no pide datos. Describe; no dice cuál elegir.
+ * Banda de choque de objetivos (RF13, api-frontend §4.11): los dos objetivos
+ * con más peso quedan más cerca en alternativas distintas. Muestra el `texto`
+ * del back tal cual; si las prioridades se movieron y el choque cambió, el
+ * recálculo del cliente (`textoBandaChoque`). Describe; no dice cuál elegir.
  *
  * La región `status` queda siempre montada para que el lector de pantalla
- * anuncie el aviso cuando aparece al mover una barra.
+ * anuncie la banda cuando aparece al mover una prioridad.
  */
-export default function ChoqueObjetivos({ estrategias }: { estrategias: readonly Estrategia[] }) {
-  const pesos = useEntradas((s) => s.objetivos);
-  const choque = choqueObjetivos(estrategias, pesos);
-  const texto = choque && textoChoque(choque);
-
+export default function ChoqueObjetivos({ salida, pesos }: { salida: Salida; pesos: Pesos }) {
+  const texto = textoBandaChoque(salida, pesos);
   return (
-    <div role="status">
+    <div role="status" className={css.region}>
       {texto && (
-        <p className={`clash ${css.choque}`}>
-          <b>{texto.titulo}</b> {texto.detalle}
+        <p className={css.banda}>
+          <b className={css.etiqueta}>Objetivos en choque</b> {texto}
         </p>
       )}
     </div>

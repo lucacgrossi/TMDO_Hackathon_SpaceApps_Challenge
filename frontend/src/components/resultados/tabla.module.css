@@ -1,5 +1,5 @@
 /*
- * Tabla técnica (persona 5). Usa solo los tokens del prototipo (globals.css).
+ * Tabla técnica (persona 5), con los tokens de DESIGN.md.
  * Lo que la distingue es la "huella del dato": debajo de cada valor, siempre
  * en el mismo lugar, confianza + fuente + años + resolución.
  * El scroll (vertical y horizontal) lo hace el cuerpo de la hoja: así el
@@ -8,13 +8,8 @@
 
 .contenedor {
   padding-bottom: 4px;
-  /* Fondo opaco para lo que queda fijo: --panel es apenas translúcido y dejaba ver lo que pasa por debajo */
-  --fondo-fijo: #fff;
-}
-@media (prefers-color-scheme: dark) {
-  .contenedor {
-    --fondo-fijo: rgb(17, 24, 29);
-  }
+  /* Fondo opaco para lo que queda fijo (encabezado y primera columna) */
+  --fondo-fijo: var(--papel);
 }
 
 .tabla {
@@ -24,6 +19,8 @@
   border-spacing: 0;
   table-layout: fixed;
   font-size: 13px;
+  line-height: 18px;
+  color: var(--noche);
 }
 
 .colTitulo {
@@ -67,8 +64,8 @@
   align-items: flex-start;
 }
 .nombre {
-  font-weight: 700;
-  line-height: 1.2;
+  font-weight: 600;
+  line-height: 18px;
 }
 .especies {
   font-size: 12px;
@@ -76,13 +73,14 @@
 }
 
 /* --- Grupos de filas: separan lo que cada bloque responde */
-/* El acento solo da 4,1:1 sobre blanco a 12 px: se lo lleva hacia la tinta (claro ≈ 5,8:1, oscuro ≈ 10:1) */
 .grupo th {
   text-align: left;
   font-size: 12px;
-  font-weight: 700;
-  color: color-mix(in srgb, var(--accent) 75%, var(--ink));
-  padding: 16px 12px 6px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--noche);
+  background: var(--soft);
+  padding: 6px 12px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -136,9 +134,9 @@
   flex-wrap: wrap;
 }
 .numero {
-  font-size: 18px;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 600;
   font-variant-numeric: tabular-nums;
 }
 .unidad {
@@ -179,8 +177,8 @@
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  border-radius: 999px;
-  padding: 1px 7px 1px 6px;
+  border-radius: 2px;
+  padding: 1px 6px;
   font-size: 11px;
   font-weight: 600;
   white-space: nowrap;
@@ -190,7 +188,6 @@
   content: "";
   width: 6px;
   height: 6px;
-  border-radius: 50%;
   background: currentColor;
 }
 .pildora[data-nivel="alta"] { color: var(--good); }
@@ -199,7 +196,7 @@
 .pildora[data-nivel="sin_dato"],
 .pildora[data-nivel="regla"] { color: var(--muted); }
 .pildora[data-nivel="regla"]::before {
-  border-radius: 1px;
+  width: 4px;
 }
 
 /* --- Contenidos de texto */
@@ -259,19 +256,18 @@
 }
 .punto {
   display: inline-block;
-  width: 7px;
-  height: 7px;
-  border-radius: 2px;
+  width: 8px;
+  height: 8px;
   margin-right: 4px;
   vertical-align: 0;
 }
 .sensible {
   align-self: flex-start;
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--warn);
   border: 1px solid currentColor;
-  border-radius: 999px;
+  border-radius: 2px;
   padding: 1px 8px;
 }
 
@@ -281,7 +277,7 @@
   color: var(--muted);
 }
 .faltaGlobal b {
-  color: var(--ink);
+  color: var(--noche);
 }
 
 /* Lo observado por satélite, debajo del valor del calendario en la actual */
