@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from app.api.contrato import ResultadoPlanilla
-from app.mediciones.planilla import leer_planilla, main
+from app.mediciones.planilla import MAX_BYTES, leer_planilla, main
 
 FIXTURES = Path(__file__).parent / "fixtures"
 HOY = date(2026, 11, 14)
@@ -196,10 +196,19 @@ def test_11_errores_claros(contenido, esperado):
 
 # 12 · Más de 1 MB o 20.000 filas → error de tamaño
 def test_12_mas_de_1_mb():
-    contenido = b"fecha;lluvia_mm\n" + b"01/01/2023;0\n" * 80_000
-    assert len(contenido) > 1_000_000
+    contenido = b"fecha;lluvia_mm\n" + b"01/01/2023;0\n" * 90_000
+    assert len(contenido) > MAX_BYTES
     r = leer_bytes(contenido)
-    assert not r.ok and "el máximo es 1 MB" in r.errores[0].motivo
+    assert not r.ok and "La planilla supera 1 MB" in r.errores[0].motivo
+
+
+def test_12_entre_1_000_000_bytes_y_1_mb_no_es_error_de_tamano():
+    # Antes el parser cortaba en 1.000.000 y la ruta en 1.048.576: con 1,02 MB pasaba la ruta y el parser
+    # respondía "pesa 1,0 MB: el máximo es 1 MB". Ahora el tope es uno solo.
+    contenido = b"fecha;lluvia_mm\n" + b"01/01/2023;0\n" * 78_500
+    assert 1_000_000 < len(contenido) <= MAX_BYTES
+    r = leer_bytes(contenido)
+    assert not any("1 MB" in e.motivo for e in r.errores)
 
 
 def test_12_mas_de_20000_filas():
