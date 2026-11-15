@@ -58,9 +58,7 @@ describe("planilla CSV · plantilla de ejemplo (H-022)", () => {
   /** Lee la plantilla descargable como la devolvería el back (solo mes y lluvia). */
   const plantilla = (): SeriePlanilla => {
     const csv = readFileSync(fileURLToPath(new URL("../../public/plantillas/mediciones.csv", import.meta.url)), "utf-8");
-    const filas = csv.trim().split(/
-?
-/).slice(1).map((l) => l.split(";"));
+    const filas = csv.trim().split(/\r?\n/).slice(1).map((l) => l.split(";"));
     return {
       ...RESULTADO_EJEMPLO.serie!,
       meses: filas.map(([mes, lluvia]) => ({ mes, lluvia_mm: Number(lluvia.replace(",", ".")) })),
