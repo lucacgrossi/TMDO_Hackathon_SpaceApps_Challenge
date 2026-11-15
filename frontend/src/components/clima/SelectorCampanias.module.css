@@ -14,6 +14,12 @@
   border-radius: 0;
   cursor: pointer;
   background: var(--normal, #a8a29e);
+  transform-origin: bottom;
+  transition: transform 140ms var(--ease-out);
+}
+
+.barra:active:not(:disabled) {
+  transform: scale(0.94);
 }
 
 .barra[data-tipo="seco"] {

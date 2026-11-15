@@ -16,6 +16,22 @@
   }
 }
 
+/* Entrada al dashboard: el raster aparece de arriba abajo en 12 saltos, como
+   filas de píxeles que se van llenando ("el lote se pixela"). */
+.revelar {
+  image-rendering: pixelated;
+  animation: revelar 0.6s steps(12, end);
+}
+
+@keyframes revelar {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
 /* Leaflet pone el color como atributo: la clase lo pisa con los tokens. */
 .lote {
   stroke: var(--papel, #fff);
@@ -48,7 +64,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .px {
+  .px,
+  .revelar {
     animation: none;
   }
 }
