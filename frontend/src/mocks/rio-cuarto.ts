@@ -13,223 +13,2953 @@
 import type { Salida } from "@/lib/contrato";
 
 export const RIO_CUARTO: Salida = {
-  lote: {
-    localidad_aprox: "a 17 km de Río Cuarto, Córdoba",
-    area_ha: 95,
-    pendiente_pct: {
-      valor: 0.6,
-      unidad: "%",
-      fuente: "NASADEM (plano ajustado)",
-      anios: "2000",
-      resolucion: "30 m",
-      confianza: "media",
-      motivo: null,
+  "lote": {
+    "localidad_aprox": "a 17 km de Río Cuarto, Córdoba",
+    "area_ha": 95,
+    "pendiente_pct": {
+      "valor": 0.6,
+      "unidad": "%",
+      "fuente": "NASADEM · NASA, vía Planetary Computer",
+      "anios": "2000 (misión SRTM, reprocesada en NASADEM)",
+      "resolucion": "30 m",
+      "confianza": "alta",
+      "motivo": null,
+      "nota": "Plano ajustado sobre 1050 píxeles del lote"
     },
-    cobertura_agricola_pct: {
-      valor: 98,
-      unidad: "% del lote",
-      fuente: "ESA WorldCover (clase 40)",
-      anios: "2021",
-      resolucion: "10 m",
-      confianza: "alta",
-      motivo: null,
+    "pendiente_maxima_pct": {
+      "valor": 1.8,
+      "unidad": "%",
+      "fuente": "NASADEM · NASA, vía Planetary Computer",
+      "anios": "2000 (misión SRTM, reprocesada en NASADEM)",
+      "resolucion": "30 m",
+      "confianza": "media",
+      "motivo": null,
+      "nota": "Percentil 95 de la pendiente por píxel (1050 píxeles); valor por píxel, ruidoso"
     },
+    "cobertura_agricola_pct": {
+      "valor": 98,
+      "unidad": "%",
+      "fuente": "ESA WorldCover 2021 v200, vía Planetary Computer",
+      "anios": "2021",
+      "resolucion": "10 m",
+      "confianza": "alta",
+      "motivo": null,
+      "nota": "9310 de 9500 píxeles de 10 m dentro del lote son cultivo"
+    }
   },
-  visto_por_satelite: {
-    campana: "2024/25",
-    fuente: "NASA HLS 30 m",
-    meses: [
-      { fecha: "2025-01-18", ndvi_medio: 0.71, nubes_escena: 4, fuente: "NASA HLS 30 m" },
-      { fecha: "2025-02-12", ndvi_medio: 0.78, nubes_escena: 4, fuente: "NASA HLS 30 m" },
-      { fecha: "2025-03-09", ndvi_medio: 0.69, nubes_escena: 4, fuente: "NASA HLS 30 m" },
-      { fecha: "2025-04-15", ndvi_medio: 0.42, nubes_escena: 4, fuente: "NASA HLS 30 m" },
-      { fecha: "2025-05-20", ndvi_medio: 0.24, nubes_escena: 4, fuente: "NASA HLS 30 m" },
-      { fecha: "2025-06-14", ndvi_medio: 0.22, nubes_escena: 4, fuente: "NASA HLS 30 m" },
-      { fecha: "2024-07-22", ndvi_medio: 0.26, nubes_escena: 4, fuente: "NASA HLS 30 m" },
-      { fecha: "2024-08-16", ndvi_medio: 0.21, nubes_escena: 4, fuente: "NASA HLS 30 m" },
-      { fecha: "2024-09-10", ndvi_medio: 0.19, nubes_escena: 4, fuente: "NASA HLS 30 m" },
-      { fecha: "2024-10-28", ndvi_medio: 0.18, nubes_escena: 4, fuente: "NASA HLS 30 m" },
+  "visto_por_satelite": {
+    "campana": "2024/25",
+    "fuente": "NASA HLS 30 m + MODIS 250 m (respaldo en 1 de 12 meses)",
+    "meses": [
+      {
+        "mes": "2025-01",
+        "fecha": "2025-01-18",
+        "ndvi_medio": 0.71,
+        "nubes_escena": 4,
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2025-01-18",
+        "pixeles": 1050,
+        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+      },
+      {
+        "mes": "2025-02",
+        "fecha": "2025-02-12",
+        "ndvi_medio": 0.78,
+        "nubes_escena": 4,
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2025-02-12",
+        "pixeles": 1050,
+        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+      },
+      {
+        "mes": "2025-03",
+        "fecha": "2025-03-09",
+        "ndvi_medio": 0.69,
+        "nubes_escena": null,
+        "coleccion": "modis-13Q1-061",
+        "item": "MOCK-MOD13Q1-2025-03-09",
+        "pixeles": 15,
+        "fuente": "NASA MODIS MOD13Q1 · 250 m, compuesto de 16 días · respaldo: sin escena HLS con < 30 % de nubes. Mezcla el lote con los vecinos: con el umbral 0,3 marca menos meses que HLS"
+      },
+      {
+        "mes": "2025-04",
+        "fecha": "2025-04-15",
+        "ndvi_medio": 0.42,
+        "nubes_escena": 4,
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2025-04-15",
+        "pixeles": 1050,
+        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+      },
+      {
+        "mes": "2025-05",
+        "fecha": "2025-05-20",
+        "ndvi_medio": 0.24,
+        "nubes_escena": 4,
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2025-05-20",
+        "pixeles": 1050,
+        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+      },
+      {
+        "mes": "2025-06",
+        "fecha": "2025-06-14",
+        "ndvi_medio": 0.22,
+        "nubes_escena": 4,
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2025-06-14",
+        "pixeles": 1050,
+        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+      },
+      {
+        "mes": "2024-07",
+        "fecha": "2024-07-22",
+        "ndvi_medio": 0.26,
+        "nubes_escena": 4,
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2024-07-22",
+        "pixeles": 1050,
+        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+      },
+      {
+        "mes": "2024-08",
+        "fecha": "2024-08-16",
+        "ndvi_medio": 0.21,
+        "nubes_escena": 4,
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2024-08-16",
+        "pixeles": 1050,
+        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+      },
+      {
+        "mes": "2024-09",
+        "fecha": "2024-09-10",
+        "ndvi_medio": 0.19,
+        "nubes_escena": 4,
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2024-09-10",
+        "pixeles": 1050,
+        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+      },
+      {
+        "mes": "2024-10",
+        "fecha": "2024-10-28",
+        "ndvi_medio": 0.18,
+        "nubes_escena": 4,
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2024-10-28",
+        "pixeles": 1050,
+        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+      },
       null,
-      { fecha: "2024-12-17", ndvi_medio: 0.38, nubes_escena: 4, fuente: "NASA HLS 30 m" },
+      {
+        "mes": "2024-12",
+        "fecha": "2024-12-17",
+        "ndvi_medio": 0.38,
+        "nubes_escena": 4,
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2024-12-17",
+        "pixeles": 1050,
+        "fuente": "NASA HLS S30 (Sentinel-2) · 30 m"
+      }
     ],
-    meses_ndvi_bajo: 6,
-    meses_con_dato: 11,
-    umbral: 0.3,
-    confianza: "alta",
-    motivo: "Noviembre sin escena con menos de 30 % de nubes",
+    "meses_ndvi_bajo": 6,
+    "meses_con_dato": 11,
+    "umbral": 0.3,
+    "confianza": "baja",
+    "motivo": "NDVI medio del lote < 0,3 en 6 de 11 meses con dato; faltan 1 meses (ver Información que falta); en los meses con MODIS el píxel de 250 m mezcla el lote con los vecinos",
+    "faltantes": [
+      {
+        "mes": "2024-11",
+        "motivo": "noviembre de 2024: sin escena HLS con < 30 % de nubes; MODIS de respaldo: sin compuesto con píxeles buenos"
+      }
+    ],
+    "orden_meses": "índice 0 = enero … 11 = diciembre; julio a diciembre del primer año de la campaña, enero a junio del segundo"
   },
-  indicadores: {
-    lluvia_anual: {
-      valor: 769,
-      unidad: "mm/año",
-      fuente: "NASA POWER mensual (comunidad AG)",
-      anios: "1996/97 a 2025/26",
-      resolucion: "~50 km (0,5° × 0,625°)",
-      confianza: "media",
-      motivo: null,
+  "indicadores": {
+    "lluvia_anual": {
+      "valor": 769,
+      "unidad": "mm/año",
+      "fuente": "NASA POWER mensual (comunidad AG)",
+      "anios": "1995/96–2024/25",
+      "resolucion": "~50 km (0,5° × 0,625°)",
+      "confianza": "media",
+      "motivo": null,
+      "nota": null
     },
-    et0_anual: {
-      valor: 1235,
-      unidad: "mm/año",
-      fuente: "Hargreaves (FAO-56) con temperaturas de NASA POWER",
-      anios: "1996/97 a 2025/26",
-      resolucion: "~50 km (0,5° × 0,625°)",
-      confianza: "media",
-      motivo: null,
+    "et0_anual": {
+      "valor": 1235,
+      "unidad": "mm/año",
+      "fuente": "Hargreaves (FAO-56) con temperaturas de NASA POWER",
+      "anios": "1995/96–2024/25",
+      "resolucion": "~50 km (0,5° × 0,625°)",
+      "confianza": "media",
+      "motivo": null,
+      "nota": null
     },
-    balance_anual: {
-      valor: -466,
-      unidad: "mm/año",
-      fuente: "NASA POWER − ET0 Hargreaves",
-      anios: "1996/97 a 2025/26",
-      resolucion: "~50 km (0,5° × 0,625°)",
-      confianza: "media",
-      motivo: null,
+    "balance_anual": {
+      "valor": -466,
+      "unidad": "mm/año",
+      "fuente": "NASA POWER − ET0 Hargreaves",
+      "anios": "1995/96–2024/25",
+      "resolucion": "~50 km (0,5° × 0,625°)",
+      "confianza": "media",
+      "motivo": null,
+      "nota": null
     },
-    et_real_anual: {
-      valor: null,
-      unidad: "mm/año",
-      fuente: "MODIS MOD16A3GF",
-      anios: null,
-      resolucion: "500 m",
-      confianza: "sin_dato",
-      motivo: "Pendiente de Back 2",
+    "et_real_anual": {
+      "valor": 690,
+      "unidad": "mm/año",
+      "fuente": "MODIS MOD16A3GF/MYD16A3GF v061 (Terra y Aqua) · NASA, vía Planetary Computer",
+      "anios": "2025",
+      "resolucion": "500 m",
+      "confianza": "media",
+      "motivo": null,
+      "nota": null
     },
+    "meses_cobertura_baja": {
+      "valor": 6,
+      "unidad": "meses",
+      "fuente": "NASA HLS 30 m (Landsat + Sentinel-2) y MODIS MOD13Q1 250 m de respaldo en 1 mes, vía Planetary Computer",
+      "anios": "2024/25",
+      "resolucion": "30 m (250 m en 1 de 12 meses)",
+      "confianza": "baja",
+      "motivo": null,
+      "nota": "NDVI medio del lote < 0,3 en 6 de 11 meses con dato"
+    }
   },
-  contraste_mediciones: [],
-  clima_celda: {
-    bbox: [-64.6875, -33.25, -64.0625, -32.75],
-    posicion_lote: "cerca del borde sur",
-    resolucion: "~50 km (0,5° × 0,625°)",
+  "contraste_mediciones": [],
+  "clima_celda": {
+    "bbox": [
+      -64.6875,
+      -33.25,
+      -64.0625,
+      -32.75
+    ],
+    "posicion_lote": "cerca del borde sur",
+    "resolucion": "~50 km (0,5° × 0,625°)"
   },
-  clima_mensual: {
-    lluvia_mm: [110, 100, 105, 60, 30, 12, 10, 12, 35, 80, 100, 115],
-    minima_media_c: [17, 16, 14, 10, 6, 3, 2, 4, 7, 10, 13, 16],
-    maxima_media_c: [31, 29, 27, 23, 19, 16, 16, 19, 21, 24, 27, 30],
-    et0_mm: [170, 135, 115, 80, 55, 40, 45, 65, 90, 120, 150, 170],
-    balance_mm: [-60, -35, -10, -20, -25, -28, -35, -53, -55, -40, -50, -55],
-    anios_con_helada: [0, 0, 0, 2, 12, 25, 27, 22, 9, 1, 0, 0],
-    anios_con_35c: [20, 9, 2, 0, 0, 0, 0, 0, 0, 1, 6, 18],
-    helada_frecuente: [false, false, false, false, true, true, true, true, false, false, false, false],
-    n_anios: 30,
-    periodo: "1996/97 a 2025/26",
-    fuente: "NASA POWER mensual (comunidad AG)",
-    resolucion: "~50 km (0,5° × 0,625°)",
+  "clima_mensual": {
+    "lluvia_mm": [
+      110,
+      100,
+      105,
+      60,
+      30,
+      12,
+      10,
+      12,
+      35,
+      80,
+      100,
+      115
+    ],
+    "minima_media_c": [
+      17,
+      16,
+      14,
+      10,
+      6,
+      3,
+      2,
+      4,
+      7,
+      10,
+      13,
+      16
+    ],
+    "maxima_media_c": [
+      31,
+      29,
+      27,
+      23,
+      19,
+      16,
+      16,
+      19,
+      21,
+      24,
+      27,
+      30
+    ],
+    "t_media_c": null,
+    "amplitud_diaria_c": null,
+    "et0_mm": [
+      170,
+      135,
+      115,
+      80,
+      55,
+      40,
+      45,
+      65,
+      90,
+      120,
+      150,
+      170
+    ],
+    "balance_mm": [
+      -60,
+      -35,
+      -10,
+      -20,
+      -25,
+      -28,
+      -35,
+      -53,
+      -55,
+      -40,
+      -50,
+      -55
+    ],
+    "anios_con_helada": [
+      0,
+      0,
+      0,
+      2,
+      12,
+      25,
+      27,
+      22,
+      9,
+      1,
+      0,
+      0
+    ],
+    "anios_con_35c": [
+      20,
+      9,
+      2,
+      0,
+      0,
+      0,
+      0,
+      0,
+      0,
+      1,
+      6,
+      18
+    ],
+    "helada_frecuente": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      false,
+      false,
+      false,
+      false
+    ],
+    "n_anios": 30,
+    "periodo": "1995/96–2024/25",
+    "fuente": "NASA POWER mensual (comunidad AG)",
+    "resolucion": "~50 km (0,5° × 0,625°)"
   },
-  tipos_de_anio: {
-    metodo: "terciles_balance",
-    seco: [
+  "tipos_de_anio": {
+    "metodo": "terciles_balance",
+    "seco": [
+      "1995/96",
+      "1998/99",
+      "2001/02",
+      "2004/05",
+      "2007/08",
+      "2010/11",
+      "2013/14",
+      "2016/17",
+      "2019/20",
+      "2022/23"
+    ],
+    "normal": [
       "1996/97",
+      "1999/00",
+      "2002/03",
       "2005/06",
       "2008/09",
       "2011/12",
-      "2017/18",
-      "2019/20",
-      "2020/21",
-      "2021/22",
-      "2022/23",
-      "2025/26",
-    ],
-    normal: [
-      "2000/01",
-      "2001/02",
-      "2002/03",
-      "2009/10",
-      "2010/11",
-      "2012/13",
-      "2013/14",
-      "2016/17",
-      "2018/19",
-      "2023/24",
-    ],
-    humedo: [
-      "1997/98",
-      "1998/99",
-      "1999/00",
-      "2003/04",
-      "2004/05",
-      "2006/07",
-      "2007/08",
       "2014/15",
+      "2017/18",
+      "2020/21",
+      "2023/24"
+    ],
+    "humedo": [
+      "1997/98",
+      "2000/01",
+      "2003/04",
+      "2006/07",
+      "2009/10",
+      "2012/13",
       "2015/16",
-      "2024/25",
+      "2018/19",
+      "2021/22",
+      "2024/25"
     ],
-    umbral_seco_mm: -730.6,
-    umbral_humedo_mm: -529.6,
+    "umbral_seco_mm": -420,
+    "umbral_humedo_mm": -240
   },
-  // Copia tal cual de `serie_anual` en `backend/app/demo/rio_cuarto.json` (datos reales de POWER).
-  serie_anual: {
-    fuente: "NASA POWER mensual (comunidad AG)",
-    resolucion: "~50 km (0,5° × 0,625°)",
-    periodo: "1996/97 a 2025/26",
-    campanas: [
-      { campana: "1996/97", lluvia_mm: 678, balance_mm: -794, tipo: "seco" },
-      { campana: "1997/98", lluvia_mm: 1156, balance_mm: -184, tipo: "humedo" },
-      { campana: "1998/99", lluvia_mm: 933, balance_mm: -459, tipo: "humedo" },
-      { campana: "1999/00", lluvia_mm: 1088, balance_mm: -272, tipo: "humedo" },
-      { campana: "2000/01", lluvia_mm: 850, balance_mm: -575, tipo: "normal" },
-      { campana: "2001/02", lluvia_mm: 734, balance_mm: -688, tipo: "normal" },
-      { campana: "2002/03", lluvia_mm: 814, balance_mm: -651, tipo: "normal" },
-      { campana: "2003/04", lluvia_mm: 1065, balance_mm: -433, tipo: "humedo" },
-      { campana: "2004/05", lluvia_mm: 898, balance_mm: -509, tipo: "humedo" },
-      { campana: "2005/06", lluvia_mm: 619, balance_mm: -852, tipo: "seco" },
-      { campana: "2006/07", lluvia_mm: 959, balance_mm: -447, tipo: "humedo" },
-      { campana: "2007/08", lluvia_mm: 894, balance_mm: -530, tipo: "humedo" },
-      { campana: "2008/09", lluvia_mm: 632, balance_mm: -879, tipo: "seco" },
-      { campana: "2009/10", lluvia_mm: 815, balance_mm: -660, tipo: "normal" },
-      { campana: "2010/11", lluvia_mm: 754, balance_mm: -687, tipo: "normal" },
-      { campana: "2011/12", lluvia_mm: 674, balance_mm: -835, tipo: "seco" },
-      { campana: "2012/13", lluvia_mm: 834, balance_mm: -605, tipo: "normal" },
-      { campana: "2013/14", lluvia_mm: 889, balance_mm: -546, tipo: "normal" },
-      { campana: "2014/15", lluvia_mm: 942, balance_mm: -487, tipo: "humedo" },
-      { campana: "2015/16", lluvia_mm: 1007, balance_mm: -319, tipo: "humedo" },
-      { campana: "2016/17", lluvia_mm: 747, balance_mm: -704, tipo: "normal" },
-      { campana: "2017/18", lluvia_mm: 651, balance_mm: -862, tipo: "seco" },
-      { campana: "2018/19", lluvia_mm: 902, balance_mm: -534, tipo: "normal" },
-      { campana: "2019/20", lluvia_mm: 621, balance_mm: -873, tipo: "seco" },
-      { campana: "2020/21", lluvia_mm: 732, balance_mm: -733, tipo: "seco" },
-      { campana: "2021/22", lluvia_mm: 546, balance_mm: -952, tipo: "seco" },
-      { campana: "2022/23", lluvia_mm: 803, balance_mm: -731, tipo: "seco" },
-      { campana: "2023/24", lluvia_mm: 795, balance_mm: -652, tipo: "normal" },
-      { campana: "2024/25", lluvia_mm: 939, balance_mm: -520, tipo: "humedo" },
-      { campana: "2025/26", lluvia_mm: 601, balance_mm: -879, tipo: "seco" },
+  "serie_anual": {
+    "fuente": "NASA POWER mensual (comunidad AG)",
+    "resolucion": "~50 km (0,5° × 0,625°)",
+    "periodo": "1995/96–2024/25",
+    "campanas": [
+      {
+        "campana": "1995/96",
+        "lluvia_mm": 615,
+        "balance_mm": -620,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            88,
+            80,
+            84,
+            48,
+            24,
+            9.6,
+            8,
+            9.6,
+            28,
+            64,
+            80,
+            92
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -82,
+            -55,
+            -31,
+            -32,
+            -31,
+            -30.4,
+            -37,
+            -55.4,
+            -62,
+            -56,
+            -70,
+            -78
+          ]
+        }
+      },
+      {
+        "campana": "1996/97",
+        "lluvia_mm": 769,
+        "balance_mm": -466,
+        "tipo": "normal",
+        "mensual": {
+          "lluvia_mm": [
+            110,
+            100,
+            105,
+            60,
+            30,
+            12,
+            10,
+            12,
+            35,
+            80,
+            100,
+            115
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -60,
+            -35,
+            -10,
+            -20,
+            -25,
+            -28,
+            -35,
+            -53,
+            -55,
+            -40,
+            -50,
+            -55
+          ]
+        }
+      },
+      {
+        "campana": "1997/98",
+        "lluvia_mm": 923,
+        "balance_mm": -312,
+        "tipo": "humedo",
+        "mensual": {
+          "lluvia_mm": [
+            132,
+            120,
+            126,
+            72,
+            36,
+            14.4,
+            12,
+            14.4,
+            42,
+            96,
+            120,
+            138
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -38,
+            -15,
+            11,
+            -8,
+            -19,
+            -25.6,
+            -33,
+            -50.6,
+            -48,
+            -24,
+            -30,
+            -32
+          ]
+        }
+      },
+      {
+        "campana": "1998/99",
+        "lluvia_mm": 615,
+        "balance_mm": -620,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            88,
+            80,
+            84,
+            48,
+            24,
+            9.6,
+            8,
+            9.6,
+            28,
+            64,
+            80,
+            92
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -82,
+            -55,
+            -31,
+            -32,
+            -31,
+            -30.4,
+            -37,
+            -55.4,
+            -62,
+            -56,
+            -70,
+            -78
+          ]
+        }
+      },
+      {
+        "campana": "1999/00",
+        "lluvia_mm": 769,
+        "balance_mm": -466,
+        "tipo": "normal",
+        "mensual": {
+          "lluvia_mm": [
+            110,
+            100,
+            105,
+            60,
+            30,
+            12,
+            10,
+            12,
+            35,
+            80,
+            100,
+            115
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -60,
+            -35,
+            -10,
+            -20,
+            -25,
+            -28,
+            -35,
+            -53,
+            -55,
+            -40,
+            -50,
+            -55
+          ]
+        }
+      },
+      {
+        "campana": "2000/01",
+        "lluvia_mm": 923,
+        "balance_mm": -312,
+        "tipo": "humedo",
+        "mensual": {
+          "lluvia_mm": [
+            132,
+            120,
+            126,
+            72,
+            36,
+            14.4,
+            12,
+            14.4,
+            42,
+            96,
+            120,
+            138
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -38,
+            -15,
+            11,
+            -8,
+            -19,
+            -25.6,
+            -33,
+            -50.6,
+            -48,
+            -24,
+            -30,
+            -32
+          ]
+        }
+      },
+      {
+        "campana": "2001/02",
+        "lluvia_mm": 615,
+        "balance_mm": -620,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            88,
+            80,
+            84,
+            48,
+            24,
+            9.6,
+            8,
+            9.6,
+            28,
+            64,
+            80,
+            92
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -82,
+            -55,
+            -31,
+            -32,
+            -31,
+            -30.4,
+            -37,
+            -55.4,
+            -62,
+            -56,
+            -70,
+            -78
+          ]
+        }
+      },
+      {
+        "campana": "2002/03",
+        "lluvia_mm": 769,
+        "balance_mm": -466,
+        "tipo": "normal",
+        "mensual": {
+          "lluvia_mm": [
+            110,
+            100,
+            105,
+            60,
+            30,
+            12,
+            10,
+            12,
+            35,
+            80,
+            100,
+            115
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -60,
+            -35,
+            -10,
+            -20,
+            -25,
+            -28,
+            -35,
+            -53,
+            -55,
+            -40,
+            -50,
+            -55
+          ]
+        }
+      },
+      {
+        "campana": "2003/04",
+        "lluvia_mm": 923,
+        "balance_mm": -312,
+        "tipo": "humedo",
+        "mensual": {
+          "lluvia_mm": [
+            132,
+            120,
+            126,
+            72,
+            36,
+            14.4,
+            12,
+            14.4,
+            42,
+            96,
+            120,
+            138
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -38,
+            -15,
+            11,
+            -8,
+            -19,
+            -25.6,
+            -33,
+            -50.6,
+            -48,
+            -24,
+            -30,
+            -32
+          ]
+        }
+      },
+      {
+        "campana": "2004/05",
+        "lluvia_mm": 615,
+        "balance_mm": -620,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            88,
+            80,
+            84,
+            48,
+            24,
+            9.6,
+            8,
+            9.6,
+            28,
+            64,
+            80,
+            92
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -82,
+            -55,
+            -31,
+            -32,
+            -31,
+            -30.4,
+            -37,
+            -55.4,
+            -62,
+            -56,
+            -70,
+            -78
+          ]
+        }
+      },
+      {
+        "campana": "2005/06",
+        "lluvia_mm": 769,
+        "balance_mm": -466,
+        "tipo": "normal",
+        "mensual": {
+          "lluvia_mm": [
+            110,
+            100,
+            105,
+            60,
+            30,
+            12,
+            10,
+            12,
+            35,
+            80,
+            100,
+            115
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -60,
+            -35,
+            -10,
+            -20,
+            -25,
+            -28,
+            -35,
+            -53,
+            -55,
+            -40,
+            -50,
+            -55
+          ]
+        }
+      },
+      {
+        "campana": "2006/07",
+        "lluvia_mm": 923,
+        "balance_mm": -312,
+        "tipo": "humedo",
+        "mensual": {
+          "lluvia_mm": [
+            132,
+            120,
+            126,
+            72,
+            36,
+            14.4,
+            12,
+            14.4,
+            42,
+            96,
+            120,
+            138
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -38,
+            -15,
+            11,
+            -8,
+            -19,
+            -25.6,
+            -33,
+            -50.6,
+            -48,
+            -24,
+            -30,
+            -32
+          ]
+        }
+      },
+      {
+        "campana": "2007/08",
+        "lluvia_mm": 615,
+        "balance_mm": -620,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            88,
+            80,
+            84,
+            48,
+            24,
+            9.6,
+            8,
+            9.6,
+            28,
+            64,
+            80,
+            92
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -82,
+            -55,
+            -31,
+            -32,
+            -31,
+            -30.4,
+            -37,
+            -55.4,
+            -62,
+            -56,
+            -70,
+            -78
+          ]
+        }
+      },
+      {
+        "campana": "2008/09",
+        "lluvia_mm": 769,
+        "balance_mm": -466,
+        "tipo": "normal",
+        "mensual": {
+          "lluvia_mm": [
+            110,
+            100,
+            105,
+            60,
+            30,
+            12,
+            10,
+            12,
+            35,
+            80,
+            100,
+            115
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -60,
+            -35,
+            -10,
+            -20,
+            -25,
+            -28,
+            -35,
+            -53,
+            -55,
+            -40,
+            -50,
+            -55
+          ]
+        }
+      },
+      {
+        "campana": "2009/10",
+        "lluvia_mm": 923,
+        "balance_mm": -312,
+        "tipo": "humedo",
+        "mensual": {
+          "lluvia_mm": [
+            132,
+            120,
+            126,
+            72,
+            36,
+            14.4,
+            12,
+            14.4,
+            42,
+            96,
+            120,
+            138
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -38,
+            -15,
+            11,
+            -8,
+            -19,
+            -25.6,
+            -33,
+            -50.6,
+            -48,
+            -24,
+            -30,
+            -32
+          ]
+        }
+      },
+      {
+        "campana": "2010/11",
+        "lluvia_mm": 615,
+        "balance_mm": -620,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            88,
+            80,
+            84,
+            48,
+            24,
+            9.6,
+            8,
+            9.6,
+            28,
+            64,
+            80,
+            92
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -82,
+            -55,
+            -31,
+            -32,
+            -31,
+            -30.4,
+            -37,
+            -55.4,
+            -62,
+            -56,
+            -70,
+            -78
+          ]
+        }
+      },
+      {
+        "campana": "2011/12",
+        "lluvia_mm": 769,
+        "balance_mm": -466,
+        "tipo": "normal",
+        "mensual": {
+          "lluvia_mm": [
+            110,
+            100,
+            105,
+            60,
+            30,
+            12,
+            10,
+            12,
+            35,
+            80,
+            100,
+            115
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -60,
+            -35,
+            -10,
+            -20,
+            -25,
+            -28,
+            -35,
+            -53,
+            -55,
+            -40,
+            -50,
+            -55
+          ]
+        }
+      },
+      {
+        "campana": "2012/13",
+        "lluvia_mm": 923,
+        "balance_mm": -312,
+        "tipo": "humedo",
+        "mensual": {
+          "lluvia_mm": [
+            132,
+            120,
+            126,
+            72,
+            36,
+            14.4,
+            12,
+            14.4,
+            42,
+            96,
+            120,
+            138
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -38,
+            -15,
+            11,
+            -8,
+            -19,
+            -25.6,
+            -33,
+            -50.6,
+            -48,
+            -24,
+            -30,
+            -32
+          ]
+        }
+      },
+      {
+        "campana": "2013/14",
+        "lluvia_mm": 615,
+        "balance_mm": -620,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            88,
+            80,
+            84,
+            48,
+            24,
+            9.6,
+            8,
+            9.6,
+            28,
+            64,
+            80,
+            92
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -82,
+            -55,
+            -31,
+            -32,
+            -31,
+            -30.4,
+            -37,
+            -55.4,
+            -62,
+            -56,
+            -70,
+            -78
+          ]
+        }
+      },
+      {
+        "campana": "2014/15",
+        "lluvia_mm": 769,
+        "balance_mm": -466,
+        "tipo": "normal",
+        "mensual": {
+          "lluvia_mm": [
+            110,
+            100,
+            105,
+            60,
+            30,
+            12,
+            10,
+            12,
+            35,
+            80,
+            100,
+            115
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -60,
+            -35,
+            -10,
+            -20,
+            -25,
+            -28,
+            -35,
+            -53,
+            -55,
+            -40,
+            -50,
+            -55
+          ]
+        }
+      },
+      {
+        "campana": "2015/16",
+        "lluvia_mm": 923,
+        "balance_mm": -312,
+        "tipo": "humedo",
+        "mensual": {
+          "lluvia_mm": [
+            132,
+            120,
+            126,
+            72,
+            36,
+            14.4,
+            12,
+            14.4,
+            42,
+            96,
+            120,
+            138
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -38,
+            -15,
+            11,
+            -8,
+            -19,
+            -25.6,
+            -33,
+            -50.6,
+            -48,
+            -24,
+            -30,
+            -32
+          ]
+        }
+      },
+      {
+        "campana": "2016/17",
+        "lluvia_mm": 615,
+        "balance_mm": -620,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            88,
+            80,
+            84,
+            48,
+            24,
+            9.6,
+            8,
+            9.6,
+            28,
+            64,
+            80,
+            92
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -82,
+            -55,
+            -31,
+            -32,
+            -31,
+            -30.4,
+            -37,
+            -55.4,
+            -62,
+            -56,
+            -70,
+            -78
+          ]
+        }
+      },
+      {
+        "campana": "2017/18",
+        "lluvia_mm": 769,
+        "balance_mm": -466,
+        "tipo": "normal",
+        "mensual": {
+          "lluvia_mm": [
+            110,
+            100,
+            105,
+            60,
+            30,
+            12,
+            10,
+            12,
+            35,
+            80,
+            100,
+            115
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -60,
+            -35,
+            -10,
+            -20,
+            -25,
+            -28,
+            -35,
+            -53,
+            -55,
+            -40,
+            -50,
+            -55
+          ]
+        }
+      },
+      {
+        "campana": "2018/19",
+        "lluvia_mm": 923,
+        "balance_mm": -312,
+        "tipo": "humedo",
+        "mensual": {
+          "lluvia_mm": [
+            132,
+            120,
+            126,
+            72,
+            36,
+            14.4,
+            12,
+            14.4,
+            42,
+            96,
+            120,
+            138
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -38,
+            -15,
+            11,
+            -8,
+            -19,
+            -25.6,
+            -33,
+            -50.6,
+            -48,
+            -24,
+            -30,
+            -32
+          ]
+        }
+      },
+      {
+        "campana": "2019/20",
+        "lluvia_mm": 615,
+        "balance_mm": -620,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            88,
+            80,
+            84,
+            48,
+            24,
+            9.6,
+            8,
+            9.6,
+            28,
+            64,
+            80,
+            92
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -82,
+            -55,
+            -31,
+            -32,
+            -31,
+            -30.4,
+            -37,
+            -55.4,
+            -62,
+            -56,
+            -70,
+            -78
+          ]
+        }
+      },
+      {
+        "campana": "2020/21",
+        "lluvia_mm": 769,
+        "balance_mm": -466,
+        "tipo": "normal",
+        "mensual": {
+          "lluvia_mm": [
+            110,
+            100,
+            105,
+            60,
+            30,
+            12,
+            10,
+            12,
+            35,
+            80,
+            100,
+            115
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -60,
+            -35,
+            -10,
+            -20,
+            -25,
+            -28,
+            -35,
+            -53,
+            -55,
+            -40,
+            -50,
+            -55
+          ]
+        }
+      },
+      {
+        "campana": "2021/22",
+        "lluvia_mm": 923,
+        "balance_mm": -312,
+        "tipo": "humedo",
+        "mensual": {
+          "lluvia_mm": [
+            132,
+            120,
+            126,
+            72,
+            36,
+            14.4,
+            12,
+            14.4,
+            42,
+            96,
+            120,
+            138
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -38,
+            -15,
+            11,
+            -8,
+            -19,
+            -25.6,
+            -33,
+            -50.6,
+            -48,
+            -24,
+            -30,
+            -32
+          ]
+        }
+      },
+      {
+        "campana": "2022/23",
+        "lluvia_mm": 615,
+        "balance_mm": -620,
+        "tipo": "seco",
+        "mensual": {
+          "lluvia_mm": [
+            88,
+            80,
+            84,
+            48,
+            24,
+            9.6,
+            8,
+            9.6,
+            28,
+            64,
+            80,
+            92
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -82,
+            -55,
+            -31,
+            -32,
+            -31,
+            -30.4,
+            -37,
+            -55.4,
+            -62,
+            -56,
+            -70,
+            -78
+          ]
+        }
+      },
+      {
+        "campana": "2023/24",
+        "lluvia_mm": 769,
+        "balance_mm": -466,
+        "tipo": "normal",
+        "mensual": {
+          "lluvia_mm": [
+            110,
+            100,
+            105,
+            60,
+            30,
+            12,
+            10,
+            12,
+            35,
+            80,
+            100,
+            115
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -60,
+            -35,
+            -10,
+            -20,
+            -25,
+            -28,
+            -35,
+            -53,
+            -55,
+            -40,
+            -50,
+            -55
+          ]
+        }
+      },
+      {
+        "campana": "2024/25",
+        "lluvia_mm": 923,
+        "balance_mm": -312,
+        "tipo": "humedo",
+        "mensual": {
+          "lluvia_mm": [
+            132,
+            120,
+            126,
+            72,
+            36,
+            14.4,
+            12,
+            14.4,
+            42,
+            96,
+            120,
+            138
+          ],
+          "t_min_c": [
+            17,
+            16,
+            14,
+            10,
+            6,
+            3,
+            2,
+            4,
+            7,
+            10,
+            13,
+            16
+          ],
+          "t_max_c": [
+            31,
+            29,
+            27,
+            23,
+            19,
+            16,
+            16,
+            19,
+            21,
+            24,
+            27,
+            30
+          ],
+          "et0_mm": [
+            170,
+            135,
+            115,
+            80,
+            55,
+            40,
+            45,
+            65,
+            90,
+            120,
+            150,
+            170
+          ],
+          "balance_mm": [
+            -38,
+            -15,
+            11,
+            -8,
+            -19,
+            -25.6,
+            -33,
+            -50.6,
+            -48,
+            -24,
+            -30,
+            -32
+          ]
+        }
+      }
     ],
-    ultimas_10_mm: 733.6,
-    previas_20_mm: 861.9,
-    secos_en_ultimas_10: 6,
+    "ultimas_10_mm": 784.4,
+    "previas_20_mm": 761.3,
+    "secos_en_ultimas_10": 3
   },
-  capas: {
-    erosion: null,
-    ndvi_mensual: [
-      { coleccion: "hls2-s30", item: "MOCK-2025-01-18", fecha: "2025-01-18" },
-      { coleccion: "hls2-s30", item: "MOCK-2025-02-12", fecha: "2025-02-12" },
-      { coleccion: "hls2-s30", item: "MOCK-2025-03-09", fecha: "2025-03-09" },
-      { coleccion: "hls2-s30", item: "MOCK-2025-04-15", fecha: "2025-04-15" },
-      { coleccion: "hls2-s30", item: "MOCK-2025-05-20", fecha: "2025-05-20" },
-      { coleccion: "hls2-s30", item: "MOCK-2025-06-14", fecha: "2025-06-14" },
-      { coleccion: "hls2-s30", item: "MOCK-2024-07-22", fecha: "2024-07-22" },
-      { coleccion: "hls2-s30", item: "MOCK-2024-08-16", fecha: "2024-08-16" },
-      { coleccion: "hls2-s30", item: "MOCK-2024-09-10", fecha: "2024-09-10" },
-      { coleccion: "hls2-s30", item: "MOCK-2024-10-28", fecha: "2024-10-28" },
+  "capas": {
+    "erosion": null,
+    "ndvi_mensual": [
+      {
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2025-01-18",
+        "fecha": "2025-01-18",
+        "mapa": null
+      },
+      {
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2025-02-12",
+        "fecha": "2025-02-12",
+        "mapa": null
+      },
+      {
+        "coleccion": "modis-13Q1-061",
+        "item": "MOCK-MOD13Q1-2025-03-09",
+        "fecha": "2025-03-09",
+        "mapa": null
+      },
+      {
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2025-04-15",
+        "fecha": "2025-04-15",
+        "mapa": null
+      },
+      {
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2025-05-20",
+        "fecha": "2025-05-20",
+        "mapa": null
+      },
+      {
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2025-06-14",
+        "fecha": "2025-06-14",
+        "mapa": null
+      },
+      {
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2024-07-22",
+        "fecha": "2024-07-22",
+        "mapa": null
+      },
+      {
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2024-08-16",
+        "fecha": "2024-08-16",
+        "mapa": null
+      },
+      {
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2024-09-10",
+        "fecha": "2024-09-10",
+        "mapa": null
+      },
+      {
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2024-10-28",
+        "fecha": "2024-10-28",
+        "mapa": null
+      },
       null,
-      { coleccion: "hls2-s30", item: "MOCK-2024-12-17", fecha: "2024-12-17" },
+      {
+        "coleccion": "hls2-s30",
+        "item": "MOCK-HLS-2024-12-17",
+        "fecha": "2024-12-17",
+        "mapa": null
+      }
     ],
-    agua_regional_mensual: null,
-    heladas_regional_mensual: null,
-    no_disponibles: [
+    "agua_regional_mensual": null,
+    "heladas_regional_mensual": null,
+    "no_disponibles": [
       "erosion",
       "agua_regional_mensual",
-      "heladas_regional_mensual",
+      "heladas_regional_mensual"
     ],
+    "grilla": {
+      "bounds": [
+        [
+          -33.25180555555556,
+          -64.23819444444445
+        ],
+        [
+          -33.24347222222222,
+          -64.22652777777778
+        ]
+      ],
+      "ancho": 42,
+      "alto": 30,
+      "paso": 0.0002777777777777778
+    },
+    "pendiente_mapa": {
+      "id": "pendiente",
+      "titulo": "Pendiente",
+      "unidad": "%",
+      "fuente": "NASADEM · NASA, vía Planetary Computer",
+      "fecha": "estática",
+      "campana": null,
+      "resolucion_nativa": "30 m",
+      "resolucion_grilla": "1″ (~30 m)",
+      "bounds": [
+        [
+          -33.25180555555556,
+          -64.23819444444445
+        ],
+        [
+          -33.24347222222222,
+          -64.22652777777778
+        ]
+      ],
+      "ancho": 42,
+      "alto": 30,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAAPUlEQVR42u3OAQ0AEBAAwH8xpBJDJDGkUoMUNra7BJd1tB2PW31miU+IioqKioqKioqKioqKioqKiorecgBRRgQ8V84fjQAAAABJRU5ErkJggg==",
+      "valores": "LgAwADIANAA2ADgAOQA6ADsAPAA8ADwAPAA7ADoAOQA4ADYANAAyADAALgAsACoAKAAmACQAIwAhACAAHwAfAB8AHwAfAB8AIAAiACMAJQAmAACALgAwADIANAA2ADgAOQA6ADsAPAA8ADwAPAA7ADsAOQA4ADcANQAzADEALwAtACsAKQAnACUAJAAiACEAIAAgACAAIAAgACEAIgAjACQAJgAoAACALgAwADIANAA2ADcAOQA6ADsAPAA8ADwAPAA7ADoAOQA4ADcANQAzADEALwAuACwAKgAoACYAJQAkACMAIgAhACEAIQAiACIAIwAkACYAJwApAACALgAwADIANAA1ADcAOAA5ADoAOwA7ADsAOwA7ADoAOQA4ADcANQA0ADIAMAAuACwAKwApACgAJgAlACQAIwAjACMAIwAjACQAJQAmACcAKQArAACALgAwADIAMwA1ADYAOAA5ADoAOgA7ADsAOwA6ADoAOQA4ADcANQA0ADIAMQAvAC0ALAAqACkAKAAnACYAJQAlACUAJQAlACYAJwAoACkAKwAsAACALgAwADEAMwA0ADYANwA4ADkAOQA6ADoAOgA6ADkAOAA3ADYANQA0ADIAMQAwAC4ALQAsACoAKQAoACgAJwAnACcAJwAnACgAKQAqACsALAAuAACALgAvADEAMgA0ADUANgA3ADgAOAA5ADkAOQA5ADgAOAA3ADYANQA0ADMAMgAwAC8ALgAtACwAKwAqACoAKQApACkAKQAqACoAKwAsAC0ALgAwAACALgAvADAAMgAzADQANQA2ADYANwA3ADcAOAA3ADcANwA2ADUANQA0ADMAMgAxADAALwAuAC4ALQAsACwALAAsACwALAAsAC0ALQAuAC8AMAAyAACALgAvADAAMQAyADMANAA0ADUANQA2ADYANgA2ADYANgA1ADUANAA0ADMAMwAyADEAMQAwAC8ALwAvAC4ALgAuAC4ALwAvAC8AMAAxADIAMwA0AACALQAuAC8AMAAxADIAMgAzADMANAA0ADUANQA1ADUANQA1ADQANAA0ADMAMwAzADIAMgAyADEAMQAxADEAMQAxADEAMQAyADIAMwAzADQANQA2AACALQAuAC8ALwAwADAAMQAxADIAMgAzADMAMwAzADMANAA0ADQANAA0ADQAMwAzADMAMwAzADMAMwAzADMANAA0ADQANAA1ADUANQA2ADYANwA4AACALQAuAC4ALgAvAC8AMAAwADAAMQAxADEAMgAyADIAMgAzADMAMwAzADQANAA0ADQANQA1ADUANQA2ADYANgA3ADcANwA3ADgAOAA5ADkAOQA6AACALQAtAC0ALgAuAC4ALgAuAC8ALwAvADAAMAAwADEAMQAyADIAMwAzADQANAA1ADUANgA3ADcAOAA4ADkAOQA5ADoAOgA6ADsAOwA7ADsAPAA8AACALQAtAC0ALQAtAC0ALQAtAC0ALQAuAC4ALgAvAC8AMAAxADIAMgAzADQANQA2ADcANwA4ADkAOgA6ADsAPAA8AD0APQA9AD4APgA+AD4APgA+AACALQAsACwALAAsACsAKwArACsALAAsACwALQAtAC4ALwAwADEAMgAzADQANQA2ADgAOQA6ADsAPAA9AD4APgA/AD8AQABAAEAAQABAAEAAQABAAACALQAsACwAKwArACoAKgAqACoAKgAqACsAKwAsAC0ALgAvADAAMgAzADQANgA3ADkAOgA7AD0APgA/AEAAQQBCAEIAQwBDAEMAQwBDAEMAQgBCAACALQAsACsAKgAqACkAKQApACkAKQApACkAKgArACwALQAuADAAMQAzADUANgA4ADoAOwA9AD4AQABBAEIAQwBEAEUARQBFAEYARQBFAEUARABEAACALQAsACsAKgApACgAKAAoACcAJwAoACgAKQAqACsALAAuAC8AMQAzADUANwA5ADsAPQA+AEAAQgBDAEQARgBGAEcASABIAEgASABIAEcARgBGAACALAArACoAKQAoACgAJwAnACYAJgAnACcAKAApACoALAAtAC8AMQAzADUANwA5ADwAPgBAAEIAQwBFAEYASABJAEkASgBKAEoASgBKAEkASABHAACALAArACoAKQAoACcAJgAmACYAJgAmACYAJwAoACoAKwAtAC8AMQAzADUAOAA6ADwAPwBBAEMARQBHAEgASgBLAEsATABMAEwATABMAEsASgBJAACALAArACoAKAAnACYAJgAlACUAJQAlACYAJwAoACkAKwAtAC8AMQAzADYAOAA7AD0AQABCAEQARgBIAEoASwBMAE0ATgBOAE4ATgBNAE0ATABLAACALAArACkAKAAnACYAJQAlACUAJQAlACUAJgAoACkAKwAtAC8AMQA0ADYAOQA7AD4AQQBDAEUASABKAEsATQBOAE8ATwBQAFAATwBPAE4ATQBMAACALAArACkAKAAnACYAJQAlACQAJAAlACUAJgAoACkAKwAtAC8AMQA0ADcAOQA8AD8AQgBEAEYASQBLAEwATgBPAFAAUQBRAFEAUQBQAFAATwBNAACALAArACkAKAAnACYAJQAlACQAJQAlACYAJwAoACkAKwAtAC8AMgA1ADcAOgA9AEAAQgBFAEcASgBMAE0ATwBQAFEAUgBSAFIAUgBRAFEAUABPAACALAArACkAKAAnACYAJgAlACUAJQAlACYAJwAoACoALAAuADAAMgA1ADgAOwA9AEAAQwBGAEgASgBMAE4AUABRAFIAUwBTAFMAUwBSAFIAUQBQAACALAArACoAKQAnACcAJgAmACUAJgAmACcAKAApACsALAAuADEAMwA2ADgAOwA+AEEAQwBGAEgASwBNAE8AUABRAFIAUwBUAFQAVABTAFMAUgBRAACALAArACoAKQAoACcAJwAmACYAJgAnACgAKQAqACwALQAvADIANAA3ADkAPAA/AEEARABGAEkASwBNAE8AUABSAFMAUwBUAFQAVABUAFMAUgBRAACALAArACoAKQApACgAKAAnACcAKAAoACkAKgArAC0ALgAwADMANQA3ADoAPQA/AEIARABHAEkASwBNAE8AUABSAFMAVABUAFQAVABUAFQAUwBSAACALQAsACsAKgApACkAKQApACkAKQApACoAKwAtAC4AMAAyADQANgA4ADsAPQBAAEIARQBHAEkASwBNAE8AUABSAFMAUwBUAFQAVABUAFQAUwBTAACALQAsACsAKwAqACoAKgAqACoAKgArACwALQAuADAAMQAzADUANwA5ADwAPgBAAEMARQBHAEkASwBNAE4AUABRAFIAUwBUAFQAVABUAFQAVABTAACA",
+      "factor": 0.01,
+      "nodata": -32768,
+      "escala": {
+        "cortes": [
+          0,
+          1,
+          2.5,
+          4,
+          6
+        ],
+        "colores": [
+          "#1A9850",
+          "#91CF60",
+          "#FEE08B",
+          "#FC8D59",
+          "#D73027"
+        ],
+        "etiquetas": [
+          "0–1 %",
+          "1–2,5 %",
+          "2,5–4 %",
+          "4–6 %",
+          "≥ 6 %"
+        ]
+      },
+      "resumen": {
+        "media": 0.535,
+        "min": 0.305,
+        "max": 0.843,
+        "pixeles": 1230,
+        "valor_lote": 0.6
+      },
+      "confianza": "media",
+      "nota": "Ejemplo ilustrativo del mock (no son datos de NASA): para probar el mapa en el front"
+    },
+    "cultivo_mapa": {
+      "id": "cultivo",
+      "titulo": "Cultivo (ESA WorldCover)",
+      "unidad": "clase",
+      "fuente": "ESA WorldCover 2021 v200",
+      "fecha": "2021",
+      "campana": null,
+      "resolucion_nativa": "10 m (moda a 30 m)",
+      "resolucion_grilla": "1″ (~30 m)",
+      "bounds": [
+        [
+          -33.25180555555556,
+          -64.23819444444445
+        ],
+        [
+          -33.24347222222222,
+          -64.22652777777778
+        ]
+      ],
+      "ancho": 42,
+      "alto": 30,
+      "png": "iVBORw0KGgoAAAANSUhEUgAAACoAAAAeCAYAAABaKIzgAAAAQklEQVR42u3OwQnAIBQFsGf38Ooshc789xI86BSFFpIJ0qpqJ8mYd76qP6td+QlRUVFRUVFRUVFRUVFRUVFRUdG3HEK6Bjx7x4UMAAAAAElFTkSuQmCC",
+      "valores": "AAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACAAAAAAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAAEAAQABAACA",
+      "factor": 1,
+      "nodata": -32768,
+      "escala": {
+        "cortes": [
+          0,
+          1
+        ],
+        "colores": [
+          "#BDBDBD",
+          "#E3B505"
+        ],
+        "etiquetas": [
+          "Otro uso",
+          "Cultivo (clase 40)"
+        ]
+      },
+      "resumen": {
+        "media": 0.951,
+        "min": 0,
+        "max": 1,
+        "pixeles": 1230,
+        "valor_lote": 95.1
+      },
+      "confianza": "alta",
+      "nota": "Ejemplo ilustrativo del mock (no son datos de NASA): para probar el mapa en el front"
+    },
+    "erosion_mapa": null
   },
-  estrategias: [
+  "estrategias": [
     {
-      id: "actual",
-      nombre: "Lo que hacés hoy",
-      especies: "Soja + barbecho",
-      disponible: true,
-      motivo_descarte: null,
-      calendario: [
+      "id": "actual",
+      "nombre": "Lo que hacés hoy",
+      "especies": "Soja + barbecho",
+      "disponible": true,
+      "motivo_descarte": null,
+      "calendario": [
         "soja",
         "soja",
         "soja",
@@ -241,135 +2971,216 @@ export const RIO_CUARTO: Salida = {
         "barbecho",
         "barbecho",
         "soja",
-        "soja",
+        "soja"
       ],
-      resumen: "Línea de base: 6 meses con el lote pelado.",
-      valores: {
-        agua_mm: -224,
-        meses_cobertura_baja: 6,
-        aporte_n: 5,
-        rastrojo: 5,
-        erosion: 48,
-        ingreso: 50,
-        conflictos_helada_calor: { meses_helada_frecuente: [4, 5, 6, 7], meses_conflicto_helada: [], meses_calor: [0, 11] },
+      "resumen": "Línea de base: 6 meses con el lote pelado.",
+      "valores": {
+        "agua_mm": -224,
+        "meses_cobertura_baja": 6,
+        "aporte_n": 5,
+        "rastrojo": 5,
+        "erosion": 48,
+        "ingreso": 50,
+        "conflictos_helada_calor": {
+          "meses_helada_frecuente": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "meses_conflicto_helada": [],
+          "meses_calor": [
+            0,
+            11
+          ]
+        }
       },
-      puntos: { agua: {seco: 21, normal: 53, humedo: 72}, suelo: 32, erosion: 48, ingreso: 50 },
-      valores_por_tipo_anio: {
-        seco: { agua_mm: -413, lluvia_mm: 569, uso_mm: 840, cercania: 38 },
-        normal: { agua_mm: -224, lluvia_mm: 769, uso_mm: 800, cercania: 46 },
-        humedo: { agua_mm: -34, lluvia_mm: 969, uso_mm: 760, cercania: 50 },
+      "puntos": {
+        "agua": {
+          "seco": 21,
+          "normal": 53,
+          "humedo": 72
+        },
+        "suelo": 32,
+        "erosion": 48,
+        "ingreso": 50
       },
-      diferencia_vs_actual: { agua: 0, suelo: 0, erosion: 0, ingreso: 0 },
-      cercania: 46,
-      cercania_objetivos: { agua: 53, suelo: 32, erosion: 48, ingreso: 50 },
-      que_le_falta: [],
-      sensible_clima: false,
-      reglas_aplicadas: [
+      "valores_por_tipo_anio": {
+        "seco": {
+          "agua_mm": -413,
+          "lluvia_mm": 569,
+          "uso_mm": 840,
+          "cercania": 38
+        },
+        "normal": {
+          "agua_mm": -224,
+          "lluvia_mm": 769,
+          "uso_mm": 800,
+          "cercania": 46
+        },
+        "humedo": {
+          "agua_mm": -34,
+          "lluvia_mm": 969,
+          "uso_mm": 760,
+          "cercania": 50
+        }
+      },
+      "diferencia_vs_actual": {
+        "agua": 0,
+        "suelo": 0,
+        "erosion": 0,
+        "ingreso": 0
+      },
+      "cercania": 46,
+      "cercania_objetivos": {
+        "agua": 53,
+        "suelo": 32,
+        "erosion": 48,
+        "ingreso": 50
+      },
+      "que_le_falta": [],
+      "sensible_clima": false,
+      "reglas_aplicadas": [
         {
-          regla: "agua",
-          efecto: { agua: 20.506515130214723 },
-          dato: "Años secos: lluvia 569 mm, uso estimado 840 mm (kc × ET0), balance −413 mm · NASA POWER, 10 campañas",
+          "regla": "agua",
+          "efecto": {
+            "agua": 20.506515130214723
+          },
+          "dato": "Años secos: lluvia 569 mm, uso estimado 840 mm (kc × ET0), balance −413 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "agua",
-          efecto: { agua: 53.202210663198954 },
-          dato: "Años normales: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance −224 mm · NASA POWER, 10 campañas",
+          "regla": "agua",
+          "efecto": {
+            "agua": 53.202210663198954
+          },
+          "dato": "Años normales: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance −224 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "agua",
-          efecto: { agua: 72.40444454765002 },
-          dato: "Años húmedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance −34 mm · NASA POWER, 10 campañas",
-        },
-        { regla: "suelo_base", efecto: {suelo: 20}, dato: "Base de la regla" },
-        {
-          regla: "nitrogeno",
-          efecto: { suelo: 5 },
-          dato: "Soja fija nitrógeno · tabla de cultivos",
+          "regla": "agua",
+          "efecto": {
+            "agua": 72.40444454765002
+          },
+          "dato": "Años húmedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance −34 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "rastrojo",
-          efecto: { suelo: 5 },
-          dato: "Soja deja rastrojo (5) · tabla de cultivos",
+          "regla": "suelo_base",
+          "efecto": {
+            "suelo": 20
+          },
+          "dato": "Base de la regla"
         },
         {
-          regla: "meses_cubiertos",
-          efecto: { suelo: 12 },
-          dato: "6 meses con cultivo vivo · calendario",
+          "regla": "nitrogeno",
+          "efecto": {
+            "suelo": 5
+          },
+          "dato": "Soja fija nitrógeno · tabla de cultivos"
         },
         {
-          regla: "repite_cultivo",
-          efecto: { suelo: -10 },
-          dato: "Repite soja de la campaña pasada",
-        },
-        { regla: "erosion_base", efecto: {erosion: 100}, dato: "Base de la regla" },
-        {
-          regla: "meses_pelados",
-          efecto: { erosion: -51.839999999999996 },
-          dato: "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM",
+          "regla": "rastrojo",
+          "efecto": {
+            "suelo": 5
+          },
+          "dato": "Soja deja rastrojo (5) · tabla de cultivos"
         },
         {
-          regla: "ingreso",
-          efecto: { ingreso: 50 },
-          dato: "Cultivos que se venden: Soja · sin precios",
+          "regla": "meses_cubiertos",
+          "efecto": {
+            "suelo": 12
+          },
+          "dato": "6 meses con cultivo vivo · calendario"
         },
+        {
+          "regla": "repite_cultivo",
+          "efecto": {
+            "suelo": -10
+          },
+          "dato": "Repite soja de la campaña pasada"
+        },
+        {
+          "regla": "erosion_base",
+          "efecto": {
+            "erosion": 100
+          },
+          "dato": "Base de la regla"
+        },
+        {
+          "regla": "meses_pelados",
+          "efecto": {
+            "erosion": -51.839999999999996
+          },
+          "dato": "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM"
+        },
+        {
+          "regla": "ingreso",
+          "efecto": {
+            "ingreso": 50
+          },
+          "dato": "Cultivos que se venden: Soja · sin precios"
+        }
       ],
-      probabilidades: [
+      "probabilidades": [
         {
-          evento: "helada",
-          mes: 10,
-          cultivo: "soja",
-          anios: 1,
-          de: 30,
-          pct: 3,
-          texto: "Helada en noviembre con soja en el lote: 1 de 30 años (3 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+          "evento": "helada",
+          "mes": 10,
+          "cultivo": "soja",
+          "anios": 1,
+          "de": 30,
+          "pct": 3,
+          "texto": "Helada en noviembre con soja en el lote: 1 de 30 años (3 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
         },
         {
-          evento: "siembra_seca",
-          mes: 10,
-          cultivo: "soja",
-          anios: 4,
-          de: 30,
-          pct: 13,
-          texto: "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+          "evento": "siembra_seca",
+          "mes": 10,
+          "cultivo": "soja",
+          "anios": 4,
+          "de": 30,
+          "pct": 13,
+          "texto": "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
         },
         {
-          evento: "calor",
-          mes: 0,
-          cultivo: "soja",
-          anios: 20,
-          de: 30,
-          pct: 67,
-          texto: "Máxima de 35 °C o más en enero con soja: 20 de 30 años (67 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
-        },
+          "evento": "calor",
+          "mes": 0,
+          "cultivo": "soja",
+          "anios": 20,
+          "de": 30,
+          "pct": 67,
+          "texto": "Máxima de 35 °C o más en enero con soja: 20 de 30 años (67 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
+        }
       ],
-      por_que: ["6 meses con el lote pelado"],
-      evidencia: [
+      "por_que": [
+        "6 meses con el lote pelado"
+      ],
+      "evidencia": [
         "Años húmedos: lluvia 969 mm, uso estimado 760 mm (kc × ET0), balance −34 mm · NASA POWER, 10 campañas",
         "Años normales: lluvia 769 mm, uso estimado 800 mm (kc × ET0), balance −224 mm · NASA POWER, 10 campañas",
         "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM",
-        "Cultivos que se venden: Soja · sin precios",
+        "Cultivos que se venden: Soja · sin precios"
       ],
-      beneficios: [],
-      vacios: [
+      "beneficios": [],
+      "vacios": [
         "Precios",
-        "Materia orgánica",
+        "Materia orgánica"
       ],
-      riesgos: [
+      "riesgos": [
         "Poca reserva de agua en años secos",
         "Repite el cultivo de la campaña pasada",
-        "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)",
-      ],
+        "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)"
+      ]
     },
     {
-      id: "A",
-      nombre: "Cobertura de invierno",
-      especies: "Soja + vicia",
-      disponible: true,
-      motivo_descarte: null,
-      calendario: [
+      "id": "A",
+      "nombre": "Cobertura de invierno",
+      "especies": "Soja + vicia",
+      "disponible": true,
+      "motivo_descarte": null,
+      "calendario": [
         "soja",
         "soja",
         "soja",
@@ -381,154 +3192,237 @@ export const RIO_CUARTO: Salida = {
         "vicia",
         "barbecho",
         "soja",
-        "soja",
+        "soja"
       ],
-      resumen: "Gana en suelo y erosión; pierde en agua; cuesta ~124 mm en años secos.",
-      valores: {
-        agua_mm: -342,
-        meses_cobertura_baja: 1,
-        aporte_n: 35,
-        rastrojo: 20,
-        erosion: 91,
-        ingreso: 45,
-        conflictos_helada_calor: { meses_helada_frecuente: [4, 5, 6, 7], meses_conflicto_helada: [], meses_calor: [0, 11] },
+      "resumen": "Gana en suelo y erosión; pierde en agua; cuesta ~124 mm en años secos.",
+      "valores": {
+        "agua_mm": -342,
+        "meses_cobertura_baja": 1,
+        "aporte_n": 35,
+        "rastrojo": 20,
+        "erosion": 91,
+        "ingreso": 45,
+        "conflictos_helada_calor": {
+          "meses_helada_frecuente": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "meses_conflicto_helada": [],
+          "meses_calor": [
+            0,
+            11
+          ]
+        }
       },
-      puntos: { agua: {seco: 4, normal: 42, humedo: 64}, suelo: 87, erosion: 91, ingreso: 45 },
-      valores_por_tipo_anio: {
-        seco: { agua_mm: -537, lluvia_mm: 569, uso_mm: 964, cercania: 57 },
-        normal: { agua_mm: -342, lluvia_mm: 769, uso_mm: 918, cercania: 66 },
-        humedo: { agua_mm: -146, lluvia_mm: 969, uso_mm: 872, cercania: 72 },
+      "puntos": {
+        "agua": {
+          "seco": 4,
+          "normal": 42,
+          "humedo": 64
+        },
+        "suelo": 87,
+        "erosion": 91,
+        "ingreso": 45
       },
-      diferencia_vs_actual: { agua: -11, suelo: 55, erosion: 43, ingreso: -5 },
-      cercania: 66,
-      cercania_objetivos: { agua: 42, suelo: 87, erosion: 91, ingreso: 45 },
-      que_le_falta: [],
-      sensible_clima: true,
-      reglas_aplicadas: [
+      "valores_por_tipo_anio": {
+        "seco": {
+          "agua_mm": -537,
+          "lluvia_mm": 569,
+          "uso_mm": 964,
+          "cercania": 57
+        },
+        "normal": {
+          "agua_mm": -342,
+          "lluvia_mm": 769,
+          "uso_mm": 918,
+          "cercania": 66
+        },
+        "humedo": {
+          "agua_mm": -146,
+          "lluvia_mm": 969,
+          "uso_mm": 872,
+          "cercania": 72
+        }
+      },
+      "diferencia_vs_actual": {
+        "agua": -11,
+        "suelo": 55,
+        "erosion": 43,
+        "ingreso": -5
+      },
+      "cercania": 66,
+      "cercania_objetivos": {
+        "agua": 42,
+        "suelo": 87,
+        "erosion": 91,
+        "ingreso": 45
+      },
+      "que_le_falta": [],
+      "sensible_clima": true,
+      "reglas_aplicadas": [
         {
-          regla: "agua",
-          efecto: { agua: 4.176954099743412 },
-          dato: "Años secos: lluvia 569 mm, uso estimado 964 mm (kc × ET0), balance −537 mm · NASA POWER, 10 campañas",
+          "regla": "agua",
+          "efecto": {
+            "agua": 4.176954099743412
+          },
+          "dato": "Años secos: lluvia 569 mm, uso estimado 964 mm (kc × ET0), balance −537 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "agua",
-          efecto: { agua: 41.69375812743823 },
-          dato: "Años normales: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance −342 mm · NASA POWER, 10 campañas",
+          "regla": "agua",
+          "efecto": {
+            "agua": 41.69375812743823
+          },
+          "dato": "Años normales: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance −342 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "agua",
-          efecto: { agua: 63.727436683385974 },
-          dato: "Años húmedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance −146 mm · NASA POWER, 10 campañas",
-        },
-        { regla: "suelo_base", efecto: {suelo: 20}, dato: "Base de la regla" },
-        {
-          regla: "nitrogeno",
-          efecto: { suelo: 5 },
-          dato: "Soja fija nitrógeno · tabla de cultivos",
+          "regla": "agua",
+          "efecto": {
+            "agua": 63.727436683385974
+          },
+          "dato": "Años húmedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance −146 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "rastrojo",
-          efecto: { suelo: 5 },
-          dato: "Soja deja rastrojo (5) · tabla de cultivos",
+          "regla": "suelo_base",
+          "efecto": {
+            "suelo": 20
+          },
+          "dato": "Base de la regla"
         },
         {
-          regla: "nitrogeno",
-          efecto: { suelo: 30 },
-          dato: "Vicia fija nitrógeno · tabla de cultivos",
+          "regla": "nitrogeno",
+          "efecto": {
+            "suelo": 5
+          },
+          "dato": "Soja fija nitrógeno · tabla de cultivos"
         },
         {
-          regla: "rastrojo",
-          efecto: { suelo: 15 },
-          dato: "Vicia deja rastrojo (15) · tabla de cultivos",
+          "regla": "rastrojo",
+          "efecto": {
+            "suelo": 5
+          },
+          "dato": "Soja deja rastrojo (5) · tabla de cultivos"
         },
         {
-          regla: "meses_cubiertos",
-          efecto: { suelo: 22 },
-          dato: "11 meses con cultivo vivo · calendario",
+          "regla": "nitrogeno",
+          "efecto": {
+            "suelo": 30
+          },
+          "dato": "Vicia fija nitrógeno · tabla de cultivos"
         },
         {
-          regla: "repite_cultivo",
-          efecto: { suelo: -10 },
-          dato: "Repite soja de la campaña pasada",
-        },
-        { regla: "erosion_base", efecto: {erosion: 100}, dato: "Base de la regla" },
-        {
-          regla: "meses_pelados",
-          efecto: { erosion: -8.64 },
-          dato: "1 meses pelados (oct) con pendiente 0.6 % · SRTM",
+          "regla": "rastrojo",
+          "efecto": {
+            "suelo": 15
+          },
+          "dato": "Vicia deja rastrojo (15) · tabla de cultivos"
         },
         {
-          regla: "ingreso",
-          efecto: { ingreso: 45 },
-          dato: "Cultivos que se venden: Soja · sin precios",
+          "regla": "meses_cubiertos",
+          "efecto": {
+            "suelo": 22
+          },
+          "dato": "11 meses con cultivo vivo · calendario"
         },
+        {
+          "regla": "repite_cultivo",
+          "efecto": {
+            "suelo": -10
+          },
+          "dato": "Repite soja de la campaña pasada"
+        },
+        {
+          "regla": "erosion_base",
+          "efecto": {
+            "erosion": 100
+          },
+          "dato": "Base de la regla"
+        },
+        {
+          "regla": "meses_pelados",
+          "efecto": {
+            "erosion": -8.64
+          },
+          "dato": "1 meses pelados (oct) con pendiente 0.6 % · SRTM"
+        },
+        {
+          "regla": "ingreso",
+          "efecto": {
+            "ingreso": 45
+          },
+          "dato": "Cultivos que se venden: Soja · sin precios"
+        }
       ],
-      probabilidades: [
+      "probabilidades": [
         {
-          evento: "siembra_seca",
-          mes: 4,
-          cultivo: "vicia",
-          anios: 14,
-          de: 30,
-          pct: 47,
-          texto: "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+          "evento": "siembra_seca",
+          "mes": 4,
+          "cultivo": "vicia",
+          "anios": 14,
+          "de": 30,
+          "pct": 47,
+          "texto": "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
         },
         {
-          evento: "siembra_seca",
-          mes: 10,
-          cultivo: "soja",
-          anios: 4,
-          de: 30,
-          pct: 13,
-          texto: "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+          "evento": "siembra_seca",
+          "mes": 10,
+          "cultivo": "soja",
+          "anios": 4,
+          "de": 30,
+          "pct": 13,
+          "texto": "Siembra de soja (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
         },
         {
-          evento: "calor",
-          mes: 0,
-          cultivo: "soja",
-          anios: 20,
-          de: 30,
-          pct: 67,
-          texto: "Máxima de 35 °C o más en enero con soja: 20 de 30 años (67 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
-        },
+          "evento": "calor",
+          "mes": 0,
+          "cultivo": "soja",
+          "anios": 20,
+          "de": 30,
+          "pct": 67,
+          "texto": "Máxima de 35 °C o más en enero con soja: 20 de 30 años (67 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
+        }
       ],
-      por_que: [
+      "por_que": [
         "Cubre el suelo 11 meses",
-        "La vicia fija nitrógeno",
+        "La vicia fija nitrógeno"
       ],
-      evidencia: [
+      "evidencia": [
         "Años húmedos: lluvia 969 mm, uso estimado 872 mm (kc × ET0), balance −146 mm · NASA POWER, 10 campañas",
         "Cultivos que se venden: Soja · sin precios",
         "Años normales: lluvia 769 mm, uso estimado 918 mm (kc × ET0), balance −342 mm · NASA POWER, 10 campañas",
-        "Vicia fija nitrógeno · tabla de cultivos",
+        "Vicia fija nitrógeno · tabla de cultivos"
       ],
-      beneficios: [
+      "beneficios": [
         "5 meses más de cobertura que hoy",
         "Suelo: +55 puntos frente a hoy",
-        "Erosión: +43 puntos frente a hoy",
+        "Erosión: +43 puntos frente a hoy"
       ],
-      vacios: [
+      "vacios": [
         "Precios",
-        "Materia orgánica",
+        "Materia orgánica"
       ],
-      riesgos: [
+      "riesgos": [
         "Poca reserva de agua en años secos",
         "Repite el cultivo de la campaña pasada",
         "Secado ~30 días antes de la siembra",
         "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)",
-        "El resultado cambia mucho entre años secos y húmedos: sensible al clima",
-      ],
+        "El resultado cambia mucho entre años secos y húmedos: sensible al clima"
+      ]
     },
     {
-      id: "B",
-      nombre: "Cultivo de invierno",
-      especies: "Trigo + soja 2ª",
-      disponible: true,
-      motivo_descarte: null,
-      calendario: [
+      "id": "B",
+      "nombre": "Cultivo de invierno",
+      "especies": "Trigo + soja 2ª",
+      "disponible": true,
+      "motivo_descarte": null,
+      "calendario": [
         "soja2",
         "soja2",
         "soja2",
@@ -540,145 +3434,228 @@ export const RIO_CUARTO: Salida = {
         "trigo",
         "trigo",
         "trigo",
-        "soja2",
+        "soja2"
       ],
-      resumen: "Gana en suelo, erosión y ingreso; cuesta ~53 mm en años secos.",
-      valores: {
-        agua_mm: -274,
-        meses_cobertura_baja: 1,
-        aporte_n: 5,
-        rastrojo: 25,
-        erosion: 91,
-        ingreso: 85,
-        conflictos_helada_calor: { meses_helada_frecuente: [4, 5, 6, 7], meses_conflicto_helada: [], meses_calor: [0, 11] },
+      "resumen": "Gana en suelo, erosión y ingreso; cuesta ~53 mm en años secos.",
+      "valores": {
+        "agua_mm": -274,
+        "meses_cobertura_baja": 1,
+        "aporte_n": 5,
+        "rastrojo": 25,
+        "erosion": 91,
+        "ingreso": 85,
+        "conflictos_helada_calor": {
+          "meses_helada_frecuente": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "meses_conflicto_helada": [],
+          "meses_calor": [
+            0,
+            11
+          ]
+        }
       },
-      puntos: { agua: {seco: 14, normal: 48, humedo: 69}, suelo: 62, erosion: 91, ingreso: 85 },
-      valores_por_tipo_anio: {
-        seco: { agua_mm: -466, lluvia_mm: 569, uso_mm: 893, cercania: 63 },
-        normal: { agua_mm: -274, lluvia_mm: 769, uso_mm: 850, cercania: 72 },
-        humedo: { agua_mm: -81, lluvia_mm: 969, uso_mm: 808, cercania: 77 },
+      "puntos": {
+        "agua": {
+          "seco": 14,
+          "normal": 48,
+          "humedo": 69
+        },
+        "suelo": 62,
+        "erosion": 91,
+        "ingreso": 85
       },
-      diferencia_vs_actual: { agua: -5, suelo: 30, erosion: 43, ingreso: 35 },
-      cercania: 72,
-      cercania_objetivos: { agua: 48, suelo: 62, erosion: 91, ingreso: 85 },
-      que_le_falta: [],
-      sensible_clima: false,
-      reglas_aplicadas: [
+      "valores_por_tipo_anio": {
+        "seco": {
+          "agua_mm": -466,
+          "lluvia_mm": 569,
+          "uso_mm": 893,
+          "cercania": 63
+        },
+        "normal": {
+          "agua_mm": -274,
+          "lluvia_mm": 769,
+          "uso_mm": 850,
+          "cercania": 72
+        },
+        "humedo": {
+          "agua_mm": -81,
+          "lluvia_mm": 969,
+          "uso_mm": 808,
+          "cercania": 77
+        }
+      },
+      "diferencia_vs_actual": {
+        "agua": -5,
+        "suelo": 30,
+        "erosion": 43,
+        "ingreso": 35
+      },
+      "cercania": 72,
+      "cercania_objetivos": {
+        "agua": 48,
+        "suelo": 62,
+        "erosion": 91,
+        "ingreso": 85
+      },
+      "que_le_falta": [],
+      "sensible_clima": false,
+      "reglas_aplicadas": [
         {
-          regla: "agua",
-          efecto: { agua: 13.587209608828573 },
-          dato: "Años secos: lluvia 569 mm, uso estimado 893 mm (kc × ET0), balance −466 mm · NASA POWER, 10 campañas",
+          "regla": "agua",
+          "efecto": {
+            "agua": 13.587209608828573
+          },
+          "dato": "Años secos: lluvia 569 mm, uso estimado 893 mm (kc × ET0), balance −466 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "agua",
-          efecto: { agua: 48.325747724317296 },
-          dato: "Años normales: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance −274 mm · NASA POWER, 10 campañas",
+          "regla": "agua",
+          "efecto": {
+            "agua": 48.325747724317296
+          },
+          "dato": "Años normales: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance −274 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "agua",
-          efecto: { agua: 68.7277463000805 },
-          dato: "Años húmedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance −81 mm · NASA POWER, 10 campañas",
-        },
-        { regla: "suelo_base", efecto: {suelo: 20}, dato: "Base de la regla" },
-        {
-          regla: "nitrogeno",
-          efecto: { suelo: 5 },
-          dato: "Soja 2ª fija nitrógeno · tabla de cultivos",
+          "regla": "agua",
+          "efecto": {
+            "agua": 68.7277463000805
+          },
+          "dato": "Años húmedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance −81 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "rastrojo",
-          efecto: { suelo: 5 },
-          dato: "Soja 2ª deja rastrojo (5) · tabla de cultivos",
+          "regla": "suelo_base",
+          "efecto": {
+            "suelo": 20
+          },
+          "dato": "Base de la regla"
         },
         {
-          regla: "rastrojo",
-          efecto: { suelo: 20 },
-          dato: "Trigo deja rastrojo (20) · tabla de cultivos",
+          "regla": "nitrogeno",
+          "efecto": {
+            "suelo": 5
+          },
+          "dato": "Soja 2ª fija nitrógeno · tabla de cultivos"
         },
         {
-          regla: "meses_cubiertos",
-          efecto: { suelo: 22 },
-          dato: "11 meses con cultivo vivo · calendario",
+          "regla": "rastrojo",
+          "efecto": {
+            "suelo": 5
+          },
+          "dato": "Soja 2ª deja rastrojo (5) · tabla de cultivos"
         },
         {
-          regla: "repite_cultivo",
-          efecto: { suelo: -10 },
-          dato: "Repite soja de la campaña pasada",
-        },
-        { regla: "erosion_base", efecto: {erosion: 100}, dato: "Base de la regla" },
-        {
-          regla: "meses_pelados",
-          efecto: { erosion: -8.64 },
-          dato: "1 meses pelados (may) con pendiente 0.6 % · SRTM",
+          "regla": "rastrojo",
+          "efecto": {
+            "suelo": 20
+          },
+          "dato": "Trigo deja rastrojo (20) · tabla de cultivos"
         },
         {
-          regla: "ingreso",
-          efecto: { ingreso: 85 },
-          dato: "Cultivos que se venden: Soja 2ª, Trigo · sin precios",
+          "regla": "meses_cubiertos",
+          "efecto": {
+            "suelo": 22
+          },
+          "dato": "11 meses con cultivo vivo · calendario"
         },
+        {
+          "regla": "repite_cultivo",
+          "efecto": {
+            "suelo": -10
+          },
+          "dato": "Repite soja de la campaña pasada"
+        },
+        {
+          "regla": "erosion_base",
+          "efecto": {
+            "erosion": 100
+          },
+          "dato": "Base de la regla"
+        },
+        {
+          "regla": "meses_pelados",
+          "efecto": {
+            "erosion": -8.64
+          },
+          "dato": "1 meses pelados (may) con pendiente 0.6 % · SRTM"
+        },
+        {
+          "regla": "ingreso",
+          "efecto": {
+            "ingreso": 85
+          },
+          "dato": "Cultivos que se venden: Soja 2ª, Trigo · sin precios"
+        }
       ],
-      probabilidades: [
+      "probabilidades": [
         {
-          evento: "siembra_seca",
-          mes: 5,
-          cultivo: "trigo",
-          anios: 13,
-          de: 30,
-          pct: 43,
-          texto: "Siembra de trigo (junio) con menos de la mitad de la lluvia normal: 13 de 30 años (43 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+          "evento": "siembra_seca",
+          "mes": 5,
+          "cultivo": "trigo",
+          "anios": 13,
+          "de": 30,
+          "pct": 43,
+          "texto": "Siembra de trigo (junio) con menos de la mitad de la lluvia normal: 13 de 30 años (43 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
         },
         {
-          evento: "siembra_seca",
-          mes: 11,
-          cultivo: "soja2",
-          anios: 3,
-          de: 30,
-          pct: 10,
-          texto: "Siembra de soja 2ª (diciembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+          "evento": "siembra_seca",
+          "mes": 11,
+          "cultivo": "soja2",
+          "anios": 3,
+          "de": 30,
+          "pct": 10,
+          "texto": "Siembra de soja 2ª (diciembre) con menos de la mitad de la lluvia normal: 3 de 30 años (10 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
         },
         {
-          evento: "calor",
-          mes: 0,
-          cultivo: "soja2",
-          anios: 20,
-          de: 30,
-          pct: 67,
-          texto: "Máxima de 35 °C o más en enero con soja 2ª: 20 de 30 años (67 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
-        },
+          "evento": "calor",
+          "mes": 0,
+          "cultivo": "soja2",
+          "anios": 20,
+          "de": 30,
+          "pct": 67,
+          "texto": "Máxima de 35 °C o más en enero con soja 2ª: 20 de 30 años (67 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
+        }
       ],
-      por_que: ["Suma un cultivo que se vende en invierno"],
-      evidencia: [
+      "por_que": [
+        "Suma un cultivo que se vende en invierno"
+      ],
+      "evidencia": [
         "Cultivos que se venden: Soja 2ª, Trigo · sin precios",
         "Años húmedos: lluvia 969 mm, uso estimado 808 mm (kc × ET0), balance −81 mm · NASA POWER, 10 campañas",
         "Años normales: lluvia 769 mm, uso estimado 850 mm (kc × ET0), balance −274 mm · NASA POWER, 10 campañas",
-        "11 meses con cultivo vivo · calendario",
+        "11 meses con cultivo vivo · calendario"
       ],
-      beneficios: [
+      "beneficios": [
         "5 meses más de cobertura que hoy",
         "Suelo: +30 puntos frente a hoy",
         "Erosión: +43 puntos frente a hoy",
-        "Ingreso: +35 puntos frente a hoy",
+        "Ingreso: +35 puntos frente a hoy"
       ],
-      vacios: [
+      "vacios": [
         "Precios",
-        "Materia orgánica",
+        "Materia orgánica"
       ],
-      riesgos: [
+      "riesgos": [
         "Poca reserva de agua en años secos",
         "Repite el cultivo de la campaña pasada",
-        "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)",
-      ],
+        "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)"
+      ]
     },
     {
-      id: "C",
-      nombre: "Diversificar el verano",
-      especies: "Sorgo, rota con soja",
-      disponible: true,
-      motivo_descarte: null,
-      calendario: [
+      "id": "C",
+      "nombre": "Diversificar el verano",
+      "especies": "Sorgo, rota con soja",
+      "disponible": true,
+      "motivo_descarte": null,
+      "calendario": [
         "sorgo",
         "sorgo",
         "sorgo",
@@ -690,127 +3667,207 @@ export const RIO_CUARTO: Salida = {
         "barbecho",
         "barbecho",
         "sorgo",
-        "sorgo",
+        "sorgo"
       ],
-      resumen: "Gana en agua, suelo y erosión.",
-      valores: {
-        agua_mm: -18,
-        meses_cobertura_baja: 6,
-        aporte_n: 0,
-        rastrojo: 30,
-        erosion: 68,
-        ingreso: 50,
-        conflictos_helada_calor: { meses_helada_frecuente: [4, 5, 6, 7], meses_conflicto_helada: [], meses_calor: [0, 11] },
+      "resumen": "Gana en agua, suelo y erosión.",
+      "valores": {
+        "agua_mm": -18,
+        "meses_cobertura_baja": 6,
+        "aporte_n": 0,
+        "rastrojo": 30,
+        "erosion": 68,
+        "ingreso": 50,
+        "conflictos_helada_calor": {
+          "meses_helada_frecuente": [
+            4,
+            5,
+            6,
+            7
+          ],
+          "meses_conflicto_helada": [],
+          "meses_calor": [
+            0,
+            11
+          ]
+        }
       },
-      puntos: { agua: {seco: 49, normal: 73, humedo: 87}, suelo: 62, erosion: 68, ingreso: 50 },
-      valores_por_tipo_anio: {
-        seco: { agua_mm: -198, lluvia_mm: 569, uso_mm: 625, cercania: 57 },
-        normal: { agua_mm: -18, lluvia_mm: 769, uso_mm: 595, cercania: 63 },
-        humedo: { agua_mm: 161, lluvia_mm: 969, uso_mm: 565, cercania: 67 },
+      "puntos": {
+        "agua": {
+          "seco": 49,
+          "normal": 73,
+          "humedo": 87
+        },
+        "suelo": 62,
+        "erosion": 68,
+        "ingreso": 50
       },
-      diferencia_vs_actual: { agua: 20, suelo: 30, erosion: 20, ingreso: 0 },
-      cercania: 63,
-      cercania_objetivos: { agua: 73, suelo: 62, erosion: 68, ingreso: 50 },
-      que_le_falta: [],
-      sensible_clima: false,
-      reglas_aplicadas: [
+      "valores_por_tipo_anio": {
+        "seco": {
+          "agua_mm": -198,
+          "lluvia_mm": 569,
+          "uso_mm": 625,
+          "cercania": 57
+        },
+        "normal": {
+          "agua_mm": -18,
+          "lluvia_mm": 769,
+          "uso_mm": 595,
+          "cercania": 63
+        },
+        "humedo": {
+          "agua_mm": 161,
+          "lluvia_mm": 969,
+          "uso_mm": 565,
+          "cercania": 67
+        }
+      },
+      "diferencia_vs_actual": {
+        "agua": 20,
+        "suelo": 30,
+        "erosion": 20,
+        "ingreso": 0
+      },
+      "cercania": 63,
+      "cercania_objetivos": {
+        "agua": 73,
+        "suelo": 62,
+        "erosion": 68,
+        "ingreso": 50
+      },
+      "que_le_falta": [],
+      "sensible_clima": false,
+      "reglas_aplicadas": [
         {
-          regla: "agua",
-          efecto: { agua: 48.87566776789792 },
-          dato: "Años secos: lluvia 569 mm, uso estimado 625 mm (kc × ET0), balance −198 mm · NASA POWER, 10 campañas",
+          "regla": "agua",
+          "efecto": {
+            "agua": 48.87566776789792
+          },
+          "dato": "Años secos: lluvia 569 mm, uso estimado 625 mm (kc × ET0), balance −198 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "agua",
-          efecto: { agua: 73.19570871261378 },
-          dato: "Años normales: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance −18 mm · NASA POWER, 10 campañas",
+          "regla": "agua",
+          "efecto": {
+            "agua": 73.19570871261378
+          },
+          "dato": "Años normales: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance −18 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "agua",
-          efecto: { agua: 87.478907362685 },
-          dato: "Años húmedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas",
-        },
-        { regla: "suelo_base", efecto: {suelo: 20}, dato: "Base de la regla" },
-        {
-          regla: "rastrojo",
-          efecto: { suelo: 30 },
-          dato: "Sorgo deja rastrojo (30) · tabla de cultivos",
+          "regla": "agua",
+          "efecto": {
+            "agua": 87.478907362685
+          },
+          "dato": "Años húmedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas"
         },
         {
-          regla: "meses_cubiertos",
-          efecto: { suelo: 12 },
-          dato: "6 meses con cultivo vivo · calendario",
-        },
-        { regla: "erosion_base", efecto: {erosion: 100}, dato: "Base de la regla" },
-        {
-          regla: "meses_pelados",
-          efecto: { erosion: -51.839999999999996 },
-          dato: "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM",
+          "regla": "suelo_base",
+          "efecto": {
+            "suelo": 20
+          },
+          "dato": "Base de la regla"
         },
         {
-          regla: "rastrojo_protege",
-          efecto: { erosion: 20 },
-          dato: "Rastrojo total 30 (≥ 30) · tabla de cultivos",
+          "regla": "rastrojo",
+          "efecto": {
+            "suelo": 30
+          },
+          "dato": "Sorgo deja rastrojo (30) · tabla de cultivos"
         },
         {
-          regla: "ingreso",
-          efecto: { ingreso: 50 },
-          dato: "Cultivos que se venden: Sorgo · sin precios",
+          "regla": "meses_cubiertos",
+          "efecto": {
+            "suelo": 12
+          },
+          "dato": "6 meses con cultivo vivo · calendario"
         },
+        {
+          "regla": "erosion_base",
+          "efecto": {
+            "erosion": 100
+          },
+          "dato": "Base de la regla"
+        },
+        {
+          "regla": "meses_pelados",
+          "efecto": {
+            "erosion": -51.839999999999996
+          },
+          "dato": "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM"
+        },
+        {
+          "regla": "rastrojo_protege",
+          "efecto": {
+            "erosion": 20
+          },
+          "dato": "Rastrojo total 30 (≥ 30) · tabla de cultivos"
+        },
+        {
+          "regla": "ingreso",
+          "efecto": {
+            "ingreso": 50
+          },
+          "dato": "Cultivos que se venden: Sorgo · sin precios"
+        }
       ],
-      probabilidades: [
+      "probabilidades": [
         {
-          evento: "siembra_seca",
-          mes: 10,
-          cultivo: "sorgo",
-          anios: 4,
-          de: 30,
-          pct: 13,
-          texto: "Siembra de sorgo (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
+          "evento": "siembra_seca",
+          "mes": 10,
+          "cultivo": "sorgo",
+          "anios": 4,
+          "de": 30,
+          "pct": 13,
+          "texto": "Siembra de sorgo (noviembre) con menos de la mitad de la lluvia normal: 4 de 30 años (13 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
         },
         {
-          evento: "calor",
-          mes: 0,
-          cultivo: "sorgo",
-          anios: 20,
-          de: 30,
-          pct: 67,
-          texto: "Máxima de 35 °C o más en enero con sorgo: 20 de 30 años (67 %)",
-          fuente: "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1996/97 a 2025/26",
-        },
+          "evento": "calor",
+          "mes": 0,
+          "cultivo": "sorgo",
+          "anios": 20,
+          "de": 30,
+          "pct": 67,
+          "texto": "Máxima de 35 °C o más en enero con sorgo: 20 de 30 años (67 %)",
+          "fuente": "NASA POWER mensual (comunidad AG) · ~50 km (0,5° × 0,625°) · 1995/96–2024/25",
+          "contraste": null
+        }
       ],
-      por_que: ["Sorgo corta el ciclo de plagas y tolera la sequía"],
-      evidencia: [
+      "por_que": [
+        "Sorgo corta el ciclo de plagas y tolera la sequía"
+      ],
+      "evidencia": [
         "Años húmedos: lluvia 969 mm, uso estimado 565 mm (kc × ET0), balance +161 mm · NASA POWER, 10 campañas",
         "Años normales: lluvia 769 mm, uso estimado 595 mm (kc × ET0), balance −18 mm · NASA POWER, 10 campañas",
         "6 meses pelados (may, jun, jul, ago, sep, oct) con pendiente 0.6 % · SRTM",
-        "Cultivos que se venden: Sorgo · sin precios",
+        "Cultivos que se venden: Sorgo · sin precios"
       ],
-      beneficios: [
+      "beneficios": [
         "+215 mm de balance de agua en años secos",
         "Agua: +20 puntos frente a hoy",
         "Suelo: +30 puntos frente a hoy",
-        "Erosión: +20 puntos frente a hoy",
+        "Erosión: +20 puntos frente a hoy"
       ],
-      vacios: [
+      "vacios": [
         "Precios",
-        "Materia orgánica",
+        "Materia orgánica"
       ],
-      riesgos: ["Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene,  dic)"],
-    },
+      "riesgos": [
+        "Cultivo de verano en meses con calor ≥ 35 °C en la mitad de los años (ene, dic)"
+      ]
+    }
   ],
-  choque: {
-    hay: false,
-    objetivos: [],
-    texto: "",
+  "choque": {
+    "hay": false,
+    "objetivos": [],
+    "texto": ""
   },
-  periodo_clima: "1996/97 a 2025/26",
-  informacion_falta: [
+  "periodo_clima": "1995/96–2024/25",
+  "informacion_falta": [
     "Respuesta de prueba (mock): valores ilustrativos, no son datos de NASA",
-    "ET real de MODIS",
+    "NDVI de noviembre de 2024: sin escena HLS limpia ni compuesto MODIS",
     "Capa de erosión",
-    "Serie por campaña",
+    "Serie por campaña"
   ],
-  aviso: "Herramienta de apoyo: no reemplaza el criterio del productor ni del agrónomo.",
-  es_mock: true,
+  "aviso": "Herramienta de apoyo: no reemplaza el criterio del productor ni del agrónomo.",
+  "es_mock": true
 };

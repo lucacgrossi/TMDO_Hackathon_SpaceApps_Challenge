@@ -10,14 +10,9 @@ const ESCALA_NDVI = {
   etiquetas: ["<0,15", "0,15", "0,3", "0,45", "0,6", "≥0,75"],
 };
 
-/** Visto por satélite con marzo en MODIS y noviembre sin escena (como el lote demo del back). */
-const VISTO: VistoPorSatelite = {
-  ...RIO_CUARTO.visto_por_satelite,
-  meses: RIO_CUARTO.visto_por_satelite.meses.map((m, i) =>
-    i === 2 && m ? { ...m, coleccion: "modis-13Q1-061", fuente: "MODIS 250 m", nubes_escena: null } : m,
-  ),
-  faltantes: [{ mes: "2024-11", motivo: "Ninguna escena HLS con menos de 30 % de nubes" }],
-};
+/** El mock trae marzo en MODIS y noviembre sin escena, con su motivo en `faltantes`. */
+const VISTO: VistoPorSatelite = RIO_CUARTO.visto_por_satelite;
+const MOTIVO_NOV = VISTO.faltantes![0].motivo;
 
 /** Capas con raster solo en julio (6), para probar el color y `conRaster`. */
 const CAPAS: Capas = {
@@ -47,12 +42,12 @@ describe("línea de tiempo del NDVI", () => {
   it("el mes sin escena queda sin dato, con el motivo y alto 0", () => {
     const nov = lineaTiempo(VISTO).find((m) => m.mes === 10)!;
     expect(nov).toMatchObject({ ndvi: null, alto: 0, bajo: null, color: null, modis: false });
-    expect(nov.motivo).toBe("Ninguna escena HLS con menos de 30 % de nubes");
-    expect(nov.texto).toBe("noviembre: sin dato. Ninguna escena HLS con menos de 30 % de nubes");
+    expect(nov.motivo).toBe(MOTIVO_NOV);
+    expect(nov.texto).toBe(`noviembre: sin dato. ${MOTIVO_NOV}`);
   });
 
   it("sin faltantes, el mes vacío dice que no hubo escena", () => {
-    const nov = lineaTiempo(RIO_CUARTO.visto_por_satelite).find((m) => m.mes === 10)!;
+    const nov = lineaTiempo({ ...VISTO, faltantes: [] }).find((m) => m.mes === 10)!;
     expect(nov.motivo).toBe("Sin escena utilizable ese mes.");
   });
 
@@ -81,7 +76,7 @@ describe("línea de tiempo del NDVI", () => {
   });
 
   it("texto con valor, fuente y fecha", () => {
-    expect(lineaTiempo(VISTO)[0].texto).toBe("julio: NDVI 0,26, NASA HLS 30 m, 22/07/2024");
+    expect(lineaTiempo(VISTO)[0].texto).toBe(`julio: NDVI 0,26, ${VISTO.meses[6]!.fuente}, 22/07/2024`);
   });
 
   it("detecta MODIS por la colección o, si no viene, por la fuente", () => {
