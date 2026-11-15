@@ -2,6 +2,9 @@
   background: var(--papel, #fff);
   border-radius: 6px;
   padding: 16px;
+  /* Queda debajo del gráfico: fuera de pantalla no se calcula ni se pinta. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 520px;
 }
 
 .titulo {

@@ -11,6 +11,7 @@ from fastapi.responses import JSONResponse
 from app import servicio
 from app.api.contrato import AvisoFila, Entrada, Error, ResultadoPlanilla, Salida
 from app.api.mock import salida_mock
+from app.mediciones.planilla import MAX_BYTES as MAX_BYTES_PLANILLA  # un solo tope: ruta y parser
 
 log = logging.getLogger("fieldshift.rutas")
 router = APIRouter()
@@ -63,8 +64,7 @@ def analizar(entrada: Entrada) -> Salida | JSONResponse:
 
 # --- Planilla de mediciones del productor (docs/plan-planilla-lluvia.md, 5.2) ---
 
-MAX_BYTES_PLANILLA = 1024 * 1024  # 1 MB
-PARSER_PENDIENTE = "Lectura de planillas en preparación: por ahora cargá la lluvia anual a mano"
+PARSER_PENDIENTE = "La lectura de planillas no está disponible en este momento: probá de nuevo en unos minutos"
 
 
 def _cargar_parser():

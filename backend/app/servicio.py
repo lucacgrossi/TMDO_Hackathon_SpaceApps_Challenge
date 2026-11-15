@@ -326,6 +326,30 @@ def _puntos_normal(s: dict) -> dict[str, int]:
     return {"agua": s["agua_por_tipo"]["normal"], "suelo": s["suelo"], "erosion": s["erosion"], "ingreso": s["ingreso"]}
 
 
+NOMBRE_OBJETIVO = {"agua": "Agua (año normal)", "suelo": "Salud del suelo", "erosion": "Erosión", "ingreso": "Ingreso"}
+
+
+def completar_que_le_falta(estrategias: list[Estrategia]) -> None:
+    """Llena `que_le_falta` en números (MVP, principio 2): por objetivo, cuántos puntos le faltan a
+    cada columna para llegar a la columna disponible con más puntos en ese objetivo.
+
+    No depende de las prioridades, para que no quede viejo cuando el front las mueve sin volver a
+    consultar (RF13). Solo describe diferencias de puntos; no elige ninguna columna. Las columnas
+    descartadas no participan. Modifica la lista en el lugar.
+    """
+    disponibles = [e for e in estrategias if e.disponible and e.cercania_objetivos]
+    for e in disponibles:
+        faltas = []
+        for o in OBJETIVOS:
+            tope = max(disponibles, key=lambda x: x.cercania_objetivos[o])
+            dif = tope.cercania_objetivos[o] - e.cercania_objetivos[o]
+            if dif > 0:
+                etiqueta = tope.nombre if tope.id == "actual" else f"{tope.id} · {tope.nombre}"
+                faltas.append(f"{NOMBRE_OBJETIVO[o]}: {e.cercania_objetivos[o]} pts, {dif} menos que "
+                              f"{etiqueta} ({tope.cercania_objetivos[o]} pts)")
+        e.que_le_falta = faltas
+
+
 def _estrategia(
     s: dict,
     actual: dict,
@@ -645,6 +669,7 @@ def _armar_salida(
     probs = _con_linea_del_productor(probs, contraste)
 
     estrategias = [_estrategia(s, lista[0], vacios_back, contraste.riesgos, probs.get(s["id"])) for s in lista]
+    completar_que_le_falta(estrategias)
     ch = resultado.get("choque") or {}
 
     serie_anual = clima_serie.serie_anual(clima)

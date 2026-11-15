@@ -145,3 +145,32 @@ export function tonosFranjas(valores: readonly (number | null)[]): (TonoFranja |
       : { lado: v < mediana ? "seco" : "humedo", intensidad: Math.min(1, Math.abs(v - mediana) / escala) },
   );
 }
+
+/**
+ * Nubes de la intro (DESIGN.md, "Movimiento"): la imagen en color verdadero de
+ * VIIRS (satélite NOAA-20) de ayer, por NASA GIBS. Ayer en UTC: la pasada de
+ * la tarde sobre Sudamérica ya está procesada a cualquier hora de hoy.
+ */
+export const CAPA_NUBES = "VIIRS_NOAA20_CorrectedReflectance_TrueColor";
+/** GIBS publica esta capa hasta el nivel 9 (~300 m por píxel). */
+export const ZOOM_NATIVO_NUBES = 9;
+
+/** Fecha (AAAA-MM-DD, UTC) de la imagen de nubes: el día anterior a `ahora`. */
+export function fechaNubes(ahora: Date): string {
+  return new Date(ahora.getTime() - 86_400_000).toISOString().slice(0, 10);
+}
+
+/** Plantilla de teselas de GIBS (WMTS en Web Mercator) para esa fecha. */
+export function urlNubes(fecha: string): string {
+  return `https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/${CAPA_NUBES}/default/${fecha}/GoogleMapsCompatible_Level9/{z}/{y}/{x}.jpg`;
+}
+
+/**
+ * Cuánto se abrieron las nubes (0 cerradas, 1 desaparecidas) en el instante t
+ * del vuelo (0 a 1): quietas en la órbita, empiezan a apartarse al 15 % del
+ * vuelo y se terminan de ir al 80 %, con aceleración y frenado suaves.
+ */
+export function aperturaNubes(t: number): number {
+  const p = Math.min(1, Math.max(0, (t - 0.15) / 0.65));
+  return 0.5 - Math.cos(Math.PI * p) / 2;
+}
