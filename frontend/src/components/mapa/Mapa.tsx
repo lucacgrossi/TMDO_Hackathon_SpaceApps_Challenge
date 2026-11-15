@@ -11,8 +11,10 @@ import CapaNdvi from "./CapaNdvi";
 import CapaPendiente from "./CapaPendiente";
 import Encuadre from "./Encuadre";
 import EsquinasLote from "./EsquinasLote";
+import IntroOrbita from "./IntroOrbita";
 import EncuadreCapa from "./EncuadreCapa";
 import MarcaUbicacion from "./MarcaUbicacion";
+import PixelarLote from "./PixelarLote";
 
 /**
  * F2 · Mapa base: imagen satelital de Esri + nombres de lugares encima.
@@ -126,12 +128,14 @@ export default function Mapa() {
           <CapaNdvi />
           <CapaPendiente />
           <CapaClima />
+          <PixelarLote />
           <CapaLote />
           <EsquinasLote />
           <CapaDibujo />
           <Encuadre />
           <EncuadreCapa />
           <MarcaUbicacion />
+          <IntroOrbita />
         </MapContainer>
       </div>
       {/* En el paso 1 el mapa no se ve: el aviso solo taparía el formulario. */}

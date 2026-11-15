@@ -37,12 +37,13 @@ export default function ClimaHistorico({ salida }: { salida: Salida }) {
     <div className={css.seccion}>
       <section className={css.panel} aria-labelledby="campanias-titulo">
         <h2 id="campanias-titulo" className={css.h2}>
-          {n} campañas de lluvia
+          {n} campañas de agua
         </h2>
         <p className={css.pie}>
           {serie ? `${serie.fuente}, ${serie.resolucion}, ${serie.periodo}` : `${clima.fuente}, ${clima.resolucion}, ${clima.periodo}`}, de julio a junio.
-          Color y letra por tercio de {salida.tipos_de_anio.metodo === "terciles_balance" ? "balance de agua" : "lluvia"}: S seco, N
-          normal, H húmedo.{seleccion.habilitada && " Elegí una campaña para ver sus meses."}
+          Una franja por campaña: más intensa, más lejos de lo común en{" "}
+          {salida.tipos_de_anio.metodo === "terciles_balance" ? "balance de agua" : "lluvia"}. La letra es su tercio: S seco, N normal, H
+          húmedo.{seleccion.habilitada && " Elegí una campaña para ver sus meses."}
         </p>
         {serie ? (
           <SelectorCampanias

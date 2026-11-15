@@ -24,6 +24,7 @@ describe("celdasCalendario", () => {
   it("asigna cultivo y grupo de cada mes", () => {
     const celdas = celdasCalendario(cal);
     expect(celdas[0]).toMatchObject({ mes: 6, cultivo: "barbecho", grupo: "barbecho", nombreMes: "julio" });
+    expect(celdas[0].nombreCultivo).toBe("Barbecho (pelado)");
     expect(celdas[4]).toMatchObject({ mes: 10, cultivo: "soja", grupo: "verano", nombreCultivo: "Soja" });
   });
 });
