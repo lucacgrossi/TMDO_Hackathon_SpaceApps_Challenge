@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
   conSigno,
-  ETIQUETA_TRAMO,
+  LETRA_CULTIVO,
+  NOMBRE_LEYENDA,
+  ORDEN_LEYENDA,
   fmt,
   fmtHasta,
   fmtNdvi,
@@ -118,21 +120,19 @@ describe("calendario y meses", () => {
   });
 });
 
-describe("etiquetas de los tramos del calendario", () => {
-  it("tres largos fijos por cultivo: completa, abreviatura de hasta 4 letras e inicial", () => {
-    for (const [cultivo, et] of Object.entries(ETIQUETA_TRAMO)) {
-      expect(et.corta.length, cultivo).toBeLessThanOrEqual(4);
-      expect(et.inicial).toHaveLength(1);
-      expect(et.completa.startsWith(et.inicial), cultivo).toBe(true);
+describe("letras del calendario", () => {
+  it("cada cultivo tiene una letra distinta que empieza como su nombre", () => {
+    const letras = Object.values(LETRA_CULTIVO);
+    expect(new Set(letras).size).toBe(letras.length);
+    for (const c of Object.keys(LETRA_CULTIVO) as (keyof typeof LETRA_CULTIVO)[]) {
+      expect(NOMBRE_LEYENDA[c].startsWith(LETRA_CULTIVO[c][0]), c).toBe(true);
     }
+    expect(LETRA_CULTIVO.barbecho).toBe("P");
+    expect(LETRA_CULTIVO.soja).toBe("S");
   });
 
-  it("el nombre completo es el mismo que en el title, salvo el barbecho, que se lee Pelado", () => {
-    for (const c of Object.keys(ETIQUETA_TRAMO) as (keyof typeof ETIQUETA_TRAMO)[]) {
-      if (c === "barbecho") continue;
-      expect(ETIQUETA_TRAMO[c].completa).toBe(NOMBRE_CULTIVO[c]);
-    }
-    expect(ETIQUETA_TRAMO.barbecho).toEqual({ completa: "Pelado", corta: "Pel.", inicial: "P" });
-    expect(NOMBRE_CULTIVO.barbecho).toBe("Barbecho (pelado)");
+  it("la leyenda nombra el barbecho como Pelado y ordena todos los cultivos", () => {
+    expect(NOMBRE_LEYENDA.barbecho).toBe("Pelado");
+    expect([...ORDEN_LEYENDA].sort()).toEqual(Object.keys(LETRA_CULTIVO).sort());
   });
 });

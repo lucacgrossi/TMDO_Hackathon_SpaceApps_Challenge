@@ -70,61 +70,65 @@
   border-radius: 2px !important;
 }
 
-/* --- Tramos de la fila de cultivos (tabla). Mismos colores y patrón que el
-   calendario de las cards (TarjetaEstrategia): verano, invierno, cobertura y
-   barbecho con puntos. Todas las etiquetas con el mismo tamaño y alto; según el
-   ancho del tramo se ve el nombre completo, la abreviatura fija o la inicial,
-   nunca una palabra cortada. El nombre completo está en el title y en la
-   descripción de la línea para lectores de pantalla. */
-.tramo {
-  container-type: inline-size;
-  min-width: 0;
+/* --- Fila de cultivos: un cuadrado por mes con la letra del cultivo. Mismos
+   colores y patrón que el calendario de las cards (TarjetaEstrategia): verano,
+   invierno, cobertura y barbecho con puntos. Grilla de 12, alineada con la
+   fila de meses de arriba y la fila fina del satélite. */
+.mesesCultivo {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  height: 22px;
+}
+.mesCultivo,
+.muestraLetra {
   display: flex;
   align-items: center;
-  height: 22px;
-  padding: 0 4px;
+  justify-content: center;
+  min-width: 0;
   border-radius: 2px;
   font-size: 11px;
   line-height: 14px;
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
+  font-variant-numeric: tabular-nums;
   color: var(--noche);
 }
-.tramo[data-grupo="verano"] {
+.mesCultivo[data-grupo="verano"],
+.muestraLetra[data-grupo="verano"] {
   background: var(--verano);
   color: var(--papel);
 }
-.tramo[data-grupo="invierno"] {
+.mesCultivo[data-grupo="invierno"],
+.muestraLetra[data-grupo="invierno"] {
   background: var(--invierno);
 }
-.tramo[data-grupo="cobertura"] {
+.mesCultivo[data-grupo="cobertura"],
+.muestraLetra[data-grupo="cobertura"] {
   background: var(--cobertura);
 }
-.tramo[data-grupo="barbecho"] {
+.mesCultivo[data-grupo="barbecho"],
+.muestraLetra[data-grupo="barbecho"] {
   background: radial-gradient(var(--suelo) 1px, transparent 1.5px) 0 0 / 6px 6px, var(--barbecho);
 }
 
-.completa,
-.corta,
-.inicial {
-  display: none;
+/* Leyenda de letras: cada letra en su cuadrado, con el nombre al lado */
+.letras {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 14px;
+  margin-bottom: 6px;
 }
-/* Umbrales fijos sobre el ancho del texto (el más largo, "Centeno", entra en 48 px). */
-@container (min-width: 48px) {
-  .completa {
-    display: inline;
-  }
+.letras > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
-@container (min-width: 24px) and (max-width: 47.98px) {
-  .corta {
-    display: inline;
-  }
-}
-@container (min-width: 7px) and (max-width: 23.98px) {
-  .inicial {
-    display: inline;
-  }
+.muestraLetra {
+  width: 22px;
+  height: 18px;
+  font-style: normal;
 }
 
 /* Muestras de la leyenda: los mismos fondos que los tramos */

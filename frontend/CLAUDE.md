@@ -46,7 +46,8 @@ Dueños y reparto del rediseño (persona 4, persona 5 y Luca): **`./PLAN.md`**. 
 Desde `frontend/` (Node 20 o más):
 - `npm install` · instala las dependencias (versiones fijas en `package.json`).
 - `npm run dev` · servidor local en http://localhost:3000.
-- `npm run build` · build de producción (es lo que corre el `Dockerfile` en Cloud Build).
+- `npm run build` · build de producción (es lo que corre el `Dockerfile` en Cloud Build, y también Vercel, que quedó de plan B).
+- **Vercel solo deploya `main` y `dev`** (`vercel.json`, `git.deploymentEnabled`): las branches de trabajo (`nombre/tipo/…`, `pr-*`) no generan preview, para no pasar el tope de 100 deploys por día del plan gratis. Para revisar un PR se prueba local con `npm run dev`; la CI de GitHub corre el build igual.
 - `npm run lint` y `npm run typecheck` · revisar antes de abrir un PR.
 - `npm test` · tests de lógica pura con vitest (`src/**/*.test.ts`).
 - Variables: copiar `.env.example` a `.env.local`. Sin `.env.local`, se usa el mock.

@@ -249,7 +249,7 @@ export const RIO_CUARTO: Salida = {
       "resolucion": "pendiente del plano × meses bajos por píxel en la grilla de 1″ (~30 m); pendiente y NDVI a 30 m",
       "confianza": "baja",
       "motivo": null,
-      "nota": "Valor del lote: pendiente general 0,6 % (plano) × 4,3 meses con NDVI < 0,3 en promedio por píxel (1230 píxeles de la grilla de 1″ (~30 m), campaña 2025/26). El mapa muestra dónde: pendiente del píxel × meses del píxel (media 5,5); la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases propuesta, a validar por la persona 3"
+      "nota": "Valor del lote: pendiente general 0,6 % (plano) × 4,3 meses con NDVI < 0,3 en promedio por píxel (1230 píxeles de la grilla de 1″ (~30 m), campaña 2025/26). El mapa muestra dónde: pendiente del píxel × meses del píxel (media 5,5); la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases provisoria"
     }
   },
   "contraste_mediciones": [],
@@ -2808,7 +2808,7 @@ export const RIO_CUARTO: Salida = {
       "anios": "2025/26",
       "resolucion": "pendiente del plano × meses bajos por píxel en la grilla de 1″ (~30 m); pendiente y NDVI a 30 m",
       "confianza": "baja",
-      "nota": "Valor del lote: pendiente general 0,6 % (plano) × 4,3 meses con NDVI < 0,3 en promedio por píxel (1230 píxeles de la grilla de 1″ (~30 m), campaña 2025/26). El mapa muestra dónde: pendiente del píxel × meses del píxel (media 5,5); la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases propuesta, a validar por la persona 3",
+      "nota": "Valor del lote: pendiente general 0,6 % (plano) × 4,3 meses con NDVI < 0,3 en promedio por píxel (1230 píxeles de la grilla de 1″ (~30 m), campaña 2025/26). El mapa muestra dónde: pendiente del píxel × meses del píxel (media 5,5); la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases provisoria",
       "pendiente_pct": 0.6,
       "meses_cobertura_baja": 3,
       "meses_bajos": [
@@ -3799,7 +3799,7 @@ export const RIO_CUARTO: Salida = {
         "valor_lote": 2.6
       },
       "confianza": "baja",
-      "nota": "Valor del lote: pendiente general 0,6 % (plano) × 4,3 meses con NDVI < 0,3 en promedio por píxel (1230 píxeles de la grilla de 1″ (~30 m), campaña 2025/26). El mapa muestra dónde: pendiente del píxel × meses del píxel (media 5,5); la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases propuesta, a validar por la persona 3"
+      "nota": "Valor del lote: pendiente general 0,6 % (plano) × 4,3 meses con NDVI < 0,3 en promedio por píxel (1230 píxeles de la grilla de 1″ (~30 m), campaña 2025/26). El mapa muestra dónde: pendiente del píxel × meses del píxel (media 5,5); la pendiente por píxel es ruidosa y sesgada hacia arriba en terreno llano, por eso el valor del lote usa la del plano. Índice relativo para comparar lotes, zonas del lote y meses: no es pérdida de suelo (t/ha). Escala de clases provisoria"
     }
   },
   "estrategias": [
@@ -4005,6 +4005,7 @@ export const RIO_CUARTO: Salida = {
       ],
       "por_que": [
         "6 meses con el lote pelado (mayo, junio, julio, agosto, septiembre, octubre)",
+        "Restricciones que cargaste: sin riego (el agua de cada columna sale solo de la lluvia)",
         "Tus prioridades: agua 3, suelo 3, erosión 3, ingreso 3 (pesan al cuadrado en la cercanía)"
       ],
       "evidencia": [
@@ -4197,7 +4198,7 @@ export const RIO_CUARTO: Salida = {
           "efecto": {
             "erosion": -13
           },
-          "dato": "1 meses pelados (octubre) con pendiente 0,6 % y 88 mm de lluvia en esos meses en años normales (NASA POWER)"
+          "dato": "1 mes pelado (octubre) con pendiente 0,6 % y 88 mm de lluvia en esos meses en años normales (NASA POWER)"
         },
         {
           "regla": "ingreso",
@@ -4253,6 +4254,7 @@ export const RIO_CUARTO: Salida = {
         "Elegida por tus prioridades y el clima del lote: Vicia: prioridad suelo 3 y erosión 3, pendiente 0,6 %, lluvia de invierno en años secos 123 mm",
         "Cubre el suelo 11 meses (hoy 6)",
         "La vicia fija nitrógeno",
+        "Restricciones que cargaste: sin riego (el agua de cada columna sale solo de la lluvia)",
         "Tus prioridades: agua 3, suelo 3, erosión 3, ingreso 3 (pesan al cuadrado en la cercanía)"
       ],
       "evidencia": [
@@ -4273,14 +4275,14 @@ export const RIO_CUARTO: Salida = {
       ],
       "riesgos": [
         "Repite el cultivo de la campaña pasada",
-        "Secado de la cobertura ~30 días antes de la siembra de verano",
+        "Secado de la cobertura (vicia) en octubre, ~30 días antes de la siembra de soja en noviembre",
         "Máxima de 35 °C o más en la mitad de los años con cultivo de verano: enero, febrero, marzo, noviembre, diciembre",
         "En años secos la vicia consumió más agua que el centeno y afectó al maíz siguiente · INTA Manfredi"
       ]
     },
     {
       "id": "B",
-      "nombre": "Cultivo de invierno",
+      "nombre": "Cultivo de invierno comercial",
       "especies": "Trigo + soja de 2ª",
       "disponible": true,
       "motivo_descarte": null,
@@ -4443,7 +4445,7 @@ export const RIO_CUARTO: Salida = {
           "efecto": {
             "erosion": -4.3
           },
-          "dato": "1 meses pelados (mayo) con pendiente 0,6 % y 20 mm de lluvia en esos meses en años normales (NASA POWER)"
+          "dato": "1 mes pelado (mayo) con pendiente 0,6 % y 20 mm de lluvia en esos meses en años normales (NASA POWER)"
         },
         {
           "regla": "ingreso",
@@ -4499,6 +4501,8 @@ export const RIO_CUARTO: Salida = {
         "Elegida por tus prioridades y el clima del lote: Trigo: prioridad agua 3, lluvia de invierno en años secos 123 mm",
         "Cubre el suelo 11 meses (hoy 6)",
         "Suma un cultivo que se vende en invierno (trigo)",
+        "Trigo con su ciclo completo (junio a noviembre) y soja de 2ª de diciembre a abril, con siembra después de la cosecha",
+        "Restricciones que cargaste: sin riego (el agua de cada columna sale solo de la lluvia)",
         "Tus prioridades: agua 3, suelo 3, erosión 3, ingreso 3 (pesan al cuadrado en la cercanía)"
       ],
       "evidencia": [
@@ -4711,6 +4715,7 @@ export const RIO_CUARTO: Salida = {
       "por_que": [
         "Elegida por tus prioridades y el clima del lote: Sorgo: prioridad agua 3, lluvia de verano en años secos 468 mm",
         "Sorgo corta el ciclo de plagas de soja y tolera sequía y calor",
+        "Restricciones que cargaste: sin riego (el agua de cada columna sale solo de la lluvia)",
         "Tus prioridades: agua 3, suelo 3, erosión 3, ingreso 3 (pesan al cuadrado en la cercanía)"
       ],
       "evidencia": [
