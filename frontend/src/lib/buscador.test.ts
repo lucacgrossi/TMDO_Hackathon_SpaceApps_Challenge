@@ -5,7 +5,10 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   buscarSugerencias,
+  esMensajeDeError,
   limpiarTexto,
+  MENSAJES,
+  MENSAJES_MAPA,
   parsearCoordenadas,
 } from "./buscador";
 
@@ -24,6 +27,18 @@ describe("parsearCoordenadas", () => {
   it("separado por espacio o punto y coma", () => {
     cerca("-33.2477 -64.2325", -33.2477, -64.2325);
     cerca("-33.2477;-64.2325", -33.2477, -64.2325);
+  });
+
+  it("con coma decimal, separado por espacio, punto y coma o coma + espacio (QA H-015)", () => {
+    cerca("-33,2477 -64,2325", -33.2477, -64.2325);
+    cerca("-33,2477; -64,2325", -33.2477, -64.2325);
+    cerca("-33,2477;-64,2325", -33.2477, -64.2325);
+    cerca("-33,2477, -64,2325", -33.2477, -64.2325);
+    cerca("33,2477 64,2325", -33.2477, -64.2325);
+  });
+
+  it("coma decimal sin separador claro no se adivina", () => {
+    expect(parsearCoordenadas("-33,2477,-64,2325")).toBeNull();
   });
 
   it("sin signo en Argentina va al sur y oeste", () =>
@@ -63,6 +78,19 @@ describe("parsearCoordenadas", () => {
     expect(parsearCoordenadas("-33.2477, -64.2325")?.etiqueta).toBe(
       "33,2477° S · 64,2325° O",
     );
+  });
+});
+
+describe("esMensajeDeError", () => {
+  it("los errores del buscador de S1 (lugar no encontrado, GPS denegado) borran el lugar anterior (QA H-015)", () => {
+    expect(esMensajeDeError(MENSAJES.sinResultados)).toBe(true);
+    expect(esMensajeDeError(MENSAJES.gpsFallo)).toBe(true);
+    expect(esMensajeDeError(MENSAJES.sinGeo)).toBe(true);
+  });
+
+  it("sin mensaje u otro texto, no", () => {
+    expect(esMensajeDeError("")).toBe(false);
+    expect(esMensajeDeError(MENSAJES_MAPA.sinResultados)).toBe(false);
   });
 });
 

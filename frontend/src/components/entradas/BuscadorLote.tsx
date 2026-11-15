@@ -18,10 +18,10 @@
  * lógica sin React (regex, llamadas a Esri, mensajes) está en `src/lib/buscador.ts`.
  */
 
-import { useId, useState } from "react";
+import { useEffect, useId, useState } from "react";
 import Boton from "@/components/comunes/Boton";
 import ListaSugerencias from "@/components/comunes/ListaSugerencias";
-import { MENSAJES, fmt } from "@/lib/buscador";
+import { MENSAJES, esMensajeDeError, fmt } from "@/lib/buscador";
 import type { UbicacionElegida } from "@/lib/entradas";
 import { useEntradas } from "@/lib/store";
 import { useBuscadorLugares } from "@/lib/useBuscadorLugares";
@@ -48,6 +48,13 @@ export default function BuscadorLote() {
     // En el paso 1, pegar coordenadas o un link ya ubica el lote (listener de `#q`).
     coordenadasAlEscribir: true,
   });
+
+  // Al mostrar un error (lugar no encontrado, GPS denegado…), el "Tu lote está
+  // acá" anterior ya no corresponde: se borra el lugar (QA H-015).
+  const mensaje = b.mensaje;
+  useEffect(() => {
+    if (esMensajeDeError(mensaje) && useEntradas.getState().ubicacion) cambiar({ ubicacion: null });
+  }, [mensaje, cambiar]);
 
   // Ids para unir el input con la lista (accesibilidad: aria-controls y aria-activedescendant).
   const idBase = useId();
