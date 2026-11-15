@@ -1,0 +1,170 @@
+/* Barra lateral del dashboard (DESIGN.md, "Sidebar del dashboard" e "Ítem de sidebar"). */
+
+.barra {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: 20px var(--space-4) var(--space-4);
+  background: var(--noche);
+  color: var(--papel);
+  overflow-y: auto;
+}
+
+.logo {
+  width: 200px;
+  height: auto;
+  border-radius: 2px;
+  margin-bottom: var(--space-4);
+}
+
+.nav {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  border-radius: 2px;
+  background: none;
+  color: var(--papel);
+  font: inherit;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.item:hover {
+  background: color-mix(in srgb, var(--papel) 10%, transparent);
+}
+
+.item[aria-current="page"] {
+  background: var(--cielo-brillo);
+  color: var(--noche);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--cielo-brillo);
+  outline-offset: 2px;
+}
+
+/* Marcador del ícono pixel (16 × 16, escalones). Se reemplaza por IconoPixel. */
+.icono {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  background: currentColor;
+  clip-path: polygon(0 0, 40% 0, 40% 40%, 100% 40%, 100% 100%, 0 100%);
+}
+
+.separador {
+  height: 1px;
+  margin: var(--space-2) 0;
+  background: color-mix(in srgb, var(--papel) 15%, transparent);
+}
+
+.relleno {
+  flex: 1;
+}
+
+.lugar {
+  margin: 0 0 var(--space-2);
+  color: var(--cielo-brillo);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Aviso de apoyo (RF22): siempre visible, sin botón de cerrar. */
+.aviso {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px dashed var(--cielo-brillo);
+  border-radius: 2px;
+  color: var(--cielo-brillo);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .item {
+    transition: none;
+  }
+}
+
+/* Celular: barra inferior fija con las secciones y el aviso arriba. */
+@media (max-width: 767px) {
+  .barra {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 1100;
+    height: auto;
+    flex-direction: column-reverse;
+    gap: 0;
+    padding: 0;
+    overflow: visible;
+  }
+
+  .logo,
+  .lugar,
+  .relleno,
+  .separador {
+    display: none;
+  }
+
+  .nav {
+    flex-direction: row;
+    gap: 0;
+  }
+
+  .lista {
+    display: contents;
+  }
+
+  .lista > li {
+    flex: 1;
+    display: flex;
+  }
+
+  .item {
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    gap: var(--space-1);
+    padding: var(--space-2) var(--space-1);
+    border-radius: 0;
+    font-size: 12px;
+    line-height: 16px;
+    text-align: center;
+  }
+
+  .nav > .item {
+    flex: 1;
+  }
+
+  .aviso {
+    padding: var(--space-1) var(--space-3);
+    border: 0;
+    border-bottom: 1px dashed var(--cielo-brillo);
+    border-radius: 0;
+    font-size: 11px;
+    line-height: 14px;
+  }
+}
