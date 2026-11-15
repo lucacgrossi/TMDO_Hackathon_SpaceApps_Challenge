@@ -1,6 +1,6 @@
 # Frontend · AgroPixel
 
-Contexto, principios y alcance: `../CLAUDE.md` (no se repiten acá). Producto y requerimientos: `../docs/mvp-alcance.md`. **Diseño visual: `./DESIGN.md` y el Figma [AgroPixel · Rediseño del front](https://www.figma.com/design/uQbWWU8RVCaWDeVma4Padn)** (página 03: qué componente y qué store usa cada pantalla). El prototipo `../docs/prototipo/field-shift-prototipo.html` queda solo como referencia de comportamiento del mapa.
+Contexto, principios y alcance: `../CLAUDE.md` (no se repiten acá). Producto y requerimientos: `../docs/mvp-alcance.md`. **Guía de la API para el front: `../docs/api-frontend.md`** (rutas, errores, cada campo de la salida, cómo dibujar capas y meses). **Diseño visual: `./DESIGN.md` y el Figma [AgroPixel · Rediseño del front](https://www.figma.com/design/uQbWWU8RVCaWDeVma4Padn)** (pantallas S1 a S3b; el dashboard está en el mockup `../docs/prototipo/agropixel-dashboard-mockup.html`). El prototipo `../docs/prototipo/field-shift-prototipo.html` queda solo como referencia de comportamiento del mapa.
 
 Dueños y reparto del rediseño (persona 4, persona 5 y Luca): **`./PLAN.md`**. Coordinar antes de tocar archivos de otro.
 
@@ -29,6 +29,8 @@ Dueños y reparto del rediseño (persona 4, persona 5 y Luca): **`./PLAN.md`**. 
 - **Capas del mapa: el back calcula, el front dibuja.** Cada capa llega como `CapaRaster` (PNG + `bounds` comunes + `escala` + `valores` por píxel; `src/lib/capaRaster.ts`) y se dibuja como `ImageOverlay` con `image-rendering: pixelated`. La leyenda lee `capa.escala` y el inspector de píxel lee `valores[fila][columna]`. Nada de búsquedas de escenas propias, cálculos en el navegador ni valores ilustrativos. Todas las capas usan la campaña del back y el mismo `mes` (índice 0 = enero; la línea de tiempo se muestra de julio a junio). Detalle en `../docs/plan-armonizacion-capas.md`.
 - **Estilos:** tokens en `:root` de `src/app/globals.css` (los de `DESIGN.md`, un solo tema claro) y **un CSS module por componente**. El CSS del prototipo que hoy está en `globals.css` se borra a medida que cada pantalla se migra; no se agregan clases globales nuevas.
 - **Fuentes:** Pixelify Sans (títulos) e IBM Plex Sans (todo lo demás) por `next/font/google` en `layout.tsx`. Inter se retira.
+- **Meses:** todo array de 12 de la API tiene índice 0 = enero. Lo que se muestra como campaña (línea de tiempo, calendarios, gráficos) va de julio a junio rotando `[6..11, 0..5]` con un solo helper de `src/lib/`; nadie rota a mano en un componente.
+- **`null` es "sin dato"**, nunca 0. Los textos que manda el back (`resumen`, `texto`, `motivo`…) se muestran tal cual.
 - **El color nunca es la única señal:** terciles con letra, barbecho con patrón, confianza con texto, descartadas con el motivo.
 - **Compu primero.** En celular, la tabla hace scroll horizontal y la barra lateral pasa a una barra inferior.
 - **Una pieza por archivo** (`TarjetaEstrategia`, `InspectorPixel`, `ModalFormatoPlanilla`…) para evitar conflictos de merge.
