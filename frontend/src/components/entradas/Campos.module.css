@@ -62,7 +62,15 @@
   color: var(--bad);
 }
 
-/* Aviso de una contradicción en lo cargado (QA H-003, H-025): describe, no corrige. */
+/* Nota del calendario (QA H-003): cómo quedó armado, sin tono de alerta. */
+.nota {
+  margin: var(--space-2) 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+/* Aviso de una contradicción en lo cargado (QA H-025): describe, no corrige. */
 .aviso {
   margin: var(--space-3) 0 0;
   padding: var(--space-2) var(--space-3);

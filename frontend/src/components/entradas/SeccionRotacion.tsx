@@ -18,9 +18,8 @@ import {
   calendario,
   describirSegmento,
   nombreTramo,
+  notaCalendario,
   segmentos,
-  solapamiento,
-  textoSolapamiento,
 } from "@/lib/calendario";
 import estilos from "./Campos.module.css";
 import "./calendario.css";
@@ -34,8 +33,8 @@ export default function SeccionRotacion() {
 
   // El calendario no se guarda: se deriva de verano + invierno en cada render (es barato, 12 meses).
   const tramos = segmentos(calendario(verano, invierno));
-  // Si el verano pisa al invierno, el calendario lo recorta: se avisa en vez de hacerlo en silencio (QA H-003).
-  const pisa = solapamiento(verano, invierno);
+  // Si un cultivo sale de su ventana típica (verano de 2ª, cobertura que se seca antes), se dice (QA H-003).
+  const nota = notaCalendario(verano, invierno);
 
   return (
     <div>
@@ -125,9 +124,9 @@ export default function SeccionRotacion() {
         </div>
         <div className="cap">Campaña de julio a junio, armada con lo que elegiste.</div>
       </div>
-      {pisa && (
-        <p className={estilos.aviso} role="status">
-          <b>Ciclos superpuestos.</b> {textoSolapamiento(pisa)}
+      {nota && (
+        <p className={estilos.nota} role="status">
+          {nota}
         </p>
       )}
     </div>

@@ -92,26 +92,55 @@ export const ORDEN_CAMPANA = [6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5] as const;
  * Arma los 12 meses (índice 0 = enero) de una rotación verano + invierno
  * (cal del prototipo).
  *
- * Pasos:
+ * Pasos (misma regla que el motor del back, QA H-003):
  * 1. Todo arranca en barbecho.
- * 2. Se pinta el cultivo de invierno, si hay.
- * 3. Se pinta el de verano encima: si se pisan meses, gana el verano.
+ * 2. Se pinta el cultivo de verano (`mesesDeVerano`).
+ * 3. Se pinta el de invierno, sin pisar al verano (`mesesDeInvierno`).
  *
- * Regla: soja después de trigo o cebada pasa a "soja 2ª", que se siembra un
- * mes más tarde (diciembre), porque el lote está ocupado hasta noviembre.
+ * Con trigo o cebada, el invierno conserva su ciclo (junio a noviembre) y el
+ * verano va "de 2ª", de diciembre a abril, con mayo en barbecho; la soja pasa a
+ * "soja 2ª" y los demás mantienen su clave. Las coberturas (vicia, centeno) se
+ * secan el mes anterior a la siembra de verano, que queda en barbecho.
  */
 export function calendario(verano: string, invierno: string): CultivoCalendario[] {
   const meses: CultivoCalendario[] = Array(12).fill("barbecho");
-
+  const ver = cultivoDeVerano(verano, invierno);
+  if (ver in WIN) mesesDeVerano(verano, invierno).forEach((m) => (meses[m] = ver));
   if (invierno !== "barbecho" && invierno in WIN) {
     const inv = invierno as keyof typeof WIN;
-    WIN[inv].forEach((m) => (meses[m] = inv));
+    mesesDeInvierno(verano, invierno).forEach((m) => (meses[m] = inv));
   }
-
-  const ver = cultivoDeVerano(verano, invierno);
-  if (ver in WIN) WIN[ver].forEach((m) => (meses[m] = ver));
-
   return meses;
+}
+
+/** Trigo o cebada: cultivo de invierno que se cosecha, con el verano de 2ª detrás. */
+const esInviernoComercial = (invierno: string) => invierno === "trigo" || invierno === "cebada";
+
+/** Ventana del verano "de 2ª" (diciembre a abril), detrás de trigo o cebada. */
+export const VENTANA_2DA: readonly number[] = WIN.soja2;
+
+/**
+ * Meses del cultivo de verano (0 = enero), en el orden de su ciclo. Detrás de
+ * trigo o cebada, cualquier verano va de 2ª: diciembre a abril.
+ */
+export function mesesDeVerano(verano: string, invierno: string): number[] {
+  if (!(verano in WIN)) return [];
+  if (esInviernoComercial(invierno)) return [...VENTANA_2DA];
+  return [...WIN[verano as keyof typeof WIN]];
+}
+
+/**
+ * Meses del cultivo de invierno, en el orden de su ciclo. Trigo y cebada
+ * conservan junio a noviembre. Una cobertura termina antes del mes anterior a
+ * la siembra de verano (ese mes es el secado y queda en barbecho).
+ */
+export function mesesDeInvierno(verano: string, invierno: string): number[] {
+  if (invierno === "barbecho" || !(invierno in WIN)) return [];
+  const propios = WIN[invierno as keyof typeof WIN];
+  const ver = mesesDeVerano(verano, invierno);
+  if (esInviernoComercial(invierno) || !ver.length) return [...propios];
+  const secado = (ver[0] + 11) % 12;
+  return propios.filter((m) => m !== secado && !ver.includes(m));
 }
 
 /**
@@ -163,63 +192,46 @@ export function describirSegmento(s: Segmento): string {
   return s.meses === 1 ? `${nombre}: ${primero}` : `${nombre}: ${primero} a ${ultimo}`;
 }
 
-/** Cuando el verano pisa al invierno: qué meses y cómo queda el invierno en el calendario. */
-export interface Solapamiento {
-  verano: Exclude<CultivoCalendario, "barbecho">;
-  invierno: Exclude<CultivoCalendario, "barbecho">;
-  /** Meses que ocupan los dos (0 = enero), en el orden del ciclo del invierno (`WIN`). */
-  meses: number[];
-  /** Meses que le quedan al invierno en el calendario, en el orden de su ciclo. */
-  inviernoQueda: number[];
-}
-
-/**
- * Si el cultivo de verano se siembra antes de que termine el de invierno, con
- * las ventanas típicas de `WIN`. `calendario()` pinta el verano encima, así que
- * el invierno queda recortado: esto permite avisarlo en vez de recortarlo en
- * silencio (QA H-003). Ej.: maíz (octubre a abril) y trigo (junio a
- * noviembre) se pisan en octubre y noviembre. null si no se pisan.
- */
-export function solapamiento(verano: string, invierno: string): Solapamiento | null {
-  if (invierno === "barbecho" || !(invierno in WIN)) return null;
-  const ver = cultivoDeVerano(verano, invierno);
-  if (!(ver in WIN)) return null;
-  const inv = invierno as keyof typeof WIN;
-  // `WIN` ya está en el orden del ciclo (siembra → cosecha), aunque cruce de año:
-  // filtrar lo conserva (el trigo va de junio a noviembre, no "julio a junio").
-  const meses = WIN[inv].filter((m) => WIN[ver].includes(m));
-  if (!meses.length) return null;
-  return { verano: ver, invierno: inv, meses, inviernoQueda: WIN[inv].filter((m) => !WIN[ver].includes(m)) };
-}
-
 const mes = (m: number) => MESES[m].toLowerCase();
 
 /** "junio a noviembre": del primero al último, en el orden en que vienen (el del ciclo). */
-function rango(meses: number[]): string {
+function rango(meses: readonly number[]): string {
   if (meses.length === 1) return mes(meses[0]);
   return `${mes(meses[0])} a ${mes(meses[meses.length - 1])}`;
 }
 
-/** "octubre y noviembre", "septiembre, octubre y noviembre". */
-function lista(meses: number[]): string {
-  const ns = meses.map(mes);
-  return ns.length <= 1 ? ns.join("") : `${ns.slice(0, -1).join(", ")} y ${ns[ns.length - 1]}`;
+/**
+ * Nota del panel cuando el calendario corre un cultivo de su ventana típica,
+ * para que no cambie en silencio (QA H-003). Describe, no recomienda.
+ * - Trigo o cebada: "Con trigo en invierno, el maíz va de 2ª: diciembre a
+ *   abril, con mayo en barbecho. El trigo va de junio a noviembre."
+ * - Cobertura recortada por el secado: "La vicia se seca en agosto, el mes
+ *   anterior a la siembra de girasol: va de mayo a julio."
+ * null si los dos cultivos quedan en su ventana típica.
+ */
+/** "el maíz", "la soja": artículo para las notas del calendario. */
+function conArticulo(c: CultivoCalendario): string {
+  const n = C[c].n.toLowerCase();
+  return `${c === "soja" || c === "cebada" || c === "vicia" ? "la" : "el"} ${n}`;
 }
 
-/**
- * Aviso del panel cuando el verano pisa al invierno. Describe, no recomienda:
- * "Maíz (octubre a abril) y trigo (junio a noviembre) se superponen en
- * octubre y noviembre. El calendario muestra trigo de junio a septiembre.
- * Fechas a revisar con el agrónomo."
- */
-export function textoSolapamiento(s: Solapamiento): string {
-  const ver = C[s.verano].n;
-  const inv = C[s.invierno].n.toLowerCase();
-  const queda = s.inviernoQueda.length
-    ? `El calendario muestra ${inv} de ${rango(s.inviernoQueda)}.`
-    : `El calendario no muestra ${inv}.`;
-  return (
-    `${ver} (${rango(WIN[s.verano])}) y ${inv} (${rango(WIN[s.invierno])}) ` +
-    `se superponen en ${lista(s.meses)}. ${queda} Fechas a revisar con el agrónomo.`
-  );
+const mayuscula = (t: string) => t.charAt(0).toUpperCase() + t.slice(1);
+
+export function notaCalendario(verano: string, invierno: string): string | null {
+  if (!(verano in WIN) || invierno === "barbecho" || !(invierno in WIN)) return null;
+  const ver = verano as keyof typeof WIN;
+  const inv = invierno as keyof typeof WIN;
+  const nVer = C[ver].n.toLowerCase();
+  const nInv = C[inv].n.toLowerCase();
+  if (esInviernoComercial(invierno)) {
+    return (
+      `Con ${nInv} en invierno, ${conArticulo(ver)} va de 2ª: ${rango(mesesDeVerano(verano, invierno))}, con mayo en barbecho. ` +
+      `${mayuscula(conArticulo(inv))} va de ${rango(mesesDeInvierno(verano, invierno))}.`
+    );
+  }
+  const queda = mesesDeInvierno(verano, invierno);
+  if (queda.length === WIN[inv].length) return null;
+  const secado = (mesesDeVerano(verano, invierno)[0] + 11) % 12;
+  const dondeQueda = queda.length ? `va de ${rango(queda)}` : "no entra en el calendario";
+  return `${mayuscula(conArticulo(inv))} se seca en ${mes(secado)}, el mes anterior a la siembra de ${nVer}: ${dondeQueda}.`;
 }
