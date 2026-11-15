@@ -20,7 +20,7 @@
   "periodo": {"desde": "2022-07", "hasta": "2023-06"},
   "campanas_completas": {"lluvia_mm": ["2022/23"], "t_min_c": ["2022/23"], "t_max_c": ["2022/23"]},
   "lluvia_media_campana_mm": 774.0,
-  "filas_leidas": 13,
+  "filas_leidas": 12,
   "filas_usadas": 12,
   "avisos": [{"fila": 1, "motivo": "Encabezado reconocido: mes, lluvia_mm, t_min_c, t_max_c"}],
   "formato": {"codificacion": "utf-8", "separador": ";", "decimal": ","}

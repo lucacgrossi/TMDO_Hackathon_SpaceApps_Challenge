@@ -40,6 +40,8 @@ MESES_CERO_HUECO = 6  # más meses seguidos con 0 mm → posible hueco del regis
 SEPARADORES = (";", "\t", ",")  # en este orden: con empate gana `;`
 NOMBRE_SEPARADOR = {";": ";", "\t": "tab", ",": ","}
 LINEAS_MUESTRA = 10
+MAX_FECHAS_INEXISTENTES = 0.2  # más del 20 % de las filas con fechas que no existen → orden mes/día
+FECHAS_MES_DIA = "Las fechas parecen estar en formato mes/día; usá día/mes"
 
 
 @dataclass(frozen=True)
@@ -192,6 +194,12 @@ def _fecha(celda: str) -> tuple[str, date] | None:
     return None
 
 
+def _parece_mes_dia(celda: str) -> bool:
+    """`07/13/2023`: el segundo número no puede ser un mes y el primero sí → orden de Estados Unidos."""
+    m = _DIA_DMA.match(_HORA.sub("", celda.strip()))
+    return bool(m) and int(m[1]) <= 12 < int(m[2])
+
+
 def _es_fecha(celda: str) -> bool:
     try:
         return _fecha(celda) is not None
@@ -248,9 +256,9 @@ class _Lector:
             elif var and var not in cols:
                 cols[var] = i
             elif var:
-                self.aviso(f"columna `{nombre.strip()}` ignorada: repite {VARIABLES[var].nombre}", num)
+                self.aviso(f'columna "{nombre.strip()}" ignorada: repite {VARIABLES[var].nombre}', num)
             else:
-                self.aviso(f"columna `{nombre.strip()}` ignorada: no se usa en esta versión", num)
+                self.aviso(f'columna "{nombre.strip()}" ignorada: no se usa en esta versión', num)
         if col_fecha is None:
             raise _Rechazo(f"No se encontró la columna de fecha (nombres reconocidos: {', '.join(ALIAS_FECHA)})", num)
         if not cols:
@@ -272,7 +280,7 @@ class _Lector:
             try:
                 v, coma = _numero(celda, separador)
             except ValueError:
-                self.problema(f"{var.nombre} `{celda.strip()}` no es un número: se descartó", num)
+                self.problema(f'{var.nombre} "{celda.strip()}" no es un número: se descartó', num)
                 continue
             if v is None:
                 continue
@@ -328,17 +336,22 @@ class _Lector:
         repetidos: list[AvisoFila] = []
         uso_coma = False
         filas_usadas = 0
+        fechas_inexistentes = 0
+        filas_sin_valor = 0
 
         for num, celdas in datos:
             celda_fecha = celdas[col_fecha].strip() if col_fecha < len(celdas) else ""
             try:
                 leida = _fecha(celda_fecha)
             except ValueError:
-                self.problema(f"la fecha `{celda_fecha}` no existe: fila descartada", num)
+                if _parece_mes_dia(celda_fecha):
+                    raise _Rechazo(f'{FECHAS_MES_DIA} (por ejemplo, "{celda_fecha}")', num) from None
+                self.problema(f'la fecha "{celda_fecha}" no existe: fila descartada', num)
+                fechas_inexistentes += 1
                 continue
             if leida is None:
                 self.problema(
-                    f"fecha `{celda_fecha}` no reconocida (se espera dd/mm/aaaa, aaaa-mm-dd o aaaa-mm): "
+                    f'fecha "{celda_fecha}" no reconocida (se espera dd/mm/aaaa, aaaa-mm-dd o aaaa-mm): '
                     "fila descartada",
                     num,
                 )
@@ -349,13 +362,13 @@ class _Lector:
             elif tipo != granularidad:
                 raise _Rechazo(
                     f"El archivo mezcla fechas diarias y mensuales: empieza {granularidad} y esta fila "
-                    f"tiene una fecha {tipo} (`{celda_fecha}`). Tiene que ser un solo formato",
+                    f'tiene una fecha {tipo} ("{celda_fecha}"). Tiene que ser un solo formato',
                     num,
                 )
             mes: Mes = (dia.year, dia.month)
             futura = dia > self.hoy if tipo == "diaria" else mes > (self.hoy.year, self.hoy.month)
             if futura:
-                self.problema(f"fecha futura `{celda_fecha}`: fila descartada", num)
+                self.problema(f'fecha futura "{celda_fecha}": fila descartada', num)
                 continue
             if tipo == "mensual":
                 if mes in fila_mes:
@@ -371,8 +384,11 @@ class _Lector:
                     continue
                 fila_mes[mes] = num
 
+            antes = len(self.problemas)
             valores, coma = self.valores(num, celdas, cols, separador, tipo)
             if not valores:
+                if len(self.problemas) == antes:
+                    filas_sin_valor += 1  # sin problema propio: se avisa al final, para que cierren las cuentas
                 continue
             filas_usadas += 1
             uso_coma |= coma
@@ -393,11 +409,18 @@ class _Lector:
                     else:
                         por_dia[dia.day] = max(previo, v)
 
+        if fechas_inexistentes > MAX_FECHAS_INEXISTENTES * len(datos):
+            raise _Rechazo(
+                f"{FECHAS_MES_DIA}: {fechas_inexistentes} de {len(datos)} filas tienen una fecha que no existe"
+            )
         if repetidos:
             raise _Rechazo(repetidos)
         if granularidad is None:
             raise _Rechazo("Ninguna fila tiene una fecha válida (se espera dd/mm/aaaa, aaaa-mm-dd o aaaa-mm)")
 
+        if filas_sin_valor:
+            cuantas = "1 fila tiene" if filas_sin_valor == 1 else f"{filas_sin_valor} filas tienen"
+            self.aviso(f"{cuantas} fecha pero ninguna medición: no se usan")
         if granularidad == "diaria":
             meses = self.mensualizar(diario)
         else:
@@ -409,7 +432,7 @@ class _Lector:
             FormatoPlanilla(
                 codificacion=codificacion, separador=NOMBRE_SEPARADOR[separador], decimal="," if uso_coma else "."
             ),
-            len(filas),
+            len(datos),  # sin el encabezado: la vista previa resta las usadas para contar las descartadas
             filas_usadas,
         )
 
@@ -484,10 +507,10 @@ class _Lector:
         variables = [c for c in VARIABLES if any(c in v for v in meses.values())]
         cuenta = {c: sum(1 for v in meses.values() if c in v) for c in variables}
         if not any(n >= MIN_MESES for n in cuenta.values()):
-            detalle = ", ".join(f"{VARIABLES[c].nombre}: {cuenta[c]}" for c in variables)
-            raise _Rechazo(
-                f"Ninguna variable llega a {MIN_MESES} meses con dato ({detalle}): hacen falta al menos {MIN_MESES}"
-            )
+            partes = [f"{VARIABLES[c].nombre} en {cuenta[c]} mes{'es' if cuenta[c] != 1 else ''}" for c in variables]
+            detalle = partes[0] if len(partes) == 1 else f"{', '.join(partes[:-1])} y {partes[-1]}"
+            alguna = "" if len(partes) == 1 else " de alguna de ellas"
+            raise _Rechazo(f"Tu planilla tiene {detalle}: hacen falta al menos {MIN_MESES} meses{alguna}")
 
         # Posible hueco: más de 6 meses seguidos con 0 mm.
         for clave in variables:
