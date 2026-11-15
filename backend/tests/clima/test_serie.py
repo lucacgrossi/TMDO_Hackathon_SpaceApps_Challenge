@@ -51,6 +51,27 @@ def test_lluvia_y_balance_redondeados(s, clima):
         assert fila.balance_mm == round(c.balance_total_mm)
 
 
+def test_cada_campana_trae_sus_12_meses(s, clima):
+    for fila, c in zip(s.campanas, clima.campanas, strict=True):
+        m = fila.mensual
+        assert m is not None
+        assert m.lluvia_mm == [round(v, 1) for v in c.lluvia_mm]
+        assert m.t_min_c == [round(v, 1) for v in c.t_min_c]
+        assert m.t_max_c == [round(v, 1) for v in c.t_max_c]
+        assert m.et0_mm == [round(v, 1) for v in c.et0_mm]
+        assert m.balance_mm == [round(v, 1) for v in c.balance_mm]
+        # Los meses cierran con el total de la campaña (salvo redondeo)
+        assert abs(sum(m.lluvia_mm) - fila.lluvia_mm) <= 1.5
+        assert abs(sum(m.balance_mm) - fila.balance_mm) <= 1.5
+
+
+def test_meses_con_indice_0_enero(s, clima):
+    # Río Cuarto: enero es de lo más lluvioso y julio de lo más seco, en todas las campañas juntas
+    lluvia = [sum(c.mensual.lluvia_mm[i] for c in s.campanas) for i in range(12)]
+    assert lluvia[0] > 3 * lluvia[6]
+    assert all(c.mensual.t_max_c[0] > c.mensual.t_max_c[6] for c in s.campanas)
+
+
 def test_tipos_coinciden_con_tipos_de_anio(s, clima):
     t = clima.tipos_de_anio
     por_tipo = {tipo: [c.campana for c in s.campanas if c.tipo == tipo] for tipo in ind.TIPOS}
@@ -91,6 +112,8 @@ def test_sin_et0_el_balance_va_vacio(monkeypatch):
     s = se.serie_anual(ind.calcular(_serie_power(), LAT_DEMO, LON_DEMO))
     assert s is not None and len(s.campanas) == 30
     assert all(c.balance_mm is None for c in s.campanas)
+    assert all(c.mensual.et0_mm is None and c.mensual.balance_mm is None for c in s.campanas)
+    assert all(len(c.mensual.lluvia_mm) == 12 for c in s.campanas)
     assert all(c.tipo in ind.TIPOS for c in s.campanas)
 
 

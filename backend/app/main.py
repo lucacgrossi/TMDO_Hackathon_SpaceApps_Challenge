@@ -1,5 +1,5 @@
 """
-API de Field Shift (dueño: Back 1).
+API de AgroPixel (dueño: Back 1).
 
 Correr desde `backend/`:
     py -m uvicorn app.main:app --reload --port 8000
@@ -24,7 +24,7 @@ from app.api.rutas import router
 log = logging.getLogger("fieldshift")
 
 app = FastAPI(
-    title="Field Shift API",
+    title="AgroPixel API",
     description="Compara la rotación actual con 3 alternativas usando 30 campañas de datos de NASA.",
     version="0.1.0",
 )
