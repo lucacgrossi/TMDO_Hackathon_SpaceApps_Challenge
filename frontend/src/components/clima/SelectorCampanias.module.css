@@ -1,8 +1,8 @@
 .barras {
   display: flex;
-  align-items: flex-end;
-  gap: 4px;
-  height: 120px;
+  align-items: stretch;
+  gap: 0;
+  height: 128px;
   margin: 12px 0 4px;
 }
 
@@ -13,26 +13,21 @@
   border: 0;
   border-radius: 0;
   cursor: pointer;
-  background: var(--normal, #a8a29e);
+  position: relative;
   transform-origin: bottom;
   transition: transform 140ms var(--ease-out);
 }
 
 .barra:active:not(:disabled) {
-  transform: scale(0.94);
+  transform: scaleY(0.96);
 }
 
-.barra[data-tipo="seco"] {
-  background: var(--seco, #c0703a);
-}
-
-.barra[data-tipo="humedo"] {
-  background: var(--humedo, #2c7fb8);
-}
-
+/* La elegida se separa de las vecinas con un borde de papel y otro de noche. */
 .barra[aria-pressed="true"] {
-  outline: 2px solid var(--noche, #14202b);
-  outline-offset: 2px;
+  z-index: 1;
+  box-shadow:
+    0 0 0 2px var(--papel, #fff),
+    0 0 0 4px var(--noche, #14202b);
 }
 
 .barra:focus-visible {
@@ -65,8 +60,23 @@
 
 .extremos {
   justify-content: space-between;
+  align-items: center;
   font-size: 12px;
   line-height: 16px;
+}
+
+/* Escala de las franjas: del seco al húmedo, pasando por lo común */
+.escala {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rampa {
+  width: 96px;
+  height: 8px;
+  background: linear-gradient(90deg, var(--seco, #c0703a), var(--papel, #fff), var(--humedo, #2c7fb8));
+  border: 1px solid var(--line, #dce2d6);
 }
 
 .motivo {

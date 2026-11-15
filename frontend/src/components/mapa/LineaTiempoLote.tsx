@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import type { Capas, VistoPorSatelite } from "@/lib/contrato";
-import { fmt } from "@/lib/formato";
+import { fmtNdvi } from "@/lib/formato";
 import { lineaTiempo, NOTA_MODIS } from "@/lib/lineaTiempo";
 import css from "./LineaTiempoLote.module.css";
 
@@ -72,7 +72,7 @@ export default function LineaTiempoLote({
                 onMes(m.mes);
               }}
             >
-              <span className={css.valor}>{m.ndvi == null ? "–" : fmt(m.ndvi, 2)}</span>
+              <span className={css.valor}>{m.ndvi == null ? "–" : fmtNdvi(m.ndvi)}</span>
               <span
                 className={m.ndvi == null ? `${css.barra} ${css.sinDato}` : css.barra}
                 style={{

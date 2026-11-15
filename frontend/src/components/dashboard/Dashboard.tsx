@@ -1,6 +1,6 @@
 "use client";
 
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect } from "react";
 import ClimaHistorico from "@/components/clima/ClimaHistorico";
 import SeccionMapa from "@/components/mapa/SeccionMapa";
 import HojaImpresion from "@/components/resultados/HojaImpresion";
@@ -8,6 +8,7 @@ import MenuCompartir from "@/components/resultados/MenuCompartir";
 import Rotaciones from "@/components/resultados/Rotaciones";
 import Boton from "@/components/comunes/Boton";
 import type { Seccion } from "@/lib/app";
+import { alSalir } from "@/lib/avisoRecarga";
 import type { Salida } from "@/lib/contrato";
 import { TEXTO_DESACTUALIZADO, fichaDelLote, itemMenu } from "@/lib/dashboard";
 import BarraLateral from "./BarraLateral";
@@ -49,6 +50,12 @@ function contenido(seccion: Seccion, salida: Salida): ReactNode {
 export default function Dashboard({ seccion, onCambiarSeccion, onEditar, salida, desactualizado }: PropsDashboard) {
   const item = itemMenu(seccion);
   const idTitulo = `titulo-${seccion}`;
+
+  // Recargar o cerrar la pestaña pierde el análisis (no se guarda nada): el navegador pide confirmar
+  useEffect(() => {
+    window.addEventListener("beforeunload", alSalir);
+    return () => window.removeEventListener("beforeunload", alSalir);
+  }, []);
 
   return (
     <div className={css.dashboard}>

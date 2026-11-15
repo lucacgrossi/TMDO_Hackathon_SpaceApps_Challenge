@@ -228,3 +228,22 @@ def test_erosion_del_lote_usa_la_media_de_meses_por_pixel():
                     {**_pendiente(), "mapa": pend, "grilla": g})
     assert r["erosion"]["meses_bajos_medio_pixel"] == 4.0 and r["erosion"]["valor"] == 2.4
     assert r["erosion_mapa"]["resumen"]["media"] == 6.0   # 1,5 % × 4 meses de promedio
+
+
+# --- Reporte QA del 15/11 ---------------------------------------------------------------------------
+
+def test_nota_de_erosion_sin_referencias_internas():
+    """H-012: la nota de la erosión por píxel decía "a validar por la persona 3"."""
+    pend, bajos, g, _ = _capas_px(2.0, 4.0, LOTE_L)
+    elev = {**_pendiente(), "mapa": pend, "grilla": g}
+    r = capas.armar({**_ndvi(MESES), "meses_bajos_mapa": bajos, "grilla": g}, elev)
+    for texto in (r["erosion"]["nota"], r["erosion_mapa"]["nota"]):
+        assert "persona" not in texto and "a validar" not in texto
+    assert "Escala de clases provisoria" in r["erosion"]["nota"]
+
+
+def test_nota_de_erosion_del_lote_con_un_mes_en_singular():
+    """H-017: "× 1 meses" → "× 1 mes"."""
+    ndvi_1 = _ndvi(MESES, valor=1)
+    ero = capas.erosion(ndvi_1["visto_por_satelite"], ndvi_1["meses_cobertura_baja"], _pendiente()["pendiente_general"])
+    assert "× 1 mes con NDVI" in ero["nota"] and "1 meses" not in ero["nota"]

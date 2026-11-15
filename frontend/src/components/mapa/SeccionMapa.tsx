@@ -1,10 +1,11 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { dibujoNdvi, estadoCapas, filasFicha, type IdCapaLote, lecturaPixel, moverPixel, rasterDeCapa } from "@/lib/capasLote";
 import type { Salida } from "@/lib/contrato";
 import { useMapaLote } from "@/lib/mapaLote";
+import { type Margenes, margenesLote } from "@/lib/margenesMapa";
 import { useResultadoStore } from "@/lib/resultado";
 import { useEntradas } from "@/lib/store";
 import { useVista } from "@/lib/vista";
@@ -21,6 +22,21 @@ const MapaLote = dynamic(() => import("./MapaLote"), {
   ssr: false,
   loading: () => <div className={css.cargando}>Cargando el mapa…</div>,
 });
+
+const SIN_PANELES: Margenes = { paddingTopLeft: [12, 12], paddingBottomRight: [12, 12] };
+
+/** Pantalla táctil sin mouse (celular, tablet): el inspector se lee tocando el lote. */
+function useTactil(): boolean {
+  const [tactil, setTactil] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: none) and (pointer: coarse)");
+    const actualizar = () => setTactil(mq.matches);
+    actualizar();
+    mq.addEventListener("change", actualizar);
+    return () => mq.removeEventListener("change", actualizar);
+  }, []);
+  return tactil;
+}
 
 /**
  * Sección Mapa del dashboard (S4): el mapa del lote con sus capas del back, el
@@ -42,6 +58,20 @@ export default function SeccionMapa({ salida }: { salida: Salida }) {
   const capaElegida = useMapaLote((s) => s.capa);
   const cambiarCapa = useMapaLote((s) => s.cambiarCapa);
   const [pixel, setPixel] = useState<Pixel | null>(null);
+  const tactil = useTactil();
+
+  // Lienzo del mapa y paneles flotantes: se miden al encuadrar para no tapar el lote (H-020)
+  const lienzo = useRef<HTMLDivElement>(null);
+  const paneles = useRef<(HTMLDivElement | null)[]>([]);
+  const margenes = useCallback((aspecto: number) => {
+    const caja = lienzo.current?.getBoundingClientRect();
+    if (!caja) return SIN_PANELES;
+    const cajas = paneles.current.filter((p): p is HTMLDivElement => p != null).map((p) => p.getBoundingClientRect());
+    return margenesLote(caja, cajas, aspecto);
+  }, []);
+  const panel = (i: number) => (el: HTMLDivElement | null) => {
+    paneles.current[i] = el;
+  };
 
   const capas = useMemo(() => estadoCapas(salida), [salida]);
   const filas = useMemo(() => filasFicha(salida), [salida]);
@@ -64,9 +94,11 @@ export default function SeccionMapa({ salida }: { salida: Salida }) {
 
   // Sin capa raster (Satélite, Celda NASA POWER o NDVI por teselas) no hay
   // píxeles que leer: el inspector no se muestra.
-  const ayuda = conValores
-    ? "Pasá el mouse sobre el lote o usá las flechas con el mapa enfocado para leer un píxel."
-    : "Esta capa no trae valores por píxel (lote grande): se ve la imagen, sin lectura.";
+  const ayuda = !conValores
+    ? "Esta capa no trae valores por píxel (lote grande): se ve la imagen, sin lectura."
+    : tactil
+      ? "Tocá el lote para leer un píxel."
+      : "Pasá el mouse sobre el lote o usá las flechas con el mapa enfocado para leer un píxel.";
 
   return (
     <section className={css.seccion} aria-label="Mapa del lote">
@@ -84,19 +116,30 @@ export default function SeccionMapa({ salida }: { salida: Salida }) {
           }
         }}
       >
-        <MapaLote salida={salida} capa={capa} mes={mes} poligono={poligono} pixel={pixel} onPixel={setPixel} />
-        <div className={css.arribaIzq}>
+        <div ref={lienzo} className={css.lienzo}>
+          <MapaLote
+            salida={salida}
+            capa={capa}
+            mes={mes}
+            poligono={poligono}
+            pixel={pixel}
+            onPixel={setPixel}
+            margenes={margenes}
+          />
+        </div>
+        <div ref={panel(0)} className={css.arribaIzq}>
           <SelectorCapasLote capas={capas} activa={capa} onCambiar={cambiarCapa} />
         </div>
         {raster && (
-          <div className={css.arribaDer}>
+          <div ref={panel(1)} className={css.arribaDer}>
             <InspectorPixel lectura={lectura} ayuda={ayuda} />
           </div>
         )}
-        <div className={css.abajoIzq}>
+        {/* En compu flotan sobre el mapa; debajo de 1100 px van debajo del mapa */}
+        <div ref={panel(2)} className={css.abajoIzq}>
           <LineaTiempoLote visto={salida.visto_por_satelite} capas={salida.capas} mes={mes} onMes={elegirMes} />
         </div>
-        <div className={css.abajoDer}>
+        <div ref={panel(3)} className={css.abajoDer}>
           <LeyendaLote salida={salida} capa={capa} mes={mes} raster={raster} ndvi={ndvi} />
         </div>
       </div>

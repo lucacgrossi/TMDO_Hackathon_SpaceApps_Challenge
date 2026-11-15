@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { esDisponible, type Salida } from "@/lib/contrato";
 import { MOCK_BASE, MOCK_DESCARTADA, MOCK_PLUVIOMETRO, MOCK_SIN_MEZCLA, mockAnalizar } from "@/mocks/analizar";
+import { RIO_CUARTO } from "@/mocks/rio-cuarto";
 
 const puntos = (s: Salida) => s.estrategias.map((e) => ({ id: e.id, puntos: e.puntos, cercania: e.cercania }));
 
@@ -52,12 +53,12 @@ describe("mock de /analizar · variantes", () => {
     expect(mockAnalizar({ noSembrar: ["trigo"] }).estrategias[2].disponible).toBe(true);
   });
 
-  it("pluviómetro de 620 mm: −19 % contra NASA, confianza baja y nota para el agrónomo", () => {
+  it("pluviómetro de 620 mm: −24 % contra NASA, confianza baja y nota para el agrónomo", () => {
     const [c] = MOCK_PLUVIOMETRO.contraste_mediciones;
-    expect(c).toMatchObject({ valor_productor: 620, valor_nasa: 769, diferencia_pct: -19, confianza_resultante: "baja" });
-    expect(c.texto).toBe("Tu pluviómetro: 620 mm/año · NASA: 769 mm (−19 %)");
+    expect(c).toMatchObject({ valor_productor: 620, valor_nasa: 819, diferencia_pct: -24, confianza_resultante: "baja" });
+    expect(c.texto).toBe("Tu pluviómetro: 620 mm/año · NASA: 819 mm (−24 %)");
     expect(MOCK_PLUVIOMETRO.indicadores.lluvia_anual.confianza).toBe("baja");
-    expect(MOCK_PLUVIOMETRO.estrategias[0].riesgos.some((r) => r.includes("difiere 19 %"))).toBe(true);
+    expect(MOCK_PLUVIOMETRO.estrategias[0].riesgos.some((r) => r.includes("difiere 24 %"))).toBe(true);
   });
 
   it("el mock no simula la mezcla en los puntajes y lo dice en lo que falta", () => {
@@ -84,8 +85,8 @@ describe("mock de /analizar · variantes", () => {
     }
   });
 
-  it("decide con la diferencia exacta: 650 mm es −15,5 %, pasa el 15 % y baja la confianza", () => {
-    expect(mockAnalizar({ lluviaAnualMm: 650 }).contraste_mediciones[0].confianza_resultante).toBe("baja");
+  it("decide con la diferencia exacta: 696 mm es −15,02 %, pasa el 15 % y baja la confianza", () => {
+    expect(mockAnalizar({ lluviaAnualMm: 696 }).contraste_mediciones[0].confianza_resultante).toBe("baja");
   });
 
   it("un pluviómetro que coincide (±15 %) deja la confianza como estaba", () => {
@@ -117,5 +118,45 @@ describe("mock de /analizar · variantes", () => {
     mockAnalizar({ lluviaAnualMm: 620 });
     expect(MOCK_BASE.contraste_mediciones).toEqual([]);
     expect(MOCK_BASE.estrategias[0].riesgos.some((r) => r.includes("pluviómetro"))).toBe(false);
+  });
+});
+
+describe("mock de /analizar · lote dibujado (H-019)", () => {
+  // Rectángulo de ~50 ha corrido unos 10 km al norte del lote de la demo
+  const poligono: [number, number][] = [
+    [-33.16, -64.24],
+    [-33.16, -64.2317],
+    [-33.1661, -64.2317],
+    [-33.1661, -64.24],
+  ];
+  const s = mockAnalizar({ poligono });
+
+  it("copia la superficie del polígono", () => {
+    expect(s.lote.area_ha).toBeGreaterThan(40);
+    expect(s.lote.area_ha).toBeLessThan(60);
+    expect(MOCK_BASE.lote.area_ha).toBe(RIO_CUARTO.lote.area_ha);
+  });
+
+  it("corre las capas y la celda de POWER al centro del polígono", () => {
+    const [[sur, oeste], [norte, este]] = s.capas.grilla!.bounds;
+    expect((sur + norte) / 2).toBeCloseTo(-33.16305, 3);
+    expect((oeste + este) / 2).toBeCloseTo(-64.23585, 3);
+    for (const capa of [s.capas.pendiente_mapa, s.capas.cultivo_mapa, s.capas.erosion_mapa]) {
+      expect(capa?.bounds).toEqual(s.capas.grilla!.bounds);
+    }
+    const dLat = sur - RIO_CUARTO.capas.grilla!.bounds[0][0];
+    expect(s.clima_celda.bbox[1]).toBeCloseTo(RIO_CUARTO.clima_celda.bbox[1] + dLat, 6);
+  });
+
+  it("sin polígono queda la demo tal cual", () => {
+    expect(MOCK_BASE.capas.grilla).toEqual(RIO_CUARTO.capas.grilla);
+  });
+});
+
+describe("mock al día con la demo del back (H-019)", () => {
+  it("usa el período vigente y no arrastra faltantes viejos", () => {
+    expect(MOCK_BASE.periodo_clima).toBe("1996/97 a 2025/26");
+    expect(MOCK_BASE.informacion_falta).not.toContain("Serie por campaña");
+    expect(MOCK_BASE.serie_anual).not.toBeNull();
   });
 });

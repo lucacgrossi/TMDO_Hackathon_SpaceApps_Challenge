@@ -56,7 +56,7 @@ def test_1_excel_espanol():
     # Tres lluvias el 09/12/2021 y otra el 08 y el 22: se suman.
     assert por_mes(r)["2021-12"].lluvia_mm == pytest.approx(70.5 + 12 + 7.5 + 45)
     assert len(s.meses) == 24
-    assert s.filas_leidas == 34 and s.filas_usadas == 33
+    assert s.filas_leidas == 33 and s.filas_usadas == 33  # sin el encabezado (H-023)
 
 
 # 2 · Google Sheets en inglés: `,`, punto decimal, aaaa-mm-dd
@@ -94,7 +94,7 @@ def test_4_mensual():
     assert s.campanas_completas == {"lluvia_mm": ["2022/23"], "t_min_c": ["2022/23"], "t_max_c": ["2022/23"]}
     assert s.lluvia_media_campana_mm == pytest.approx(820)
     assert por_mes(r)["2023-01"].t_max_c == pytest.approx(38)
-    assert s.filas_leidas == 13 and s.filas_usadas == 12
+    assert s.filas_leidas == 12 and s.filas_usadas == 12  # sin el encabezado (H-023)
 
 
 # 5 · Sin encabezado
@@ -154,7 +154,7 @@ def test_8_descartes():
     assert "15: lluvia 350 mm fuera de rango" in texto
     assert "16: temperatura mínima (20 °C) mayor que la máxima (10 °C)" in texto
     assert "17: temperatura máxima 60 °C fuera de rango" in texto
-    assert "18: fecha futura `07/01/2030`" in texto
+    assert '18: fecha futura "07/01/2030"' in texto
     assert por_mes(r)["2023-01"].lluvia_mm == pytest.approx(135.5 + 12)  # la lluvia de la fila 16 sigue
     assert r.serie.campanas_completas == {"lluvia_mm": ["2022/23"]}
 
@@ -183,7 +183,7 @@ def test_10_mezclado():
         (b"fecha;lluvia_mm\r\n", "solo tiene el encabezado"),
         (
             b"mes;lluvia_mm\n2023-01;10\n2023-02;20\n2023-03;30\n2023-04;40\n2023-05;50\n",
-            "Ninguna variable llega a 12 meses con dato (lluvia: 5)",
+            "Tu planilla tiene lluvia en 5 meses: hacen falta al menos 12 meses",
         ),
         (b"fecha;viento\n01/01/2023;3\n", "No se reconoció ninguna columna de medición"),
     ],
@@ -241,7 +241,7 @@ def test_15_columna_extra():
     r = leer("humedad.csv")
     assert r.ok, motivos(r.errores)
     assert r.serie.variables == ["lluvia_mm"]
-    assert "columna `humedad_suelo` ignorada: no se usa en esta versión" in motivos(r.serie.avisos)
+    assert 'columna "humedad_suelo" ignorada: no se usa en esta versión' in motivos(r.serie.avisos)
 
 
 # 16 · Solo temperaturas, sin lluvia
@@ -302,3 +302,70 @@ def test_cli(capsys):
     assert main([str(FIXTURES / "mensual.csv")]) == 0
     assert "Campañas completas de lluvia_mm: 2022/23" in capsys.readouterr().out
     assert main([str(FIXTURES / "mezclado.csv")]) == 1
+
+
+# --- hallazgos del test E2E del 15/11 (docs/qa/reporte-test-e2e-2026-11-15.md) ---------------------------
+
+
+def test_h016_fechas_mes_dia_se_rechazan():
+    # 01/01 a 12/01 se leen como día/mes; 01/13/2023 delata el orden de Estados Unidos.
+    filas = ["fecha;lluvia_mm"] + [f"01/{d:02d}/2023;{d}" for d in range(1, 20)]
+    r = leer_bytes(("\n".join(filas) + "\n").encode())
+    assert not r.ok and r.serie is None
+    assert r.errores[0].fila == 14
+    assert r.errores[0].motivo.startswith("Las fechas parecen estar en formato mes/día; usá día/mes")
+    assert '"01/13/2023"' in r.errores[0].motivo
+
+
+def test_h016_mas_del_20_por_ciento_de_fechas_inexistentes_se_rechaza():
+    # 12 meses válidos y 4 fechas que no existen (31/02, 30/02...): 4 de 16 = 25 %.
+    filas = ["fecha;lluvia_mm"] + [f"15/{m:02d}/2022;{m * 10}" for m in range(1, 13)]
+    filas += ["31/02/2022;5", "30/02/2022;5", "31/04/2022;5", "31/06/2022;5"]
+    r = leer_bytes(("\n".join(filas) + "\n").encode())
+    assert not r.ok
+    assert "Las fechas parecen estar en formato mes/día; usá día/mes: 4 de 16 filas" in motivos(r.errores)
+
+
+def test_h016_pocas_fechas_inexistentes_se_descartan_y_sigue():
+    filas = ["fecha;lluvia_mm"] + [f"15/{m:02d}/2022;{m * 10}" for m in range(1, 13)] + ["31/02/2022;5"]
+    r = leer_bytes(("\n".join(filas) + "\n").encode())
+    assert r.ok, motivos(r.errores)
+    assert 'la fecha "31/02/2022" no existe: fila descartada' in motivos(r.serie.avisos)
+
+
+def test_h022_mensaje_de_pocos_meses_en_singular_y_con_varias_variables():
+    r = leer_bytes(b"fecha;lluvia_mm\n15/01/2023;32,5\n")
+    assert motivos(r.errores) == "None: Tu planilla tiene lluvia en 1 mes: hacen falta al menos 12 meses"
+    r = leer_bytes(b"mes;lluvia_mm;t_min_c\n2023-01;10;\n2023-02;20;15\n2023-03;30;14\n")
+    assert (
+        "Tu planilla tiene lluvia en 3 meses y temperatura mínima en 2 meses: hacen falta al menos 12 meses "
+        "de alguna de ellas"
+    ) in motivos(r.errores)
+
+
+def test_h022_la_plantilla_descargable_se_acepta_tal_cual():
+    plantilla = Path(__file__).parents[3] / "frontend" / "public" / "plantillas" / "mediciones.csv"
+    r = leer_planilla(plantilla.read_bytes(), plantilla.name, hoy=HOY)
+    assert r.ok, motivos(r.errores)
+    assert r.serie.campanas_completas.get("lluvia_mm")
+
+
+def test_h023_filas_leidas_no_cuenta_el_encabezado():
+    r = leer("mensual.csv")
+    assert r.serie.filas_leidas - r.serie.filas_usadas == 0  # nada descartado → la vista previa no dice "1 fila"
+
+
+def test_mensajes_sin_comillas_invertidas():
+    filas = ["fecha;lluvia_mm;napa"] + [f"15/{m:02d}/2022;{m * 10};1" for m in range(1, 13)]
+    filas += ["15/01/2022;mucho;1", "xx;3;1", "15/01/2030;1;1"]
+    r = leer_bytes(("\n".join(filas) + "\n").encode())
+    assert r.ok, motivos(r.errores)
+    assert "`" not in motivos(r.serie.avisos)
+
+
+def test_h023_filas_sin_medicion_se_avisan_para_que_cierren_las_descartadas():
+    filas = ["mes;lluvia_mm;t_min_c"] + [f"2022-{m:02d};{m * 10};" for m in range(1, 13)] + ["2023-01;;", "2023-02;-;"]
+    r = leer_bytes(("\n".join(filas) + "\n").encode())
+    assert r.ok, motivos(r.errores)
+    assert r.serie.filas_leidas == 14 and r.serie.filas_usadas == 12
+    assert "2 filas tienen fecha pero ninguna medición: no se usan" in motivos(r.serie.avisos)

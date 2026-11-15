@@ -97,7 +97,7 @@ Productor con experiencia y agrónomo o asesor. Conocen el agro; lo que puede se
 
 **Marcar lote:** solo el mapa satelital. Buscador (lugar, coordenadas o link de Google Maps), "Usar mi ubicación" y "Probar con el lote de ejemplo (Río Cuarto)". El usuario marca cada esquina del lote (RF1, de 1 a 20.000 ha, sin cruces) y cierra con "Listo".
 
-**Lote + panel de entradas:** el lote queda dibujado y a la derecha aparece un panel con rotación actual, prioridades de 1 a 5, restricciones y "No sembrar", datos del lote y mediciones propias (a mano o planilla CSV). "Ver formato del archivo" abre un modal con el formato de la planilla (`docs/plan-planilla-lluvia.md` §2–3) y la plantilla para descargar. Abajo, fijo, el botón **"Analizar lote"**.
+**Lote + panel de entradas:** el lote queda dibujado y a la derecha aparece un panel con rotación actual, prioridades de 1 a 5, restricciones y "No sembrar", datos del lote y mediciones propias (solo planilla CSV). "Ver formato del archivo" abre un modal con el formato de la planilla (`docs/plan-planilla-lluvia.md` §2–3) y la plantilla para descargar. Abajo, fijo, el botón **"Analizar lote"**.
 
 **Carga:** pantalla propia con la planta pixel del logo que crece y la lista de fuentes que se consultan. No muestra porcentaje: `/analizar` es un solo pedido y no informa progreso. Errores 422 (no es un lote agrícola) y 503 (NASA POWER no responde) con cómo seguir.
 
@@ -123,7 +123,7 @@ Diseño de cada pantalla: `frontend/DESIGN.md` y el Figma.
 - Rotación actual (verano, invierno, campaña pasada).
 - Objetivos con barritas de 1 a 5 ("cuánto te importa cada uno: 1 poco, 5 mucho").
 - Restricciones de lista y "No sembrar".
-- Datos del lote (se encharca, textura) y mediciones propias, plegados: a mano (lluvia anual del pluviómetro y años de registro, materia orgánica) o **"Subir planilla (CSV)"** con su registro de lluvia y, opcionalmente, de temperaturas, con vista previa y plantilla para descargar (RF26).
+- Datos del lote (se encharca, textura) y mediciones propias, plegados: solo **"Subir planilla (CSV)"** con su registro de lluvia y, opcionalmente, de temperaturas, con vista previa y plantilla para descargar (RF26). No hay carga a mano (lluvia anual, años de registro ni materia orgánica).
 
 **Paso 2 · Mapa + comparación:** la caja se achica hacia la derecha, el mapa aparece detrás y vuela al lote (o al lugar elegido, ya en modo dibujo).
 
@@ -154,10 +154,9 @@ Diseño de cada pantalla: `frontend/DESIGN.md` y el Figma.
 **CU2:** con los mismos valores ya calculados, se recalcula la cercanía a los objetivos ponderada por las barritas. No se vuelve a llamar a NASA. **No se elige ganador:** solo cambia el indicador de cercanía.
 
 **CU4:**
-- El productor carga sus mediciones a mano o sube una planilla CSV (RF26).
+- El productor sube sus mediciones en una planilla CSV (RF26). No hay carga a mano.
 - La lluvia del pluviómetro se muestra junto a NASA POWER; con planilla, en las **mismas campañas**. Si la diferencia pasa del 15 %, la confianza de los indicadores de agua baja a **"baja"** y aparece una nota.
 - Con temperaturas: las heladas y el calor de su estación se comparan con NASA por mes. Si difieren en 1 de cada 3 campañas en común o más (mínimo 1), baja la confianza de las heladas.
-- La materia orgánica se muestra en la fila Suelo como "dato del productor" y no puntúa.
 - La lluvia y las temperaturas del productor entran en los puntajes del motor, mezcladas con NASA según los años de registro (RF15). Las probabilidades climatológicas no cambian: salen de las 30 campañas de NASA.
 
 **CU5:** `mailto:` con la comparación en texto armado con una plantilla fija. Plan B: PDF.
@@ -176,7 +175,7 @@ Diseño de cada pantalla: `frontend/DESIGN.md` y el Figma.
 | Calendario 12 meses | Cultivo por mes con días de helada y días > 35 °C marcados | NASA POWER + tabla de cultivos |
 | Meses con cobertura baja | Actual: observado (NDVI). Alternativas: según el calendario | HLS 30 m (MODIS 250 m de respaldo) / calendario |
 | Agua | Balance por temporada (mm) y diferencia vs. actual; pluviómetro al lado si existe | POWER, mezclado con las mediciones del productor si las hay (motor) |
-| Suelo | Aporte de N, rastrojo; materia orgánica del productor como dato (no puntúa) | Tabla de cultivos + productor |
+| Suelo | Aporte de N, rastrojo | Tabla de cultivos |
 | Erosión | Meses con cobertura baja × pendiente (%) | HLS + NASADEM (lluvia del productor en los meses pelados, si la hay) |
 | Ingreso | Cultivos comerciales o forraje (sin precios) | Tabla de cultivos |
 | Riesgo de helada / calor | Meses en conflicto con el calendario del cultivo | POWER |
@@ -267,7 +266,7 @@ La app funciona en cualquier punto; Río Cuarto es el lote precalculado para la 
 | RF12 | Textos de la tabla generados con plantillas fijas a partir de los valores (sin IA) | Must |
 | RF13 | Recalcular la cercanía al mover las barritas, sin volver a llamar a NASA | Must |
 | RF14 | Mostrar lo que vio el satélite: NDVI medio del lote en cada mes de la última campaña (HLS 30 m, `POST /api/data/v1/item/statistics` con el polígono del lote). Mes "pelado" si el NDVI medio es < 0,3 (regla a validar con la persona 3). Si no coincide con la rotación cargada (2 meses o más de diferencia), va a "Revisar con el agrónomo". No cambia los puntajes | Should |
-| RF15 | Mediciones del productor (a mano o con la planilla de RF26). **Al lado** de NASA: "Tu pluviómetro: 650 mm/año · NASA: 819 mm (−21 %)"; con planilla, en las mismas campañas. Diferencia > 15 % → la confianza del agua baja a "baja" y va a "Revisar con el agrónomo". Se muestra un "corregido con tu pluviómetro" informativo (por ejemplo, el umbral de año seco). **Además** (4.3, aprobado por la persona 3), la lluvia y las temperaturas mínima y máxima **cambian los puntajes**: el motor las mezcla con NASA con un peso que crece con los años de registro (1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10 o más 75 %) y lo dice en la evidencia. La materia orgánica es un dato al lado y no puntúa | Should |
+| RF15 | Mediciones del productor, solo con la planilla de RF26 (sin carga a mano). **Al lado** de NASA: "Tu pluviómetro: 650 mm/año · NASA: 819 mm (−21 %)"; con planilla, en las mismas campañas. Diferencia > 15 % → la confianza del agua baja a "baja" y va a "Revisar con el agrónomo". Se muestra un "corregido con tu pluviómetro" informativo (por ejemplo, el umbral de año seco). **Además** (4.3, aprobado por la persona 3), la lluvia y las temperaturas mínima y máxima **cambian los puntajes**: el motor las mezcla con NASA con un peso que crece con los años de registro (1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10 o más 75 %) y lo dice en la evidencia. La materia orgánica no se carga en la app | Should |
 | RF16 | Capa de riesgo de erosión dentro del lote (calculada por el back; ver `docs/plan-armonizacion-capas.md`) | Should |
 | RF17 | Capa NDVI por mes con línea de tiempo sincronizada con el calendario, con la escena que eligió el back | Should |
 | RF18 | Leyenda con valores y escala (las escalas salen del back); tocar una zona muestra el valor y la fuente | Should |
@@ -341,7 +340,7 @@ entrada: {
   no_sembrar: [cultivos],
   anegable: 'si' | 'a_veces' | 'no' | 'no_se',
   textura_suelo: 'arenoso' | 'franco' | 'arcilloso' | 'no_se',
-  mediciones_propias: { lluvia_anual_mm?, anios_registro?, materia_organica_pct?, serie_mensual? (4.3) }
+  mediciones_propias: { lluvia_anual_mm?, anios_registro?, materia_organica_pct?, serie_mensual? (4.3) }  // la app solo manda serie_mensual (planilla); los otros los acepta la API pero la app no los ofrece
 }
 
 salida: {

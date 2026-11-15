@@ -78,6 +78,19 @@ def test_worldcover_caido_no_bloquea_ni_cambia_los_puntajes(cliente, entrada_dem
     assert _falta(s, "ESA WorldCover")
     assert _puntos(s) == _puntos(base)  # WorldCover no entra al motor
     assert s["capas"]["pendiente_mapa"] is not None
+    # H-002/H-013: el motivo dice que no se pudo verificar el lote, en lenguaje del productor.
+    falta = next(f for f in s["informacion_falta"] if "ESA WorldCover" in f)
+    assert "No se pudo verificar que el polígono sea un lote de campo" in falta
+    assert "HTTP" not in falta and "503" not in falta
+
+
+def test_poligono_sin_datos_de_worldcover_da_422(cliente, entrada_demo, red_nasa):
+    """H-002: si WorldCover no tiene tesela para el polígono (por ejemplo, en el mar), se rechaza."""
+    red_nasa["pc"]["sin_escenas"] = {"esa-worldcover"}
+    entrada_demo["lote"]["tipo"] = "dibujado"
+    r = cliente.post("/analizar", json=entrada_demo)
+    assert r.status_code == 422
+    assert r.json()["mensaje"].startswith("No hay datos de uso del suelo para este polígono")
 
 
 def test_et_de_modis_caida_solo_saca_la_et_real(cliente, entrada_demo, red_nasa):

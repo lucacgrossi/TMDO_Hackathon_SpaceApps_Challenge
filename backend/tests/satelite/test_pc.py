@@ -32,7 +32,7 @@ def test_timeout_es_error_pc(monkeypatch):
 
 def test_http_500_es_error_pc(monkeypatch):
     monkeypatch.setattr(pc, "_cliente", _cliente(lambda r: httpx.Response(500)))
-    with pytest.raises(pc.ErrorPC, match="HTTP 500"):
+    with pytest.raises(pc.ErrorPC, match="no responde; probá de nuevo"):
         pc.estadisticas("nasadem", "x", LOTE_EJEMPLO, assets="elevation")
 
 
@@ -49,7 +49,7 @@ def test_http_4xx_no_reintenta(monkeypatch):
         intentos.append(request)
         return httpx.Response(404)
     monkeypatch.setattr(pc, "_cliente", _cliente(handler))
-    with pytest.raises(pc.ErrorPC, match="HTTP 404"):
+    with pytest.raises(pc.ErrorPC, match="no devolvió el dato"):
         pc.buscar("nasadem", LOTE_EJEMPLO)
     assert len(intentos) == 1
 
@@ -134,5 +134,79 @@ def test_raster_en_grilla_forma_distinta_es_error_pc(monkeypatch):
 
 def test_raster_en_grilla_http_es_error_pc(monkeypatch):
     monkeypatch.setattr(pc, "_cliente", _cliente(lambda r: httpx.Response(404)))
-    with pytest.raises(pc.ErrorPC, match="HTTP 404"):
+    with pytest.raises(pc.ErrorPC, match="no devolvió el dato"):
         pc.raster_en_grilla("hls2-s30", "x", _GrillaChica(), assets="B04")
+
+
+# --- H-013: 429, mensajes para el productor y caché (reporte QA del 15/11) ------------------------
+
+
+def test_ningun_mensaje_de_error_tiene_codigos_http(monkeypatch):
+    for estado in (404, 429, 500, 503):
+        monkeypatch.setattr(pc, "_cliente", _cliente(lambda r, e=estado: httpx.Response(e)))
+        monkeypatch.setattr(pc.time, "sleep", lambda s: None)
+        with pytest.raises(pc.ErrorPC) as err:
+            pc.buscar("nasadem", LOTE_EJEMPLO)
+        assert "HTTP" not in str(err.value) and str(estado) not in str(err.value)
+
+
+def test_429_reintenta_despues_de_una_espera_corta(monkeypatch):
+    respuestas = iter([httpx.Response(429, headers={"Retry-After": "30"}),
+                       httpx.Response(200, json={"features": [{"id": "a"}]})])
+    esperas = []
+    monkeypatch.setattr(pc, "_cliente", _cliente(lambda r: next(respuestas)))
+    monkeypatch.setattr(pc.time, "sleep", esperas.append)
+    assert pc.buscar("hls2-s30", LOTE_EJEMPLO) == [{"id": "a"}]
+    assert esperas == [pc.ESPERA_MAX_429]  # Retry-After de 30 s se recorta a la espera máxima
+
+
+def test_429_dos_veces_dice_que_esta_saturado(monkeypatch):
+    intentos = []
+
+    def handler(request):
+        intentos.append(request)
+        return httpx.Response(429)
+    monkeypatch.setattr(pc, "_cliente", _cliente(handler))
+    monkeypatch.setattr(pc.time, "sleep", lambda s: None)
+    with pytest.raises(pc.ErrorPC) as err:
+        pc.buscar("hls2-s30", LOTE_EJEMPLO)
+    assert str(err.value) == pc.MENSAJE_SATURADO
+    assert "saturado; probá de nuevo en un minuto" in str(err.value)
+    assert len(intentos) == pc.REINTENTOS + 1
+
+
+def test_cache_devuelve_lo_mismo_sin_volver_a_pedir(monkeypatch):
+    monkeypatch.setattr(pc, "CACHE_ACTIVA", True)
+    pedidos = []
+
+    def handler(request):
+        pedidos.append(request)
+        return httpx.Response(200, json={"features": [{"id": f"a{len(pedidos)}"}]})
+    monkeypatch.setattr(pc, "_cliente", _cliente(handler))
+    primero = pc.buscar("hls2-s30", LOTE_EJEMPLO, fechas="2025-07-01/2025-07-31")
+    assert pc.buscar("hls2-s30", LOTE_EJEMPLO, fechas="2025-07-01/2025-07-31") == primero
+    assert len(pedidos) == 1
+    # Otro polígono u otras fechas son otro pedido.
+    pc.buscar("hls2-s30", LOTE_EJEMPLO, fechas="2025-08-01/2025-08-31")
+    assert len(pedidos) == 2
+
+
+def test_cache_no_guarda_las_fallas(monkeypatch):
+    monkeypatch.setattr(pc, "CACHE_ACTIVA", True)
+    monkeypatch.setattr(pc.time, "sleep", lambda s: None)
+    respuestas = iter([httpx.Response(429), httpx.Response(429),
+                       httpx.Response(200, json={"features": [{"id": "a"}]})])
+    monkeypatch.setattr(pc, "_cliente", _cliente(lambda r: next(respuestas)))
+    with pytest.raises(pc.ErrorPC):
+        pc.buscar("hls2-s30", LOTE_EJEMPLO)
+    assert pc.buscar("hls2-s30", LOTE_EJEMPLO) == [{"id": "a"}]
+
+
+def test_cache_vence_y_respeta_el_tope_de_bytes(monkeypatch):
+    monkeypatch.setattr(pc, "CACHE_ACTIVA", True)
+    monkeypatch.setattr(pc, "CACHE_MAX_BYTES", 50)
+    pc._a_cache("a", b"x" * 30)
+    pc._a_cache("b", b"y" * 30)  # pasa el tope: se va la más vieja
+    assert pc._de_cache("a") is None and pc._de_cache("b") == b"y" * 30
+    monkeypatch.setattr(pc, "CACHE_TTL_S", -1)
+    assert pc._de_cache("b") is None and pc._cache_bytes == 0

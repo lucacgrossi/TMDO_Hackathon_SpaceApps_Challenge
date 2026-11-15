@@ -15,9 +15,9 @@ describe("línea de la campaña", () => {
     if (!esDisponible(actual)) throw new Error("la actual siempre está disponible");
     const meses = mesesLinea(MOCK_BASE, actual);
     expect(meses.map((m) => m.mes)).toEqual([6, 7, 8, 9, 10, 11, 0, 1, 2, 3, 4, 5]);
-    // Soja + barbecho: helada frecuente de mayo a agosto, calor con soja en diciembre y enero
-    expect(meses.filter((m) => m.heladaFrecuente).map((m) => m.mes)).toEqual([6, 7, 4, 5]);
-    expect(meses.filter((m) => m.calor).map((m) => m.mes)).toEqual([11, 0]);
+    // Soja + barbecho: helada frecuente de junio a septiembre, calor con soja de noviembre a marzo
+    expect(meses.filter((m) => m.heladaFrecuente).map((m) => m.mes)).toEqual([6, 7, 8, 5]);
+    expect(meses.filter((m) => m.calor).map((m) => m.mes)).toEqual([10, 11, 0, 1, 2]);
     expect(meses.some((m) => m.conflictoHelada)).toBe(false);
   });
 

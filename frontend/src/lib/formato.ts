@@ -26,6 +26,27 @@ export const NOMBRE_CULTIVO: Record<CultivoMes, string> = {
   barbecho: "Barbecho (pelado)",
 };
 
+/**
+ * Lo que se lee dentro de un tramo del calendario, en tres largos fijos según
+ * el lugar que haya (siempre los mismos para el mismo cultivo, en las 4
+ * columnas): el nombre completo, una abreviatura de hasta 4 letras y la
+ * inicial. El nombre completo va siempre en el `title` y en el texto para
+ * lectores de pantalla.
+ */
+export const ETIQUETA_TRAMO: Record<CultivoMes, { completa: string; corta: string; inicial: string }> = {
+  soja: { completa: "Soja", corta: "Soja", inicial: "S" },
+  soja2: { completa: "Soja 2ª", corta: "S2ª", inicial: "S" },
+  maiz: { completa: "Maíz", corta: "Maíz", inicial: "M" },
+  girasol: { completa: "Girasol", corta: "Gir.", inicial: "G" },
+  sorgo: { completa: "Sorgo", corta: "Sor.", inicial: "S" },
+  mani: { completa: "Maní", corta: "Maní", inicial: "M" },
+  trigo: { completa: "Trigo", corta: "Tri.", inicial: "T" },
+  cebada: { completa: "Cebada", corta: "Ceb.", inicial: "C" },
+  vicia: { completa: "Vicia", corta: "Vic.", inicial: "V" },
+  centeno: { completa: "Centeno", corta: "Cen.", inicial: "C" },
+  barbecho: { completa: "Pelado", corta: "Pel.", inicial: "P" },
+};
+
 export interface Tramo {
   cultivo: CultivoMes;
   /** Primer y último mes del tramo (0 = enero). */
@@ -80,9 +101,43 @@ export function textoEfecto(efecto: Record<string, number>): string {
     .join(" · ");
 }
 
-/** 1234.5 → "1.235"; con decimales: fmt(0.6, 1) → "0,6". */
+/** Signo menos tipográfico (−) en vez del guion que pone `toLocaleString`; "-0" queda "0". */
+function conMenos(texto: string): string {
+  if (!texto.startsWith("-")) return texto;
+  const resto = texto.slice(1);
+  return /^[0,]+$/.test(resto) ? resto : `−${resto}`;
+}
+
+/** 1234.5 → "1.235"; con decimales: fmt(0.6, 1) → "0,6"; fmt(-15) → "−15". */
 export function fmt(n: number, decimales = 0): string {
-  return n.toLocaleString("es-AR", { minimumFractionDigits: decimales, maximumFractionDigits: decimales });
+  return conMenos(n.toLocaleString("es-AR", { minimumFractionDigits: decimales, maximumFractionDigits: decimales }));
+}
+
+/** Hasta `decimales`, sin ceros de relleno: fmtHasta(0.6, 2) → "0,6"; fmtHasta(-1.25, 1) → "−1,3". */
+export function fmtHasta(n: number, decimales: number): string {
+  return conMenos(n.toLocaleString("es-AR", { maximumFractionDigits: decimales }));
+}
+
+/** NDVI siempre con 2 decimales, igual en la leyenda, la línea de tiempo y el inspector: 0.2 → "0,20". */
+export function fmtNdvi(n: number): string {
+  return fmt(n, 2);
+}
+
+/**
+ * Resolución de una capa para el pie de la leyenda, sin repetir la de la fuente
+ * ni anidar paréntesis. La grilla viene como "1″ (~30 m)":
+ * - ("NASA HLS L30 · 30 m", "30 m", "1″ (~30 m)") → "grilla de 1″" (la fuente ya dice 30 m)
+ * - ("NASADEM", "30 m", "1″ (~30 m)") → "30 m, grilla de 1″"
+ * - ("ESA WorldCover", "10 m (moda a 30 m)", "1″ (~30 m)") → "10 m (moda a 30 m), grilla de 1″ (~30 m)"
+ */
+export function textoResolucion(fuente: string, nativa: string, grilla: string): string {
+  const m = /^(.*?)\s*\(~\s*(.+?)\)\s*$/.exec(grilla);
+  const base = m ? m[1] : grilla;
+  const aprox = m ? m[2] : null;
+  const partes: string[] = [];
+  if (nativa && !fuente.includes(nativa)) partes.push(nativa);
+  if (base) partes.push(aprox && aprox !== nativa ? `grilla de ${base} (~${aprox})` : `grilla de ${base}`);
+  return partes.join(", ");
 }
 
 /** Diferencia con signo: +5, −60, 0. */

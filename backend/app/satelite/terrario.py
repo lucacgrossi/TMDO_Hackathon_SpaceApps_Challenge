@@ -89,11 +89,12 @@ def _bajar(z: int, x: int, y: int) -> np.ndarray:
         except httpx.HTTPError as e:
             error = f"No se pudo conectar con AWS Terrain Tiles ({type(e).__name__})"
             continue
-        if r.status_code != 200:
-            error = f"AWS Terrain Tiles respondió con error HTTP {r.status_code}"
-            if r.status_code < 500:
-                break
-            continue
+        if r.status_code != 200:  # sin códigos HTTP: el motivo llega a "Información que falta"
+            if r.status_code == 429 or r.status_code >= 500:
+                error = "AWS Terrain Tiles no responde; probá de nuevo en un minuto"
+                continue
+            error = "AWS Terrain Tiles no tiene la tesela del lote"
+            break
         try:
             rgb = np.asarray(Image.open(io.BytesIO(r.content)).convert("RGB"), dtype=float)
         except (OSError, ValueError) as e:

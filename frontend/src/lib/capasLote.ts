@@ -12,7 +12,7 @@
  */
 import { centroPixel, claseEscala, colorEscala, valorPixel } from "./capaRaster";
 import type { Bounds, CapaRaster, Confianza, Indicador, Salida } from "./contrato";
-import { MESES } from "./formato";
+import { fmtHasta, fmtNdvi, MESES } from "./formato";
 import { fechaCorta, rasterNdviDelMes } from "./lineaTiempo";
 import { HLS_EXPR, urlTeselasHls } from "./ndvi";
 import { anioDelMes, mesesCampania } from "./ordenCampania";
@@ -137,8 +137,7 @@ export function boundsPixel(capa: CapaRaster, fila: number, columna: number): Bo
 
 /** Número con coma decimal: hasta 2 decimales debajo de 1 y hasta 1 por encima. */
 export function numero(v: number): string {
-  const dec = Math.abs(v) < 1 ? 2 : 1;
-  return v.toLocaleString("es-AR", { maximumFractionDigits: dec });
+  return fmtHasta(v, Math.abs(v) < 1 ? 2 : 1);
 }
 
 /** Capas por clase (cultivo): el valor se lee con la etiqueta de su clase. */
@@ -152,7 +151,7 @@ export function textoValor(capa: CapaRaster, valor: number): string {
     const i = claseEscala(capa.escala, valor);
     return (i == null ? null : capa.escala.etiquetas[i]) ?? numero(valor);
   }
-  if (capa.unidad === "NDVI") return `NDVI ${numero(valor)}`;
+  if (capa.unidad === "NDVI") return `NDVI ${fmtNdvi(valor)}`;
   return `${numero(valor)} ${capa.unidad}`;
 }
 

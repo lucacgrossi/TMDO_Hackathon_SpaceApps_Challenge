@@ -143,7 +143,12 @@ export function despertar(): void {
  * pasa a un `ResultadoPlanilla` con el error para que la vista previa lo muestre igual.
  */
 export async function subirPlanilla(archivo: File): Promise<ResultadoPlanilla> {
-  const error = (motivo: string): ResultadoPlanilla => ({ ok: false, serie: null, errores: [{ fila: null, motivo }] });
+  const error = (motivo: string, sinServidor = false): ResultadoPlanilla => ({
+    ok: false,
+    serie: null,
+    errores: [{ fila: null, motivo }],
+    ...(sinServidor ? { sinServidor } : {}),
+  });
   try {
     const form = new FormData();
     form.append("archivo", archivo);
@@ -153,12 +158,14 @@ export async function subirPlanilla(archivo: File): Promise<ResultadoPlanilla> {
     if ((r.status === 200 || r.status === 422) && cuerpo && typeof cuerpo === "object" && "ok" in cuerpo) {
       return cuerpo as ResultadoPlanilla;
     }
-    return error(mensajeDeError(r.status, cuerpo));
+    // 5xx: el problema es del servidor, no del archivo (H-024).
+    return error(mensajeDeError(r.status, cuerpo), r.status >= 500);
   } catch {
     return error(
       navegadorSinConexion()
         ? "El navegador está sin conexión a internet: no se pudo leer la planilla."
-        : "El servidor de AgroPixel no contestó: no se pudo leer la planilla.",
+        : "El servidor de AgroPixel no contestó: el archivo no se revisó. Probá de nuevo en unos minutos.",
+      true,
     );
   }
 }

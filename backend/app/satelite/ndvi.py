@@ -99,6 +99,11 @@ def _nombre_mes(anio: int, mes: int) -> str:
     return f"{MESES_ES[mes - 1].capitalize()} {anio}"
 
 
+def _meses(n: int) -> str:
+    """Singular con 1 (reporte QA, H-017: decía "faltan 1 meses")."""
+    return f"{n} mes" if n == 1 else f"{n} meses"
+
+
 def _intervalo(anio: int, mes: int) -> str:
     ultimo = calendar.monthrange(anio, mes)[1]
     return f"{anio}-{mes:02d}-01/{anio}-{mes:02d}-{ultimo:02d}"
@@ -299,12 +304,12 @@ def _meses_bajos(meses: list, arrays: list, malla: tuple | None, etiqueta: str) 
                           .sum(axis=0).astype(float), np.nan)
         n_modis = sum(1 for r, _ in con_dato if r["coleccion"] == MODIS_COLECCION)
         nota = (f"Meses de la campaña {etiqueta} en que el píxel tuvo NDVI < {UMBRAL_TEXTO}, sobre "
-                f"{len(con_dato)} meses con dato. Un píxel sin dato en un mes no suma ese mes")
+                f"{_meses(len(con_dato))} con dato. Un píxel sin dato en un mes no suma ese mes")
         if n_modis:
             nota += f". En {n_modis} {'mes' if n_modis == 1 else 'meses'} el dato es MODIS (bloques de 250 m)"
         capa = raster.capa(
             id="meses_bajos", titulo=f"Meses con cobertura baja · {etiqueta}", unidad="meses",
-            fuente=FUENTE_HLS if not n_modis else f"{FUENTE_HLS}; MODIS 250 m en {n_modis} de {len(con_dato)} meses",
+            fuente=FUENTE_HLS if not n_modis else f"{FUENTE_HLS}; MODIS 250 m en {n_modis} de {_meses(len(con_dato))}",
             resolucion_nativa=RESOLUCION_HLS if not n_modis else "30 m (250 m en los meses MODIS)", grilla=g,
             array=conteo, mascara=adentro, escala=escalas.MESES_BAJOS, factor=1.0,
             confianza="alta" if not n_modis and len(con_dato) == 12 else "media", nota=nota, campana=etiqueta)
@@ -398,9 +403,10 @@ def _armar(etiqueta: str, meses: list, faltantes: list) -> dict:
         f"{'mes' if n_modis == 1 else 'meses'}, vía Planetary Computer")
     resolucion = RESOLUCION_HLS if not n_modis else f"30 m (250 m en {n_modis} de 12 meses)"
     completo = len(con_dato) == 12 and not n_modis
-    notas = [f"NDVI medio del lote < {UMBRAL_TEXTO} en {bajos} de {len(con_dato)} meses con dato"]
+    notas = [f"NDVI medio del lote < {UMBRAL_TEXTO} en {bajos} de {_meses(len(con_dato))} con dato"]
     if len(con_dato) < 12:
-        notas.append(f"faltan {12 - len(con_dato)} meses (ver Información que falta)")
+        notas.append(f"{'falta' if 12 - len(con_dato) == 1 else 'faltan'} {_meses(12 - len(con_dato))} "
+                     "(ver Información que falta)")
     if n_modis:
         notas.append("en los meses con MODIS el píxel de 250 m mezcla el lote con los vecinos")
 

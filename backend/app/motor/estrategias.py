@@ -17,19 +17,34 @@ LLUVIA_VERANO_SECO_MM = 400     # C: sorgo en vez de girasol
 PENDIENTE_VICIA_MAX = 3.0       # A: con más pendiente, centeno (más rastrojo)
 # A también pasa a centeno si el invierno de los años secos es corto de lluvia (LLUVIA_INVIERNO_SECO_MM):
 # en años secos la vicia consume más agua que el centeno (INTA Manfredi).
+INVIERNO_COMERCIAL = ("trigo", "cebada")
+# Verano de 2ª (después de trigo o cebada): de diciembre a abril, los meses de la soja de 2ª del catálogo.
+VERANO_DE_SEGUNDA = tuple(C["soja2"]["meses"])
 
 
 def calendario(verano: str, invierno: str | None) -> list[str]:
-    """12 meses (índice 0 = enero). Primero el invierno; el verano pisa los meses que se superponen.
+    """12 meses (índice 0 = enero) sin solapamientos entre el invierno y el verano.
 
-    Después de trigo o cebada, la soja pasa a soja de 2ª.
+    - Después de trigo o cebada, el cultivo de invierno conserva su ciclo completo (junio a noviembre) y
+      el verano va de 2ª: se siembra en diciembre, después de la cosecha, y ocupa de diciembre a abril
+      (`VERANO_DE_SEGUNDA`). La soja pasa a "soja2"; maíz, girasol, sorgo y maní conservan su clave (el
+      contrato no tiene "maíz de 2ª") con esos meses, y `plantillas.py` lo dice en "Por qué aparece".
+    - Una cobertura (vicia o centeno) se seca un mes antes de la siembra de verano: ese mes queda en
+      barbecho (el secado de ~30 días que nombra "A revisar con el agrónomo").
     """
     cal = [BARBECHO] * 12
+    if invierno in INVIERNO_COMERCIAL:
+        v, meses_v = ("soja2" if verano == "soja" else verano), list(VERANO_DE_SEGUNDA)
+    else:
+        v, meses_v = verano, list(C[verano]["meses"])
     if invierno and invierno != BARBECHO:
-        for m in C[invierno]["meses"]:
+        meses_inv = C[invierno]["meses"]
+        if C[invierno]["grupo"] == "cobertura":
+            secado = (meses_v[0] - 1) % 12
+            meses_inv = [m for m in meses_inv if m not in meses_v and m != secado]
+        for m in meses_inv:
             cal[m] = invierno
-    v = "soja2" if verano == "soja" and invierno in ("trigo", "cebada") else verano
-    for m in C[v]["meses"]:
+    for m in meses_v:
         cal[m] = v
     return cal
 
@@ -72,19 +87,25 @@ def armar(entradas: dict, clima: dict, pendiente: float) -> list[dict]:
                                f"pendiente {dec(pendiente)} %, lluvia de invierno en años secos "
                                f"{lluvia_inv_seco:.0f} mm") if cob else ""})
 
-    # B · cultivo de invierno comercial: cebada (gasta menos agua) si el agua pesa 4 o más o si el
-    # invierno de los años secos es corto de lluvia; si no, trigo.
+    # B · cultivo de invierno comercial + soja de 2ª, sea cual sea el verano actual (CLAUDE.md, tabla de
+    # las 4 columnas): cebada (gasta menos agua) si el agua pesa 4 o más o si el invierno de los años
+    # secos es corto de lluvia; si no, trigo. Si ya hace ese cultivo de invierno, se prueba el otro.
     corto = lluvia_inv_seco < LLUVIA_INVIERNO_SECO_MM
     opciones = ["cebada", "trigo"] if w["agua"] >= 4 or corto else ["trigo", "cebada"]
+    if inv in opciones:
+        opciones = [x for x in opciones if x != inv] + [inv]
     win = _elegir(opciones, no)
-    cal_b = calendario(ver, win) if win else None
-    ver_b = nombre("soja2" if ver == "soja" else ver).lower()
-    lista.append({"id": "B", "k": "B", "nombre": "Cultivo de invierno",
-                  "especies": f"{nombre(win)} + {ver_b}" if win else "",
-                  "calendario": cal_b, "on": bool(win),
+    eleccion_b = ""
+    if win:
+        eleccion_b = (f"{nombre(win)}: prioridad agua {w['agua']}, lluvia de invierno en años secos "
+                      f"{lluvia_inv_seco:.0f} mm")
+        if inv in INVIERNO_COMERCIAL and win != inv:
+            eleccion_b += f"; tu rotación ya tiene {nombre(inv).lower()}"
+    lista.append({"id": "B", "k": "B", "nombre": "Cultivo de invierno comercial",
+                  "especies": f"{nombre(win)} + {nombre('soja2').lower()}" if win else "",
+                  "calendario": calendario("soja", win) if win else None, "on": bool(win),
                   "motivo": "" if win else _ni(["trigo", "cebada"]),
-                  "eleccion": (f"{nombre(win)}: prioridad agua {w['agua']}, lluvia de invierno en años "
-                               f"secos {lluvia_inv_seco:.0f} mm") if win else ""})
+                  "eleccion": eleccion_b})
 
     # C · diversificar el verano: sorgo (tolera sequía y calor) si el agua pesa 3 o más o si el
     # verano de los años secos es corto de lluvia; si no, girasol. Nunca repite el verano actual.
