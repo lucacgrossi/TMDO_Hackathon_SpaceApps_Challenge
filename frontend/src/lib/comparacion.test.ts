@@ -1,11 +1,13 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import { cambiosDesdeLaComparacion, fotoDe, listaDeCambios, useComparacion } from "@/lib/comparacion";
-import { ENTRADAS_INICIALES, type Entradas } from "@/lib/entradas";
+import { ENTRADAS_INICIALES, LOTE_DEMO, type Entradas, type LatLng } from "@/lib/entradas";
+import { RESULTADO_EJEMPLO } from "@/lib/planilla";
 import { useEntradas } from "@/lib/store";
 import { useVista } from "@/lib/vista";
 
-const base: Entradas = structuredClone(ENTRADAS_INICIALES);
+const base: Entradas = { ...structuredClone(ENTRADAS_INICIALES), poligono: LOTE_DEMO.map((p) => [...p] as LatLng) };
 const con = (parcial: Partial<Entradas>): Entradas => ({ ...structuredClone(base), ...parcial });
+const CON_PLANILLA: Entradas["mediciones"] = { planilla: { nombre: "lluvia.csv", resultado: RESULTADO_EJEMPLO } };
 
 describe("cambiosDesdeLaComparacion", () => {
   it("sin cambios: vacío", () => {
@@ -20,8 +22,7 @@ describe("cambiosDesdeLaComparacion", () => {
     expect(cambiosDesdeLaComparacion(base, con({ paso: "inicio", ubicacion: { lat: -33, lng: -64, etiqueta: "x" } }))).toEqual([]);
   });
 
-  it("lote: cambia el modo o un vértice del polígono", () => {
-    expect(cambiosDesdeLaComparacion(base, con({ modoLote: "dibujo" }))).toEqual(["lote"]);
+  it("lote: cambia un vértice del polígono", () => {
     const poligono = base.poligono.map((p) => [...p] as [number, number]);
     poligono[2][0] += 0.001;
     expect(cambiosDesdeLaComparacion(base, con({ poligono }))).toEqual(["lote"]);
@@ -55,12 +56,9 @@ describe("cambiosDesdeLaComparacion", () => {
     expect(cambiosDesdeLaComparacion(base, con({ textura: "arenoso" }))).toEqual(["datosLote"]);
   });
 
-  it("mediciones: pluviómetro o materia orgánica, también al borrarlas", () => {
-    expect(cambiosDesdeLaComparacion(base, con({ mediciones: { ...base.mediciones, lluviaAnualMm: 650, materiaOrganicaPct: null } }))).toEqual([
-      "mediciones",
-    ]);
-    const foto = con({ mediciones: { ...base.mediciones, lluviaAnualMm: null, materiaOrganicaPct: 2.4 } });
-    expect(cambiosDesdeLaComparacion(foto, base)).toEqual(["mediciones"]);
+  it("mediciones: subir o quitar la planilla", () => {
+    expect(cambiosDesdeLaComparacion(base, con({ mediciones: CON_PLANILLA }))).toEqual(["mediciones"]);
+    expect(cambiosDesdeLaComparacion(con({ mediciones: CON_PLANILLA }), base)).toEqual(["mediciones"]);
   });
 
   it("mediciones: compara todas las claves, también campos que no están en el tipo (años de registro, serie)", () => {
@@ -81,7 +79,7 @@ describe("cambiosDesdeLaComparacion", () => {
   });
 
   it("varios cambios, siempre en el mismo orden", () => {
-    const actuales = con({ mediciones: { ...base.mediciones, lluviaAnualMm: 650, materiaOrganicaPct: null }, verano: "maiz", modoLote: "dibujo" });
+    const actuales = con({ mediciones: CON_PLANILLA, verano: "maiz", poligono: base.poligono.slice(0, 3) });
     expect(cambiosDesdeLaComparacion(base, actuales)).toEqual(["lote", "rotacion", "mediciones"]);
   });
 });
@@ -117,9 +115,9 @@ describe("useComparacion · foto de las entradas", () => {
 
   it("volver a comparar saca una foto nueva", () => {
     useVista.getState().abrirHoja();
-    useEntradas.getState().cambiar({ mediciones: { ...base.mediciones, lluviaAnualMm: 620, materiaOrganicaPct: null } });
+    useEntradas.getState().cambiar({ mediciones: CON_PLANILLA });
     useComparacion.getState().volverAComparar();
-    expect(useComparacion.getState().foto?.mediciones.lluviaAnualMm).toBe(620);
+    expect(useComparacion.getState().foto?.mediciones.planilla?.nombre).toBe("lluvia.csv");
   });
 
   it("cerrar y abrir de nuevo también es comparar", () => {

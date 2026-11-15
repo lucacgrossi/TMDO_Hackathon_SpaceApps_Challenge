@@ -9,7 +9,7 @@ import Dashboard from "@/components/dashboard/Dashboard";
 import PanelEntradas from "@/components/entradas/PanelEntradas";
 import PantallaMarcar from "@/components/marcar/PantallaMarcar";
 import MapaDinamico from "@/components/mapa/MapaDinamico";
-import { analizarLote, analizarLoteEjemplo, lugarDelLote } from "@/lib/analisis";
+import { analizarLote, lugarDelLote } from "@/lib/analisis";
 import { useApp } from "@/lib/app";
 import { cambiosDesdeLaComparacion, useComparacion } from "@/lib/comparacion";
 import { areaHa } from "@/lib/geo";
@@ -44,10 +44,9 @@ export default function Inicio() {
 /** S3 · Carga: la superficie y el lugar salen de las entradas, sin pedir nada. */
 function Carga() {
   const poligono = useEntradas((s) => s.poligono);
-  const modoLote = useEntradas((s) => s.modoLote);
   const ubicacion = useEntradas((s) => s.ubicacion);
   const superficie = poligono.length >= 3 ? areaHa(poligono) : null;
-  return <PantallaCarga superficieHa={superficie} lugar={lugarDelLote({ modoLote, poligono, ubicacion })} />;
+  return <PantallaCarga superficieHa={superficie} lugar={lugarDelLote({ ubicacion })} />;
 }
 
 /**
@@ -88,7 +87,6 @@ function ErrorDelAnalisis() {
         deLaApp={error.deLaApp}
         onMarcarOtro={volverAMarcar}
         onReintentar={analizarLote}
-        onEjemplo={analizarLoteEjemplo}
         onCerrar={cerrarError}
       />
     </div>

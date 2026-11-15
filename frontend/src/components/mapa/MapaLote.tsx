@@ -3,16 +3,19 @@
 import L from "leaflet";
 import { useEffect, useMemo } from "react";
 import { ImageOverlay, MapContainer, Polygon, Rectangle, TileLayer, Tooltip, useMap, useMapEvents, ZoomControl } from "react-leaflet";
-import { pixelEn, urlImagen } from "@/lib/capaRaster";
+import { pixelEn } from "@/lib/capaRaster";
 import { boundsCelda, boundsPixel, dibujoNdvi, type IdCapaLote, rasterDeCapa } from "@/lib/capasLote";
 import type { Bounds, Salida } from "@/lib/contrato";
 import type { LatLng } from "@/lib/entradas";
+import { dentroDelPoligono } from "@/lib/geo";
 import css from "./MapaLote.module.css";
+import { useImagenRecortada } from "./useImagenRecortada";
 
 /**
  * Mapa de la sección Mapa del dashboard (S4). Solo dibuja lo que manda el back:
  * - Base Esri (maxNativeZoom 17, maxZoom 18, minZoom 5: frontend/CLAUDE.md).
- * - La capa elegida como `ImageOverlay` pixelado sobre sus `bounds`; el NDVI
+ * - La capa elegida como `ImageOverlay` pixelado sobre sus `bounds`, recortada
+ *   al contorno del lote (`useImagenRecortada`): fuera del lote no se dibuja. El NDVI
  *   sin raster va por teselas (escena del back en Planetary Computer o GIBS).
  * - La celda de NASA POWER con `clima_celda.bbox` ([oeste, sur, este, norte]).
  * - El contorno del lote y el recuadro del píxel del inspector.
@@ -50,12 +53,21 @@ function Encuadre({ capa, lote, celda }: { capa: IdCapaLote; lote: L.LatLngBound
   return null;
 }
 
-/** Lee el píxel bajo el mouse en la capa raster activa. */
-function LecturaMouse({ capaRaster, onPixel }: { capaRaster: ReturnType<typeof rasterDeCapa>; onPixel: Props["onPixel"] }) {
+/** Lee el píxel bajo el mouse en la capa raster activa; fuera del lote, nada. */
+function LecturaMouse({
+  capaRaster,
+  poligono,
+  onPixel,
+}: {
+  capaRaster: ReturnType<typeof rasterDeCapa>;
+  poligono: LatLng[];
+  onPixel: Props["onPixel"];
+}) {
   useMapEvents({
     mousemove(e) {
       if (!capaRaster?.valores) return;
-      onPixel(pixelEn(capaRaster, e.latlng.lat, e.latlng.lng));
+      const { lat, lng } = e.latlng;
+      onPixel(dentroDelPoligono(lat, lng, poligono) ? pixelEn(capaRaster, lat, lng) : null);
     },
     mouseout() {
       onPixel(null);
@@ -70,6 +82,7 @@ export default function MapaLote({ salida, capa, mes, poligono, pixel, onPixel }
 
   const ndvi = capa === "ndvi" ? dibujoNdvi(salida, mes) : null;
   const raster = ndvi ? (ndvi.tipo === "raster" ? ndvi.capa : null) : rasterDeCapa(salida, capa, mes);
+  const imagen = useImagenRecortada(raster, poligono, `${capa}-${mes}`);
 
   return (
     <MapContainer
@@ -85,13 +98,13 @@ export default function MapaLote({ salida, capa, mes, poligono, pixel, onPixel }
       <TileLayer url={ESRI} maxZoom={18} maxNativeZoom={17} keepBuffer={4} attribution="Imagen © Esri, Maxar, Earthstar Geographics" />
       <ZoomControl position="bottomright" />
       <Encuadre capa={capa} lote={lote} celda={celdaB} />
-      <LecturaMouse capaRaster={raster} onPixel={onPixel} />
+      <LecturaMouse capaRaster={raster} poligono={poligono} onPixel={onPixel} />
 
-      {raster && (
+      {raster && imagen && (
         // `key` por capa y mes: al cambiar, se crea la imagen nueva con un fundido de 0,2 s.
         <ImageOverlay
           key={`${capa}-${mes}`}
-          url={urlImagen(raster)}
+          url={imagen}
           bounds={raster.bounds}
           opacity={0.9}
           className={css.px}

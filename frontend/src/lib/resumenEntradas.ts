@@ -1,7 +1,6 @@
 import { C } from "./calendario";
 import type { Entradas, LatLng, Objetivo } from "./entradas";
 import { areaHa, formatoNumero } from "./geo";
-import { traeLluvia } from "./planilla";
 
 /**
  * Textos del panel de entradas (S2): el resumen de cada sección plegable
@@ -70,16 +69,9 @@ export function resumenDatosLote(e: Pick<Entradas, "anegable" | "textura">): str
   return `Se encharca: ${ANEGABLE[e.anegable]}; textura: ${TEXTURA[e.textura]}`;
 }
 
-/** "Sin cargar", "Planilla lluvia.csv", "Pluviómetro 820 mm/año (8 años)", "Materia orgánica 1,8 %"… */
+/** "Sin cargar" o "Planilla lluvia.csv": las mediciones llegan solo por planilla. */
 export function resumenMediciones(m: Entradas["mediciones"]): string {
-  const partes: string[] = [];
-  if (m.planilla?.resultado.ok) partes.push(`Planilla ${m.planilla.nombre}`);
-  if (m.lluviaAnualMm !== null && !traeLluvia(m.planilla?.resultado ?? null)) {
-    const anios = m.aniosRegistro !== null ? ` (${m.aniosRegistro} ${m.aniosRegistro === 1 ? "año" : "años"})` : "";
-    partes.push(`Pluviómetro ${formatoNumero(m.lluviaAnualMm)} mm/año${anios}`);
-  }
-  if (m.materiaOrganicaPct !== null) partes.push(`Materia orgánica ${formatoNumero(m.materiaOrganicaPct, 1)} %`);
-  return partes.length ? partes.join("; ") : "Sin cargar";
+  return m.planilla?.resultado.ok ? `Planilla ${m.planilla.nombre}` : "Sin cargar";
 }
 
 /** "a", "a y b", "a, b y c". */

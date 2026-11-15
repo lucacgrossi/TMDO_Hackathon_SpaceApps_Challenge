@@ -1,17 +1,10 @@
 "use client";
 
+import { efectoContraste, nombreIndicador } from "@/lib/contraste";
 import type { ContrasteMedicion, Salida } from "@/lib/contrato";
 import { fmt } from "@/lib/formato";
 import PildoraConfianza from "./PildoraConfianza";
 import css from "./mediciones.module.css";
-
-/** Diferencia con NASA a partir de la cual baja la confianza del agua (RF15). La decide el back. */
-const UMBRAL_DIFERENCIA_PCT = 15;
-
-const NOMBRE_INDICADOR: Record<string, string> = {
-  lluvia_anual: "Lluvia anual",
-  materia_organica: "Materia orgánica",
-};
 
 /** Sin valor de NASA la fila es "dato del productor" (contrato, `ContrasteMedicion`). */
 const esDatoDelProductor = (c: ContrasteMedicion) => c.valor_nasa == null;
@@ -28,15 +21,13 @@ function FilaContraste({ c }: { c: ContrasteMedicion }) {
   const nota = c.corregido_al_lado?.nota.replace(/\s*Solo informativo[^.]*\.?\s*$/i, "");
   return (
     <li className={css.fila} data-difiere={difiere}>
-      <span className={css.indicador}>{NOMBRE_INDICADOR[c.indicador] ?? c.indicador}</span>
+      <span className={css.indicador}>{nombreIndicador(c.indicador)}</span>
       <div className={css.cuerpo}>
         <p className={css.texto}>{c.texto}</p>
         <p className={css.efecto}>
           {/* Solo si baja: si coincide, la confianza queda la que traía el indicador (no siempre "alta") */}
           {difiere && <PildoraConfianza nivel="baja" />}
-          {difiere
-            ? `Difieren más de ${UMBRAL_DIFERENCIA_PCT} %: confianza baja en los datos de agua. Queda anotado en "A revisar con el agrónomo" de la actual.`
-            : `Difieren ${UMBRAL_DIFERENCIA_PCT} % o menos: la confianza del agua no cambia.`}
+          {efectoContraste(c)}
         </p>
         {nota && (
           <p className={css.informativo}>
@@ -53,7 +44,7 @@ function FilaContraste({ c }: { c: ContrasteMedicion }) {
 function FilaDatoProductor({ c }: { c: ContrasteMedicion }) {
   return (
     <li className={css.fila}>
-      <span className={css.indicador}>{NOMBRE_INDICADOR[c.indicador] ?? c.indicador}</span>
+      <span className={css.indicador}>{nombreIndicador(c.indicador)}</span>
       <div className={css.cuerpo}>
         <p className={css.texto}>
           {fmt(c.valor_productor, 1)} {c.unidad} <span className={css.etiqueta}>dato del productor</span>

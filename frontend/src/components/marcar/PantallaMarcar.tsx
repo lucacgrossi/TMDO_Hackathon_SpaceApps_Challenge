@@ -1,15 +1,11 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import Boton from "@/components/comunes/Boton";
 import BuscadorLote from "@/components/entradas/BuscadorLote";
 import BarraDibujo from "@/components/mapa/BarraDibujo";
 import { useApp } from "@/lib/app";
 import { useDibujo } from "@/lib/dibujo";
-import { useEncuadre } from "@/lib/encuadre";
-import { LOTE_DEMO, type LatLng } from "@/lib/entradas";
 import { useMapa } from "@/lib/mapa";
-import { useEntradas } from "@/lib/store";
 import estilos from "./PantallaMarcar.module.css";
 
 /**
@@ -20,10 +16,9 @@ import estilos from "./PantallaMarcar.module.css";
  * El dibujo está activo desde que se entra: cada clic en el mapa marca una
  * esquina. Buscar un lugar solo mueve el mapa hasta ahí (Encuadre).
  *
- * Sale a `configurar` (S2) de dos formas:
- * - Al cerrar un lote válido (Listo, tocar la primera esquina o Enter):
- *   `useDibujo.cierres` sube y acá se escucha.
- * - Con "Probar con el lote de ejemplo".
+ * Sale a `configurar` (S2) al cerrar un lote válido (Listo, tocar la primera
+ * esquina o Enter): `useDibujo.cierres` sube y acá se escucha. No hay lote de
+ * ejemplo: el productor siempre marca el suyo.
  */
 export default function PantallaMarcar() {
   const loteListo = useApp((s) => s.loteListo);
@@ -45,19 +40,6 @@ export default function PantallaMarcar() {
     if (cierres > cierresAlEntrar.current) loteListo();
   }, [cierres, loteListo]);
 
-  function probarEjemplo() {
-    // Primero sale del dibujo, después carga el lote de Río Cuarto y lo encuadra.
-    useDibujo.setState({ dibujando: false, puntos: [], arrastrando: false });
-    useEntradas.getState().cambiar({
-      modoLote: "demo",
-      ubicacion: null,
-      poligono: LOTE_DEMO.map((p) => [...p] as LatLng),
-    });
-    useMapa.getState().cambiarMapa({ loteVisible: true, marcaVisible: false });
-    useEncuadre.getState().pedirEncuadre(0.3);
-    loteListo();
-  }
-
   return (
     <>
       <section className={estilos.caja} aria-labelledby="titulo-marcar">
@@ -73,12 +55,6 @@ export default function PantallaMarcar() {
           Hacé clic en el mapa en cada esquina del lote. Si está lejos, buscalo primero.
         </p>
         <BuscadorLote />
-        <div className={estilos.separador} aria-hidden="true">
-          o
-        </div>
-        <Boton variante="secundario" ancho="completo" onClick={probarEjemplo}>
-          Probar con el lote de ejemplo (Río Cuarto)
-        </Boton>
         <p className={estilos.fuente}>Imagen satelital y búsqueda de lugares: Esri.</p>
       </section>
       <BarraDibujo />

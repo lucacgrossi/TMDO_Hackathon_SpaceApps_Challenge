@@ -2,11 +2,7 @@
 
 import { useApp, type ErrorAnalisis, type Evento } from "./app";
 import { useComparacion } from "./comparacion";
-import { useDibujo } from "./dibujo";
-import { useEncuadre } from "./encuadre";
-import { LOTE_DEMO, type Entradas, type LatLng } from "./entradas";
-import { mismoPoligono } from "./geo";
-import { useMapa } from "./mapa";
+import type { Entradas } from "./entradas";
 import { useResultadoStore, type Resultado } from "./resultado";
 import { useEntradas } from "./store";
 
@@ -45,12 +41,10 @@ export function eventoDeResultado(r: Resultado): Evento | null {
 }
 
 /**
- * "Lote de 94,9 ha cerca de Río Cuarto": dónde está el lote, con lo que ya
- * está en las entradas. El de ejemplo es Río Cuarto; uno dibujado, el lugar
+ * "Lote de 94,9 ha cerca de Alcira Gigena": dónde está el lote, con el lugar
  * que se buscó. Sin lugar buscado (o con el GPS), null: la frase se acorta.
  */
-export function lugarDelLote(e: Pick<Entradas, "modoLote" | "poligono" | "ubicacion">): string | null {
-  if (e.modoLote === "demo" && mismoPoligono(e.poligono, LOTE_DEMO)) return "cerca de Río Cuarto";
+export function lugarDelLote(e: Pick<Entradas, "ubicacion">): string | null {
   const u = e.ubicacion;
   if (!u || u.precisionM != null || !u.etiqueta.trim()) return null;
   return `cerca de ${u.etiqueta.trim()}`;
@@ -67,22 +61,6 @@ export function analizarLote(): void {
   app.analizar();
   // Foto nueva de las entradas → resultado.ts pide /analizar (y aborta uno anterior).
   useComparacion.getState().volverAComparar();
-}
-
-/**
- * "Probar con el lote de ejemplo" (S3b): carga el lote de Río Cuarto, lo
- * encuadra y lo analiza. Lo mismo que hace S1 con su botón de ejemplo.
- */
-export function analizarLoteEjemplo(): void {
-  useDibujo.setState({ dibujando: false, puntos: [], arrastrando: false });
-  useEntradas.getState().cambiar({
-    modoLote: "demo",
-    ubicacion: null,
-    poligono: LOTE_DEMO.map((p) => [...p] as LatLng),
-  });
-  useMapa.getState().cambiarMapa({ loteVisible: true, marcaVisible: false });
-  useEncuadre.getState().pedirEncuadre(0.3);
-  analizarLote();
 }
 
 // Cada resultado nuevo mueve el flujo, pero solo mientras se espera uno: una

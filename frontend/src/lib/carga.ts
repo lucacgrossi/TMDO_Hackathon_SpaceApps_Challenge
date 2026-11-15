@@ -56,7 +56,7 @@ export const CONSULTAS: readonly { dato: string; detalle: string; fuente: string
   },
 ];
 
-export type AccionError = "marcar" | "reintentar" | "ejemplo";
+export type AccionError = "marcar" | "reintentar";
 
 export interface TextosError {
   titulo: string;
@@ -68,38 +68,36 @@ export interface TextosError {
 /**
  * Qué pasó y cómo seguir según el código de `/analizar` (api-frontend.md §4.2).
  * 422: el polígono no es un lote agrícola. 503: NASA POWER no respondió.
- * Cualquier otro (500, red caída, tiempo agotado): solo "Probar de nuevo". El
- * lote de ejemplo no se ofrece porque su respaldo precalculado lo da el back,
- * y si el back no responde también falla.
+ * Cualquier otro (500, red caída, tiempo agotado): solo "Probar de nuevo".
  * `deLaApp` (422 con `{detail}`): el pedido no cumplió el esquema; reintentar
- * no lo arregla, así que se ofrece el lote de ejemplo o marcar de nuevo.
+ * no lo arregla, así que solo se ofrece marcar de nuevo.
+ * No hay lote de ejemplo: el productor siempre marca el suyo.
  */
 export function textosError(codigo: number, deLaApp = false): TextosError {
   if (deLaApp) {
     return {
       titulo: "No se pudo armar el pedido del análisis",
-      comoSeguir: "Probá con el lote de ejemplo de Río Cuarto o volvé a marcar el lote.",
-      acciones: ["ejemplo", "marcar"],
+      comoSeguir: "Volvé a marcar el lote. Si se repite, es un error de la app y no de tu lote.",
+      acciones: ["marcar"],
     };
   }
   if (codigo === 422) {
     return {
       titulo: "Este polígono no parece un lote agrícola",
-      comoSeguir: "Marcá otro lote sobre un campo cultivado o probá con el lote de ejemplo de Río Cuarto.",
-      acciones: ["marcar", "ejemplo"],
+      comoSeguir: "Marcá otro lote sobre un campo cultivado.",
+      acciones: ["marcar"],
     };
   }
   if (codigo === 503) {
     return {
       titulo: "NASA POWER no responde",
-      comoSeguir:
-        "Probá de nuevo en unos minutos. El lote de ejemplo usa datos precalculados y anda sin NASA POWER.",
-      acciones: ["reintentar", "ejemplo"],
+      comoSeguir: "Probá de nuevo en unos minutos.",
+      acciones: ["reintentar"],
     };
   }
   return {
     titulo: "No se pudo terminar el análisis",
-    comoSeguir: "Revisá la conexión y probá de nuevo en unos segundos. Si sigue, avisá al equipo.",
+    comoSeguir: "Revisá la conexión y probá de nuevo en unos segundos.",
     acciones: ["reintentar"],
   };
 }
@@ -108,5 +106,4 @@ export function textosError(codigo: number, deLaApp = false): TextosError {
 export const ETIQUETAS_ACCION: Record<AccionError, string> = {
   marcar: "Marcar otro lote",
   reintentar: "Probar de nuevo",
-  ejemplo: "Probar con el lote de ejemplo",
 };

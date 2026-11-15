@@ -28,7 +28,7 @@ const iconoRotulo = L.divIcon({
 export default function CapaClima() {
   const activa = useMapa((s) => s.capa === "clima");
   const poligono = useEntradas((s) => s.poligono);
-  if (!activa) return null;
+  if (!activa || poligono.length < 3) return null;
 
   const celda = celdaPower(centro(poligono));
   return (

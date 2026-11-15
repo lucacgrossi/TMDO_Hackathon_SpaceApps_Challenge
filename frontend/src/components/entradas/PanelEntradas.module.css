@@ -96,6 +96,13 @@
   font-variant-numeric: tabular-nums;
 }
 
+.ayudaLote {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
 /* Celu (mismo corte que el mapa del prototipo): el panel va debajo del mapa */
 @media (max-width: 900px) {
   .panel {

@@ -41,6 +41,8 @@ export default function Encuadre() {
   /** focus() del prototipo: encuadra el lote (con aire opcional) sin animación. */
   const encuadrar = useRef((aire = 0) => {
     mapa.invalidateSize();
+    // En S1, antes de marcar el lote, no hay nada que encuadrar.
+    if (useEntradas.getState().poligono.length < 3) return;
     mapa.fitBounds(limitesLote(aire), { ...margenes(), maxZoom: ZOOM_LOTE });
   });
 
@@ -59,7 +61,7 @@ export default function Encuadre() {
     };
   }, []);
 
-  // Pedidos que llegan desde el panel (por ejemplo, "Lote de ejemplo").
+  // Pedidos de encuadre (por ejemplo, al cerrar el lote dibujado).
   useEffect(() => {
     if (pedido) encuadrar.current(pedido.aire);
   }, [pedido]);

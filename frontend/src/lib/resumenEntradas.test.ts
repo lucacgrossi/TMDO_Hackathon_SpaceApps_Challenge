@@ -44,18 +44,9 @@ describe("resúmenes del panel de entradas", () => {
     expect(resumenDatosLote({ anegable: "a_veces", textura: "no_se" })).toBe("Se encharca: a veces; textura: no sé");
   });
 
-  it("mediciones: sin cargar, a mano y con planilla", () => {
+  it("mediciones: sin cargar o con planilla (no hay carga a mano)", () => {
     expect(resumenMediciones(SIN_MEDICIONES)).toBe("Sin cargar");
-    expect(resumenMediciones({ ...SIN_MEDICIONES, lluviaAnualMm: 820, aniosRegistro: 8 })).toBe(
-      "Pluviómetro 820 mm/año (8 años)",
-    );
-    expect(resumenMediciones({ ...SIN_MEDICIONES, lluviaAnualMm: 820, aniosRegistro: 1, materiaOrganicaPct: 1.8 })).toBe(
-      "Pluviómetro 820 mm/año (1 año); Materia orgánica 1,8 %",
-    );
-  });
-
-  it("con una planilla que trae lluvia, el pluviómetro a mano no se resume (manda la planilla)", () => {
-    const m = { ...SIN_MEDICIONES, lluviaAnualMm: 820, planilla: { nombre: "lluvia.csv", resultado: RESULTADO_EJEMPLO } };
+    const m = { ...SIN_MEDICIONES, planilla: { nombre: "lluvia.csv", resultado: RESULTADO_EJEMPLO } };
     expect(resumenMediciones(m)).toBe("Planilla lluvia.csv");
   });
 

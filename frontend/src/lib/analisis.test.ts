@@ -7,7 +7,6 @@ import {
   MENSAJE_PEDIDO_INVALIDO,
 } from "@/lib/analisis";
 import { ESTADO_INICIAL, useApp } from "@/lib/app";
-import { LOTE_DEMO, type LatLng } from "@/lib/entradas";
 import { useResultadoStore } from "@/lib/resultado";
 import { RIO_CUARTO } from "@/mocks/rio-cuarto";
 
@@ -49,26 +48,12 @@ describe("eventoDeResultado", () => {
 });
 
 describe("lugarDelLote", () => {
-  const otro: LatLng[] = [
-    [-31.4, -64.2],
-    [-31.4, -64.1],
-    [-31.5, -64.1],
-  ];
-
-  it("el lote de ejemplo está cerca de Río Cuarto", () => {
-    expect(lugarDelLote({ modoLote: "demo", poligono: LOTE_DEMO, ubicacion: null })).toBe("cerca de Río Cuarto");
-  });
-
-  it("uno dibujado usa el lugar buscado; sin lugar o con el GPS, null", () => {
+  it("usa el lugar buscado; sin lugar o con el GPS, null", () => {
     const ubicacion = { lat: -31.4, lng: -64.2, etiqueta: "Alcira Gigena, Córdoba" };
-    expect(lugarDelLote({ modoLote: "dibujo", poligono: otro, ubicacion })).toBe("cerca de Alcira Gigena, Córdoba");
-    expect(lugarDelLote({ modoLote: "dibujo", poligono: otro, ubicacion: null })).toBeNull();
+    expect(lugarDelLote({ ubicacion })).toBe("cerca de Alcira Gigena, Córdoba");
+    expect(lugarDelLote({ ubicacion: null })).toBeNull();
     const gps = { lat: -31.4, lng: -64.2, etiqueta: "tu ubicación actual", precisionM: 20 };
-    expect(lugarDelLote({ modoLote: "dibujo", poligono: otro, ubicacion: gps })).toBeNull();
-  });
-
-  it("en modo ejemplo pero con el lote movido, no inventa Río Cuarto", () => {
-    expect(lugarDelLote({ modoLote: "demo", poligono: otro, ubicacion: null })).toBeNull();
+    expect(lugarDelLote({ ubicacion: gps })).toBeNull();
   });
 });
 

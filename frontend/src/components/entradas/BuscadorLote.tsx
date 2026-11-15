@@ -11,7 +11,7 @@
  *
  * Qué NO hace: no dibuja nada en el mapa. Solo escribe `ubicacion` (y
  * `modoLote: "dibujo"`) en el store compartido; el mapa la lee y pone la marca.
- * Vive en la caja de S1 (PantallaMarcar), arriba de "Probar con el lote de ejemplo".
+ * Vive en la caja de S1 (PantallaMarcar).
  *
  * La búsqueda (debounce, Esri, teclado) está en el hook compartido
  * `src/lib/useBuscadorLugares.ts`, que también usa el buscador del mapa; la

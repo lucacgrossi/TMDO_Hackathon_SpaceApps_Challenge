@@ -35,6 +35,7 @@ export default function EncuadreCapa() {
     if (capa !== "ndvi") mapa.setMaxZoom(ZOOM_MAX_MAPA);
 
     const poligono = useEntradas.getState().poligono;
+    if (poligono.length < 3) return;
     const lote = L.latLngBounds(poligono);
     const ir = (limites: L.LatLngBounds, maxZoom: number) => {
       mapa.invalidateSize();

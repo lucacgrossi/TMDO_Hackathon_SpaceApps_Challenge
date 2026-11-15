@@ -75,7 +75,7 @@ const salida = useSalidaDashboard(); // null mientras carga o con error
 |---|---|
 | 10:00 | PR de la base (paso 0) mergeado. Persona 5 con el esqueleto del dashboard en un PR |
 | 13:00 | Cada pantalla anda con el mock, en su PR |
-| 15:30 | Todo mergeado en `dev`. Prueba de punta a punta con la API real (Cloud Run) y con el lote de ejemplo sin conexión |
+| 15:30 | Todo mergeado en `dev`. Prueba de punta a punta con la API real (Cloud Run) |
 | 17:00 | `dev` → `main` (persona 3). Prueba en la URL de la demo |
 | 18:00 | Código congelado |
 
@@ -96,4 +96,4 @@ const salida = useSalidaDashboard(); // null mientras carga o con error
 - [ ] El color nunca es la única señal; foco visible; `prefers-reduced-motion`.
 - [ ] Aviso de apoyo visible en el dashboard y en el PDF.
 - [ ] No toca carpetas de otra persona sin avisar; no agrega clases globales nuevas.
-- [ ] Pasa la CI y anda con el mock y con el lote de ejemplo.
+- [ ] Pasa la CI y anda con el mock y con un lote marcado contra la API real.

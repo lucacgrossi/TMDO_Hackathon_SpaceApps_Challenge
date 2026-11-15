@@ -69,11 +69,11 @@ Dos familias, por `next/font/google`:
 ## Flujo y pantallas
 El flujo pasa por cuatro etapas (`etapa` en el estado): **marcar → configurar → cargando → dashboard**. Pantallas de escritorio a 1440 × 900.
 
-1. **Marcar lote (S1).** Solo el mapa (Esri) a pantalla completa. Arriba a la izquierda, una caja con la marca, "Marcá tu lote", el buscador (lugar, coordenadas o link de Google Maps), "Probar con el lote de ejemplo (Río Cuarto)" y "Usar mi ubicación". Abajo al centro, la barra de dibujo: ayuda + Deshacer · Cancelar · Listo. Las esquinas marcadas son cuadrados de 10 px (pixel), el tramo hacia el cursor va punteado.
-2. **Lote marcado + panel de entradas (S2).** El mapa queda a la izquierda con el lote cerrado ("Lote de 94,9 ha") y "Volver a marcar el lote". A la derecha, un panel de 400 px con scroll y **pie fijo**:
+1. **Marcar lote (S1).** Solo el mapa (Esri) a pantalla completa. Arriba a la izquierda, una caja con la marca, "Marcá tu lote", el buscador (lugar, coordenadas o link de Google Maps) y "Usar mi ubicación". No hay lote de ejemplo: el productor siempre marca el suyo, y el mapa arranca en la región pampeana sin ningún lote. Abajo al centro, la barra de dibujo: ayuda + Deshacer · Cancelar · Listo. Las esquinas marcadas son cuadrados de 10 px (pixel), el tramo hacia el cursor va punteado.
+2. **Lote marcado + panel de entradas (S2).** El mapa queda a la izquierda con el lote cerrado ("Lote de 94,9 ha") y "Volver a marcar el lote". Las esquinas del lote se pueden arrastrar para ajustar el borde; al soltar se valida igual que el dibujo y, si no cumple, vuelve atrás con el motivo. A la derecha, un panel de 400 px con scroll y **pie fijo**:
    - Encabezado "Tu lote" con superficie y centro.
    - Secciones plegables, cada una con el resumen de lo cargado cuando está cerrada: Rotación actual · Prioridades (4 sliders 1–5 en bloques) · Restricciones y "No sembrar" · Datos del lote · Mediciones propias.
-   - En Mediciones propias: zona para soltar el CSV, "Ver formato del archivo" (abre el modal) y la carga a mano.
+   - En Mediciones propias: solo la planilla, con la zona para soltar el CSV y "Ver formato del archivo" (abre el modal). No hay carga a mano.
    - Pie fijo: botón principal **"Analizar lote"** y "Consulta NASA POWER, HLS, NASADEM y ESA WorldCover. Suele tardar hasta 30 s."
 3. **Modal "Formato de la planilla" (S2b).** Pestañas Diaria / Mensual con una tabla de ejemplo, qué acepta (codificación, separadores, decimales, fechas, encabezado), valores válidos por variable, límites y "Descargar plantilla" (`public/plantillas/mediciones.csv`). El contenido sale de `../docs/plan-planilla-lluvia.md` §2–3.
 4. **Carga (S3).** Ver "Pantalla de carga".
@@ -99,7 +99,7 @@ Una por columna, siempre las 4, en el orden y color de la tabla.
 - Fondo `--rastrojo`, todo centrado: planta pixel (16 × 16 a ×12), "Analizando tu lote", "Lote de 94,9 ha cerca de Río Cuarto. Suele tardar hasta 30 s; van 12 s." y la lista **"Qué se consulta, en un solo pedido"** (Clima, Vegetación, Relieve, Uso del suelo, Comparación), con la fuente y la resolución de cada una.
 - **Sin barra ni porcentaje, y sin tildes de "listo" por fuente:** la API no informa progreso, así que mostrar avance sería inventar. El único indicador es la planta y el tiempo transcurrido.
 - **Animación:** 5 fotogramas (semilla → brote → 2 hojas → 4 hojas → con vainas), uno cada 1,2 s; el 5 queda fijo hasta la respuesta. Con `prefers-reduced-motion` se muestra solo el 4.
-- **Errores (S3b):** card con borde superior `--bad`, la semilla pixel, qué pasó y cómo seguir. 422: "Este polígono no parece un lote agrícola" + Marcar otro lote / Probar con el lote de ejemplo. 503: "NASA POWER no responde" + Probar de nuevo / Probar con el lote de ejemplo.
+- **Errores (S3b):** card con borde superior `--bad`, la semilla pixel, qué pasó y cómo seguir. 422: "Este polígono no parece un lote agrícola" + Marcar otro lote. 503 o sin conexión: "NASA POWER no responde" / "No se pudo terminar el análisis" + Probar de nuevo.
 
 ## Exportar PDF (hoja de impresión)
 "Exportar PDF" llama a `window.print()`. Una hoja `@media print` A4 apaisada (`@page { size: A4 landscape; margin: 12mm }`) muestra solo: logo y "Comparación de rotaciones", la ficha del lote (superficie, centro, campaña, período), la tabla comparativa completa, las fuentes con sus años y resoluciones, la fecha de generación y el aviso de apoyo al pie. Se ocultan la barra lateral, el mapa, las cards y los controles. Sin dependencias nuevas.
@@ -112,7 +112,8 @@ Una por columna, siempre las 4, en el orden y color de la tabla.
 
 ## Estados
 - **Sin dato o confianza baja:** "sin dato" o la píldora de confianza. Nunca un cero ni un valor rellenado. Va a "Información que falta".
-- **Fuente caída:** con el lote de ejemplo, el back devuelve la demo precalculada (`es_mock`); el encabezado lo dice ("Datos precalculados del lote de ejemplo"). Nunca se marca como real.
+- **Fuente caída:** si una respuesta llega marcada `es_mock`, el encabezado lo dice. Nunca se marca como real.
+- **Capas del mapa:** cada raster se recorta al contorno del lote; fuera del lote no se dibuja ni se lee ningún píxel.
 - **Sin conexión al mapa:** aviso centrado "El mapa no puede cargar acá".
 - **Entradas cambiadas después de analizar:** banda `--warn` "Cambiaste entradas después del análisis. Analizá de nuevo para actualizar."
 

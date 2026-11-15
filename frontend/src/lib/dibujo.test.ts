@@ -80,11 +80,11 @@ describe("dibujo · store", () => {
     expect(useDibujo.getState().cierres).toBe(antes + 1);
   });
 
-  it("cancelar con el lote de ejemplo vuelve al modo ejemplo", () => {
+  it("cancelar deja el lote anterior como estaba", () => {
     useDibujo.getState().iniciar(null);
     useDibujo.getState().agregar(CUADRADO[0]);
     useDibujo.getState().cancelar();
-    expect(useEntradas.getState().modoLote).toBe("demo");
     expect(useEntradas.getState().poligono).toEqual(LOTE_DEMO);
+    expect(useDibujo.getState().dibujando).toBe(false);
   });
 });

@@ -10,6 +10,7 @@ import CapaLote from "./CapaLote";
 import CapaNdvi from "./CapaNdvi";
 import CapaPendiente from "./CapaPendiente";
 import Encuadre from "./Encuadre";
+import EsquinasLote from "./EsquinasLote";
 import EncuadreCapa from "./EncuadreCapa";
 import MarcaUbicacion from "./MarcaUbicacion";
 
@@ -29,15 +30,14 @@ import MarcaUbicacion from "./MarcaUbicacion";
  * EncuadreCapa mueve la cámara al cambiar de capa.
  */
 
-/** Centro inicial: el lote de ejemplo de Río Cuarto (setView del prototipo). */
-const CENTRO_DEMO: [number, number] = [-33.2476, -64.2325];
-
 /**
- * Zoom inicial alejado (11): en el paso 1 el mapa "espera atrás" y al pasar al
- * paso 2 vuela hasta el lote (arranque del prototipo final, ~línea 490). Si
- * arrancara cerca, no habría vuelo que mostrar.
+ * Vista inicial: la región pampeana, sin ningún lote marcado. El productor
+ * busca su lugar o se acerca y marca su lote (no hay lote de ejemplo).
  */
-const ZOOM_INICIAL = 11;
+const CENTRO_INICIAL: [number, number] = [-33.5, -62.5];
+
+/** Zoom inicial (7): se ve la región entera; con el buscador se vuela al lugar. */
+const ZOOM_INICIAL = 7;
 
 /**
  * Zoom máximo del mapa. Esri tiene imagen hasta 18 en el lote demo, pero no en
@@ -80,7 +80,7 @@ export default function Mapa() {
           MapContainer no deja poner aria-label, por eso va en este envoltorio. */}
       <div id="map" aria-label="Mapa satelital">
         <MapContainer
-          center={CENTRO_DEMO}
+          center={CENTRO_INICIAL}
           zoom={ZOOM_INICIAL}
           minZoom={5}
           maxZoom={ZOOM_MAX}
@@ -127,6 +127,7 @@ export default function Mapa() {
           <CapaPendiente />
           <CapaClima />
           <CapaLote />
+          <EsquinasLote />
           <CapaDibujo />
           <Encuadre />
           <EncuadreCapa />
