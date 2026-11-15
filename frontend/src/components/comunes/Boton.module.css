@@ -11,7 +11,16 @@
   line-height: 21px;
   text-decoration: none;
   white-space: nowrap;
-  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    transform 140ms var(--ease-out);
+}
+
+/* Respuesta al apretar: el botón se hunde apenas (todos los botones de la app). */
+.boton:active:not(:disabled) {
+  transform: scale(0.97);
 }
 
 .boton:disabled {

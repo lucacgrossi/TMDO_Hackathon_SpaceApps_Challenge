@@ -6,13 +6,22 @@ import css from "./linea.module.css";
 export default function LeyendaLinea() {
   return (
     <div className={`lgd ${css.leyenda}`}>
+      {/* Mismos colores que el calendario de las cards; el barbecho con puntos */}
       <span>
-        <i style={{ background: "var(--cover)" }} />
-        Con cultivo o cobertura
+        <i data-grupo="verano" className={css.muestraTramo} />
+        Cultivo de verano
       </span>
       <span>
-        <i style={{ background: "var(--barbecho)" }} />
-        Pelado
+        <i data-grupo="invierno" className={css.muestraTramo} />
+        Cultivo de invierno
+      </span>
+      <span>
+        <i data-grupo="cobertura" className={css.muestraTramo} />
+        Cobertura
+      </span>
+      <span>
+        <i data-grupo="barbecho" className={css.muestraTramo} />
+        Pelado (barbecho)
       </span>
       <span>
         <i className={css.muestraHelada} />
