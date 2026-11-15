@@ -2,8 +2,9 @@
 
 import type { EstrategiaDisponible, Salida } from "@/lib/contrato";
 import { C } from "@/lib/calendario";
-import { ETIQUETA_TRAMO, fmt, MESES, mesesConAnios, NOMBRE_CULTIVO, rangoMeses, tramosCalendario } from "@/lib/formato";
+import { fmt, LETRA_CULTIVO, MESES, mesesConAnios, NOMBRE_CULTIVO, rangoMeses, tramosCalendario } from "@/lib/formato";
 import { colorNdvi, mesesLinea } from "@/lib/linea";
+import { mesesCampania } from "@/lib/ordenCampania";
 import { meses as unidadMeses } from "@/lib/plural";
 import css from "./linea.module.css";
 
@@ -14,7 +15,8 @@ const INICIAL = ["E", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
  * Línea de la campaña (julio → junio), la del prototipo (`timelineHTML`):
  * - fila de meses: helada frecuente (fondo), helada con cultivo sensible
  *   (anillo) y calor ≥ 35 °C con cultivo de verano (raya arriba);
- * - fila de cultivos: un segmento por tramo, "Pelado" en el barbecho;
+ * - fila de cultivos: un cuadrado por mes con la letra del cultivo (S soja,
+ *   P pelado…; la leyenda de la tabla dice qué es cada una), del color de su grupo;
  * - en la actual, la fila fina de lo que vio el satélite, con la escala del NDVI del mapa.
  * El color nunca es la única señal: cada marca tiene forma propia, título y
  * la línea entera tiene una descripción en texto.
@@ -67,22 +69,12 @@ export default function LineaCampania({
           </div>
         </div>
         <div className="r">
-          <div className="row2">
-            {tramos.map((t) => {
-              const et = ETIQUETA_TRAMO[t.cultivo];
+          <div className={css.mesesCultivo}>
+            {mesesCampania(estrategia.calendario).map(({ mes, nombre, valor }) => {
+              const c = valor ?? "barbecho";
               return (
-                // Mismo alto y tamaño de letra en todos los tramos: se ve el nombre completo, la
-                // abreviatura o la inicial según el ancho (container query), nunca una palabra cortada.
-                <span
-                  key={t.desde}
-                  className={css.tramo}
-                  data-grupo={C[t.cultivo].g}
-                  style={{ flex: t.meses }}
-                  title={`${NOMBRE_CULTIVO[t.cultivo]}: ${rangoMeses(t)} (${t.meses} ${t.meses === 1 ? "mes" : "meses"})`}
-                >
-                  <span className={css.completa}>{et.completa}</span>
-                  <span className={css.corta}>{et.corta}</span>
-                  <span className={css.inicial}>{et.inicial}</span>
+                <span key={mes} className={css.mesCultivo} data-grupo={C[c].g} title={`${nombre}: ${NOMBRE_CULTIVO[c]}`}>
+                  {LETRA_CULTIVO[c]}
                 </span>
               );
             })}
