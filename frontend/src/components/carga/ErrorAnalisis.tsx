@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Boton from "@/components/comunes/Boton";
+import { navegadorSinConexion } from "@/lib/api";
 import { ETIQUETAS_ACCION, textosError, type AccionError } from "@/lib/carga";
 import PlantaPixel from "./PlantaPixel";
 import estilos from "./ErrorAnalisis.module.css";
@@ -23,9 +24,11 @@ interface Props {
 
 /**
  * S3b · Error del análisis: card con borde superior `--bad`, la semilla pixel,
- * qué pasó (`mensaje` del back tal cual) y cómo seguir, con dos acciones.
- * Errores sin disculpas (DESIGN.md, "Lenguaje"). No llama a la API ni al
- * store: las acciones llegan por props.
+ * qué pasó y cómo seguir, con una o dos acciones. Qué pasó: la explicación de
+ * `textosError` si la hay (NASA POWER caído, sin internet) o el `mensaje` del
+ * back tal cual. Sin el código HTTP a la vista (QA H-028). Errores sin
+ * disculpas (DESIGN.md, "Lenguaje"). No llama a la API ni al store: las
+ * acciones llegan por props.
  */
 export default function ErrorAnalisis({
   codigo,
@@ -35,7 +38,11 @@ export default function ErrorAnalisis({
   deLaApp = false,
   onCerrar,
 }: Props) {
-  const textos = textosError(codigo, deLaApp);
+  // Sin respuesta: si el navegador dice que está sin conexión, es internet;
+  // si no, el que no responde es el servidor de AgroPixel.
+  const sinInternet = codigo === 0 && navegadorSinConexion();
+  const textos = textosError(codigo, deLaApp, sinInternet);
+  const quepaso = textos.explicacion ?? mensaje;
   const acciones: Record<AccionError, () => void> = {
     marcar: onMarcarOtro,
     reintentar: onReintentar,
@@ -62,7 +69,7 @@ export default function ErrorAnalisis({
         <h2 id="error-analisis-titulo" className={estilos.titulo}>
           {textos.titulo}
         </h2>
-        {mensaje && <p className={estilos.mensaje}>{mensaje}</p>}
+        {quepaso && <p className={estilos.mensaje}>{quepaso}</p>}
         <p className={estilos.seguir}>{textos.comoSeguir}</p>
         <div className={estilos.acciones}>
           {textos.acciones.map((a, i) => (
@@ -71,7 +78,6 @@ export default function ErrorAnalisis({
             </Boton>
           ))}
         </div>
-        <p className={estilos.codigo}>{codigo > 0 ? `Respuesta del servidor: ${codigo}` : "Sin respuesta del servidor"}</p>
       </div>
     </section>
   );

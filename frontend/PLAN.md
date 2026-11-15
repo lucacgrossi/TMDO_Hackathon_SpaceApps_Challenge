@@ -29,7 +29,7 @@ Un solo PR chico que desbloquea a los demás. Se mergea antes de que nadie toque
 
 ## Persona 4 · Antes del dashboard
 Carpetas: `components/marcar/`, `components/entradas/`, `components/carga/`.
-1. **S1 Marcar lote** (`PantallaMarcar`): mapa solo, caja de buscar o probar, barra de dibujo. Reusa `BuscadorLote`, `CapaDibujo`, `BarraDibujo`, `MapaDinamico`. Al cerrar el polígono o elegir el ejemplo: `etapa = 'configurar'`.
+1. **S1 Marcar lote** (`PantallaMarcar`): mapa solo, caja de buscar, barra de dibujo. Reusa `BuscadorLote`, `CapaDibujo`, `BarraDibujo`, `MapaDinamico`. Al cerrar el polígono: `etapa = 'configurar'`. No hay lote de ejemplo.
 2. **S2 Panel de entradas** (`PanelEntradas` como panel derecho de 400 px con pie fijo): reusa las `Seccion*` con el componente `SeccionPlegable` nuevo y el resumen de cada sección cuando está cerrada. Botón "Analizar lote".
 3. **S2b `ModalFormatoPlanilla`**: pestañas Diaria / Mensual, ejemplo, qué acepta, rangos, límites y "Descargar plantilla". Texto de `../docs/plan-planilla-lluvia.md` §2–3. Foco atrapado y Esc.
 4. **S3 `PantallaCarga`**: planta pixel de 5 fotogramas (bitmaps en el Figma, S3), tiempo transcurrido y la lista "Qué se consulta". Sin porcentaje. **S3b `ErrorAnalisis`** para 422 y 503.

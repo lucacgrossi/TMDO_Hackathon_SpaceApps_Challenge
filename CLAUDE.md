@@ -51,7 +51,7 @@ Responde al desafío *"Field Shift: Adapting Farms with NASA Data"*: comparar ro
 
 **Lote:** es un polígono que dibuja el usuario (de 1 a 20.000 ha) o el lote de ejemplo. Todo lo satelital se calcula sobre el polígono, no sobre un punto.
 
-**Lote de la demo:** zona de Río Cuarto (sur de Córdoba), lote de soja con barbecho invernal (≈ 33,2477° S, 64,2325° O). Su respuesta completa está precalculada en `backend/app/demo/rio_cuarto.json` (`scripts/precalcular_demo.py`; se regenera después de cada cambio de contrato o del motor), y la API la devuelve si NASA POWER no responde y el lote es el de ejemplo. La app tiene que funcionar en cualquier punto.
+**Lote de la demo:** zona de Río Cuarto (sur de Córdoba), lote de soja con barbecho invernal (≈ 33,2477° S, 64,2325° O). Su respuesta completa está precalculada en `backend/app/demo/rio_cuarto.json` (`scripts/precalcular_demo.py`; se regenera después de cada cambio de contrato o del motor), y queda como respaldo del back: la API la devuelve si NASA POWER no responde y el pedido llega con `lote.tipo = "ejemplo"`. La app no tiene lote de ejemplo ni botón para pedirlo: el productor siempre marca su lote y, si NASA POWER no responde, el front lo dice claramente ("El sistema de NASA (NASA POWER) no responde") y ofrece "Probar de nuevo". La app tiene que funcionar en cualquier punto.
 
 **Fuera de alcance:** IA en la app · modelos de predicción entrenados (machine learning) · texto libre · login o cuentas · guardar historial · varios lotes · precios de mercado · elegir ganador · pasturas/alfalfa · app nativa · planillas en XLSX y otras variables del productor (humedad del suelo, napa).
 

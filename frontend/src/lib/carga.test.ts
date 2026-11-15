@@ -45,22 +45,41 @@ describe("textosError", () => {
     expect(t.acciones).toEqual(["marcar"]);
   });
 
-  it("503: NASA POWER no responde", () => {
+  it("503: dice claramente que el sistema de NASA (NASA POWER) no responde y ofrece probar de nuevo", () => {
     const t = textosError(503);
-    expect(t.titulo).toBe("NASA POWER no responde");
+    expect(t.titulo).toBe("El sistema de NASA (NASA POWER) no responde");
+    expect(t.explicacion).toContain("NASA POWER");
     expect(t.acciones).toEqual(["reintentar"]);
   });
 
-  it("otro código o sin respuesta: solo probar de nuevo", () => {
+  it("sin respuesta: el que no responde es el servidor de AgroPixel, no internet", () => {
+    const t = textosError(0);
+    expect(t.titulo).toBe("El servidor de AgroPixel no responde");
+    expect(`${t.titulo} ${t.comoSeguir}`).not.toMatch(/internet|conexión/i);
+    expect(t.acciones).toEqual(["reintentar"]);
+  });
+
+  it("sin respuesta y el navegador sin conexión: ahí sí es internet", () => {
+    expect(textosError(0, false, true).titulo).toBe("Sin conexión a internet");
+    expect(textosError(503, false, true).titulo).toContain("NASA POWER");
+  });
+
+  it("otro código: solo probar de nuevo, sin lote de ejemplo", () => {
     expect(textosError(500).acciones).toEqual(["reintentar"]);
-    expect(textosError(0).acciones).toEqual(["reintentar"]);
-    expect(textosError(500).comoSeguir).not.toMatch(/ejemplo/i);
+    expect(textosError(500).comoSeguir).not.toMatch(/ejemplo|internet/i);
+  });
+
+  it("ningún texto muestra el código HTTP", () => {
+    for (const c of [0, 422, 500, 502, 503]) {
+      const t = textosError(c);
+      expect(`${t.titulo} ${t.explicacion ?? ""} ${t.comoSeguir}`).not.toMatch(/\d{3}/);
+    }
   });
 
   it("los textos no recomiendan", () => {
-    for (const c of [422, 503, 500]) {
+    for (const c of [0, 422, 503, 500]) {
       const t = textosError(c);
-      expect(`${t.titulo} ${t.comoSeguir}`).not.toMatch(/recomendamos|deberías|la mejor/i);
+      expect(`${t.titulo} ${t.explicacion ?? ""} ${t.comoSeguir}`).not.toMatch(/recomendamos|deberías|la mejor/i);
     }
   });
 });
