@@ -19,6 +19,7 @@ import {
   describirSegmento,
   segmentos,
 } from "@/lib/calendario";
+import estilos from "./Campos.module.css";
 import "./calendario.css";
 
 export default function SeccionRotacion() {
@@ -32,12 +33,12 @@ export default function SeccionRotacion() {
   const tramos = segmentos(calendario(verano, invierno));
 
   return (
-    <div className="blk" data-a="rot">
-      <h3>Rotación actual</h3>
-      <div className="sel3">
-        <label>
+    <div>
+      <div className={estilos.grilla}>
+        <label className={estilos.campo}>
           Verano
           <select
+            className={estilos.control}
             id="verano"
             value={verano}
             onChange={(e) => cambiar({ verano: e.target.value as Verano })}
@@ -49,9 +50,10 @@ export default function SeccionRotacion() {
             ))}
           </select>
         </label>
-        <label>
+        <label className={estilos.campo}>
           Invierno
           <select
+            className={estilos.control}
             id="invierno"
             value={invierno}
             onChange={(e) => cambiar({ invierno: e.target.value as Invierno })}
@@ -64,9 +66,10 @@ export default function SeccionRotacion() {
           </select>
         </label>
         {/* La campaña pasada sirve para detectar si se repite el mismo cultivo de verano. */}
-        <label className="full">
+        <label className={`${estilos.campo} ${estilos.completo}`}>
           Verano de la campaña pasada
           <select
+            className={estilos.control}
             id="pasada"
             value={pasada}
             onChange={(e) => cambiar({ pasada: e.target.value as Verano })}
@@ -115,7 +118,7 @@ export default function SeccionRotacion() {
             </div>
           </div>
         </div>
-        <div className="cap">Campaña de julio a junio · se arma con lo que elegiste</div>
+        <div className="cap">Campaña de julio a junio, armada con lo que elegiste.</div>
       </div>
     </div>
   );

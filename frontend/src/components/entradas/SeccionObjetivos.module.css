@@ -1,0 +1,78 @@
+.ayuda {
+  margin: 0 0 var(--space-3);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Slider de prioridad: etiqueta, 5 bloques y el número */
+.slider {
+  display: grid;
+  grid-template-columns: 72px 1fr 16px;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+}
+
+.etiqueta {
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+  color: var(--noche);
+}
+
+.bloques {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 3px;
+}
+
+.bloque {
+  position: relative;
+  display: block;
+  height: 16px;
+  cursor: pointer;
+}
+
+.bloque input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.bloque span {
+  display: block;
+  height: 100%;
+  background: var(--soft);
+  border: 1px solid var(--line);
+}
+
+.bloque[data-lleno="true"] span {
+  background: var(--hoja);
+  border-color: var(--hoja);
+}
+
+.bloque:hover span {
+  border-color: var(--hoja);
+}
+
+.bloque input:focus-visible + span {
+  outline: 2px solid var(--cielo);
+  outline-offset: 2px;
+}
+
+.valor {
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

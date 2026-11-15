@@ -1,0 +1,118 @@
+/*
+ * Piezas compartidas por las secciones del panel de entradas (Figma: Campo,
+ * Chip de restricción). Es un CSS module: solo lo usan las Seccion* de esta carpeta.
+ */
+.grilla {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.completo {
+  grid-column: 1 / -1;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.control {
+  width: 100%;
+  padding: var(--space-2) var(--space-2);
+  background: var(--soft);
+  border: 1px solid transparent;
+  border-radius: var(--radio-dato);
+  color: var(--noche);
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.control:hover:not(:disabled) {
+  border-color: var(--line);
+}
+
+.control:focus {
+  background: var(--papel);
+  border-color: var(--hoja);
+}
+
+.control:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+.ayuda {
+  margin: 0 0 var(--space-2);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.error {
+  font-weight: 600;
+  color: var(--bad);
+}
+
+.subtitulo {
+  margin: var(--space-3) 0 var(--space-2);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* Chip de restricción: radio de 2 px; activo con tilde además del color */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-1) var(--space-3);
+  background: var(--papel);
+  border: 1px solid var(--line);
+  border-radius: var(--radio-dato);
+  color: var(--noche);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--hoja);
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--hoja-suave);
+  border-color: var(--hoja);
+  color: var(--hoja);
+}
+
+.chip[aria-pressed="true"]::before {
+  content: "✓";
+}
+
+/* "No sembrar": en tonos de suelo, con una cruz */
+.chipNo[aria-pressed="true"] {
+  background: var(--suelo-suave);
+  border-color: var(--suelo);
+  color: var(--suelo);
+}
+
+.chipNo[aria-pressed="true"]::before {
+  content: "✕";
+}

@@ -25,6 +25,7 @@
 import { useState } from "react";
 import { traeLluvia } from "@/lib/planilla";
 import { useEntradas } from "@/lib/store";
+import estilos from "./Campos.module.css";
 import SubirPlanilla from "./SubirPlanilla";
 import "./mediciones.css";
 
@@ -86,14 +87,19 @@ export default function SeccionMediciones() {
   };
 
   return (
-    <details data-a="mp">
-      <summary>Mediciones propias</summary>
-      <div className="sel3">
+    <div>
+      <p className={estilos.ayuda}>
+        Opcionales. Se comparan con NASA y, en los puntajes, pesan más según tus años de registro.
+      </p>
+      <SubirPlanilla />
+      <div className={estilos.subtitulo}>O cargalas a mano</div>
+      <div className={estilos.grilla}>
         {CAMPOS.map((c) => (
-          <label key={c.k}>
+          <label key={c.k} className={estilos.campo}>
             {c.n}
             <input
               type="number"
+              className={estilos.control}
               id={c.id}
               min={c.min}
               max={c.max}
@@ -112,14 +118,13 @@ export default function SeccionMediciones() {
             {fuera[c.k] && (
               // Aviso en texto (el color no es la única señal). Mientras está
               // fuera de rango, la medición queda en null: no se usa.
-              <span className="err" id={`${c.id}-err`} role="alert">
+              <span className={estilos.error} id={`${c.id}-err`} role="alert">
                 {c.entero ? "Número entero, " : "Fuera de rango: "}de {c.min} a {c.max.toLocaleString("es-AR")} {c.u}
               </span>
             )}
           </label>
         ))}
       </div>
-      <SubirPlanilla />
-    </details>
+    </div>
   );
 }

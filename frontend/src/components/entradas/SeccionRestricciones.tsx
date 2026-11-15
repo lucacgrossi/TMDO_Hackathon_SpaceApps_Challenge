@@ -15,6 +15,7 @@
 import { useEntradas } from "@/lib/store";
 import { NO_SEMBRAR, type CultivoNoSembrar, type Entradas } from "@/lib/entradas";
 import { C } from "@/lib/calendario";
+import estilos from "./Campos.module.css";
 
 type Restriccion = keyof Entradas["restricciones"];
 
@@ -40,14 +41,13 @@ export default function SeccionRestricciones() {
     });
 
   return (
-    <div className="blk" data-a="res">
-      <h3>Restricciones</h3>
-      <div className="chips">
+    <div>
+      <div className={estilos.chips} role="group" aria-label="Restricciones">
         {RESTRICCIONES.map((r) => (
           <button
             key={r.k}
             type="button"
-            className="chip"
+            className={estilos.chip}
             aria-pressed={restricciones[r.k]}
             onClick={() => alternar(r.k)}
           >
@@ -55,16 +55,16 @@ export default function SeccionRestricciones() {
           </button>
         ))}
       </div>
-      <div className="sub" id="nos-t">
+      <div className={estilos.subtitulo} id="nos-t">
         No sembrar
       </div>
-      {/* Variante .no del prototipo: activa se pinta en rojo (--bad). */}
-      <div className="chips" id="nos" role="group" aria-labelledby="nos-t">
+      {/* Activo: tonos de suelo y una cruz, además del color. Las alternativas que lo usan salen en gris con el motivo. */}
+      <div className={estilos.chips} role="group" aria-labelledby="nos-t">
         {NO_SEMBRAR.map((k) => (
           <button
             key={k}
             type="button"
-            className="chip no"
+            className={`${estilos.chip} ${estilos.chipNo}`}
             aria-pressed={noSembrar.includes(k)}
             onClick={() => alternarCultivo(k)}
           >

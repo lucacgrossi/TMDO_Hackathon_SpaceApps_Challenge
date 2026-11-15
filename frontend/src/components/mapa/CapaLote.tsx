@@ -5,20 +5,20 @@ import { useCallback, useEffect, useState } from "react";
 import { Marker, Polygon, Tooltip, useMap, useMapEvents } from "react-leaflet";
 import { useDibujo } from "@/lib/dibujo";
 import { useEncuadre } from "@/lib/encuadre";
-import { areaHa, centro, formatoNumero, moverPoligono } from "@/lib/geo";
+import { areaHa, centro } from "@/lib/geo";
+import { superficie } from "@/lib/resumenEntradas";
 import { useMapa } from "@/lib/mapa";
 import { useEntradas } from "@/lib/store";
 
 /**
- * F3 · El lote en el mapa: el polígono blanco, su etiqueta "Lote · 95 ha" y
+ * F3 · El lote en el mapa: el polígono blanco, su etiqueta "Lote de 94,9 ha" y
  * el punto (`.pin`) que lo marca cuando se ve muy chico.
  *
  * Sale de estas partes del prototipo (prototipo-app.js):
  * - `loteLayer` y su `bindTooltip` (~línea 56): polígono blanco con 8 % de relleno.
  * - `pin` y `lotePin()` (~líneas 58-62): el punto aparece cuando el lote mide
  *   menos de 28 px en pantalla (zoom alejado) y al tocarlo encuadra el lote.
- * - el `map.on("click")` (~línea 71): tocar el mapa mueve el lote entero ahí,
- *   sin cambiarle la forma.
+ * - (el `map.on("click")` del prototipo, que movía el lote, se retiró en el rediseño)
  * - `showLote()` (~línea 376): fundido de entrada al llegar al lote.
  *
  * Vive dentro de <MapContainer> (usa `useMap`). El polígono sale de
@@ -44,7 +44,6 @@ export default function CapaLote() {
   const mapa = useMap();
   const poligono = useEntradas((s) => s.poligono);
   const paso = useEntradas((s) => s.paso);
-  const cambiar = useEntradas((s) => s.cambiar);
   const loteVisible = useMapa((s) => s.loteVisible);
   const capa = useMapa((s) => s.capa);
   // Mientras se dibuja, el lote anterior queda de fondo, tenue (startDraw del prototipo).
@@ -96,14 +95,8 @@ export default function CapaLote() {
   useMapEvents({
     zoomend: medirPin,
     moveend: medirPin,
-    // Tocar el mapa mueve el lote (con su forma) al punto tocado. Solo en el
-    // paso 2: en el paso 1 el mapa está tapado por el formulario.
-    click: (e) => {
-      if (useEntradas.getState().paso !== "mapa") return;
-      // Dibujando, el toque marca una esquina (lo atiende CapaDibujo), no mueve el lote.
-      if (useDibujo.getState().dibujando) return;
-      cambiar({ poligono: moverPoligono(poligono, [e.latlng.lat, e.latlng.lng]) });
-    },
+    // El rediseño ya no mueve el lote al tocar el mapa: en S2 el lote queda
+    // fijo y se cambia con "Volver a marcar el lote" (S1).
   });
 
   if (paso !== "mapa") return null;
@@ -127,7 +120,7 @@ export default function CapaLote() {
             cambiar el texto, así que se vuelve a crear. */}
         {visibleDelTodo && (
           <Tooltip key={`${rotulo}-${ha.toFixed(0)}`} permanent direction="top" className="lotelabel" offset={[0, -6]}>
-            {rotulo} · {formatoNumero(ha)} ha
+            {rotulo} de {superficie(poligono)}
           </Tooltip>
         )}
       </Polygon>
