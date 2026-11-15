@@ -193,8 +193,11 @@ describe("ficha técnica del lote", () => {
     expect(f[5].fuente).toContain("500 m");
   });
 
-  it("lo que falta dice sin dato, nunca cero (mock sin erosión)", () => {
-    const erosion = filasFicha(MOCK)[4];
+  it("lo que falta dice sin dato, nunca cero (respuesta sin erosión)", () => {
+    // El mock ya trae la erosión de la demo: se le saca para probar el caso sin dato.
+    const { riesgo_erosion: _sinErosion, ...indicadores } = MOCK.indicadores;
+    const s: Salida = { ...MOCK, indicadores, capas: { ...MOCK.capas, erosion: null, erosion_mapa: null } };
+    const erosion = filasFicha(s)[4];
     expect(erosion).toMatchObject({ valor: "sin dato", confianza: "sin_dato" });
     expect(erosion.nota).toBe("Esta respuesta no trae el índice de erosión.");
   });
