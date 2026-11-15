@@ -6,10 +6,12 @@
   max-width: 520px;
 }
 
+/* Si no entra (mapa angosto o celular), los meses hacen scroll horizontal en vez de cortarse. */
 .fila {
   display: flex;
   align-items: flex-end;
   gap: 8px;
+  overflow-x: auto;
 }
 
 .play {
@@ -75,20 +77,19 @@
   outline: 1px dashed var(--muted, #5a6560);
 }
 
-/* Debajo del mapa (menos de 1100 px): todo el ancho y los meses con scroll horizontal. */
+.play,
+.meses {
+  flex-shrink: 0;
+}
+
+/* Debajo del mapa (menos de 1100 px): todo el ancho. */
 @media (max-width: 1100px) {
   .linea {
     max-width: none;
   }
 
   .fila {
-    overflow-x: auto;
     padding-bottom: 4px;
-  }
-
-  .play,
-  .meses {
-    flex-shrink: 0;
   }
 }
 

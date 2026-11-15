@@ -53,9 +53,11 @@
   top: 16px;
 }
 
+/* Sin meterse debajo de la leyenda: 16 + 260 de leyenda + 56 del zoom + 24 de aire */
 .abajoIzq {
   left: 16px;
   bottom: 16px;
+  max-width: calc(100% - 356px);
 }
 
 .abajoDer {
@@ -82,6 +84,7 @@
   .abajoIzq,
   .abajoDer {
     position: static;
+    max-width: none;
     margin-top: 12px;
   }
 }
