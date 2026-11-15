@@ -105,6 +105,9 @@ Una por columna, siempre las 4, en el orden y color de la tabla.
 "Exportar PDF" llama a `window.print()`. Una hoja `@media print` A4 apaisada (`@page { size: A4 landscape; margin: 12mm }`) muestra solo: logo y "Comparación de rotaciones", la ficha del lote (superficie, centro, campaña, período), la tabla comparativa completa, las fuentes con sus años y resoluciones, la fecha de generación y el aviso de apoyo al pie. Se ocultan la barra lateral, el mapa, las cards y los controles. Sin dependencias nuevas.
 
 ## Movimiento
+- **De la órbita al lote** (al abrir S1, una vez): el mapa arranca con Sudamérica vista desde lejos, un satélite pixel como los del logo cruza la pantalla en 3 s y la cámara baja a la región pampeana. Cualquier toque en el mapa lo corta (`IntroOrbita`).
+- **El lote se pixela** (al cerrar el lote): la grilla de 1″ (~30 m, la de las capas) llena el lote en una ola de 10 saltos desde la primera esquina y se apaga a los 2 s (`PixelarLote`).
+- **Franjas climáticas** (Clima histórico): las 30 campañas como franjas pegadas, más intensas cuanto más se aparta su balance de agua de la mediana (marrón seco, azul húmedo), con la letra del tercio debajo.
 - Carga: los fotogramas de la planta. Entrada al dashboard: el contorno del lote se llena con el raster de NDVI en 0,6 s (de a filas, de arriba abajo).
 - Respuesta a acciones: mover una prioridad pasa los números al valor nuevo en 0,38 s; cambiar de mes reemplaza la capa con un fundido de 0,2 s; abrir un plegable, 0,2 s.
 - No hay entradas con fundido por sección, ni tarjetas que entran en orden, ni contadores que cuentan desde 0.
