@@ -52,6 +52,8 @@
 
 .cuerpo {
   overflow-y: auto;
+  /* Al llegar al final del modal, la página de atrás no scrollea. */
+  overscroll-behavior: contain;
   padding: var(--space-4) var(--space-6) var(--space-6);
 }
 

@@ -1,4 +1,5 @@
 import copy
+import re
 
 import pytest
 
@@ -56,7 +57,7 @@ def test_lote_demo_planilla_al_80_usa_la_diferencia_del_contraste(ind):
         assert c["terciles"][t]["pp"] == pytest.approx([p * 0.88 for p in ind["terciles"][t]["pp"]])
     assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * 0.88)
     texto = c["datos"][0]
-    assert ("Lluvia: tu registro 589 mm/año (60 %, 6 años) contra NASA POWER en las mismas 6 campañas "
+    assert ("Lluvia: tu registro 589 mm/año (60 %, 6 campañas) contra NASA POWER en las mismas 6 campañas "
             "(2020/21 a 2025/26) 736 mm (−20 %)") in texto
     assert texto.endswith(f"{c['lluvia_mm']:.0f} mm/año para las reglas")
 
@@ -68,11 +69,82 @@ def test_la_diferencia_es_la_misma_cuenta_que_el_contraste(ind):
     c = mezcla.mezclar(entradas(mediciones={"serie_mensual": serie}), ind)
     prod = sum(f["lluvia_mm"] for f in serie) / len(campanas)
     vn = _media_nasa(campanas)
-    assert c["diferencia_lluvia_pct"] == round((prod - vn) / vn * 100)  # fórmula de clima/correccion.py
-    # Sobre las mismas campañas, los factores por mes reproducen exactamente la lluvia del productor.
-    f = [(c["terciles"]["seco"]["pp"][m] / c["terciles"]["seco"]["pp_nasa"][m] - 0.5) / 0.5 for m in range(12)]
-    n_mes = [sum(_nasa(x)["lluvia_mm"][m] for x in campanas) / len(campanas) for m in range(12)]
-    assert sum(n_mes[m] * f[m] for m in range(12)) == pytest.approx(prod)
+    d = c["diferencia_lluvia_pct"]
+    assert d == round((prod - vn) / vn * 100)  # fórmula de clima/correccion.py
+    # Un solo factor anual (el % del texto) para los 12 meses y los 3 tipos de año.
+    ajuste = 0.5 * (1 + d / 100) + 0.5
+    for t in mezcla.TIPOS:
+        assert c["terciles"][t]["pp"] == pytest.approx([p * ajuste for p in ind["terciles"][t]["pp"]])
+    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * ajuste)
+
+
+def _cuenta_del_texto(texto: str) -> tuple[int, int, int, int]:
+    """(NASA de las 30, diferencia %, peso %, valor de las reglas) tal como los lee el productor."""
+    m = re.search(r"NASA de las 30 campañas \((\d+) mm\) con ese ([−+]?)(\d+) % al (\d+) %: (\d+) mm/año para "
+                  r"las reglas", texto)
+    assert m, texto
+    signo = -1 if m.group(2) == "−" else 1
+    return int(m.group(1)), signo * int(m.group(3)), int(m.group(4)), int(m.group(5))
+
+
+def _planilla_otra_estacionalidad(campanas: list[str], x: float) -> list[dict]:
+    """Planilla con X veces la lluvia anual de NASA, pero con el invierno al triple (factor por mes > 1,5)."""
+    invierno = (4, 5, 6, 7)
+    inv = sum(_nasa(c)["lluvia_mm"][m] for c in campanas for m in invierno) / len(campanas)
+    total = _media_nasa(campanas)
+    k = (x * total - 3 * inv) / (total - inv)
+    assert k > 0
+    return _planilla(campanas, lluvia=lambda m, v: v * (3 if m in invierno else k))
+
+
+# --- H-001: con planilla, el valor de las reglas es la cuenta del texto ---------
+
+DOCE = ["2013/14", "2014/15", "2015/16", "2016/17", "2017/18", "2018/19", "2019/20", "2020/21", "2021/22",
+        "2022/23", "2023/24", "2024/25"]
+
+
+@pytest.mark.parametrize("campanas", [["2024/25"], ULTIMAS_6[:3], ULTIMAS_6, DOCE])
+@pytest.mark.parametrize("x", [0.84, 0.95])
+def test_productor_mide_menos_el_valor_de_las_reglas_baja_y_cierra_con_el_texto(ind, campanas, x):
+    c = mezcla.mezclar(entradas(mediciones={"serie_mensual": _planilla_otra_estacionalidad(campanas, x)}), ind)
+    d, w = c["diferencia_lluvia_pct"], c["pesos"]["lluvia"]
+    assert d == round((x - 1) * 100) < 0
+    assert c["lluvia_mm"] < c["lluvia_nasa_mm"]
+    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * (1 + w * d / 100))
+    nasa30, d_txt, w_txt, valor = _cuenta_del_texto(c["datos"][0])
+    assert (d_txt, w_txt, valor) == (d, round(w * 100), round(c["lluvia_mm"]))
+    assert abs(nasa30 * (1 + w_txt / 100 * d_txt / 100) - valor) <= 1  # la cuenta se rehace con lo que se lee
+
+
+def test_productor_mide_mas_el_valor_de_las_reglas_sube(ind):
+    c = mezcla.mezclar(entradas(mediciones={"serie_mensual": _planilla_otra_estacionalidad(ULTIMAS_6, 1.1)}), ind)
+    assert c["diferencia_lluvia_pct"] == 10
+    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * (1 + 0.6 * 0.10))
+    assert c["lluvia_mm"] > c["lluvia_nasa_mm"]
+
+
+# --- H-007: los años de registro son campañas completas -----------------------
+
+
+def test_anios_de_registro_son_campanas_completas_no_anios_calendario(ind):
+    # Enero de 2022 a diciembre de 2024: 3 años calendario, 2 campañas completas (2022/23 y 2023/24).
+    serie = [{"mes": f"{a}-{m:02d}", "lluvia_mm": 60.0, "t_min_c": -1.0 if m == 7 else 5.0, "t_max_c": 30.0}
+             for a in (2022, 2023, 2024) for m in range(1, 13)]
+    c = mezcla.mezclar(entradas(mediciones={"serie_mensual": serie}), ind)
+    assert c["periodo_comparado"]["lluvia"] == ["2022/23", "2023/24"]
+    assert c["anios"] == {"lluvia": 2, "helada": 2, "calor": 2}
+    assert c["pesos"] == {"lluvia": 0.40, "helada": 0.40, "calor": 0.40}  # no 50 % (3 años calendario)
+    assert "(40 %, 2 campañas) contra NASA POWER en las mismas 2 campañas (2022/23 a 2023/24)" in c["datos"][0]
+
+
+def test_planilla_sin_ninguna_campana_completa_no_entra_y_lo_dice(ind):
+    serie = [{"mes": f"2024-{m:02d}", "lluvia_mm": 60.0, "t_min_c": -3.0} for m in range(1, 9)]
+    med = {"serie_mensual": serie, "lluvia_anual_mm": 2000, "anios_registro": 10}
+    c = mezcla.mezclar(entradas(mediciones=med), ind)
+    assert not c["hay_productor"] and c["pesos"]["lluvia"] == 0 and c["anios"]["lluvia"] == 0
+    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"])  # tampoco usa la lluvia anual: manda la planilla
+    assert mezcla.SIN_CAMPANA_COMPLETA in c["datos"][0] and "no entra en las reglas" in c["datos"][0]
+    assert c["helada"] == pytest.approx([h / 30 for h in ind["anios_con_helada"]])
 
 
 def test_planilla_con_campanas_fuera_de_nasa_usa_solo_las_comunes(ind):
@@ -86,9 +158,26 @@ def test_lluvia_anual_contra_las_ultimas_n_campanas(ind):
     vn = _media_nasa(ULTIMAS_6)  # 736 mm, no los 819 de las 30
     assert c["periodo_comparado"]["lluvia"] == ULTIMAS_6
     assert c["diferencia_lluvia_pct"] == round((650 - vn) / vn * 100) == -12
-    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * (0.6 * 650 / vn + 0.4), rel=1e-6)
+    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * (1 - 0.6 * 0.12))
     assert ("tu pluviómetro 650 mm/año (60 %, 6 años) contra NASA POWER en las últimas 6 campañas "
-            "(2020/21 a 2025/26) 736 mm (−12 %)") in c["datos"][0]
+            "(2020/21 a 2025/26) 736 mm (−12 %) → NASA de las 30 campañas (819 mm) con ese −12 % al 60 %: "
+            f"{c['lluvia_mm']:.0f} mm/año para las reglas") in c["datos"][0]
+
+
+def test_lluvia_anual_de_un_anio_contra_la_ultima_campana(ind):
+    c = mezcla.mezclar(entradas(mediciones={"lluvia_anual_mm": 790, "anios_registro": 1}), ind)
+    assert c["periodo_comparado"]["lluvia"] == ["2025/26"] and c["diferencia_lluvia_pct"] == 31
+    assert "contra NASA POWER en la última campaña (2025/26) 601 mm (+31 %)" in c["datos"][0]
+
+
+def test_lluvia_anual_sin_anios_va_contra_las_30_y_lo_dice(ind):
+    # H-006: sin años de registro no se sabe qué período cubre: contra el promedio de las 30, como el contraste.
+    c = mezcla.mezclar(entradas(mediciones={"lluvia_anual_mm": 700}), ind)
+    assert c["periodo_comparado"]["lluvia"] == [] and c["pesos"]["lluvia"] == 0.40 and c["anios"]["lluvia"] == 0
+    assert c["diferencia_lluvia_pct"] == round((700 - c["lluvia_nasa_mm"]) / c["lluvia_nasa_mm"] * 100) == -15
+    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * (1 - 0.4 * 0.15))
+    assert c["lluvia_mm"] < c["lluvia_nasa_mm"]
+    assert mezcla.SIN_ANIOS in c["datos"][0]
 
 
 def test_lluvia_anual_con_mas_anios_que_nasa_usa_las_30(ind):
@@ -97,9 +186,13 @@ def test_lluvia_anual_con_mas_anios_que_nasa_usa_las_30(ind):
     assert "en las últimas 30 campañas (1996/97 a 2025/26)" in c["datos"][0]
 
 
-def test_factor_extremo_se_limita(ind):
+def test_factor_extremo_se_limita_y_la_evidencia_lo_dice(ind):
     c = mezcla.mezclar(entradas(mediciones={"lluvia_anual_mm": 5000, "anios_registro": 10}), ind)
-    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * (0.75 * mezcla.FACTOR_MAX + 0.25), rel=1e-3)
+    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * (0.75 * mezcla.FACTOR_MAX + 0.25))
+    assert c["lluvia_limitada"] and "limitado a +50 %" in c["datos"][0]
+    assert c["datos"][0].endswith(f"al 75 %: {c['lluvia_mm']:.0f} mm/año para las reglas")
+    normal = mezcla.mezclar(entradas(mediciones={"lluvia_anual_mm": 700, "anios_registro": 10}), ind)
+    assert not normal["lluvia_limitada"] and "limitado" not in normal["datos"][0]
 
 
 def test_heladas_y_calor_en_las_mismas_campanas(ind):
@@ -135,19 +228,16 @@ def test_sin_campanas_nasa_la_planilla_va_contra_las_30_y_lo_dice(ind_sin_campan
     ind = ind_sin_campanas
     serie = _planilla(ULTIMAS_6)
     c = mezcla.mezclar(entradas(mediciones={"serie_mensual": serie}), ind)
-    nasa_mes = mezcla._nasa_mensual(ind["terciles"])
-    por_mes = mezcla._por_mes(serie, "lluvia_mm")
-    factores = [mezcla._limitar(sum(v) / len(v) / nasa_mes[m]) for m, v in enumerate(por_mes)]
-    for t in mezcla.TIPOS:
-        assert c["terciles"][t]["pp"] == pytest.approx(
-            [p * (0.6 * factores[m] + 0.4) for m, p in enumerate(ind["terciles"][t]["pp"])])
     assert c["periodo_comparado"]["lluvia"] == [] and c["diferencia_lluvia_pct"] == -28
+    for t in mezcla.TIPOS:
+        assert c["terciles"][t]["pp"] == pytest.approx([p * (0.6 * 0.72 + 0.4) for p in ind["terciles"][t]["pp"]])
     assert mezcla.SIN_CAMPANAS in c["datos"][0]
 
 
 def test_sin_campanas_nasa_el_anual_va_contra_las_30(ind_sin_campanas):
     c = mezcla.mezclar(entradas(mediciones={"lluvia_anual_mm": 650, "anios_registro": 6}), ind_sin_campanas)
-    assert c["lluvia_mm"] == pytest.approx(0.6 * 650 + 0.4 * c["lluvia_nasa_mm"], rel=1e-3)
+    assert c["diferencia_lluvia_pct"] == -21
+    assert c["lluvia_mm"] == pytest.approx(c["lluvia_nasa_mm"] * (1 - 0.6 * 0.21))
     assert "tu pluviómetro 650 mm/año (60 %, 6 años)" in c["datos"][0] and mezcla.SIN_CAMPANAS in c["datos"][0]
 
 

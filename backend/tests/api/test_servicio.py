@@ -419,7 +419,9 @@ def test_pluviometro_que_difiere_baja_la_confianza_del_agua_y_llega_al_motor(mon
     monkeypatch.setattr(servicio, "_cargar_motor", lambda: _motor_simulado(recibido))
     sin = servicio.analizar(Entrada.model_validate(ENTRADA))
     entrada = copy.deepcopy(ENTRADA)
-    entrada["mediciones_propias"] = {"lluvia_anual_mm": 650, "anios_registro": 10, "materia_organica_pct": 2.8}
+    # Sin años de registro: contra el promedio de las 30 campañas (819 mm), −21 %. Con años, el contraste
+    # compara contra las últimas campañas, como la mezcla del motor (H-006).
+    entrada["mediciones_propias"] = {"lluvia_anual_mm": 650, "materia_organica_pct": 2.8}
     s = servicio.analizar(Entrada.model_validate(entrada))
 
     lluvia, mo = s.contraste_mediciones
@@ -433,7 +435,7 @@ def test_pluviometro_que_difiere_baja_la_confianza_del_agua_y_llega_al_motor(mon
     assert any("difiere 21 %" in r for r in a.riesgos) and a.riesgos[0] == "Secado ~30 días antes de la siembra"
     assert c.riesgos == []  # descartada: solo el motivo
     # El peso de la medición en los puntajes lo pone el motor (mezcla.py): acá solo se verifica que le llegue.
-    assert recibido["entradas"]["mediciones"] == {"lluvia_anual_mm": 650, "anios_registro": 10, "serie_mensual": None}
+    assert recibido["entradas"]["mediciones"] == {"lluvia_anual_mm": 650, "anios_registro": None, "serie_mensual": None}
     assert "materia_organica_pct" not in recibido["entradas"]
     assert not any("en preparación" in f and "Contraste" in f for f in s.informacion_falta)
 

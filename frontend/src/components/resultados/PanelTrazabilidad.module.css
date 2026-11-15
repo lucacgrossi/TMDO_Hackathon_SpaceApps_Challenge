@@ -1,0 +1,193 @@
+/* Panel lateral de trazabilidad (DESIGN.md: panel 6 px, sombra pixel solo en lo principal). */
+
+.fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 3000;
+  display: flex;
+  justify-content: flex-end;
+  background: color-mix(in srgb, var(--noche) 35%, transparent);
+  animation: fundir 200ms var(--ease-out);
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: min(480px, 100%);
+  height: 100%;
+  background: var(--papel);
+  border-left: 1px solid var(--line);
+  box-shadow: var(--sombra-pixel);
+  color: var(--noche);
+  outline: none;
+  /* Entra desde el borde derecho, de donde vive: drawer, 280 ms. */
+  animation: entrar 280ms var(--ease-out);
+}
+
+.panel:focus-visible {
+  outline: 2px solid var(--cielo);
+  outline-offset: -2px;
+}
+
+@keyframes fundir {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes entrar {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+.encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-6) var(--space-6) var(--space-3);
+}
+
+.titulos {
+  min-width: 0;
+}
+
+.antetitulo {
+  margin: 0 0 var(--space-1);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.titulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  font-family: var(--f-titulo);
+  font-size: 20px;
+  line-height: 26px;
+  font-weight: 500;
+  text-wrap: balance;
+}
+
+.especies {
+  margin: var(--space-1) 0 0;
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--muted);
+}
+
+/* Pestañas: una por columna, con la franja del color de la estrategia */
+.pestanas {
+  display: flex;
+  gap: var(--space-1);
+  padding: 0 var(--space-6) var(--space-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.pestana {
+  min-width: 48px;
+  padding: 6px 12px;
+  border: 1px solid var(--line);
+  border-bottom-width: 3px;
+  border-radius: 0;
+  background: var(--papel);
+  color: var(--noche);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 140ms var(--ease-out);
+}
+
+.pestana:active {
+  transform: scale(0.97);
+}
+
+.pestana[data-id="actual"] { border-bottom-color: var(--s-actual); }
+.pestana[data-id="A"] { border-bottom-color: var(--s-a); }
+.pestana[data-id="B"] { border-bottom-color: var(--s-b); }
+.pestana[data-id="C"] { border-bottom-color: var(--s-c); }
+
+.pestana[aria-pressed="true"] {
+  background: var(--noche);
+  border-color: var(--noche);
+  color: var(--papel);
+}
+
+.cuerpo {
+  flex: 1;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: var(--space-4) var(--space-6) var(--space-8);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.resumen {
+  margin: 0 0 var(--space-4);
+  max-width: 64ch;
+}
+
+.descartada {
+  margin: 0 0 var(--space-4);
+  color: var(--muted);
+}
+
+.bloque {
+  padding: var(--space-3) 0;
+  border-top: 1px solid var(--line);
+}
+
+.subtitulo {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  font-size: 13px;
+  line-height: 18px;
+  font-weight: 600;
+}
+
+.cuenta {
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: 2px;
+  background: var(--soft);
+  font-size: 11px;
+  line-height: 16px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding-left: 18px;
+  font-size: 13px;
+  line-height: 19px;
+}
+
+.dato {
+  color: var(--muted);
+}
+
+.vacio {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fondo,
+  .panel {
+    animation: none;
+  }
+}
