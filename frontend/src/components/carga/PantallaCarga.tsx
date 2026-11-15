@@ -20,8 +20,8 @@ const MS_TICK = 100;
 
 /**
  * S3 · Pantalla de carga mientras `/analizar` responde. Centrada sobre
- * `--rastrojo`: la planta pixel que crece (un fotograma cada 0,3 s, el último
- * queda fijo), "Analizando tu lote", el lote y el tiempo transcurrido, y la
+ * `--rastrojo`: la planta pixel que crece (un fotograma cada 0,3 s, en bucle
+ * hasta la respuesta), "Analizando tu lote", el lote y el tiempo transcurrido, y la
  * lista de lo que se consulta en un solo pedido.
  *
  * Sin barra, sin porcentaje y sin tildes por fuente: la API no informa
