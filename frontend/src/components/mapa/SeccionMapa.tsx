@@ -62,11 +62,11 @@ export default function SeccionMapa({ salida }: { salida: Salida }) {
     [cambiarMes, cambiarCapa],
   );
 
-  const ayuda = !raster
-    ? "El inspector lee capas por píxel: NDVI (con raster), Pendiente, Cultivo o Erosión."
-    : conValores
-      ? "Pasá el mouse sobre el lote o usá las flechas con el mapa enfocado para leer un píxel."
-      : "Esta capa no trae valores por píxel (lote grande): se ve la imagen, sin lectura.";
+  // Sin capa raster (Satélite, Celda NASA POWER o NDVI por teselas) no hay
+  // píxeles que leer: el inspector no se muestra.
+  const ayuda = conValores
+    ? "Pasá el mouse sobre el lote o usá las flechas con el mapa enfocado para leer un píxel."
+    : "Esta capa no trae valores por píxel (lote grande): se ve la imagen, sin lectura.";
 
   return (
     <section className={css.seccion} aria-label="Mapa del lote">
@@ -88,9 +88,11 @@ export default function SeccionMapa({ salida }: { salida: Salida }) {
         <div className={css.arribaIzq}>
           <SelectorCapasLote capas={capas} activa={capa} onCambiar={cambiarCapa} />
         </div>
-        <div className={css.arribaDer}>
-          <InspectorPixel lectura={lectura} ayuda={ayuda} />
-        </div>
+        {raster && (
+          <div className={css.arribaDer}>
+            <InspectorPixel lectura={lectura} ayuda={ayuda} />
+          </div>
+        )}
         <div className={css.abajoIzq}>
           <LineaTiempoLote visto={salida.visto_por_satelite} capas={salida.capas} mes={mes} onMes={elegirMes} />
         </div>
