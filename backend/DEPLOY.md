@@ -31,9 +31,9 @@ gcloud run deploy $SERVICIO \
   --memory 1Gi \
   --timeout 60 \
   --min-instances 1 \
-  --set-env-vars "^@^CORS_ORIGINS=https://<dominio-front>,http://localhost:3000@CORS_ORIGIN_REGEX=https://.*\.vercel\.app"
+  --set-env-vars "^@^CORS_ORIGINS=https://agropixel.earth,https://www.agropixel.earth,http://localhost:3000@CORS_ORIGIN_REGEX=https://.*\.vercel\.app"
 ```
-- `<dominio-front>`: la URL de producción del front. Las URL de vista previa de Vercel cambian en cada deploy: las cubre `CORS_ORIGIN_REGEX`. Si el front no está en Vercel, sacar esa variable.
+- El front de producción es https://agropixel.earth (Vercel, proyecto `field-shift`; `www` redirige al dominio sin `www`). `--set-env-vars` reemplaza todas las variables: si se cambia el dominio, actualizarlo acá. Las URL de vista previa de Vercel cambian en cada deploy: las cubre `CORS_ORIGIN_REGEX`. Si el front no está en Vercel, sacar esa variable.
 - `--min-instances 1`: sin arranque en frío durante la demo. Después, volver a 0 (paso 6).
 - Probar con el paso 5. Además, para confirmar que subió la versión nueva:
   ```bash
