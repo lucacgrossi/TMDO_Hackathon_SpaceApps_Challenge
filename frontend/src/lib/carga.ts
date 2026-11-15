@@ -61,14 +61,16 @@ export type AccionError = "marcar" | "reintentar" | "ejemplo";
 export interface TextosError {
   titulo: string;
   comoSeguir: string;
-  /** La primera es la acción principal. */
-  acciones: readonly [AccionError, AccionError];
+  /** Una o dos; la primera es la acción principal. */
+  acciones: readonly AccionError[];
 }
 
 /**
  * Qué pasó y cómo seguir según el código de `/analizar` (api-frontend.md §4.2).
  * 422: el polígono no es un lote agrícola. 503: NASA POWER no respondió.
- * Cualquier otro (500, red caída): error genérico con "Probar de nuevo".
+ * Cualquier otro (500, red caída, tiempo agotado): solo "Probar de nuevo". El
+ * lote de ejemplo no se ofrece porque su respaldo precalculado lo da el back,
+ * y si el back no responde también falla.
  */
 export function textosError(codigo: number): TextosError {
   if (codigo === 422) {
@@ -88,8 +90,8 @@ export function textosError(codigo: number): TextosError {
   }
   return {
     titulo: "No se pudo terminar el análisis",
-    comoSeguir: "Probá de nuevo. El lote de ejemplo usa datos precalculados y anda sin conexión con el servidor.",
-    acciones: ["reintentar", "ejemplo"],
+    comoSeguir: "Revisá la conexión y probá de nuevo en unos segundos. Si sigue, avisá al equipo.",
+    acciones: ["reintentar"],
   };
 }
 
