@@ -8,8 +8,9 @@
    - satélite: `cobertura`, `elevacion`, `ndvi` y `et` (cada una con el polígono del lote).
    Cada fuente que falla o no llega a tiempo queda `sin_dato` con su motivo y va a
    "Información que falta"; nunca rompe la respuesta.
-3. WorldCover dice que el lote no es agrícola → 422 con su aviso. Sin dato de WorldCover no se
-   bloquea. NASA POWER caído → 503 (la ruta sirve la respuesta precalculada si el lote es el de
+3. WorldCover dice que el lote no es agrícola, o no tiene datos para el polígono (mar) → 422 con
+   su aviso. WorldCover caído o saturado no bloquea: va a "Información que falta".
+   NASA POWER caído → 503 (la ruta sirve la respuesta precalculada si el lote es el de
    ejemplo): POWER es la base, sin él no hay comparación.
 4. Motor de reglas (persona 3): `reglas.analizar` + `plantillas.armar`, traducido a los nombres
    del contrato. Si `app.motor` todavía no está en el código, un stub devuelve las 4 columnas

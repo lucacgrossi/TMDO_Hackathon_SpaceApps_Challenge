@@ -8,6 +8,11 @@ Plan de armonización (§4): las clases se cuentan sobre la **grilla común del 
 1″ ≈ 30 m; cada píxel toma la clase mayoritaria de los de 10 m con `resampling=mode`) y con su
 máscara, y la capa de cultivo (`mapa`, `CapaRaster`) sale del mismo raster: el % de la tabla es
 la media de la capa. Si el raster falla, el % sale de `item/statistics` (10 m) y no hay capa.
+
+Reporte QA del 15/11 (H-002): si WorldCover **no tiene datos** para el polígono (por ejemplo, en el
+mar: no hay tesela o no hay píxeles válidos), el lote no se puede validar como agrícola y se
+rechaza (`es_agricola: False` + `AVISO_SIN_DATOS`, el servicio responde 422). Si el servicio está
+caído o saturado, en cambio, se sigue (`es_agricola: None`) y el motivo va a "Información que falta".
 """
 from __future__ import annotations
 
@@ -33,6 +38,9 @@ CLASE_CULTIVO = 40
 # % mínimo de cultivo para tomar el polígono como lote agrícola. A validar con la persona 3.
 UMBRAL_AGRICOLA_PCT = 50.0
 
+AVISO_SIN_DATOS = ("No hay datos de uso del suelo para este polígono (ESA WorldCover "
+                   f"{ANIO}): marcá un lote de campo.")
+
 # Leyenda oficial de ESA WorldCover (códigos del asset `map`).
 CLASES = {
     10: "Árboles",
@@ -53,7 +61,7 @@ def _sin_dato(motivo: str) -> dict:
     return {
         "cultivo_pct": {"valor": None, "unidad": UNIDAD, "fuente": FUENTE, "anios": ANIO,
                         "resolucion": RESOLUCION, "confianza": "sin_dato", "motivo": motivo},
-        "es_agricola": None,   # sin dato no se bloquea el análisis: va a "Información que falta"
+        "es_agricola": None,   # servicio caído: no se bloquea el análisis, va a "Información que falta"
         "clase_principal": None,
         "clases": [],
         "aviso": None,
@@ -61,6 +69,16 @@ def _sin_dato(motivo: str) -> dict:
         "grilla": None,
         "mapa_motivo": motivo,
     }
+
+
+def _sin_cobertura(motivo: str) -> dict:
+    """WorldCover respondió, pero no tiene datos para el polígono (mar, fuera de tierra): se rechaza."""
+    return {**_sin_dato(motivo), "es_agricola": False, "aviso": AVISO_SIN_DATOS}
+
+
+def _no_se_pudo(e: Exception) -> dict:
+    """WorldCover caído o saturado: no se bloquea, pero se dice que el lote no se pudo verificar."""
+    return _sin_dato(f"No se pudo verificar que el polígono sea un lote de campo: {e}")
 
 
 def _nombre(codigo: int) -> str:
@@ -124,9 +142,9 @@ def calcular(poligono: dict) -> dict:
     try:
         items = _items(poligono)
         if not items:
-            return _sin_dato("ESA WorldCover no tiene datos para el lote")
+            return _sin_cobertura("ESA WorldCover no tiene datos para el polígono")
     except pc.ErrorPC as e:
-        return _sin_dato(f"No se pudo consultar ESA WorldCover: {e}")
+        return _no_se_pudo(e)
     except Exception as e:  # noqa: BLE001 — nunca propagar: va a "Información que falta"
         return _sin_dato(f"No se pudo calcular la cobertura del suelo ({type(e).__name__})")
 
@@ -151,13 +169,13 @@ def calcular(poligono: dict) -> dict:
         try:
             conteo = _conteo_estadisticas(poligono, items)
         except pc.ErrorPC as e:
-            return _sin_dato(f"No se pudo consultar ESA WorldCover: {e}")
+            return _no_se_pudo(e)
         except Exception as e:  # noqa: BLE001
             return _sin_dato(f"No se pudo calcular la cobertura del suelo ({type(e).__name__})")
 
     total = sum(conteo.values())
     if total == 0:
-        return _sin_dato("ESA WorldCover no tiene píxeles válidos dentro del lote")
+        return _sin_cobertura("ESA WorldCover no tiene píxeles válidos dentro del polígono")
 
     clases = sorted(
         ({"codigo": c, "nombre": _nombre(c), "pct": round(100 * n / total, 1)} for c, n in conteo.items()),
