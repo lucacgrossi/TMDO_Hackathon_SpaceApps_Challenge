@@ -1,0 +1,68 @@
+.buscador {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.etiqueta {
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+  color: var(--noche);
+}
+
+.campo {
+  position: relative;
+}
+
+.lupa {
+  position: absolute;
+  left: var(--space-3);
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--muted);
+  font-size: 16px;
+  pointer-events: none;
+}
+
+.campo input {
+  width: 100%;
+  padding: var(--space-2) var(--space-3) var(--space-2) 34px;
+  background: var(--soft);
+  border: 1px solid transparent;
+  border-radius: var(--radio-dato);
+  color: var(--noche);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.campo input:hover {
+  border-color: var(--line);
+}
+
+.campo input:focus {
+  background: var(--papel);
+  border-color: var(--hoja);
+}
+
+.elegido {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--hoja-suave);
+  border-radius: var(--radio-dato);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.elegido b {
+  color: var(--hoja);
+  font-weight: 600;
+}
+
+.elegido small {
+  color: var(--muted);
+}
+
+.gps {
+  align-self: flex-start;
+}

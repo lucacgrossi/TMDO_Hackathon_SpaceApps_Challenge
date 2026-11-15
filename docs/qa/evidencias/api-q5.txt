@@ -1,0 +1,37 @@
+=== Ciudad de Córdoba centro -> 422 (4.2s) {"mensaje": "Marcá un lote de campo: según ESA WorldCover 2021, el 100 % del polígono es construido y solo el 0 % es cultivo."}
+=== Dique San Roque (lago) -> 422 (2.9s) {"mensaje": "Marcá un lote de campo: según ESA WorldCover 2021, el 100 % del polígono es agua permanente y solo el 0 % es cultivo."}
+=== Sierras Grandes -> 422 (3.8s) {"mensaje": "Marcá un lote de campo: según ESA WorldCover 2021, el 74 % del polígono es pastizal y solo el 0 % es cultivo."}
+=== Mar argentino -> 200 (5.4s) area=60.0 loc=None cult=None pend=0.0 periodo=1996/97 a 2025/26 camp=2025/26 mock=False
+   cerc: [54, 80, 84, 67] esp: ['Soja + barbecho', 'Soja + vicia', 'Trigo + soja de 2ª', 'Sorgo, rota con soja']
+   falta: ['NDVI del lote (visto por satélite): Sin NDVI del lote en la campaña 2025/26. Enero 2026: sin escena HLS con < 30 % de nubes; MODIS de respaldo: sin compuesto MODIS confiable (nubes o relleno sobre el lote)', 'Cobertura agrícola del lote (ESA WorldCover): ESA WorldCover no tiene datos para el lote', 'ET real del lote (MODIS): MODIS no estima ET en este lote (lo marca como agua, zona urbana o suelo desnudo)', 'Capa de erosión: falta la pendiente o el NDVI del lote']
+=== Norte Bs As (Pergamino) -> 200 (3.8s) area=60.0 loc=None cult=79.9 pend=0.4 periodo=1996/97 a 2025/26 camp=2025/26 mock=False
+   cerc: [49, 70, 76, 68] esp: ['Soja + barbecho', 'Soja + vicia', 'Trigo + soja de 2ª', 'Sorgo, rota con soja']
+   falta: []
+=== Santa Fe (Casilda) -> 422 (3.8s) {"mensaje": "Marcá un lote de campo: según ESA WorldCover 2021, el 92 % del polígono es construido y solo el 3 % es cultivo."}
+=== Chaco (Charata) -> 422 (3.9s) {"mensaje": "Marcá un lote de campo: según ESA WorldCover 2021, el 96 % del polígono es construido y solo el 0 % es cultivo."}
+=== La Pampa (General Pico) -> 200 (4.1s) area=60.0 loc=None cult=55.2 pend=0.2 periodo=1996/97 a 2025/26 camp=2025/26 mock=False
+   cerc: [50, 66, 74, 73] esp: ['Soja + barbecho', 'Soja + vicia', 'Trigo + soja de 2ª', 'Sorgo, rota con soja']
+   falta: []
+=== Iowa (Ames) -> 200 (4.0s) area=60.0 loc=None cult=100.0 pend=0.4 periodo=1996/97 a 2025/26 camp=2025/26 mock=False
+   cerc: [45, 71, 76, 57] esp: ['Soja + barbecho', 'Soja + vicia', 'Trigo + soja de 2ª', 'Sorgo, rota con soja']
+   falta: ['NDVI del lote · Marzo 2026: sin escena HLS con < 30 % de nubes; MODIS de respaldo: no se pudo buscar en MODIS: Planetary Computer respondió con error HTTP 429']
+=== Río Cuarto 1 ha -> 200 (3.0s) area=1.0 loc=None cult=None pend=4.8 periodo=1996/97 a 2025/26 camp=2025/26 mock=False
+   cerc: [40, 62, 72, 63] esp: ['Soja + barbecho', 'Soja + centeno', 'Trigo + soja de 2ª', 'Sorgo, rota con soja']
+   falta: ['NDVI del lote (visto por satélite): Sin NDVI del lote en la campaña 2025/26. Enero 2026: no se pudo buscar en HLS: Planetary Computer respondió con error HTTP 429; MODIS de respaldo: no se pudo buscar en MODIS: Planetary Computer respondió con error HTTP 429', 'Cobertura agrícola del lote (ESA WorldCover): No se pudo consultar ESA WorldCover: Planetary Computer respondió con error HTTP 429', 'ET real del lote (MODIS): No se pudo consultar MODIS ET: Planetary Computer respondió con error HTTP 429', 'Capa de erosión: falta la pendiente o el NDVI del lote']
+=== Río Cuarto 0.9 ha -> 422 (2.0s) {"detail": [{"type": "greater_than_equal", "loc": ["body", "lote", "area_ha"], "msg": "Input should be greater than or equal to 1", "input": 0.9, "ctx": {"ge": 1.0}}]}
+=== Río Cuarto 20000 ha -> 200 (5.8s) area=19999.81 loc=None cult=96.3 pend=0.4 periodo=1996/97 a 2025/26 camp=2025/26 mock=False
+   cerc: [50, 64, 73, 72] esp: ['Soja + barbecho', 'Soja + vicia', 'Trigo + soja de 2ª', 'Sorgo, rota con soja']
+   falta: []
+=== Río Cuarto 20001 ha -> 422 (2.0s) {"detail": [{"type": "less_than_equal", "loc": ["body", "lote", "area_ha"], "msg": "Input should be less than or equal to 20000", "input": 20001, "ctx": {"le": 20000.0}}]}
+=== Arenoso erosion5 (La Pampa) -> 200 (4.7s) area=60.0 loc=None cult=55.2 pend=0.2 periodo=1996/97 a 2025/26 camp=2025/26 mock=False
+   cerc: [49, 74, 79, 70] esp: ['Soja + barbecho', 'Soja + centeno', 'Trigo + soja de 2ª', 'Sorgo, rota con soja']
+   falta: []
+=== Sorgo/Cebada encharca si arcilloso agua5 -> 200 (4.1s) area=60.0 loc=None cult=95.7 pend=0.7 periodo=1996/97 a 2025/26 camp=2025/26 mock=False
+   cerc: [78, 76, 78, 77] esp: ['Sorgo + cebada', 'Sorgo + vicia', 'Cebada + sorgo', 'Girasol, rota con sorgo']
+   falta: []
+=== No se / No se -> 200 (4.4s) area=60.0 loc=None cult=95.7 pend=0.7 periodo=1996/97 a 2025/26 camp=2025/26 mock=False
+   cerc: [49, 64, 73, 72] esp: ['Soja + barbecho', 'Soja + vicia', 'Trigo + soja de 2ª', 'Sorgo, rota con soja']
+   falta: []
+=== A veces / arenoso -> 200 (4.0s) area=60.0 loc=None cult=95.7 pend=0.7 periodo=1996/97 a 2025/26 camp=2025/26 mock=False
+   cerc: [46, 62, 70, 68] esp: ['Soja + barbecho', 'Soja + vicia', 'Trigo + soja de 2ª', 'Sorgo, rota con soja']
+   falta: []

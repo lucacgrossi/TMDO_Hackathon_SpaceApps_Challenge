@@ -1,0 +1,23 @@
+.aviso {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 2px solid var(--suelo);
+  font-family: var(--f);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.aviso b {
+  font-weight: 600;
+}
+
+.claro {
+  background: var(--suelo-suave);
+  color: var(--noche);
+}
+
+.oscuro {
+  background: rgba(255, 255, 255, 0.06);
+  border-left-color: var(--cielo-brillo);
+  color: var(--rastrojo);
+}

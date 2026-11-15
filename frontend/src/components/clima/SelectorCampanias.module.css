@@ -1,0 +1,90 @@
+.barras {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  height: 128px;
+  margin: 12px 0 4px;
+}
+
+.barra {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  position: relative;
+  transform-origin: bottom;
+  transition: transform 140ms var(--ease-out);
+}
+
+.barra:active:not(:disabled) {
+  transform: scaleY(0.96);
+}
+
+/* La elegida se separa de las vecinas con un borde de papel y otro de noche. */
+.barra[aria-pressed="true"] {
+  z-index: 1;
+  box-shadow:
+    0 0 0 2px var(--papel, #fff),
+    0 0 0 4px var(--noche, #14202b);
+}
+
+.barra:focus-visible {
+  outline: 2px solid var(--cielo, #1c7c93);
+  outline-offset: 2px;
+}
+
+.barra:disabled {
+  cursor: default;
+}
+
+.letras,
+.extremos {
+  display: flex;
+  gap: 4px;
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--muted, #5a6560);
+}
+
+.letras span {
+  flex: 1;
+  text-align: center;
+}
+
+.letraElegida {
+  color: var(--noche, #14202b);
+  font-weight: 600;
+}
+
+.extremos {
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+/* Escala de las franjas: del seco al húmedo, pasando por lo común */
+.escala {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.rampa {
+  width: 96px;
+  height: 8px;
+  background: linear-gradient(90deg, var(--seco, #c0703a), var(--papel, #fff), var(--humedo, #2c7fb8));
+  border: 1px solid var(--line, #dce2d6);
+}
+
+.motivo {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--warn, #a86a0f);
+  background: var(--soft, #e8ece2);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--noche, #14202b);
+}

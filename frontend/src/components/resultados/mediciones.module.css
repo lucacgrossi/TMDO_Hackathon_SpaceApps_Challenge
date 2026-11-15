@@ -1,0 +1,118 @@
+/*
+ * Mediciones del productor al lado de NASA (persona 5, RF15).
+ * Solo tokens del prototipo. Lo del productor lleva siempre la etiqueta
+ * "dato del productor" o "solo informativo": se distingue por texto, no solo por color.
+ */
+
+.bloque {
+  margin: 12px 0 14px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: var(--soft);
+  font-size: 13px;
+}
+.bloque:has([data-difiere="true"]) {
+  border-left-color: var(--warn);
+}
+
+.titulo {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 10px;
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+.aclaracion {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.fila {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 12px;
+}
+.fila + .fila {
+  padding-top: 8px;
+  border-top: 1px dashed var(--line);
+}
+.indicador {
+  font-weight: 600;
+  line-height: 1.4;
+}
+.cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+.texto {
+  margin: 0;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.4;
+}
+.efecto {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  margin: 0;
+  line-height: 1.4;
+}
+.fila[data-difiere="true"] .efecto {
+  color: var(--warn);
+  font-weight: 600;
+}
+.informativo {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+/* Etiqueta de texto para lo que no es de NASA: borde punteado, sin relleno */
+.etiqueta {
+  display: inline-block;
+  margin-right: 6px;
+  padding: 0 6px;
+  border: 1px dashed currentColor;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  vertical-align: 1px;
+}
+.texto .etiqueta {
+  margin: 0 0 0 6px;
+}
+.datoProductor .etiqueta {
+  margin: 0;
+}
+
+/* Materia orgánica dentro de la fila Suelo, separada de los puntos de la tabla de cultivos */
+.datoProductor {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 6px;
+  margin: 6px 0 0;
+  padding-top: 6px;
+  border-top: 1px dashed var(--line);
+  font-size: 12px;
+  line-height: 1.4;
+}

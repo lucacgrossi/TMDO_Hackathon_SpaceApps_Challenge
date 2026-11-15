@@ -1,0 +1,55 @@
+name: Checks del proyecto
+
+# Reglas propias de AgroPixel (scripts simples en .github/scripts/, solo librería estándar de Python).
+# Cada paso corre aunque falle otro, para ver todos los problemas de una vez.
+on:
+  pull_request:
+    branches: [dev, main]
+  push:
+    branches: [dev]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  checks-proyecto:
+    name: checks-proyecto
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0 # para comparar contra la base del PR
+
+      - name: Lenguaje prohibido (compara, no recomienda)
+        if: ${{ !cancelled() }}
+        run: python3 .github/scripts/lenguaje_prohibido.py
+
+      - name: Fronteras entre dominios del back
+        if: ${{ !cancelled() }}
+        run: python3 .github/scripts/fronteras_dominios.py
+
+      - name: Archivos pesados y datos crudos
+        if: ${{ !cancelled() }}
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -n "$BASE_SHA" ]; then
+            python3 .github/scripts/archivos_pesados.py --base "$BASE_SHA"
+          else
+            python3 .github/scripts/archivos_pesados.py
+          fi
+
+      - name: Sin .env commiteados
+        if: ${{ !cancelled() }}
+        run: python3 .github/scripts/sin_env.py
+
+      - name: Nombre de la branch (solo avisa)
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: python3 .github/scripts/nombre_branch.py

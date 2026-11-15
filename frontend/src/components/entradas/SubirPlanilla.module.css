@@ -1,0 +1,98 @@
+.planilla {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* Zona de planilla CSV: borde punteado; resaltada al arrastrar un archivo encima */
+.zona {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-3);
+  background: var(--rastrojo);
+  border: 1px dashed var(--muted);
+  border-radius: var(--radio-dato);
+}
+
+.zona[data-encima="true"] {
+  background: var(--hoja-suave);
+  border-color: var(--hoja);
+  border-style: solid;
+}
+
+.titulo {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+  color: var(--noche);
+}
+
+.texto {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.link {
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+  color: var(--cielo);
+}
+
+.vista {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-1);
+  padding: var(--space-3);
+  background: var(--papel);
+  border: 1px solid var(--line);
+  border-radius: var(--radio-dato);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.vista b {
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.vista ul {
+  margin: 0;
+  padding-left: var(--space-4);
+}
+
+.ejemplo {
+  margin: 0;
+  padding: var(--space-2);
+  background: var(--suelo-suave);
+  color: var(--noche);
+}
+
+.error {
+  margin: 0;
+  font-weight: 600;
+  color: var(--bad);
+}
+
+.avisos summary {
+  cursor: pointer;
+  color: var(--warn);
+  font-weight: 600;
+}
+
+.detalle {
+  margin: 0;
+  color: var(--noche);
+}

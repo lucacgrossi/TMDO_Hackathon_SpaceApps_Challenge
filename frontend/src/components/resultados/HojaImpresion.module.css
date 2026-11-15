@@ -1,0 +1,128 @@
+/*
+ * Hoja de impresión (DESIGN.md, "Exportar PDF"). En pantalla no se ve; al
+ * imprimir es lo único visible. Los selectores sobre `body` pasan por `:has()`
+ * porque un CSS module necesita una clase propia en cada regla: así no se toca
+ * globals.css. La barra lateral y el contenido del dashboard se ocultan desde
+ * sus propios módulos.
+ */
+.hoja {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 landscape;
+    margin: 12mm;
+  }
+
+  :global(body):has(.hoja) {
+    height: auto;
+    background: var(--papel);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* Todo lo que no contiene la hoja (avisos flotantes, atajos): fuera del papel. */
+  :global(body):has(.hoja) > :global(*):not(:has(.hoja)) {
+    display: none !important;
+  }
+
+  .hoja {
+    display: block;
+    color: var(--noche);
+    font-family: var(--f);
+    font-size: 12px;
+    line-height: 16px;
+  }
+
+  .cabecera {
+    display: flex;
+    gap: var(--space-4);
+    align-items: flex-start;
+    margin-bottom: var(--space-4);
+    padding-bottom: var(--space-3);
+    border-bottom: 2px solid var(--noche);
+  }
+
+  .logo {
+    width: 72px;
+    height: auto;
+  }
+
+  .titulo {
+    margin: 0;
+    font-family: var(--f-titulo);
+    font-size: 24px;
+    line-height: 32px;
+    font-weight: 600;
+  }
+
+  .ficha {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-6);
+    margin: var(--space-2) 0 0;
+  }
+
+  .par {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .par dt {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+
+  .par dd {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  .precalculado {
+    display: inline-block;
+    margin: var(--space-2) 0 0;
+    padding: 2px var(--space-2);
+    border-left: 3px solid var(--suelo);
+    background: var(--suelo-suave);
+  }
+
+  .fuentes {
+    margin-top: var(--space-4);
+    color: var(--muted);
+    font-size: 11px;
+    line-height: 15px;
+    break-inside: avoid;
+  }
+
+  .fuentes ul {
+    margin: var(--space-1) 0;
+    padding-left: var(--space-4);
+  }
+
+  .fuentes p {
+    margin: 0;
+  }
+
+  .subtitulo {
+    margin: 0;
+    font-size: 12px;
+    line-height: 16px;
+    font-weight: 600;
+    color: var(--noche);
+  }
+
+  .pie {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--line);
+    color: var(--muted);
+    font-size: 11px;
+    break-inside: avoid;
+  }
+}

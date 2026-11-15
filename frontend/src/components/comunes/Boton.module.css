@@ -1,0 +1,106 @@
+.boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-family: var(--f);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 21px;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    transform 140ms var(--ease-out);
+}
+
+/* Respuesta al apretar: el botón se hunde apenas (todos los botones de la app). */
+.boton:active:not(:disabled) {
+  transform: scale(0.97);
+}
+
+.boton:disabled {
+  cursor: not-allowed;
+}
+
+.completo {
+  display: flex;
+  width: 100%;
+}
+
+/* Primario: CTA con esquinas escalonadas y sombra pixel (en .marco) */
+.marco {
+  display: inline-flex;
+  filter: drop-shadow(var(--sombra-pixel));
+}
+
+.marco:has(:focus-visible) {
+  outline: 2px solid var(--cielo);
+  outline-offset: 2px;
+}
+
+.marco:has(:disabled) {
+  filter: none;
+}
+
+.primario {
+  clip-path: var(--esquinas-pixel);
+  background: var(--hoja);
+  color: var(--papel);
+  padding: var(--space-3) var(--space-6);
+  font-family: var(--f-titulo);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.primario:focus-visible {
+  outline: none;
+}
+
+.primario:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--hoja) 82%, var(--noche));
+}
+
+.primario:disabled {
+  background: var(--soft);
+  color: var(--muted);
+}
+
+/* Secundario: acciones de apoyo ("Volver a marcar el lote", "Probar de nuevo") */
+.secundario {
+  background: var(--papel);
+  border-color: var(--line);
+  border-radius: 2px;
+  color: var(--noche);
+  padding: var(--space-2) var(--space-4);
+}
+
+.secundario:hover:not(:disabled) {
+  border-color: var(--hoja);
+  color: var(--hoja);
+}
+
+.secundario:disabled {
+  color: var(--muted);
+}
+
+/* Fantasma: acciones menores dentro de un bloque ("Ver formato del archivo") */
+.fantasma {
+  background: transparent;
+  border-radius: 2px;
+  color: var(--hoja);
+  padding: var(--space-1) var(--space-2);
+}
+
+.fantasma:hover:not(:disabled) {
+  background: var(--hoja-suave);
+}
+
+.fantasma:disabled {
+  color: var(--muted);
+}

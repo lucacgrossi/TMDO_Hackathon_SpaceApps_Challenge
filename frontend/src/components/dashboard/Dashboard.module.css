@@ -1,0 +1,69 @@
+/* Esqueleto del dashboard: barra lateral de 232 px + contenido. */
+
+.dashboard {
+  display: grid;
+  grid-template-columns: 232px minmax(0, 1fr);
+  min-height: 100vh;
+  background: var(--rastrojo);
+  color: var(--noche);
+}
+
+.principal {
+  min-width: 0;
+}
+
+/* Entradas cambiadas después de analizar (DESIGN.md, "Estados"). */
+.desactualizado {
+  margin: var(--space-4) var(--space-8) 0;
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--warn);
+  border-radius: 2px;
+  background: var(--papel);
+  color: var(--noche);
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+}
+
+.seccion {
+  padding: 0 var(--space-8) var(--space-8);
+}
+
+/* Acciones del encabezado de Rotaciones: Compartir y Exportar PDF. */
+.acciones {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+@media (max-width: 767px) {
+  .dashboard {
+    display: block;
+  }
+
+  /* Lugar para la barra inferior fija (secciones + aviso). */
+  .principal {
+    padding-bottom: 120px;
+  }
+
+  .desactualizado {
+    margin: var(--space-4) var(--space-4) 0;
+  }
+
+  .seccion {
+    padding: 0 var(--space-4) var(--space-6);
+  }
+}
+
+/* Al imprimir solo queda la hoja de impresión (HojaImpresion). */
+@media print {
+  .dashboard {
+    display: block;
+    min-height: 0;
+    background: var(--papel);
+  }
+
+  .principal {
+    display: none;
+  }
+}

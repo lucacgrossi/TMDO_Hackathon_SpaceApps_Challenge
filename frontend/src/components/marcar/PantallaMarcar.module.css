@@ -1,0 +1,77 @@
+/* Caja de S1, arriba a la izquierda sobre el mapa */
+.caja {
+  position: fixed;
+  z-index: 1002;
+  top: var(--space-4);
+  left: var(--space-4);
+  width: 360px;
+  max-width: calc(100% - 2 * var(--space-4));
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  background: var(--papel);
+  border: 1px solid var(--line);
+  border-radius: var(--radio-panel);
+  box-shadow: var(--sombra-pixel);
+  color: var(--noche);
+}
+
+.marca {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-family: var(--f-titulo);
+  font-weight: 500;
+  font-size: 18px;
+  line-height: 24px;
+}
+
+.logo {
+  display: block;
+}
+
+.titulo {
+  margin: 0;
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 32px;
+  line-height: 40px;
+  text-wrap: balance;
+}
+
+.bajada {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  color: var(--muted);
+}
+
+.fuente {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+/* Celu (mismo corte que el mapa, 900 px): el mapa queda arriba a la vista y la
+   caja pasa debajo, en el flujo de la página, sin taparlo. */
+@media (max-width: 900px) {
+  .caja {
+    position: static;
+    width: auto;
+    max-width: none;
+    max-height: none;
+    overflow: visible;
+    margin: var(--space-3);
+  }
+}
+
+@media (max-width: 767px) {
+  .titulo {
+    font-size: 24px;
+    line-height: 32px;
+  }
+}
