@@ -45,6 +45,7 @@ export default function PanelEntradas() {
       <div className={estilos.loteMapa}>
         <span>
           Lote de <b>{ha}</b>
+          <span className={estilos.ayudaLote}>Arrastrá las esquinas para ajustarlo.</span>
         </span>
         <Boton variante="secundario" icono="editar" onClick={volverAMarcar}>
           Volver a marcar el lote

@@ -10,6 +10,7 @@ import CapaLote from "./CapaLote";
 import CapaNdvi from "./CapaNdvi";
 import CapaPendiente from "./CapaPendiente";
 import Encuadre from "./Encuadre";
+import EsquinasLote from "./EsquinasLote";
 import EncuadreCapa from "./EncuadreCapa";
 import MarcaUbicacion from "./MarcaUbicacion";
 
@@ -126,6 +127,7 @@ export default function Mapa() {
           <CapaPendiente />
           <CapaClima />
           <CapaLote />
+          <EsquinasLote />
           <CapaDibujo />
           <Encuadre />
           <EncuadreCapa />
