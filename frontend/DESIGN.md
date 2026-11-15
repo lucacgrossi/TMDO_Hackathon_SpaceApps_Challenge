@@ -1,6 +1,6 @@
 # AgroPixel · Diseño
 
-**Fuente de verdad visual:** el archivo de Figma [AgroPixel · Rediseño del front](https://www.figma.com/design/uQbWWU8RVCaWDeVma4Padn) (página 01: estilo y componentes; 02: pantallas; 03: handoff) y este documento. Si no coinciden, manda este documento y se avisa para corregir el Figma. Reglas de producto: `../docs/mvp-alcance.md` (v4.5). El prototipo `../docs/prototipo/field-shift-prototipo.html` queda solo como referencia de comportamiento del mapa (dibujo del lote, encuadre), no de estilo.
+**Fuente de verdad visual:** el archivo de Figma [AgroPixel · Rediseño del front](https://www.figma.com/design/uQbWWU8RVCaWDeVma4Padn) (página 01: estilo y componentes; 02: pantallas; 03: handoff) y este documento. Si no coinciden, manda este documento y se avisa para corregir el Figma. Las pantallas del dashboard (S4 Mapa, S5 Clima histórico, S6 Rotaciones y S6b hoja de impresión) no llegaron al Figma por el límite del plan: están como **mockup básico** en `../docs/prototipo/agropixel-dashboard-mockup.html` (estructura y datos reales del lote de ejemplo; el estilo final es el de este documento). Reglas de producto: `../docs/mvp-alcance.md` (v4.5). El prototipo `../docs/prototipo/field-shift-prototipo.html` queda solo como referencia de comportamiento del mapa (dibujo del lote, encuadre), no de estilo.
 
 ## Idea
 **Cada píxel es un dato.** El logo es pixel art, y la app dibuja sobre el lote píxeles reales de 30 m (HLS, NASADEM). El estilo une las dos cosas: el pixel art no es decoración retro, es el mismo píxel que medimos.
