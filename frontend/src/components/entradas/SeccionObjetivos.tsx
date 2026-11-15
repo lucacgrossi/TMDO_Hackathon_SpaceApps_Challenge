@@ -1,52 +1,58 @@
 "use client";
 
 /**
- * F7 · Objetivos: 4 barras de 1 a 5, por defecto 3 (RF4 del MVP 4.3).
+ * F7 · Prioridades: 4 sliders de 1 a 5 en bloques, por defecto 3 (RF4).
+ * Figma: Slider de prioridad. Lo usan el panel de entradas (S2) y Rotaciones
+ * (S6, persona 5): mismo componente y mismo estado (`useEntradas`), así mover
+ * una prioridad recalcula la cercanía sin volver a llamar a la API (RF13).
  *
- * Por qué desde 1 y no desde 0 (como el prototipo): desde el #57 el motor pesa
- * las prioridades al cuadrado en la cercanía y el contrato rechaza un 0 con
- * error 422. Pedido de Back 2 en el PR #12.
+ * Por qué desde 1 y no desde 0: el motor pesa las prioridades al cuadrado en
+ * la cercanía y el contrato rechaza un 0 con error 422.
  *
- * Sale del prototipo final: `OBJ` y el armado de `#sliders` (un `.sl` por
- * objetivo con label, input range y output). Las barras solo cargan cuánto
- * le importa cada objetivo al productor; con eso la hoja de resultados
- * recalcula la cercanía sin volver a llamar a la API (RF13, persona 5).
+ * Cada slider es un grupo de 5 radios con forma de bloque: el teclado los
+ * recorre con las flechas (comportamiento nativo del radio) y el valor se ve
+ * en número al lado, no solo por cuántos bloques están llenos.
  */
-import { useEntradas } from "@/lib/store";
 import type { Objetivo } from "@/lib/entradas";
+import { PRIORIDADES } from "@/lib/resumenEntradas";
+import { useEntradas } from "@/lib/store";
+import estilos from "./SeccionObjetivos.module.css";
 
-/** Orden y nombre de cada barra (OBJ del prototipo). */
-const OBJETIVOS: { k: Objetivo; n: string }[] = [
-  { k: "agua", n: "Agua" },
-  { k: "suelo", n: "Suelo" },
-  { k: "erosion", n: "Erosión" },
-  { k: "ingreso", n: "Ingreso" },
-];
+const NIVELES = [1, 2, 3, 4, 5] as const;
 
 export default function SeccionObjetivos() {
   const objetivos = useEntradas((s) => s.objetivos);
   const cambiar = useEntradas((s) => s.cambiar);
 
+  // Se copia el objeto entero: el store no se muta, se reemplaza (así React se entera del cambio).
+  const elegir = (k: Objetivo, v: number) =>
+    cambiar({ objetivos: { ...useEntradas.getState().objetivos, [k]: v } });
+
   return (
-    <div className="blk" data-a="obj">
-      <h3>Objetivos</h3>
-      <p className="hint">Cuánto te importa cada uno: 1 poco, 5 mucho.</p>
-      <div id="sliders">
-        {OBJETIVOS.map((o) => (
-          <div className="sl" key={o.k}>
-            <label htmlFor={`w-${o.k}`}>{o.n}</label>
-            <input
-              type="range"
-              id={`w-${o.k}`}
-              min={1}
-              max={5}
-              step={1}
-              value={objetivos[o.k]}
-              // Se copia el objeto entero: el store no se muta, se reemplaza (así React se entera del cambio).
-              onChange={(e) => cambiar({ objetivos: { ...objetivos, [o.k]: Number(e.target.value) } })}
-            />
-            {/* El valor se ve al lado en número, no solo por la posición de la barra. */}
-            <output htmlFor={`w-${o.k}`} id={`o-${o.k}`} className="num">
+    <div>
+      <p className={estilos.ayuda}>Cuánto te importa cada una: 1 poco, 5 mucho.</p>
+      <div className={estilos.lista}>
+        {PRIORIDADES.map((o) => (
+          <div className={estilos.slider} key={o.k} role="radiogroup" aria-labelledby={`prioridad-${o.k}-t`}>
+            <span className={estilos.etiqueta} id={`prioridad-${o.k}-t`}>
+              {o.n}
+            </span>
+            <div className={estilos.bloques}>
+              {NIVELES.map((v) => (
+                <label key={v} className={estilos.bloque} data-lleno={v <= objetivos[o.k]}>
+                  <input
+                    type="radio"
+                    name={`prioridad-${o.k}`}
+                    value={v}
+                    checked={objetivos[o.k] === v}
+                    onChange={() => elegir(o.k, v)}
+                    aria-label={`${o.n}: ${v} de 5`}
+                  />
+                  <span aria-hidden="true" />
+                </label>
+              ))}
+            </div>
+            <output className={estilos.valor} aria-hidden="true">
               {objetivos[o.k]}
             </output>
           </div>

@@ -1,51 +1,111 @@
 "use client";
 
 import AvisoApoyo from "@/components/comunes/AvisoApoyo";
-import BotonPrincipal from "./BotonPrincipal";
-import ElegirLote from "./ElegirLote";
-import ResumenLote from "./ResumenLote";
+import Boton from "@/components/comunes/Boton";
+import { useApp } from "@/lib/app";
+import { centro } from "@/lib/geo";
+import {
+  coordenadas,
+  resumenDatosLote,
+  resumenMediciones,
+  resumenPrioridades,
+  resumenRestricciones,
+  resumenRotacion,
+  superficie,
+} from "@/lib/resumenEntradas";
+import { useEntradas } from "@/lib/store";
+import { useZona } from "@/lib/zona";
+import estilos from "./PanelEntradas.module.css";
 import SeccionDatosLote from "./SeccionDatosLote";
 import SeccionMediciones from "./SeccionMediciones";
 import SeccionObjetivos from "./SeccionObjetivos";
+import SeccionPlegable from "./SeccionPlegable";
 import SeccionRestricciones from "./SeccionRestricciones";
 import SeccionRotacion from "./SeccionRotacion";
 
 /**
- * Panel izquierdo (pantallas 2 a 4 del MVP juntas, como el prototipo).
- * En el paso 1 el CSS (body.onb) lo muestra centrado y en dos columnas;
- * en el paso 2 queda a la derecha del mapa. Cada sección es su propio
- * archivo para que las ramas de cada feature no se pisen.
+ * S2 · Panel de entradas (DESIGN.md): panel derecho de 400 px con scroll y
+ * pie fijo. Arriba "Tu lote"; en el medio, una sección plegable por grupo de
+ * entradas, cada una con su resumen cuando está cerrada; abajo, "Analizar lote".
  *
- * El botón de abajo (paso 1 → mapa → comparar) está en BotonPrincipal (F1).
+ * Sobre el mapa, arriba a la izquierda, la superficie del lote y "Volver a
+ * marcar el lote" (vuelve a S1).
  */
 export default function PanelEntradas() {
+  const entradas = useEntradas();
+  const analizar = useApp((s) => s.analizar);
+  const hayResultado = useApp((s) => s.hayResultado);
+  const volverAMarcar = useApp((s) => s.volverAMarcar);
+  const irA = useApp((s) => s.irA);
+  const zona = useZona(entradas.poligono);
+  const ha = superficie(entradas.poligono);
+
   return (
-    <aside className="panel" aria-label="Datos del lote">
-      <div className="scroll">
-        <div className="brand">
-          <b>Field Shift</b>
-          <span>Prototipo</span>
+    <>
+      <div className={estilos.loteMapa}>
+        <span>
+          Lote de <b>{ha}</b>
+        </span>
+        <Boton variante="secundario" icono="editar" onClick={volverAMarcar}>
+          Volver a marcar el lote
+        </Boton>
+      </div>
+
+      <aside className={estilos.panel} aria-labelledby="titulo-panel">
+        <header className={estilos.encabezado}>
+          <h1 id="titulo-panel" className={estilos.titulo}>
+            Tu lote
+          </h1>
+          <dl className={estilos.ficha}>
+            <div>
+              <dt>Superficie</dt>
+              <dd>{ha}</dd>
+            </div>
+            <div>
+              <dt>Centro</dt>
+              <dd>{coordenadas(centro(entradas.poligono))}</dd>
+            </div>
+            <div>
+              <dt>Zona</dt>
+              <dd>{zona ?? (entradas.modoLote === "demo" ? "Lote de ejemplo, Río Cuarto" : "Sin dato")}</dd>
+            </div>
+          </dl>
+        </header>
+
+        <div className={estilos.secciones}>
+          <SeccionPlegable titulo="Rotación actual" resumen={resumenRotacion(entradas)} abiertaAlInicio>
+            <SeccionRotacion />
+          </SeccionPlegable>
+          <SeccionPlegable titulo="Prioridades" resumen={resumenPrioridades(entradas.objetivos)}>
+            <SeccionObjetivos />
+          </SeccionPlegable>
+          <SeccionPlegable titulo="Restricciones y no sembrar" resumen={resumenRestricciones(entradas)}>
+            <SeccionRestricciones />
+          </SeccionPlegable>
+          <SeccionPlegable titulo="Datos del lote" resumen={resumenDatosLote(entradas)}>
+            <SeccionDatosLote />
+          </SeccionPlegable>
+          <SeccionPlegable titulo="Mediciones propias" resumen={resumenMediciones(entradas.mediciones)}>
+            <SeccionMediciones />
+          </SeccionPlegable>
         </div>
-        <div className="onb-hd">
-          <span className="kick">Paso 1 de 2 · tu caso</span>
-          <h1>Contanos qué hacés hoy en tu lote</h1>
-          <p>
-            Elegí cómo marcar tu lote y cargá lo que hacés hoy. En el paso 2 lo ves en el mapa con
-            los datos de NASA.
+
+        <footer className={estilos.pie}>
+          {/* El error de /analizar (S3b) y la conexión con la API los suma el PR de la conexión. */}
+          <Boton variante="primario" ancho="completo" onClick={analizar}>
+            Analizar lote
+          </Boton>
+          <p className={estilos.nota}>
+            Consulta NASA POWER, HLS, NASADEM y ESA WorldCover. Suele tardar hasta 30 s.
           </p>
-        </div>
-        <ElegirLote />
-        <ResumenLote />
-        <SeccionRotacion />
-        <SeccionObjetivos />
-        <SeccionRestricciones />
-        <SeccionDatosLote />
-        <SeccionMediciones />
-      </div>
-      <div className="cta">
-        <BotonPrincipal />
-        <AvisoApoyo />
-      </div>
-    </aside>
+          {hayResultado && (
+            <Boton variante="fantasma" onClick={() => irA("mapa")}>
+              Volver al análisis anterior
+            </Boton>
+          )}
+          <AvisoApoyo />
+        </footer>
+      </aside>
+    </>
   );
 }
