@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import ClimaHistorico from "@/components/clima/ClimaHistorico";
 import SeccionMapa from "@/components/mapa/SeccionMapa";
+import HojaImpresion from "@/components/resultados/HojaImpresion";
 import Rotaciones from "@/components/resultados/Rotaciones";
 import Boton from "@/components/comunes/Boton";
 import type { Seccion } from "@/lib/app";
@@ -73,6 +74,8 @@ export default function Dashboard({ seccion, onCambiarSeccion, onEditar, salida,
           {contenido(seccion, salida)}
         </section>
       </main>
+      {/* Solo en papel ("Exportar PDF"): en pantalla no se ve */}
+      <HojaImpresion salida={salida} />
     </div>
   );
 }

@@ -34,7 +34,7 @@ function copiarConTextarea(texto: string): boolean {
  * - Enviar por mail: `mailto:` con la versión corta (`resumenMail`), para que
  *   el link no pase de `LARGO_MAX_MAILTO` y Outlook no lo corte.
  * - Copiar resumen: el resumen completo al portapapeles, con aviso.
- * - Guardar PDF: `window.print()`; la hoja de impresión está en compartir.module.css.
+ * - El PDF ya no está acá: es "Exportar PDF" del dashboard (HojaImpresion).
  * - Nueva comparación: vuelve al paso 1 con las entradas iniciales.
  *
  * Teclado: Enter o flecha abajo abre y enfoca la primera opción; flechas,
@@ -109,11 +109,6 @@ export default function MenuCompartir({ salida }: { salida: Salida | null }) {
     useToast.getState().mostrar(ok ? "Resumen copiado" : "No se pudo copiar");
   }
 
-  function imprimir() {
-    cerrar();
-    window.print();
-  }
-
   function nuevaComparacion() {
     setAbierto(false);
     cerrarHoja();
@@ -148,9 +143,6 @@ export default function MenuCompartir({ salida }: { salida: Salida | null }) {
               </a>
               <button role="menuitem" tabIndex={-1} type="button" onClick={copiar}>
                 Copiar resumen
-              </button>
-              <button role="menuitem" tabIndex={-1} type="button" onClick={imprimir}>
-                Guardar PDF
               </button>
               <hr className={css.separador} />
             </>
