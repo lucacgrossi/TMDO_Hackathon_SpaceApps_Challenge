@@ -56,7 +56,7 @@ export default function HojaImpresion({ salida }: { salida: Salida }) {
         </div>
       </header>
 
-      <TablaTecnica salida={salida} />
+      <TablaTecnica salida={salida} impresion />
 
       <section className={css.fuentes}>
         <h2 className={css.subtitulo}>Fuentes</h2>
