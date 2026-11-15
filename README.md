@@ -403,12 +403,12 @@ Details: [`backend/DEPLOY.md`](backend/DEPLOY.md).
 
 ## Team
 
-**TMDO**, a team of five from FCEFyN, Universidad Nacional de Córdoba (Argentina):
+**TMDO**, a team of 5: 3 students from UTN FRC, one from FaCENA, Universidad Nacional del Nordeste (Argentina) and one Product Manager:
 
 - Benjamin Martin
-- Luca Camaño
+- Luca Camaño Grossi
 - Tobias Roncati
-- Valentin Ribero
+- Enrico Valentin Ribero
 - Trinidad Cruz
 
 The work was split into five areas:
