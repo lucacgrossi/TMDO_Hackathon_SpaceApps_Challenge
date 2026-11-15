@@ -1,0 +1,20 @@
+=== 05 mensual 3 años calendario/2 campañas 200 4.8s
+  contraste: Tu pluviómetro (2022/23 a 2023/24, 2 campañas): 775 mm/año · NASA en las mismas campañas: 799 mm (−3 %) · coinciden: confianza alta
+  mezcla: ['Lluvia: tu registro 775 mm/año (50 %, 3 años) contra NASA POWER en las mismas 2 campañas (2022/23 a 2023/24) 799 mm (−3 %) → NASA de las 30 campañas (819 mm) con ese −3 % al 50 %: 829 mm/año para las reglas']
+  riesgos prod: ['Tu estación registra heladas que NASA POWER no ve (agosto: 2 contra 0 de 2 campañas): revisar fechas de siembra con datos locales', 'NASA POWER registra más días de 35 °C o más que tu estación (marzo: 0 contra 2 de 2 campañas): revisar el calor en floración con datos locales']
+  cerc: [48, 64, 74, 70]
+=== C9 diaria 6 años temp (−20%) 200 4.1s
+  contraste: Tu pluviómetro (2019/20 a 2024/25, 6 campañas): 644 mm/año · NASA en las mismas campañas: 739 mm (−13 %) · coinciden: confianza alta
+  mezcla: ['Lluvia: tu registro 644 mm/año (60 %, 6 años) contra NASA POWER en las mismas 6 campañas (2019/20 a 2024/25) 739 mm (−13 %) → NASA de las 30 campañas (819 mm) con ese −13 % al 60 %: 776 mm/año para las reglas']
+  riesgos prod: ['Tu estación registra heladas que NASA POWER no ve (agosto: 6 contra 3 de 6 campañas): revisar fechas de siembra con datos locales', 'NASA POWER registra más días de 35 °C o más que tu estación (marzo: 0 contra 6 de 6 campañas): revisar el calor en floración con datos locales']
+  cerc: [47, 63, 73, 70]
+=== C10 12 años solo lluvia + mano 200 4.1s
+  contraste: Tu pluviómetro (2013/14 a 2024/25, 12 campañas): 756 mm/año · NASA en las mismas campañas: 798 mm (−5 %) · coinciden: confianza alta · se usó la planilla en lugar de la lluvia anual cargada a mano
+  mezcla: ['Lluvia: tu registro 756 mm/año (75 %, 12 años) contra NASA POWER en las mismas 12 campañas (2013/14 a 2024/25) 798 mm (−5 %) → NASA de las 30 campañas (819 mm) con ese −5 % al 75 %: 802 mm/año para las reglas']
+  riesgos prod: []
+  cerc: [48, 64, 72, 70]
+=== 03 1 año 200 4.1s
+  contraste: Tu pluviómetro (2024/25, 1 campaña): 791 mm/año · NASA en las mismas campañas: 939 mm (−16 %) · difieren más de 15 %: confianza baja en agua
+  mezcla: ['Lluvia: tu registro 791 mm/año (40 %, 1 año) contra NASA POWER en las mismas 1 campaña (2024/25) 939 mm (−16 %) → NASA de las 30 campañas (819 mm) con ese −16 % al 40 %: 840 mm/año para las reglas']
+  riesgos prod: ['Tu registro de lluvia tiene 1 año: pesa 40 % frente a NASA', 'Tu pluviómetro difiere 16 % de NASA POWER en las mismas campañas (2024/25, 1 campaña): el dato de agua tiene confianza baja']
+  cerc: [49, 64, 73, 72]
