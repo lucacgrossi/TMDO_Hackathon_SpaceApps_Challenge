@@ -35,3 +35,55 @@
     opacity: 0;
   }
 }
+
+/* Nubes de la intro (VIIRS de ayer). Entre el mapa base y el satélite. Se
+   abren desde el centro con una máscara radial que crece (--abierto) y se
+   agrandan (--escala): parece que la cámara las atraviesa. */
+.nubes {
+  position: absolute;
+  inset: 0;
+  z-index: 450;
+  overflow: hidden;
+  pointer-events: none;
+  transform: scale(var(--escala, 1));
+  transform-origin: 50% 50%;
+  -webkit-mask-image: radial-gradient(circle at 50% 50%, transparent var(--abierto, -22%), #000 calc(var(--abierto, -22%) + 22%));
+  mask-image: radial-gradient(circle at 50% 50%, transparent var(--abierto, -22%), #000 calc(var(--abierto, -22%) + 22%));
+  will-change: transform, mask-image;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out);
+}
+
+/* Aparecen cuando bajaron las teselas de la órbita, no de a pedazos. */
+.nubes.cargadas {
+  opacity: 1;
+}
+.rotuloNubes.cargadas {
+  opacity: calc(1 - var(--apertura, 0));
+}
+
+/* De qué día es la imagen: trazable, como cada capa del mapa. Se apaga con las nubes. */
+.rotuloNubes {
+  position: absolute;
+  left: 50%;
+  top: 16px;
+  transform: translateX(-50%);
+  z-index: 660;
+  white-space: nowrap;
+  margin: 0;
+  padding: 4px 10px;
+  border-radius: 2px;
+  background: color-mix(in oklab, var(--noche) 82%, transparent);
+  color: var(--papel);
+  font-size: 12px;
+  font-weight: 500;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.5s var(--ease-out);
+}
+
+/* El productor cortó el vuelo: las nubes se van en 0,4 s. */
+.irse {
+  opacity: 0 !important;
+  transition: opacity 0.4s var(--ease-out);
+}
