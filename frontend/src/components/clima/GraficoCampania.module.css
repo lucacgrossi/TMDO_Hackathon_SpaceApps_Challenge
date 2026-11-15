@@ -47,9 +47,16 @@
   gap: 6px;
 }
 
-.grupoLeyenda {
-  min-width: 112px;
+.tituloLeyenda {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 16px;
   font-weight: 600;
+  color: var(--noche, #14202b);
+}
+
+.tituloLeyenda + .leyenda {
+  margin-top: 4px;
 }
 
 .muestra {

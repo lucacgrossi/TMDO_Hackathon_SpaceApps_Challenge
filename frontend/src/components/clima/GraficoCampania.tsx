@@ -31,9 +31,9 @@ type Serie = keyof Omit<FilaGrafico, "mes" | "corto" | "nombre">;
 const NOMBRE: Record<Serie, string> = {
   lluvia: "Lluvia de la campaña",
   lluviaMedia: "Lluvia, media de 30 años",
-  tmax: ETIQUETA_TMAX,
+  tmax: `${ETIQUETA_TMAX}, de la campaña`,
   tmaxMedia: `${ETIQUETA_TMAX}, media de 30 años`,
-  tmin: ETIQUETA_TMIN,
+  tmin: `${ETIQUETA_TMIN}, de la campaña`,
   tminMedia: `${ETIQUETA_TMIN}, media de 30 años`,
   balance: "Balance de la campaña",
   balanceMedia: "Balance, media de 30 años",
@@ -95,19 +95,21 @@ function Muestra({ tipo, color }: { tipo: "barra" | "llena" | "punteada"; color:
  * distinguían.
  */
 function Leyenda({ conCampania }: { conCampania: boolean }) {
-  const items = (lluvia: string, linea: "llena" | "punteada") => (
+  // Cada ítem dice de qué es: la campaña (barra oscura, línea llena con punto)
+  // o la media de 30 años (barra clara, punteada). Sin títulos de fila.
+  const items = (lluvia: string, linea: "llena" | "punteada", de: string) => (
     <>
       <li>
         <Muestra tipo="barra" color={lluvia} />
-        Lluvia
+        Lluvia{de}
       </li>
       <li>
         <Muestra tipo={linea} color={COLOR.tmax} />
-        {ETIQUETA_TMAX}
+        Máxima{de}
       </li>
       <li>
         <Muestra tipo={linea} color={COLOR.tmin} />
-        {ETIQUETA_TMIN}
+        Mínima{de}
       </li>
     </>
   );
@@ -115,13 +117,11 @@ function Leyenda({ conCampania }: { conCampania: boolean }) {
     <div className={css.leyenda}>
       {conCampania && (
         <div className={css.filaLeyenda}>
-          <span className={css.grupoLeyenda}>Esta campaña</span>
-          <ul>{items(COLOR.lluvia, "llena")}</ul>
+          <ul>{items(COLOR.lluvia, "llena", " de la campaña")}</ul>
         </div>
       )}
       <div className={css.filaLeyenda}>
-        <span className={css.grupoLeyenda}>Media de 30 años</span>
-        <ul>{items(COLOR.lluviaMedia, "punteada")}</ul>
+        <ul>{items(COLOR.lluviaMedia, "punteada", ", media de 30 años")}</ul>
       </div>
     </div>
   );
@@ -193,8 +193,8 @@ export default function GraficoCampania({ filas, conCampania }: { filas: FilaGra
             {conCampania && <Bar dataKey="balance" name={NOMBRE.balance} fill={COLOR.balance} isAnimationActive={false} />}
           </ComposedChart>
         </ResponsiveContainer>
+        <p className={css.tituloLeyenda}>Balance de agua del mes</p>
         <LeyendaBalance conCampania={conCampania} />
-        <figcaption className={css.pie}>Balance de agua del mes: lluvia menos ET0 (Hargreaves).</figcaption>
       </figure>
     </div>
   );
