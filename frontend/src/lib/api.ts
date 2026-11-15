@@ -25,6 +25,8 @@ export class ErrorDeApi extends Error {
     readonly estado: number | null,
     /** true si tiene sentido "Probar de nuevo" (NASA no respondió, red, tiempo). */
     readonly reintentable: boolean,
+    /** true si el back rechazó el pedido por el esquema (422 con `{detail}`): es un error de la app. */
+    readonly deLaApp: boolean = false,
   ) {
     super(mensaje);
     this.name = "ErrorDeApi";
@@ -49,6 +51,16 @@ export function mensajeDeError(estado: number, cuerpo: unknown): string {
     }
   }
   return `El servidor respondió con un error (${estado}).`;
+}
+
+/**
+ * 422 de FastAPI: el pedido no cumple el esquema (`{detail: [...]}` sin
+ * `{mensaje}`). Es un error del front, no de los datos del productor.
+ */
+export function esErrorDeEsquema(cuerpo: unknown): boolean {
+  if (!cuerpo || typeof cuerpo !== "object") return false;
+  const c = cuerpo as { mensaje?: unknown; detail?: unknown };
+  return !(typeof c.mensaje === "string" && c.mensaje.trim()) && Array.isArray(c.detail);
 }
 
 /** 503 = NASA POWER no respondió; 5xx y 408/429 también vale reintentar. */
@@ -76,7 +88,10 @@ export async function analizar(entrada: Entrada, signal?: AbortSignal): Promise<
       signal: tiempo.signal,
     });
     const cuerpo = await leerJson(r);
-    if (!r.ok) throw new ErrorDeApi(mensajeDeError(r.status, cuerpo), r.status, esReintentable(r.status));
+    if (!r.ok) {
+      const esquema = r.status === 422 && esErrorDeEsquema(cuerpo);
+      throw new ErrorDeApi(mensajeDeError(r.status, cuerpo), r.status, esReintentable(r.status), esquema);
+    }
     if (!cuerpo) throw new ErrorDeApi("El servidor respondió vacío.", r.status, true);
     return cuerpo as Salida;
   } catch (e) {

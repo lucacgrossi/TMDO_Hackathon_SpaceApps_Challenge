@@ -30,6 +30,8 @@ export interface ErrorAnalisis {
   estado: number | null;
   /** true si tiene sentido "Probar de nuevo". */
   reintentable: boolean;
+  /** El back rechazó el pedido por el esquema (422 con `{detail}`): es un error de la app, no del lote. */
+  deLaApp?: boolean;
 }
 
 export interface EstadoApp {

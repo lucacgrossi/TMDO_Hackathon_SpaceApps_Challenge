@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { esReintentable, mensajeDeError } from "@/lib/api";
+import { esErrorDeEsquema, esReintentable, mensajeDeError } from "@/lib/api";
 import { camp0De, CAMP0 } from "@/lib/ndvi";
 
 describe("mensajeDeError", () => {
@@ -26,6 +26,18 @@ describe("mensajeDeError", () => {
     expect(esReintentable(503)).toBe(true);
     expect(esReintentable(500)).toBe(true);
     expect(esReintentable(422)).toBe(false);
+  });
+});
+
+describe("esErrorDeEsquema", () => {
+  it("{detail} sin {mensaje} es un pedido que no cumple el esquema (error de la app)", () => {
+    expect(esErrorDeEsquema({ detail: [{ loc: ["body", "lat"], msg: "x", type: "y" }] })).toBe(true);
+  });
+
+  it("{mensaje} del back (lote no agrícola) o un cuerpo ilegible, no", () => {
+    expect(esErrorDeEsquema({ mensaje: "El polígono no parece un lote agrícola." })).toBe(false);
+    expect(esErrorDeEsquema(null)).toBe(false);
+    expect(esErrorDeEsquema("texto")).toBe(false);
   });
 });
 

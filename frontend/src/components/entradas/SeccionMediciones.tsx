@@ -26,6 +26,7 @@ import { useState } from "react";
 import { traeLluvia } from "@/lib/planilla";
 import { useEntradas } from "@/lib/store";
 import estilos from "./Campos.module.css";
+import ModalFormatoPlanilla from "./ModalFormatoPlanilla";
 import SubirPlanilla from "./SubirPlanilla";
 import "./mediciones.css";
 
@@ -55,6 +56,8 @@ export default function SeccionMediciones() {
   const mediciones = useEntradas((s) => s.mediciones);
   const cambiar = useEntradas((s) => s.cambiar);
 
+  /** Modal "Formato de la planilla" (S2b). */
+  const [formatoAbierto, setFormatoAbierto] = useState(false);
   // Qué campo está fuera de rango, solo para mostrar el aviso. Es estado de
   // interfaz, no una entrada: por eso vive acá y no en el store.
   const [fuera, setFuera] = useState<Record<Campo, boolean>>({
@@ -91,7 +94,8 @@ export default function SeccionMediciones() {
       <p className={estilos.ayuda}>
         Opcionales. Se comparan con NASA y, en los puntajes, pesan más según tus años de registro.
       </p>
-      <SubirPlanilla />
+      <SubirPlanilla alVerFormato={() => setFormatoAbierto(true)} />
+      <ModalFormatoPlanilla abierto={formatoAbierto} onCerrar={() => setFormatoAbierto(false)} />
       <div className={estilos.subtitulo}>O cargalas a mano</div>
       <div className={estilos.grilla}>
         {CAMPOS.map((c) => (

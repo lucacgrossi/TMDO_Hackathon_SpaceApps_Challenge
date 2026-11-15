@@ -1,0 +1,25 @@
+/* S3b · El error del análisis flota sobre el mapa, a la izquierda del panel de entradas (400 px). */
+.capaError {
+  position: fixed;
+  z-index: 1100;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 400px;
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  pointer-events: none;
+}
+
+.capaError > * {
+  pointer-events: auto;
+  box-shadow: var(--sombra-pixel);
+}
+
+@media (max-width: 900px) {
+  .capaError {
+    right: 0;
+    align-items: start;
+  }
+}

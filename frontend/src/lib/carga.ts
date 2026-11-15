@@ -71,8 +71,17 @@ export interface TextosError {
  * Cualquier otro (500, red caída, tiempo agotado): solo "Probar de nuevo". El
  * lote de ejemplo no se ofrece porque su respaldo precalculado lo da el back,
  * y si el back no responde también falla.
+ * `deLaApp` (422 con `{detail}`): el pedido no cumplió el esquema; reintentar
+ * no lo arregla, así que se ofrece el lote de ejemplo o marcar de nuevo.
  */
-export function textosError(codigo: number): TextosError {
+export function textosError(codigo: number, deLaApp = false): TextosError {
+  if (deLaApp) {
+    return {
+      titulo: "No se pudo armar el pedido del análisis",
+      comoSeguir: "Probá con el lote de ejemplo de Río Cuarto o volvé a marcar el lote.",
+      acciones: ["ejemplo", "marcar"],
+    };
+  }
   if (codigo === 422) {
     return {
       titulo: "Este polígono no parece un lote agrícola",

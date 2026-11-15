@@ -24,7 +24,15 @@ import { useEntradas } from "./store";
  */
 export type Resultado =
   | { estado: "cargando" }
-  | { estado: "error"; mensaje: string; reintentable: boolean }
+  | {
+      estado: "error";
+      mensaje: string;
+      reintentable: boolean;
+      /** Código HTTP, o null si no hubo respuesta (sin conexión, tiempo agotado). */
+      codigo?: number | null;
+      /** El back rechazó el pedido por el esquema (422 con `{detail}`): error de la app. */
+      deLaApp?: boolean;
+    }
   | { estado: "listo"; datos: Salida };
 
 interface EstadoResultado {
@@ -83,7 +91,15 @@ function pedir(foto: Entradas | null) {
       if (control.signal.aborted) return;
       const err =
         e instanceof ErrorDeApi ? e : new ErrorDeApi("Error inesperado al pedir la comparación.", null, true);
-      set({ resultado: { estado: "error", mensaje: err.message, reintentable: err.reintentable } });
+      set({
+        resultado: {
+          estado: "error",
+          mensaje: err.message,
+          reintentable: err.reintentable,
+          codigo: err.estado,
+          deLaApp: err.deLaApp,
+        },
+      });
     })
     .finally(() => {
       if (enCurso === control) enCurso = null;

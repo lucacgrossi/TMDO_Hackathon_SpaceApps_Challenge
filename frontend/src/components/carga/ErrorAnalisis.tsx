@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Boton from "@/components/comunes/Boton";
 import { ETIQUETAS_ACCION, textosError, type AccionError } from "@/lib/carga";
 import PlantaPixel from "./PlantaPixel";
@@ -16,6 +17,10 @@ interface Props {
   onReintentar: () => void;
   /** "Probar con el lote de ejemplo" (422 y 503): Río Cuarto, con el respaldo precalculado del back. */
   onEjemplo: () => void;
+  /** El back rechazó el pedido por el esquema (422 con `{detail}`): error de la app, no del lote. */
+  deLaApp?: boolean;
+  /** "Cerrar" (y Esc): oculta el error y deja el panel como estaba. Sin él, no hay botón. */
+  onCerrar?: () => void;
 }
 
 /**
@@ -24,16 +29,38 @@ interface Props {
  * Errores sin disculpas (DESIGN.md, "Lenguaje"). No llama a la API ni al
  * store: las acciones llegan por props.
  */
-export default function ErrorAnalisis({ codigo, mensaje, onMarcarOtro, onReintentar, onEjemplo }: Props) {
-  const textos = textosError(codigo);
+export default function ErrorAnalisis({
+  codigo,
+  mensaje,
+  onMarcarOtro,
+  onReintentar,
+  onEjemplo,
+  deLaApp = false,
+  onCerrar,
+}: Props) {
+  const textos = textosError(codigo, deLaApp);
   const acciones: Record<AccionError, () => void> = {
     marcar: onMarcarOtro,
     reintentar: onReintentar,
     ejemplo: onEjemplo,
   };
 
+  useEffect(() => {
+    if (!onCerrar) return;
+    const alTeclear = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onCerrar();
+    };
+    window.addEventListener("keydown", alTeclear);
+    return () => window.removeEventListener("keydown", alTeclear);
+  }, [onCerrar]);
+
   return (
     <section className={estilos.card} role="alert" aria-labelledby="error-analisis-titulo">
+      {onCerrar && (
+        <Boton variante="fantasma" className={estilos.cerrar} onClick={onCerrar}>
+          Cerrar
+        </Boton>
+      )}
       <PlantaPixel fotograma={0} escala={5} desdeFila={11} className={estilos.semilla} />
       <div className={estilos.texto}>
         <h2 id="error-analisis-titulo" className={estilos.titulo}>
