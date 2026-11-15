@@ -7,6 +7,7 @@ import { VENTANA_ENTRADA_MS, sinMovimiento } from "@/lib/animacion";
 import { AVISO_PRECALCULADO, metadatosHoja } from "@/lib/formato";
 import { despertar } from "@/lib/api";
 import { useResultado, useResultadoStore } from "@/lib/resultado";
+import { useEntradas } from "@/lib/store";
 import { useVista } from "@/lib/vista";
 import ChoqueObjetivos from "./ChoqueObjetivos";
 import { EntradaHoja } from "./EntradaHoja";
@@ -34,6 +35,7 @@ export default function HojaComparacion() {
   const abierta = useVista((s) => s.hojaAbierta);
   const cerrar = useVista((s) => s.cerrarHoja);
   const resultado = useResultado();
+  const pesos = useEntradas((s) => s.objetivos);
   const reintentar = useResultadoStore((s) => s.reintentar);
   const [vista, setVista] = useState<VistaResultado>("tabla");
   // La fecha se toma al abrir, en el cliente: así no difiere entre el servidor y el navegador
@@ -108,7 +110,7 @@ export default function HojaComparacion() {
               )}
             </div>
           )}
-          {resultado.estado === "listo" && <ChoqueObjetivos estrategias={resultado.datos.estrategias} />}
+          {resultado.estado === "listo" && <ChoqueObjetivos salida={resultado.datos} pesos={pesos} />}
           {resultado.estado === "listo" && <SerieCampanias salida={resultado.datos} />}
           {resultado.estado === "listo" &&
             (vista === "tabla" ? <TablaTecnica salida={resultado.datos} /> : <TarjetasEstrategias salida={resultado.datos} />)}

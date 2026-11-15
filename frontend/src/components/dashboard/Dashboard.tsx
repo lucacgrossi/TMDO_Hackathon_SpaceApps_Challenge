@@ -3,12 +3,13 @@
 import type { ReactNode } from "react";
 import ClimaHistorico from "@/components/clima/ClimaHistorico";
 import SeccionMapa from "@/components/mapa/SeccionMapa";
+import Rotaciones from "@/components/resultados/Rotaciones";
+import Boton from "@/components/comunes/Boton";
 import type { Seccion } from "@/lib/app";
 import type { Salida } from "@/lib/contrato";
 import { TEXTO_DESACTUALIZADO, fichaDelLote, itemMenu } from "@/lib/dashboard";
 import BarraLateral from "./BarraLateral";
 import Encabezado from "./Encabezado";
-import SeccionPendiente from "./SeccionPendiente";
 import css from "./Dashboard.module.css";
 
 export interface PropsDashboard {
@@ -35,7 +36,7 @@ function contenido(seccion: Seccion, salida: Salida): ReactNode {
     case "clima":
       return <ClimaHistorico salida={salida} />;
     case "rotaciones":
-      return <SeccionPendiente nombre="Rotaciones" />;
+      return <Rotaciones salida={salida} />;
   }
 }
 
@@ -61,11 +62,26 @@ export default function Dashboard({ seccion, onCambiarSeccion, onEditar, salida,
             {TEXTO_DESACTUALIZADO}
           </p>
         )}
-        <Encabezado id={idTitulo} titulo={item.titulo} ficha={fichaDelLote(salida)} esMock={salida.es_mock} />
+        <Encabezado
+          id={idTitulo}
+          titulo={item.titulo}
+          ficha={fichaDelLote(salida)}
+          esMock={salida.es_mock}
+          accion={seccion === "rotaciones" ? <BotonExportar /> : undefined}
+        />
         <section className={css.seccion} aria-labelledby={idTitulo}>
           {contenido(seccion, salida)}
         </section>
       </main>
     </div>
+  );
+}
+
+/** "Exportar PDF" (Rotaciones): abre la impresión del navegador; la hoja la arma `HojaImpresion`. */
+function BotonExportar() {
+  return (
+    <Boton variante="primario" icono="imprimir" onClick={() => window.print()}>
+      Exportar PDF
+    </Boton>
   );
 }

@@ -1,18 +1,16 @@
 import type { IdEstrategia } from "@/lib/contrato";
-import css from "./resultados.module.css";
-
-/** Letra del badge: la actual va con "·" (DESIGN.md). */
-export const LETRA: Record<IdEstrategia, string> = { actual: "·", A: "A", B: "B", C: "C" };
+import { BADGE } from "@/lib/rotaciones";
+import css from "./InsigniaEstrategia.module.css";
 
 /**
- * Badge con la letra de la estrategia en su color (tokens --s-* del prototipo;
- * el fondo y la tinta de cada letra están en resultados.module.css, con su
- * contraste medido). Decorativo: el nombre va siempre al lado.
+ * Badge de la estrategia (Hoy, A, B, C) con esquinas escalonadas y el color de
+ * su columna (DESIGN.md, "Card de estrategia"). Igual en cards, tabla y PDF.
+ * Con `descartada`, en gris. Decorativo: el nombre va siempre al lado.
  */
-export default function InsigniaEstrategia({ id }: { id: IdEstrategia }) {
+export default function InsigniaEstrategia({ id, descartada = false }: { id: IdEstrategia; descartada?: boolean }) {
   return (
-    <span className={css.insignia} data-id={id} aria-hidden="true">
-      {LETRA[id]}
+    <span className={css.insignia} data-id={id} data-descartada={descartada} aria-hidden="true">
+      {BADGE[id]}
     </span>
   );
 }

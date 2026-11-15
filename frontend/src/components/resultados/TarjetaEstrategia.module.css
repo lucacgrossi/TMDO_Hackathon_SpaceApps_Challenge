@@ -1,0 +1,274 @@
+/* Card de estrategia (DESIGN.md). Color de la columna en el borde superior. */
+
+.card {
+  --s: var(--s-actual);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 0;
+  padding: var(--space-4);
+  border: 1px solid var(--line);
+  border-top: 4px solid var(--s);
+  border-radius: 6px;
+  background: var(--papel);
+  color: var(--noche);
+}
+
+.card[data-id="A"] { --s: var(--s-a); }
+.card[data-id="B"] { --s: var(--s-b); }
+.card[data-id="C"] { --s: var(--s-c); }
+
+/* Descartada: gris, sin datos, con el motivo. */
+.card[data-disponible="false"] {
+  --s: var(--line);
+  background: var(--soft);
+  color: var(--muted);
+}
+
+.cabecera {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+}
+
+.titulos {
+  min-width: 0;
+}
+
+/* Título/H3: Pixelify Sans 500, 18/24. */
+.nombre {
+  margin: 0;
+  font-family: var(--f-titulo);
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+}
+
+.especies,
+.pie,
+.pelado {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.descartada {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.bloque {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* --- Calendario de julio a junio */
+.calendario {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.mes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.celda {
+  display: block;
+  width: 100%;
+  height: 18px;
+  border-radius: 2px;
+}
+
+.celda[data-grupo="verano"] { background: var(--verano); }
+.celda[data-grupo="invierno"] { background: var(--invierno); }
+.celda[data-grupo="cobertura"] { background: var(--cobertura); }
+/* Barbecho: color + patrón de puntos, para que no dependa del color. */
+.celda[data-grupo="barbecho"] {
+  background: radial-gradient(var(--suelo) 1px, transparent 1.5px) 0 0 / 6px 6px, var(--barbecho);
+}
+
+.inicial {
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--muted);
+}
+
+/* --- Cercanía */
+.cercania {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+/* Número/Grande: Plex 600, 32/36. */
+.numeroGrande {
+  font-size: 32px;
+  line-height: 36px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* --- Balance por tipo de año */
+.etiqueta {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.balance {
+  margin: 0;
+}
+
+.filaBalance {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-2);
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.filaBalance dt {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.filaBalance dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.cuadro {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+}
+
+.cuadro[data-tipo="seco"] { background: var(--seco); }
+.cuadro[data-tipo="normal"] { background: var(--normal); }
+.cuadro[data-tipo="humedo"] { background: var(--humedo); }
+
+.sensible {
+  align-self: flex-start;
+  margin: var(--space-1) 0 0;
+  padding: 0 var(--space-2);
+  border: 1px solid var(--warn);
+  border-radius: 2px;
+  color: var(--warn);
+  font-size: 12px;
+  line-height: 18px;
+  font-weight: 600;
+}
+
+/* --- Probabilidad climatológica (texto del back tal cual) */
+.probabilidad {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.probabilidad p {
+  margin: 0;
+}
+
+.contraste {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.vacio {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+/* --- Los 5 puntos plegables */
+.puntos {
+  margin-top: auto;
+}
+
+/* Pisa el `details` global del prototipo (padding y margen); el +/– de globals.css queda como señal de plegable. */
+.punto,
+.punto + .punto {
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid var(--line);
+}
+
+.tituloPunto {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.resumen {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  padding: 6px 0;
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
+}
+
+.resumen::-webkit-details-marker {
+  display: none;
+}
+
+.resumen:focus-visible {
+  outline: 2px solid var(--cielo);
+  outline-offset: 2px;
+}
+
+.cuenta {
+  min-width: 20px;
+  padding: 0 var(--space-1);
+  border-radius: 2px;
+  background: var(--soft);
+  color: var(--muted);
+  font-weight: 600;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-2);
+  padding-left: var(--space-4);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.punto > .vacio {
+  margin-bottom: var(--space-2);
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
