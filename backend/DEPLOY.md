@@ -64,9 +64,9 @@ gcloud run deploy $SERVICIO \
   --memory 1Gi \
   --timeout 60 \
   --min-instances 1 \
-  --set-env-vars "^@^CORS_ORIGINS=https://agropixel.earth,https://www.agropixel.earth,http://localhost:3000,https://agropixel-web-757348191517.southamerica-east1.run.app,https://agropixel-web-wqtvuhfh7a-rj.a.run.app@CORS_ORIGIN_REGEX=https://.*\.vercel\.app"
+  --set-env-vars "^@^CORS_ORIGINS=https://agropixel.earth,https://www.agropixel.earth,http://localhost:3000,https://agropixel-web-757348191517.southamerica-east1.run.app,https://agropixel-web-wqtvuhfh7a-rj.a.run.app"
 ```
-- El front de producción es https://agropixel.earth, servido desde el 15/11 por Cloud Run (`agropixel-web`, detrás de un balanceador; ver `frontend/CLAUDE.md` → Deploy). Las dos URL `run.app` de `agropixel-web` también están en `CORS_ORIGINS`: son el respaldo si falla el dominio. `--set-env-vars` reemplaza todas las variables: si se cambia el dominio o se recrea `agropixel-web`, actualizarlo acá. `CORS_ORIGIN_REGEX` (URL de Vercel) quedó de cuando el front estaba en Vercel; ya no se usa y se puede sacar.
+- El front de producción es https://agropixel.earth, servido desde el 15/11 por Cloud Run (`agropixel-web`, detrás de un balanceador; ver `frontend/CLAUDE.md` → Deploy). Las dos URL `run.app` de `agropixel-web` también están en `CORS_ORIGINS`: son el respaldo si falla el dominio. `--set-env-vars` reemplaza todas las variables: si se cambia el dominio o se recrea `agropixel-web`, actualizarlo acá. No se usa `CORS_ORIGIN_REGEX` (se sacó el 15/11 junto con Vercel): todos los orígenes van en `CORS_ORIGINS`.
 - `--min-instances 1`: sin arranque en frío durante la demo. Después, volver a 0 (paso 6).
 - Probar con el paso 5. Además, para confirmar que subió la versión nueva:
   ```bash
