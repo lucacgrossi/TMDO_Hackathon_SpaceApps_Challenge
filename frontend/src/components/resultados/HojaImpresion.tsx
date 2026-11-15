@@ -18,13 +18,14 @@ import css from "./HojaImpresion.module.css";
  * completa, las fuentes con sus años y resoluciones, la fecha de generación y
  * el aviso de apoyo al pie. Sin librerías de PDF.
  *
- * El centro sale del polígono con que se analizó (la foto de `useComparacion`),
- * no del que se esté editando. La cercanía de la tabla usa las prioridades
- * actuales, que van impresas en la ficha.
+ * El centro, las restricciones y "No sembrar" salen de las entradas con que se
+ * analizó (la foto de `useComparacion`), no de las que se estén editando. La
+ * cercanía de la tabla usa las prioridades actuales, que van impresas en la ficha.
  */
 export default function HojaImpresion({ salida }: { salida: Salida }) {
   const pesos = useEntradas((s) => s.objetivos);
-  const poligono = useComparacion((s) => s.foto?.poligono ?? null);
+  const foto = useComparacion((s) => s.foto);
+  const poligono = foto?.poligono ?? null;
   const [fecha, setFecha] = useState<Date | null>(null);
 
   // La fecha se toma en el cliente y se renueva justo antes de imprimir
@@ -35,7 +36,7 @@ export default function HojaImpresion({ salida }: { salida: Salida }) {
     return () => window.removeEventListener("beforeprint", ahora);
   }, []);
 
-  const ficha = fichaImpresion(salida, poligono && poligono.length >= 3 ? centro(poligono) : null, pesos);
+  const ficha = fichaImpresion(salida, poligono && poligono.length >= 3 ? centro(poligono) : null, pesos, foto);
 
   return (
     <div className={css.hoja}>
