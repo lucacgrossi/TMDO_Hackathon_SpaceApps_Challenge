@@ -189,5 +189,5 @@ Back 2 expone funciones en `satelite/`; **Back 1 las llama desde `servicio.py`**
 - Secretos y configuración en variables de entorno de Cloud Run, nunca en el repo.
 - CORS abierto al dominio del front.
 - Durante la demo: `--min-instances=1`, para que no haya arranque en frío.
-- Se deploya desde `main` (lo mergea la persona 3), después de probar en `dev`. **Excepción: la demo del 15/11 se deploya desde `dev`** (ver `DEPLOY.md`).
-- `CORS_ORIGIN_REGEX` (opcional) acepta las URL de vista previa de Vercel, que cambian en cada deploy.
+- Se deploya solo en cada push a `main` (lo mergea la persona 3), después de probar en `dev` (ver `DEPLOY.md`).
+- `CORS_ORIGIN_REGEX` (opcional, en `app/main.py`) acepta orígenes por expresión regular. Hoy no está configurado: era para las vistas previas de Vercel, que ya no se usa.

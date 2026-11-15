@@ -46,16 +46,16 @@ Dueños y reparto del rediseño (persona 4, persona 5 y Luca): **`./PLAN.md`**. 
 Desde `frontend/` (Node 20 o más):
 - `npm install` · instala las dependencias (versiones fijas en `package.json`).
 - `npm run dev` · servidor local en http://localhost:3000.
-- `npm run build` · build de producción (es lo que corre el `Dockerfile` en Cloud Build, y también Vercel, que quedó de plan B).
-- **Vercel solo deploya `main` y `dev`** (`vercel.json`, `git.deploymentEnabled`): las branches de trabajo (`nombre/tipo/…`, `pr-*`) no generan preview, para no pasar el tope de 100 deploys por día del plan gratis. Para revisar un PR se prueba local con `npm run dev`; la CI de GitHub corre el build igual.
+- `npm run build` · build de producción (es lo que corre el `Dockerfile` en Cloud Build).
+- **Sin Vercel:** `vercel.json` apaga los deploys desde git (`git.deploymentEnabled: false`), así que ningún push ni PR genera un deploy ni un preview en Vercel. Para revisar un PR se prueba local con `npm run dev`; la CI de GitHub corre el build igual.
 - `npm run lint` y `npm run typecheck` · revisar antes de abrir un PR.
 - `npm test` · tests de lógica pura con vitest (`src/**/*.test.ts`).
 - Variables: copiar `.env.example` a `.env.local`. Sin `.env.local`, se usa el mock.
 
 ## Deploy (Cloud Run, desde el 15/11)
-`https://agropixel.earth` y `www` sirven el servicio de Cloud Run **`agropixel-web`** (proyecto `nasa-space-app-fieldchange`, región `southamerica-east1`) detrás de un balanceador HTTPS global (IP `8.232.221.137`, certificado de Google en el mapa `agropixel-map`). Vercel quedó como plan B: el proyecto `field-shift` sigue existiendo, pero el DNS ya no apunta ahí.
+`https://agropixel.earth` y `www` sirven el servicio de Cloud Run **`agropixel-web`** (proyecto `nasa-space-app-fieldchange`, región `southamerica-east1`) detrás de un balanceador HTTPS global (IP `8.232.221.137`, certificado de Google en el mapa `agropixel-map`). No se usa más Vercel.
 
-Para publicar un cambio, desde `frontend/` con `dev` actualizado (no hace falta Docker local: el build corre en Cloud Build):
+**Cada push a `main` que toque `frontend/` deploya solo** (`.github/workflows/deploy.yml`, ver `backend/DEPLOY.md` → Deploy automático). No hace falta Docker local: el build corre en Cloud Build. Deploy manual, solo para cambiar instancias o recursos, desde `frontend/` con `main` actualizado:
 ```bash
 gcloud run deploy agropixel-web --source . --region southamerica-east1 --allow-unauthenticated \
   --port 8080 --memory 1Gi --cpu 1 --cpu-boost --min-instances 1 --max-instances 4
