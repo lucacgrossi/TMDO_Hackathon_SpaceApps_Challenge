@@ -11,7 +11,7 @@
  * grandes): sin valores no hay "tocar un píxel", pero el PNG se dibuja igual.
  */
 
-import type { Bounds, CapaRaster } from "./contrato";
+import type { Bounds, CapaRaster, EscalaCapa } from "./contrato";
 
 /** El tipo es el del contrato (`contrato.ts`, copia de `contrato.py`): un solo tipo para el mapa y la tabla. */
 export type { CapaRaster };
@@ -56,9 +56,57 @@ export function pixelEn(capa: CapaRaster, lat: number, lng: number): { fila: num
 export function valorEn(capa: CapaRaster, lat: number, lng: number, cache?: Int16Array): number | null {
   const p = pixelEn(capa, lat, lng);
   if (!p) return null;
-  const valores = cache ?? (capa.valores ? decodificarValores(capa.valores) : null);
+  return valorPixel(capa, p.fila, p.columna, cache);
+}
+
+/** Los valores decodificados de cada capa, una sola vez por objeto (el inspector lee en cada movimiento). */
+const decodificadas = new WeakMap<CapaRaster, Int16Array | null>();
+
+/** `valores` decodificado y guardado; null si la capa no trae valores por píxel. */
+export function valoresDe(capa: CapaRaster): Int16Array | null {
+  if (!decodificadas.has(capa)) decodificadas.set(capa, capa.valores ? decodificarValores(capa.valores) : null);
+  return decodificadas.get(capa) ?? null;
+}
+
+/**
+ * Valor real de `valores[fila][columna]` (× `factor`), para el inspector de
+ * píxel con el mouse o con las flechas del teclado. null fuera de la grilla,
+ * en `nodata` o si la capa no trae valores.
+ */
+export function valorPixel(capa: CapaRaster, fila: number, columna: number, cache?: Int16Array): number | null {
+  if (!Number.isInteger(fila) || !Number.isInteger(columna)) return null;
+  if (fila < 0 || columna < 0 || fila >= capa.alto || columna >= capa.ancho) return null;
+  const valores = cache ?? valoresDe(capa);
   if (!valores) return null;
-  const entero = valores[p.fila * capa.ancho + p.columna];
+  const entero = valores[fila * capa.ancho + columna];
   if (entero === undefined || entero === capa.nodata) return null;
   return entero * capa.factor;
+}
+
+/** Centro del píxel [lat, lng]: donde se dibuja el recuadro del inspector. */
+export function centroPixel(capa: CapaRaster, fila: number, columna: number): [number, number] {
+  const [[sur, oeste], [norte, este]] = capa.bounds;
+  const lat = norte - ((fila + 0.5) / capa.alto) * (norte - sur);
+  const lng = oeste + ((columna + 0.5) / capa.ancho) * (este - oeste);
+  return [lat, lng];
+}
+
+/**
+ * Clase de la escala del back en la que cae un valor: el último corte que es
+ * menor o igual (cada corte es el piso de su clase). Por debajo del primer
+ * corte cuenta como la primera clase. null si la escala está vacía o el valor no es un número.
+ */
+export function claseEscala(escala: EscalaCapa, valor: number): number | null {
+  if (!Number.isFinite(valor) || escala.cortes.length === 0) return null;
+  let i = 0;
+  escala.cortes.forEach((corte, k) => {
+    if (valor >= corte) i = k;
+  });
+  return Math.min(i, escala.colores.length - 1);
+}
+
+/** Color de la escala del back para un valor (barritas de la línea de tiempo, inspector). */
+export function colorEscala(escala: EscalaCapa, valor: number): string | null {
+  const i = claseEscala(escala, valor);
+  return i == null ? null : (escala.colores[i] ?? null);
 }
