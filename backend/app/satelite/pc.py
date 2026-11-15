@@ -2,11 +2,23 @@
 
 Todo pedido a Planetary Computer de los módulos de `satelite/` pasa por acá.
 Cualquier falla (red, timeout, HTTP, respuesta inesperada) sale como `ErrorPC`,
-con un mensaje en español. Los módulos la atrapan y devuelven `valor: None` + motivo.
+con un mensaje en lenguaje del productor y sin códigos HTTP (va a "Información que falta").
+Los módulos la atrapan y devuelven `valor: None` + motivo.
+
+Reporte QA del 15/11 (H-013): Planetary Computer responde 429 cuando se le pide mucho seguido y
+el mismo lote daba resultados distintos según qué pedido fallaba. Por eso:
+- 429 → un reintento después de una espera corta (la que pide `Retry-After`, hasta `ESPERA_MAX_429`);
+- cada respuesta 200 se guarda en memoria (`_cache`, por método + URL + parámetros + cuerpo, que
+  incluye el polígono) durante `CACHE_TTL_S`: el mismo lote no vuelve a pedir lo que ya tiene.
+  Las fallas no se guardan, así un análisis repetido completa lo que faltó.
 """
 from __future__ import annotations
 
 import io
+import json
+import threading
+import time
+from collections import OrderedDict
 
 import httpx
 import numpy as np
@@ -17,16 +29,86 @@ BASE = "https://planetarycomputer.microsoft.com/api"
 URL_BUSQUEDA = f"{BASE}/stac/v1/search"
 URL_DATOS = f"{BASE}/data/v1"
 TIMEOUT = 10.0  # segundos por pedido (PLAN.md §3: /analizar en menos de 30 s)
-# Un reintento ante timeout, falla de red o HTTP 5xx: el 14/11 vimos timeouts sueltos que al
+# Un reintento ante timeout, falla de red, HTTP 5xx o 429: el 14/11 vimos timeouts sueltos que al
 # reintentar respondían en ~1 s. Los pedidos son lecturas, así que repetirlos es seguro.
 REINTENTOS = 1
+ESPERA_429_S = 1.0     # espera antes de reintentar un 429 si no viene `Retry-After`
+ESPERA_MAX_429 = 2.0   # tope de la espera: /analizar tiene 25 s para todo
+
+# Caché de respuestas 200 en memoria (por proceso). Los tests la apagan (tests/conftest.py).
+CACHE_ACTIVA = True
+CACHE_TTL_S = 6 * 3600
+CACHE_MAX_BYTES = 64 * 1024 * 1024
+CACHE_MAX_RESPUESTA = 8 * 1024 * 1024   # una respuesta más grande no se guarda
+
+SERVICIO = "el servicio de imágenes satelitales (Planetary Computer)"
+MENSAJE_SATURADO = f"{SERVICIO} está saturado; probá de nuevo en un minuto"
+MENSAJE_SIN_RESPUESTA = f"{SERVICIO} no respondió a tiempo; probá de nuevo en un minuto"
+MENSAJE_CAIDO = f"{SERVICIO} no responde; probá de nuevo en un minuto"
+MENSAJE_RECHAZO = f"{SERVICIO} no devolvió el dato pedido para el lote"
 
 # Un solo cliente para todo el proceso: reusa conexiones y es seguro entre hilos.
 _cliente = red.cliente(TIMEOUT)  # certificados del sistema + certifi (ver red.py)
 
+_cache: OrderedDict[str, tuple[float, bytes]] = OrderedDict()
+_cache_bytes = 0
+_cache_lock = threading.Lock()
+
 
 class ErrorPC(Exception):
     """Falla al consultar Planetary Computer. El mensaje va a "Información que falta"."""
+
+
+def limpiar_cache() -> None:
+    """Vacía la caché de respuestas (la usan los tests)."""
+    global _cache_bytes
+    with _cache_lock:
+        _cache.clear()
+        _cache_bytes = 0
+
+
+def _clave(metodo: str, url: str, params: dict | None, cuerpo: dict | None) -> str:
+    return json.dumps([metodo, url, sorted((params or {}).items()), cuerpo], sort_keys=True, default=str)
+
+
+def _de_cache(clave: str) -> bytes | None:
+    global _cache_bytes
+    if not CACHE_ACTIVA:
+        return None
+    with _cache_lock:
+        guardado = _cache.get(clave)
+        if guardado is None:
+            return None
+        hora, contenido = guardado
+        if time.monotonic() - hora > CACHE_TTL_S:
+            del _cache[clave]
+            _cache_bytes -= len(contenido)
+            return None
+        _cache.move_to_end(clave)
+        return contenido
+
+
+def _a_cache(clave: str, contenido: bytes) -> None:
+    global _cache_bytes
+    if not CACHE_ACTIVA or len(contenido) > CACHE_MAX_RESPUESTA:
+        return
+    with _cache_lock:
+        anterior = _cache.pop(clave, None)
+        if anterior:
+            _cache_bytes -= len(anterior[1])
+        _cache[clave] = (time.monotonic(), contenido)
+        _cache_bytes += len(contenido)
+        while _cache_bytes > CACHE_MAX_BYTES and _cache:
+            _, (_, viejo) = _cache.popitem(last=False)
+            _cache_bytes -= len(viejo)
+
+
+def _espera_429(r: httpx.Response) -> float:
+    try:
+        pedida = float(r.headers.get("Retry-After", ESPERA_429_S))
+    except ValueError:  # Retry-After con fecha HTTP: se usa la espera por defecto
+        pedida = ESPERA_429_S
+    return max(0.0, min(pedida, ESPERA_MAX_429))
 
 
 def _feature(poligono: dict) -> dict:
@@ -34,23 +116,35 @@ def _feature(poligono: dict) -> dict:
 
 
 def _pedir(metodo: str, url: str, **kwargs) -> httpx.Response:
+    clave = _clave(metodo, url, kwargs.get("params"), kwargs.get("json"))
+    guardado = _de_cache(clave)
+    if guardado is not None:
+        return httpx.Response(200, content=guardado)
     error: ErrorPC | None = None
-    for _ in range(REINTENTOS + 1):
+    for intento in range(REINTENTOS + 1):
         try:
             r = _cliente.request(metodo, url, **kwargs)
         except httpx.TimeoutException as e:
-            error = ErrorPC(f"Planetary Computer no respondió en {TIMEOUT:.0f} s")
+            error = ErrorPC(MENSAJE_SIN_RESPUESTA)
             error.__cause__ = e
             continue
         except httpx.HTTPError as e:
-            error = ErrorPC(f"No se pudo conectar con Planetary Computer ({type(e).__name__})")
+            error = ErrorPC(MENSAJE_CAIDO)
             error.__cause__ = e
             continue
         if r.status_code == 200:
+            _a_cache(clave, r.content)
             return r
-        error = ErrorPC(f"Planetary Computer respondió con error HTTP {r.status_code}")
-        if r.status_code < 500:  # 4xx: el pedido está mal, reintentar no cambia nada
-            break
+        if r.status_code == 429:  # saturado: se espera un poco y se reintenta
+            error = ErrorPC(MENSAJE_SATURADO)
+            if intento < REINTENTOS:
+                time.sleep(_espera_429(r))
+            continue
+        if r.status_code >= 500:
+            error = ErrorPC(MENSAJE_CAIDO)
+            continue
+        error = ErrorPC(MENSAJE_RECHAZO)  # otro 4xx: el pedido está mal, reintentar no cambia nada
+        break
     raise error
 
 

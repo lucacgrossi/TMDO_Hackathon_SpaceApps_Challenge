@@ -145,7 +145,7 @@ def test_fallan_los_dos(monkeypatch, aws_caido):
     assert r["mapa"] is None and "NASADEM" in r["mapa_motivo"]
     for ind in (r["pendiente_general"], r["pendiente_maxima"]):
         assert ind["valor"] is None and ind["confianza"] == "sin_dato"
-        assert "NASADEM" in ind["motivo"] and "AWS Terrain Tiles" in ind["motivo"] and "HTTP 503" in ind["motivo"]
+        assert "NASADEM" in ind["motivo"] and "AWS Terrain Tiles" in ind["motivo"] and "no responde" in ind["motivo"]
 
 
 def test_error_inesperado_no_rompe(monkeypatch, aws_caido):
