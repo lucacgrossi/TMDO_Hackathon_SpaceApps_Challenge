@@ -47,3 +47,16 @@
     padding: 0 var(--space-4) var(--space-6);
   }
 }
+
+/* Al imprimir solo queda la hoja de impresión (HojaImpresion). */
+@media print {
+  .dashboard {
+    display: block;
+    min-height: 0;
+    background: var(--papel);
+  }
+
+  .principal {
+    display: none;
+  }
+}

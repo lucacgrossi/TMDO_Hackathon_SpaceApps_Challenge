@@ -324,3 +324,25 @@
   color: var(--muted);
   font-style: italic;
 }
+
+/* En papel: sin encabezado ni columna fijos, la tabla entra en el ancho de la hoja y las filas no se parten. */
+@media print {
+  .tabla {
+    min-width: 0;
+    font-size: 11px;
+    line-height: 15px;
+  }
+
+  .tabla thead th,
+  .titulo {
+    position: static;
+  }
+
+  .colTitulo {
+    width: 140px;
+  }
+
+  .tabla tr {
+    break-inside: avoid;
+  }
+}
