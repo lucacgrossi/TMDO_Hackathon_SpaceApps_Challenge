@@ -240,8 +240,8 @@ export default function IntroOrbita() {
       nubesOcultas = true;
       capaNubes.style.visibility = "hidden";
       rotulo.style.visibility = "hidden";
-      const eventos = nubes.getEvents?.();
-      if (eventos) mapa.off(eventos, nubes);
+      // De a un evento: los tipos de Leaflet no aceptan off(mapa de eventos, contexto).
+      for (const [tipo, fn] of Object.entries(nubes.getEvents?.() ?? {})) mapa.off(tipo, fn, nubes);
     };
 
     let nubesFuera = false;
