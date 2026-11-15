@@ -46,10 +46,23 @@ Dueños y reparto del rediseño (persona 4, persona 5 y Luca): **`./PLAN.md`**. 
 Desde `frontend/` (Node 20 o más):
 - `npm install` · instala las dependencias (versiones fijas en `package.json`).
 - `npm run dev` · servidor local en http://localhost:3000.
-- `npm run build` · build de producción (es lo que corre Vercel).
+- `npm run build` · build de producción (es lo que corre el `Dockerfile` en Cloud Build).
 - `npm run lint` y `npm run typecheck` · revisar antes de abrir un PR.
 - `npm test` · tests de lógica pura con vitest (`src/**/*.test.ts`).
 - Variables: copiar `.env.example` a `.env.local`. Sin `.env.local`, se usa el mock.
+
+## Deploy (Cloud Run, desde el 15/11)
+`https://agropixel.earth` y `www` sirven el servicio de Cloud Run **`agropixel-web`** (proyecto `nasa-space-app-fieldchange`, región `southamerica-east1`) detrás de un balanceador HTTPS global (IP `8.232.221.137`, certificado de Google en el mapa `agropixel-map`). Vercel quedó como plan B: el proyecto `field-shift` sigue existiendo, pero el DNS ya no apunta ahí.
+
+Para publicar un cambio, desde `frontend/` con `dev` actualizado (no hace falta Docker local: el build corre en Cloud Build):
+```bash
+gcloud run deploy agropixel-web --source . --region southamerica-east1 --allow-unauthenticated \
+  --port 8080 --memory 1Gi --cpu 1 --cpu-boost --min-instances 1 --max-instances 4
+```
+- `NEXT_PUBLIC_USAR_MOCK=false` y `NEXT_PUBLIC_API_URL` están fijas en el `Dockerfile` y se graban al compilar: si cambian, se edita ahí y se vuelve a deployar.
+- `.gcloudignore` es obligatorio: deja afuera `node_modules/`, `.next/` y todo `.env*` (un `.env.local` con el mock activado dejaría la app con datos falsos). `.dockerignore` tiene lo mismo.
+- El balanceador y el dominio no se tocan al deployar. Volver atrás: `gcloud run services update-traffic agropixel-web --region southamerica-east1 --to-revisions <REVISION>=100`.
+- Después de la demo: `gcloud run services update agropixel-web --region southamerica-east1 --min-instances 0`.
 
 ## Estructura
 - `src/app/` · `layout.tsx` (fuentes, CSS de Leaflet y tokens), `page.tsx` (elige la pantalla según `etapa`), `icon.png` y `apple-icon.png` (favicon recortado del logo).
