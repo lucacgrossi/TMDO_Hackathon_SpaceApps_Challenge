@@ -1,10 +1,8 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import type { EstrategiaDisponible, Salida } from "@/lib/contrato";
 import { fmt, MESES, mesesConAnios, NOMBRE_CULTIVO, rangoMeses, tramosCalendario } from "@/lib/formato";
-import { colorNdvi, indiceCampania, mesesLinea } from "@/lib/linea";
-import { useVista } from "@/lib/vista";
+import { colorNdvi, mesesLinea } from "@/lib/linea";
 import css from "./linea.module.css";
 
 /** Inicial de cada mes (0 = enero), como el eje del prototipo. */
@@ -15,8 +13,7 @@ const INICIAL = ["E", "F", "M", "A", "M", "J", "J", "A", "S", "O", "N", "D"];
  * - fila de meses: helada frecuente (fondo), helada con cultivo sensible
  *   (anillo) y calor ≥ 35 °C con cultivo de verano (raya arriba);
  * - fila de cultivos: un segmento por tramo, "Pelado" en el barbecho;
- * - en la actual, la fila fina de lo que vio el satélite, con la escala del NDVI del mapa;
- * - el cursor marca el mes que muestra el mapa (`useVista().mes`).
+ * - en la actual, la fila fina de lo que vio el satélite, con la escala del NDVI del mapa.
  * El color nunca es la única señal: cada marca tiene forma propia, título y
  * la línea entera tiene una descripción en texto.
  */
@@ -29,7 +26,6 @@ export default function LineaCampania({
   estrategia: EstrategiaDisponible;
   satelite?: boolean;
 }) {
-  const mes = useVista((s) => s.mes);
   const meses = mesesLinea(salida, estrategia);
   const tramos = tramosCalendario(estrategia.calendario);
   const sat = salida.visto_por_satelite;
@@ -106,7 +102,6 @@ export default function LineaCampania({
             </div>
           </div>
         )}
-        <span className="cur" style={{ "--i": indiceCampania(mes) } as CSSProperties} aria-hidden="true" />
       </div>
       {satelite && (
         <div className="satcap">

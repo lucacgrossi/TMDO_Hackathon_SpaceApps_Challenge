@@ -93,9 +93,9 @@ export default function ClimaHistorico({ salida }: { salida: Salida }) {
           <ContrasteMediciones salida={salida} />
         ) : (
           <>
-            <h3 className={css.h3}>Tus mediciones contra NASA</h3>
+            <h3 className={css.h3}>Tus mediciones, al lado de NASA</h3>
             <p className={css.pie}>
-              Sin mediciones cargadas. Con tu pluviómetro o tu planilla, acá se ven al lado de NASA en las mismas campañas.
+              Sin mediciones cargadas. Si subís tu planilla de lluvia y temperaturas, tus datos se comparan acá al lado de NASA, en las mismas campañas.
             </p>
           </>
         )}
