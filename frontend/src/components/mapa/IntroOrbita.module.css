@@ -1,0 +1,27 @@
+/* El satélite cruza el mapa de izquierda a derecha, en línea (movimiento constante: linear). */
+.orbita {
+  position: absolute;
+  inset: 0;
+  z-index: 650; /* sobre las teselas y las marcas, debajo de los controles de Leaflet */
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.satelite {
+  position: absolute;
+  top: 26%;
+  left: 0;
+  width: 114px; /* 19 × 6: cada píxel del satélite mide 6 px */
+  height: 42px;
+  filter: drop-shadow(0 6px 0 rgba(20, 32, 43, 0.25));
+  animation: cruzar 3s linear forwards;
+}
+
+@keyframes cruzar {
+  from {
+    transform: translate(-140px, 40px) rotate(-6deg);
+  }
+  to {
+    transform: translate(calc(100vw + 40px), -60px) rotate(-6deg);
+  }
+}

@@ -1,7 +1,7 @@
 "use client";
 
 import L from "leaflet";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { ImageOverlay, MapContainer, Polygon, Rectangle, TileLayer, Tooltip, useMap, useMapEvents, ZoomControl } from "react-leaflet";
 import { pixelEn } from "@/lib/capaRaster";
 import { boundsCelda, boundsPixel, dibujoNdvi, type IdCapaLote, rasterDeCapa } from "@/lib/capasLote";
@@ -83,6 +83,13 @@ export default function MapaLote({ salida, capa, mes, poligono, pixel, onPixel }
   const ndvi = capa === "ndvi" ? dibujoNdvi(salida, mes) : null;
   const raster = ndvi ? (ndvi.tipo === "raster" ? ndvi.capa : null) : rasterDeCapa(salida, capa, mes);
   const imagen = useImagenRecortada(raster, poligono, `${capa}-${mes}`);
+  // La primera capa que se ve al entrar se revela de arriba abajo, de a filas
+  // (DESIGN.md, "Movimiento": el lote se pixela). Las siguientes, fundido de 0,2 s.
+  const revelada = useRef(false);
+  const claseImagen = revelada.current ? css.px : css.revelar;
+  useEffect(() => {
+    if (imagen) revelada.current = true;
+  }, [imagen]);
 
   return (
     <MapContainer
@@ -107,7 +114,7 @@ export default function MapaLote({ salida, capa, mes, poligono, pixel, onPixel }
           url={imagen}
           bounds={raster.bounds}
           opacity={0.9}
-          className={css.px}
+          className={claseImagen}
           interactive={false}
           alt={raster.titulo}
         />

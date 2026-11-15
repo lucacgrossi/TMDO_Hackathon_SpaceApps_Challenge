@@ -21,7 +21,7 @@ Principios:
 from __future__ import annotations
 
 from app.motor import estrategias as _estrategias
-from app.motor.cultivos import BARBECHO, C, MESES, PLURAL_TIPO, dec, meses_texto, nombre, pct
+from app.motor.cultivos import BARBECHO, C, MESES, PLURAL_TIPO, cuenta, dec, floracion, meses_texto, nombre, pct
 from app.motor.mezcla import mezclar
 
 TIPOS = ("seco", "normal", "humedo")
@@ -97,7 +97,7 @@ def regla_agua(cal: list[str], clima: dict, entradas: dict) -> list[dict]:
         if t == "humedo" and anegable in ANEGABLE_CASTIGO and a["cubre"] >= ANEGABLE_COBERTURA:
             castigo = ANEGABLE_CASTIGO[anegable]
             extra = _aporte("anegamiento", "agua", -castigo,
-                            f"Lote que se encharca ({anegable.replace('_', ' ')}) con agua de sobra en años "
+                            f"Lote que se encharca ({'sí' if anegable == 'si' else 'a veces'}) con agua de sobra en años "
                             f"húmedos · dato del productor")
             extra["tipo"] = t
             aportes.append(extra)
@@ -116,7 +116,7 @@ def regla_suelo(cal: list[str], entradas: dict) -> list[dict]:
             aportes.append(_aporte("rastrojo", "suelo", C[x]["rastrojo"],
                                    f"{nombre(x)} deja rastrojo ({C[x]['rastrojo']}) · tabla de cultivos"))
     aportes.append(_aporte("meses_cubiertos", "suelo", cubiertos * SUELO_POR_MES_CUBIERTO,
-                           f"{cubiertos} meses con cultivo vivo · calendario"))
+                           f"{cuenta(cubiertos, 'mes', 'meses')} con cultivo vivo · calendario"))
     verano = next((x for x in cultivos if C[x]["grupo"] == "verano"), None)
     verano = "soja" if verano == "soja2" else verano
     if verano and verano == entradas.get("pasada"):
@@ -139,7 +139,7 @@ def regla_erosion(cal: list[str], pendiente: float, clima: dict, entradas: dict)
     aportes = [
         _aporte("erosion_base", "erosion", EROSION_BASE, "Base de la regla"),
         _aporte("meses_pelados", "erosion", -castigo,
-                f"{len(pelados)} meses pelados ({meses_texto(pelados)}) con pendiente {dec(pendiente)} % y "
+                f"{cuenta(len(pelados), 'mes pelado', 'meses pelados')} ({meses_texto(pelados)}) con pendiente {dec(pendiente)} % y "
                 f"{lluvia_pelados:.0f} mm de lluvia en esos meses en años normales ({fuente_lluvia})"
                 + (" · suelo arenoso" if f_textura > 1 else "")),
     ]
@@ -169,8 +169,8 @@ def regla_ingreso(cal: list[str], clima: dict) -> list[dict]:
                                "Helada con cultivo sensible: " + ", ".join(
                                    f"{MESES[m]} {pct(clima['helada'][m])} de los años" for m in meses_h) + f" · {fuente}"))
     fuente = "tu estación y NASA" if clima["pesos"]["calor"] else "NASA POWER"
-    meses_c = [m for x in comerciales if C[x]["sensible_calor"] for m in C[x]["floracion"]
-               if cal[m] == x and clima["calor"][m] > 0]
+    meses_c = [m for x in comerciales if C[x]["sensible_calor"] for m in floracion(x, cal)
+               if clima["calor"][m] > 0]
     if meses_c:
         castigo = min(CALOR_TOPE, sum(clima["calor"][m] for m in meses_c) * CALOR_CASTIGO)
         aportes.append(_aporte("riesgo_calor", "ingreso", -castigo,

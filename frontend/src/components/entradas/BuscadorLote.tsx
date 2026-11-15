@@ -95,7 +95,7 @@ export default function BuscadorLote() {
           type="search"
           autoComplete="off"
           spellCheck={false}
-          placeholder="Lugar, coordenadas o link de Google Maps"
+          placeholder="Lugar, coordenadas o link de Google Maps…"
           value={b.texto}
           onChange={(e) => b.alEscribir(e.target.value)}
           onKeyDown={b.alTeclear}
