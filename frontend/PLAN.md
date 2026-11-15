@@ -49,6 +49,27 @@ Carpetas: `components/mapa/` (solo la sección del dashboard: `SeccionMapa`, `In
 3. **Revisión de todos los PRs del front** antes de mergear a `dev` (checklist abajo).
 4. Al final: cambiar "Field Shift" por "AgroPixel" en `compartir.ts` y su test, y borrar el CSS del prototipo que quede sin uso.
 
+### Punto de montaje de Mapa y Clima histórico (para el `Dashboard` de persona 5)
+Mapa está en `dev` (PR #88) y Clima histórico en el PR #89. Las dos son autocontenidas: reciben la respuesta de `/analizar` por props y no tocan `page.tsx`, `globals.css` ni `layout.tsx`. El `Dashboard` las monta así:
+
+```tsx
+import ClimaHistorico from "@/components/clima/ClimaHistorico";
+import SeccionMapa from "@/components/mapa/SeccionMapa";
+import { useSalidaDashboard } from "@/lib/salidaDashboard";
+
+const salida = useSalidaDashboard(); // null mientras carga o con error
+// …dentro del área de contenido, según useApp().seccion:
+{salida && seccion === "mapa" && <SeccionMapa salida={salida} />}
+{salida && seccion === "clima" && <ClimaHistorico salida={salida} />}
+```
+
+- `useSalidaDashboard` (`src/lib/salidaDashboard.ts`) devuelve la última respuesta lista, también la del mock y la de la demo precalculada (`es_mock`). No usar `useSalidaDelLote` acá: esa descarta el mock.
+- Ancho: las dos piden todo el área de contenido. Arman su propia grilla con una ficha de 280 px a la derecha y pasan a una columna debajo de 1100 px. El mapa mide 640 px de alto.
+- El mes es `useVista().mes` (0 = enero) y arranca en julio. La capa del mapa es `useMapaLote` (`src/lib/mapaLote.ts`). Ninguna sección necesita props además de `salida`.
+- Leaflet se carga solo en el navegador (`SeccionMapa` hace el `dynamic` adentro). `layout.tsx` tiene que seguir importando `leaflet/dist/leaflet.css`.
+- Mientras no esté la base (paso 0), los CSS modules usan `var(--token, valor de DESIGN.md)`. Las fuentes de los títulos usan `var(--font-pixelify)` y `var(--font-plex)`: si `layout.tsx` les pone otro nombre, avisar.
+- Cuando `page.tsx` y `Mapa.tsx` (persona 4) dejen de usarlos, se borran `SelectorCapas`, `LineaTiempo`, `Leyenda`, `CapaNdvi`, `CapaPendiente`, `CapaClima` y `EncuadreCapa`: el dashboard usa `SelectorCapasLote`, `LineaTiempoLote`, `LeyendaLote` y `MapaLote`.
+
 ## Horarios
 | Hora | Hito |
 |---|---|
