@@ -15,5 +15,6 @@ Arma las 4 columnas de `/analizar` (actual, A, B y C) con puntajes de 0 a 100 en
 - Lluvia del productor: agua (los 3 tipos de año) y erosión (lluvia en los meses pelados).
 - Mínimas y máximas del productor: riesgo de helada y de calor en el ingreso, y los meses de helada/calor.
 - Textura y anegamiento: lluvia efectiva, erosión y agua en años húmedos.
+- Anegamiento, además, en "A revisar con el agrónomo": los cultivos de la columna sensibles al encharcamiento (`sensible_anegamiento` en `cultivos.py`). Con "No sé" (igual que la textura) va a "Información que falta".
 
 Las constantes de cada regla están arriba de cada archivo para calibrarlas. Tests: `pytest tests/motor`.

@@ -16,6 +16,8 @@ Campos:
 - aporte_n: puntos de suelo por fijar nitrógeno.
 - rastrojo: puntos de suelo por el rastrojo que deja (≥ 30 en total protege de la erosión).
 - comercial: se cosecha y se vende.
+- sensible_anegamiento: sufre si el lote se encharca mientras está implantado (falta de oxígeno en las
+  raíces). Lo usa "A revisar con el agrónomo" cuando el productor dice que el lote se encharca.
 
 Las claves son las del contrato (`app/api/contrato.py`: CultivoVerano, CultivoInvierno, CultivoMes).
 """
@@ -29,37 +31,37 @@ MESES = ("enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agosto
 C: dict[str, dict] = {
     "soja": {"nombre": "Soja", "grupo": "verano", "tolera_helada": False, "sensible_calor": True,
              "kc": 0.90, "meses": [10, 11, 0, 1, 2, 3], "floracion": [0, 1],
-             "aporte_n": 5, "rastrojo": 5, "comercial": True},
+             "aporte_n": 5, "rastrojo": 5, "comercial": True, "sensible_anegamiento": True},
     "soja2": {"nombre": "Soja de 2ª", "grupo": "verano", "tolera_helada": False, "sensible_calor": True,
               "kc": 0.80, "meses": [11, 0, 1, 2, 3], "floracion": [1, 2],
-              "aporte_n": 5, "rastrojo": 5, "comercial": True},
+              "aporte_n": 5, "rastrojo": 5, "comercial": True, "sensible_anegamiento": True},
     "maiz": {"nombre": "Maíz", "grupo": "verano", "tolera_helada": False, "sensible_calor": True,
              "kc": 1.00, "meses": [9, 10, 11, 0, 1, 2, 3], "floracion": [11, 0],
-             "aporte_n": 0, "rastrojo": 25, "comercial": True},
+             "aporte_n": 0, "rastrojo": 25, "comercial": True, "sensible_anegamiento": True},
     "girasol": {"nombre": "Girasol", "grupo": "verano", "tolera_helada": False, "sensible_calor": True,
                 "kc": 0.70, "meses": [8, 9, 10, 11, 0, 1], "floracion": [11],
-                "aporte_n": 0, "rastrojo": 5, "comercial": True},
+                "aporte_n": 0, "rastrojo": 5, "comercial": True, "sensible_anegamiento": True},
     "sorgo": {"nombre": "Sorgo", "grupo": "verano", "tolera_helada": False, "sensible_calor": False,
               "kc": 0.65, "meses": [10, 11, 0, 1, 2, 3], "floracion": [1],
-              "aporte_n": 0, "rastrojo": 30, "comercial": True},
+              "aporte_n": 0, "rastrojo": 30, "comercial": True, "sensible_anegamiento": False},
     "mani": {"nombre": "Maní", "grupo": "verano", "tolera_helada": False, "sensible_calor": True,
              "kc": 0.80, "meses": [10, 11, 0, 1, 2, 3], "floracion": [0],
-             "aporte_n": 5, "rastrojo": 0, "comercial": True},
+             "aporte_n": 5, "rastrojo": 0, "comercial": True, "sensible_anegamiento": True},
     "trigo": {"nombre": "Trigo", "grupo": "invierno", "tolera_helada": True, "sensible_calor": False,
               "kc": 0.60, "meses": [5, 6, 7, 8, 9, 10], "floracion": [9],
-              "aporte_n": 0, "rastrojo": 20, "comercial": True},
+              "aporte_n": 0, "rastrojo": 20, "comercial": True, "sensible_anegamiento": False},
     "cebada": {"nombre": "Cebada", "grupo": "invierno", "tolera_helada": True, "sensible_calor": False,
                "kc": 0.50, "meses": [5, 6, 7, 8, 9, 10], "floracion": [9],
-               "aporte_n": 0, "rastrojo": 15, "comercial": True},
+               "aporte_n": 0, "rastrojo": 15, "comercial": True, "sensible_anegamiento": True},
     "vicia": {"nombre": "Vicia", "grupo": "cobertura", "tolera_helada": True, "sensible_calor": False,
               "kc": 0.65, "meses": [4, 5, 6, 7, 8], "floracion": [],
-              "aporte_n": 30, "rastrojo": 15, "comercial": False},
+              "aporte_n": 30, "rastrojo": 15, "comercial": False, "sensible_anegamiento": True},
     "centeno": {"nombre": "Centeno", "grupo": "cobertura", "tolera_helada": True, "sensible_calor": False,
                 "kc": 0.60, "meses": [4, 5, 6, 7, 8], "floracion": [],
-                "aporte_n": 0, "rastrojo": 30, "comercial": False},
+                "aporte_n": 0, "rastrojo": 30, "comercial": False, "sensible_anegamiento": False},
     BARBECHO: {"nombre": "Barbecho", "grupo": "barbecho", "tolera_helada": True, "sensible_calor": False,
                "kc": 0.15, "meses": [], "floracion": [],
-               "aporte_n": 0, "rastrojo": 0, "comercial": False},
+               "aporte_n": 0, "rastrojo": 0, "comercial": False, "sensible_anegamiento": False},
 }
 
 
