@@ -403,7 +403,7 @@ Details: [`backend/DEPLOY.md`](backend/DEPLOY.md).
 
 ## Team
 
-**TMDO**, a team of five from FCEFyN, Universidad Nacional de Córdoba (Argentina):
+**TMDO**, a team of four from FCEFyN, Universidad Nacional de Córdoba and one from FaCENA, Universidad Nacional del Nordeste (Argentina):
 
 - Benjamin Martin
 - Luca Camaño
