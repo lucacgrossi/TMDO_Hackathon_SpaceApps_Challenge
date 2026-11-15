@@ -7,7 +7,7 @@ Responde al desafío de NASA Space Apps *"Field Shift: Adapting Farms with NASA 
 - **Flujo nuevo** (ver "Flujo"): marcar el lote en el mapa → panel lateral con rotación, prioridades, restricciones y planilla CSV (con un modal que explica el formato) → "Analizar lote" → pantalla de carga → **dashboard con tres secciones: Mapa, Clima histórico y Rotaciones**. Se retiran la intro y los dos pasos.
 - **Estilo:** tema claro, pixel art como acento, Pixelify Sans + IBM Plex Sans. Diseño en `frontend/DESIGN.md` y en el Figma [AgroPixel · Rediseño del front](https://www.figma.com/design/uQbWWU8RVCaWDeVma4Padn).
 - **Mapa del dashboard:** solo capas del lote (NDVI mensual, pendiente, cultivo, erosión) y la celda de NASA POWER. Temperatura y humedad del suelo no van como capa: POWER es de ~50 km y SMAP está descartado. La temperatura, la lluvia y el balance van a Clima histórico.
-- **Clima histórico por campaña (RF24):** se puede elegir cualquiera de las 30 campañas y ver sus 12 meses contra la media de 30 años. Pide un campo nuevo en el contrato (`serie_anual.campanas[i].mensual`, ver "Contrato").
+- **Clima histórico por campaña (RF24):** se puede elegir cualquiera de las 30 campañas y ver sus 12 meses contra la media de 30 años. Usa `serie_anual.campanas[i].mensual`, que ya está en el contrato (PR #86).
 - **PDF (RF20):** la tabla comparativa se exporta con una hoja de impresión (`window.print()`), sin librerías.
 - **Código congelado el domingo 15/11 a las 18:00.**
 
@@ -278,7 +278,7 @@ La app funciona en cualquier punto; Río Cuarto es el lote precalculado para la 
 | RF23 | Tooltips fijos de términos satelitales | Could |
 | RF25 | **Decisión 2026-11-14. Probabilidad climatológica** por estrategia: frecuencia observada en las 30 campañas de los eventos que importan para su calendario (helada con cultivo sensible; siembra con menos de la mitad de la lluvia normal; máxima de 35 °C o más). Texto fijo: "Siembra de vicia (mayo) con menos de la mitad de la lluvia normal: 14 de 30 años (47 %)". La primera va en la tarjeta; todas, en el detalle. Implementado en el prototipo | Must |
 | RF26 | **Decisión 2026-11-14 (4.3). Planilla CSV del productor:** registro diario o mensual de lluvia y, opcionalmente, temperaturas mínima y máxima. El back la valida y la normaliza (`POST /mediciones/planilla`; detecta la codificación, el separador `;` o `,` y la coma decimal) y devuelve una vista previa con avisos por fila. La serie viaja en `/analizar` (`mediciones_propias.serie_mensual`). Sin guardar nada. Plantilla para descargar. Detalle: `docs/plan-planilla-lluvia.md` | Should |
-| RF24 | Serie año a año: lluvia de cada una de las 30 campañas (julio a junio, POWER mensual), pintada por tercio, con el promedio de las últimas 10 contra las 20 previas. Describe, no proyecta: sin tendencias ni pronósticos. Sale de los mismos datos que RF10. **Desde la 4.5:** en Clima histórico se elige una campaña y se ven sus 12 meses (lluvia, T mín, T máx, ET0, balance) contra la media de 30 años; necesita `serie_anual.campanas[i].mensual` (Back 1). Sin ese campo, se muestra la media de 30 años y la selección queda deshabilitada con el motivo | Should (desde la 4.5) |
+| RF24 | Serie año a año: lluvia de cada una de las 30 campañas (julio a junio, POWER mensual), pintada por tercio, con el promedio de las últimas 10 contra las 20 previas. Describe, no proyecta: sin tendencias ni pronósticos. Sale de los mismos datos que RF10. **Desde la 4.5:** en Clima histórico se elige una campaña y se ven sus 12 meses (lluvia, T mín, T máx, ET0, balance) contra la media de 30 años; sale de `serie_anual.campanas[i].mensual` (en el contrato desde el PR #86). Si viene `null`, se muestra la media de 30 años y la selección queda deshabilitada con el motivo | Should (desde la 4.5) |
 
 ## Requerimientos no funcionales
 
@@ -327,7 +327,7 @@ La app funciona en cualquier punto; Río Cuarto es el lote precalculado para la 
 > - Las prioridades van de 1 a 5.
 > - Previstos en `docs/plan-armonizacion-capas.md`: `CapaRaster` y las capas `*_mapa`.
 >
-> **Pedido para la 4.5 (Back 1, a confirmar en `contrato.py`):** en `serie_anual.campanas[i]`, un campo opcional `mensual: { lluvia_mm[12], t_min_c[12], t_max_c[12], et0_mm[12] | null, balance_mm[12] | null }`, con índice 0 = enero como el resto del contrato. Los datos ya existen en `CampanaClima` (`backend/app/clima/indicadores.py`) y se llenarían en `clima/serie.py`. Son 30 × 5 × 12 = 1800 números.
+> **Desde la 4.5 (PR #86):** `serie_anual.campanas[i].mensual` (`MesesCampana`) = `{ lluvia_mm[12], t_min_c[12], t_max_c[12], et0_mm[12] | null, balance_mm[12] | null }`, opcional, índice 0 = enero (en la campaña `2024/25`, el 0 es enero de 2025 y el 6 es julio de 2024; se dibuja de julio a junio rotando `[6..11, 0..5]`). `t_min_c` y `t_max_c` son extremos del mes: se comparan con `minima_media_c` y `maxima_media_c` de `clima_mensual`. Detalle en `docs/api-frontend.md` §4.7.
 
 ```
 POST /analizar
