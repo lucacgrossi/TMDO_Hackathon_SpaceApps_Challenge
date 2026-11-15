@@ -27,25 +27,43 @@ export const NOMBRE_CULTIVO: Record<CultivoMes, string> = {
 };
 
 /**
- * Lo que se lee dentro de un tramo del calendario, en tres largos fijos según
- * el lugar que haya (siempre los mismos para el mismo cultivo, en las 4
- * columnas): el nombre completo, una abreviatura de hasta 4 letras y la
- * inicial. El nombre completo va siempre en el `title` y en el texto para
- * lectores de pantalla.
+ * Letra de cada cultivo en los cuadrados del calendario (un cuadrado por mes).
+ * Es la inicial; cuando dos cultivos empiezan igual se suma una letra para no
+ * confundirlos (Soja S, Sorgo Sg; Maíz M, Maní Mn; Cebada Cb, Centeno Ce). La
+ * leyenda de la tabla dice qué es cada letra y el nombre completo va en el
+ * `title` de cada cuadrado.
  */
-export const ETIQUETA_TRAMO: Record<CultivoMes, { completa: string; corta: string; inicial: string }> = {
-  soja: { completa: "Soja", corta: "Soja", inicial: "S" },
-  soja2: { completa: "Soja 2ª", corta: "S2ª", inicial: "S" },
-  maiz: { completa: "Maíz", corta: "Maíz", inicial: "M" },
-  girasol: { completa: "Girasol", corta: "Gir.", inicial: "G" },
-  sorgo: { completa: "Sorgo", corta: "Sor.", inicial: "S" },
-  mani: { completa: "Maní", corta: "Maní", inicial: "M" },
-  trigo: { completa: "Trigo", corta: "Tri.", inicial: "T" },
-  cebada: { completa: "Cebada", corta: "Ceb.", inicial: "C" },
-  vicia: { completa: "Vicia", corta: "Vic.", inicial: "V" },
-  centeno: { completa: "Centeno", corta: "Cen.", inicial: "C" },
-  barbecho: { completa: "Pelado", corta: "Pel.", inicial: "P" },
+export const LETRA_CULTIVO: Record<CultivoMes, string> = {
+  soja: "S",
+  soja2: "S2",
+  maiz: "M",
+  mani: "Mn",
+  girasol: "G",
+  sorgo: "Sg",
+  trigo: "T",
+  cebada: "Cb",
+  centeno: "Ce",
+  vicia: "V",
+  barbecho: "P",
 };
+
+/** Nombre de cada letra en la leyenda: el barbecho se lee "Pelado". */
+export const NOMBRE_LEYENDA: Record<CultivoMes, string> = { ...NOMBRE_CULTIVO, barbecho: "Pelado" };
+
+/** Orden fijo de la leyenda: primero lo pelado, después verano, invierno y cobertura. */
+export const ORDEN_LEYENDA: readonly CultivoMes[] = [
+  "barbecho",
+  "soja",
+  "soja2",
+  "maiz",
+  "girasol",
+  "sorgo",
+  "mani",
+  "trigo",
+  "cebada",
+  "vicia",
+  "centeno",
+];
 
 export interface Tramo {
   cultivo: CultivoMes;

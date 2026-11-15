@@ -6,6 +6,7 @@ import {
   OBJETIVOS,
   TIPOS_DE_ANIO,
   esDisponible,
+  type CultivoMes,
   type Estrategia,
   type EstrategiaDisponible,
   type IdEstrategia,
@@ -58,8 +59,18 @@ interface Fila {
 interface Grupo {
   titulo: string;
   /** Algo que va en la misma franja del grupo (la leyenda del calendario). */
-  extra?: ReactNode;
+  extra?: (ctx: Contexto) => ReactNode;
   filas: Fila[];
+}
+
+/** Los cultivos que aparecen en algún calendario de esta respuesta (lo vacío es barbecho), para la leyenda de letras. */
+function cultivosPresentes(salida: Salida): CultivoMes[] {
+  const vistos = new Set<CultivoMes>();
+  for (const e of salida.estrategias) {
+    if (!esDisponible(e)) continue;
+    for (let m = 0; m < 12; m++) vistos.add(e.calendario[m] ?? "barbecho");
+  }
+  return [...vistos];
 }
 
 /** "−119 mm frente a la actual"; nada en la propia actual. */
@@ -153,7 +164,7 @@ const GRUPOS: Grupo[] = [
   },
   {
     titulo: "Calendario",
-    extra: <LeyendaLinea />,
+    extra: ({ salida }) => <LeyendaLinea cultivos={cultivosPresentes(salida)} />,
     filas: [
       {
         id: "calendario",
@@ -444,7 +455,7 @@ export default function TablaTecnica({ salida, impresion = false }: { salida: Sa
             <tr className={css.grupo}>
               <th scope="colgroup" colSpan={5}>
                 <span className={css.grupoTitulo}>{g.titulo}</span>
-                {g.extra}
+                {g.extra?.(ctx)}
               </th>
             </tr>
             {g.filas.map((f, fi) => {
