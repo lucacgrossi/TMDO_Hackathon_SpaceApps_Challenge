@@ -1,6 +1,6 @@
-# Field Shift — NASA Space Apps Córdoba 2026
+# AgroPixel — NASA Space Apps Córdoba 2026
 
-Proyecto de hackathon (equipo de 5, FCEFyN-UNC). **Demo: domingo 15/11 a las 18:00 · código congelado el domingo a las 12:00.**
+Proyecto de hackathon (equipo de 5, FCEFyN-UNC). **Demo: domingo 15/11 a las 18:00 · código congelado el domingo a las 18:00.**
 Objetivo: un MVP que funcione de punta a punta y se pueda demostrar. Si algo se traba, se avisa y se decide en equipo si se recorta o se simula con datos fijos.
 
 **Stack:** monorepo con `backend/` (Python + FastAPI, organizado por dominio: ver `backend/PLAN.md`) y `frontend/` (ver `frontend/CLAUDE.md`).
@@ -15,7 +15,7 @@ Objetivo: un MVP que funcione de punta a punta y se pueda demostrar. Si algo se 
 - **El contrato vigente de la API es el código:** `backend/app/api/contrato.py` (lo mantiene Back 1). El del MVP es solo un resumen.
 
 ## Qué es
-Una herramienta web donde un **productor experto o su agrónomo** marca un lote, carga su rotación, sus objetivos y sus restricciones, y recibe **una tabla técnica que compara su rotación actual con 3 alternativas**. La tabla se arma con las últimas 30 campañas de datos de NASA de ese lote (y, si las carga, con las mediciones del productor) y viene con un mapa de riesgos con línea de tiempo de 12 meses.
+**AgroPixel** (logo en `frontend/public/img/agropixel-logo.png`) es una herramienta web donde un **productor experto o su agrónomo** marca un lote en el mapa, carga su rotación, sus prioridades, sus restricciones y, si quiere, su planilla de lluvia, y recibe un **dashboard** con tres secciones: **Mapa** (capas satelitales del lote con línea de tiempo de 12 meses), **Clima histórico** (las 30 campañas de NASA, mes a mes) y **Rotaciones** (su rotación actual contra 3 alternativas, en cards y en una tabla técnica que se exporta a PDF). Todo se arma con las últimas 30 campañas de datos de NASA de ese lote y, si las carga, con las mediciones del productor. Diseño: `frontend/DESIGN.md` y el Figma [AgroPixel · Rediseño del front](https://www.figma.com/design/uQbWWU8RVCaWDeVma4Padn).
 
 Responde al desafío *"Field Shift: Adapting Farms with NASA Data"*: comparar rotaciones que mejoren la salud del suelo y la resiliencia al clima y al agua, mostrando trade-offs, riesgos e incertidumbre.
 

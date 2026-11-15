@@ -1,7 +1,7 @@
 # Config mínima de gitleaks: usa las reglas por defecto (keys de AWS/GCP/GitHub, tokens, claves privadas, etc.).
 # Usado por .github/workflows/secretos.yml. Si aparece un falso positivo, agregarlo en [allowlist]
 # con un comentario que diga por qué es seguro (nunca desactivar una regla entera).
-title = "Field Shift"
+title = "AgroPixel"
 
 [extend]
 useDefault = true
