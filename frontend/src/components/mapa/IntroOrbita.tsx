@@ -30,7 +30,9 @@ const ZOOM_MINIMO = 5;
 const MS_VUELO = 3200;
 /** Espera mínima en la órbita (que se vea Sudamérica) y máxima esperando las teselas del recorrido. */
 const MS_ORBITA_MIN = 500;
-const MS_ORBITA_MAX = 1400;
+// Con red lenta (la de la presentación) conviene esperar un poco más en la
+// órbita, con el satélite cruzando, que despegar y bajar teselas en pleno vuelo.
+const MS_ORBITA_MAX = 2500;
 /** Lo que se ven las nubes quietas en la órbita antes de que la cámara baje. */
 const MS_NUBES_QUIETAS = 700;
 
@@ -76,21 +78,29 @@ function recorrido(mapa: L.Map, t: number): { centro: L.LatLng; zoom: number } {
   return { centro: mapa.unproject(centroPx, zoom), zoom };
 }
 
-/**
- * URLs de las teselas que el vuelo va a pedir (cada capa de teselas del mapa,
- * en el nivel entero que Leaflet usa en cada tramo). Se bajan antes de
- * despegar para que, al cambiar de nivel en pleno vuelo, salgan de la caché
- * del navegador y no aparezcan de golpe ni con huecos.
- */
-function teselasDelVuelo(mapa: L.Map): string[] {
+/** Las capas de teselas que hay en el mapa en este momento. */
+function capasDeTeselas(mapa: L.Map): L.TileLayer[] {
   const capas: L.TileLayer[] = [];
   mapa.eachLayer((c) => {
     if (c instanceof L.TileLayer) capas.push(c);
   });
+  return capas;
+}
+
+/** 25 instantes del vuelo, de la órbita (0) a la llegada (1). */
+const TODO_EL_VUELO = Array.from({ length: 25 }, (_, i) => i / 24);
+
+/**
+ * URLs de las teselas que el vuelo va a pedir (cada capa, en el nivel entero
+ * que Leaflet usa en cada instante). Se bajan antes de despegar para que, al
+ * cambiar de nivel en pleno vuelo, salgan de la caché del navegador y no
+ * aparezcan de golpe ni con huecos.
+ */
+function teselasDelVuelo(mapa: L.Map, capas: L.TileLayer[], instantes: number[]): string[] {
   const tamano = mapa.getSize();
   const urls = new Set<string>();
-  for (let i = 0; i <= 24; i++) {
-    const { centro, zoom } = recorrido(mapa, i / 24);
+  for (const t of instantes) {
+    const { centro, zoom } = recorrido(mapa, t);
     for (const capa of capas) {
       const nativo = capa.options.maxNativeZoom ?? capa.options.maxZoom ?? 18;
       const nivel = Math.min(Math.round(zoom), nativo);
@@ -114,18 +124,24 @@ function teselasDelVuelo(mapa: L.Map): string[] {
   return [...urls];
 }
 
-/** Baja las imágenes (quedan en caché); se resuelve cuando terminaron todas o se cancela. */
+/**
+ * Baja y decodifica las imágenes (quedan en caché ya decodificadas, así el
+ * navegador no las decodifica en pleno vuelo); se resuelve cuando terminaron
+ * todas o se cancela.
+ */
 function precargar(urls: string[], cancelado: () => boolean): Promise<void> {
   return new Promise((resolver) => {
     let faltan = urls.length;
     if (faltan === 0) resolver();
+    const lista = () => {
+      faltan--;
+      if (faltan === 0 || cancelado()) resolver();
+    };
     for (const url of urls) {
       const img = new Image();
-      img.onload = img.onerror = () => {
-        faltan--;
-        if (faltan === 0 || cancelado()) resolver();
-      };
+      img.decoding = "async";
       img.src = url;
+      img.decode().then(lista, lista);
     }
   });
 }
@@ -199,17 +215,34 @@ export default function IntroOrbita() {
       capaNubes.style.setProperty("--escala", `${(1 + 0.3 * a).toFixed(3)}`);
       rotulo.style.setProperty("--apertura", `${a}`);
     };
-    // Los nombres (capa semitransparente) se esconden durante el vuelo: al
+    // Los nombres (capa semitransparente) salen del mapa durante el vuelo: al
     // cambiar de nivel, Leaflet deja el nivel viejo debajo del nuevo hasta que
-    // termina el fundido y se veían los nombres duplicados. Vuelven al aterrizar.
-    const nombres: { capa: L.TileLayer; opacidad: number }[] = [];
-    mapa.eachLayer((c) => {
-      if (c instanceof L.TileLayer && c.options.className === "capa-nombres") {
-        nombres.push({ capa: c, opacidad: c.options.opacity ?? 1 });
-      }
-    });
-    nombres.forEach(({ capa }) => capa.setOpacity(0));
-    const mostrarNombres = () => nombres.forEach(({ capa, opacidad }) => capa.setOpacity(opacidad));
+    // termina el fundido y se veían los nombres duplicados. Sacarlos (y no solo
+    // volverlos transparentes) evita además bajar y armar sus teselas en cada
+    // nivel del vuelo. Vuelven al aterrizar, con las de la región ya en caché.
+    const nombres = capasDeTeselas(mapa).filter((c) => c.options.className === "capa-nombres");
+    const urlsNombres = teselasDelVuelo(mapa, nombres, [1]);
+    nombres.forEach((capa) => mapa.removeLayer(capa));
+    const mostrarNombres = () => {
+      // Si el mapa ya se destruyó (Leaflet borra sus paneles), no hay dónde volver a ponerlos.
+      if (!(mapa as unknown as { _mapPane?: HTMLElement })._mapPane) return;
+      nombres.forEach((capa) => {
+        if (!mapa.hasLayer(capa)) capa.addTo(mapa);
+      });
+    };
+
+    // Cuando las nubes ya se fueron (falta el último 20 % del vuelo) se ocultan
+    // y su capa deja de pedir teselas; se sacan del todo al aterrizar, con la
+    // cámara quieta, para no borrar cientos de teselas en pleno movimiento.
+    let nubesOcultas = false;
+    const ocultarNubes = () => {
+      if (nubesOcultas) return;
+      nubesOcultas = true;
+      capaNubes.style.visibility = "hidden";
+      rotulo.style.visibility = "hidden";
+      // De a un evento: los tipos de Leaflet no aceptan off(mapa de eventos, contexto).
+      for (const [tipo, fn] of Object.entries(nubes.getEvents?.() ?? {})) mapa.off(tipo, fn, nubes);
+    };
 
     let nubesFuera = false;
     const quitarNubes = (suave: boolean) => {
@@ -256,6 +289,7 @@ export default function IntroOrbita() {
     };
 
     const terminar = (devolverZoomMinimo = true) => {
+      contenedor.classList.remove(css.volando);
       mostrarNombres();
       if (volando) {
         volando = false;
@@ -287,6 +321,9 @@ export default function IntroOrbita() {
     const volar = () => {
       if (cancelado) return;
       volando = true;
+      // Cada nivel de teselas pasa a ser una capa con su imagen fija mientras
+      // cambia la escala (ver .volando en el CSS).
+      contenedor.classList.add(css.volando);
       interno._moveStart(true, false);
       let inicio = -1;
       const paso = (ahora: number) => {
@@ -304,7 +341,7 @@ export default function IntroOrbita() {
         ultimo = mapa.getCenter();
         const a = aperturaNubes(t);
         if (a < 1) abrirNubes(a);
-        else quitarNubes(false);
+        else ocultarNubes();
         if (t < 1) cuadro = requestAnimationFrame(paso);
         else terminar();
       };
@@ -321,7 +358,8 @@ export default function IntroOrbita() {
       volar();
     };
     const tope = window.setTimeout(despegar, MS_ORBITA_MAX);
-    precargar(teselasDelVuelo(mapa), () => cancelado || despego).then(() => {
+    const urlsVuelo = teselasDelVuelo(mapa, capasDeTeselas(mapa), TODO_EL_VUELO);
+    precargar([...urlsVuelo, ...urlsNombres], () => cancelado || despego).then(() => {
       // Con todo en caché, las nubes se muestran y se dejan ver quietas un momento antes de bajar.
       window.clearTimeout(tope);
       mostrarNubes();
