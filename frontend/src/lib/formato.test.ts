@@ -3,12 +3,15 @@ import {
   conSigno,
   ETIQUETA_TRAMO,
   fmt,
+  fmtHasta,
+  fmtNdvi,
   listaMeses,
   mesesConAnios,
   metadatosHoja,
   NOMBRE_CULTIVO,
   rangoMeses,
   textoEfecto,
+  textoResolucion,
   tramosCalendario,
 } from "@/lib/formato";
 import { MOCK_BASE } from "@/mocks/analizar";
@@ -23,6 +26,47 @@ describe("formato es-AR", () => {
     expect(conSigno(-60)).toBe("−60");
     expect(conSigno(5)).toBe("+5");
     expect(conSigno(0)).toBe("0");
+  });
+
+  it("los negativos llevan el signo menos tipográfico, no el guion (ejes de Clima histórico)", () => {
+    expect(fmt(-15)).toBe("−15");
+    expect(fmt(-180)).toBe("−180");
+    expect(fmt(-1234.5, 1)).toBe("−1.234,5");
+    expect(fmtHasta(-0.25, 2)).toBe("−0,25");
+    expect(fmt(-0.04)).toBe("0");
+    expect(fmt(-0.001, 1)).toBe("0,0");
+  });
+
+  it("fmtHasta no rellena con ceros", () => {
+    expect(fmtHasta(0.6, 2)).toBe("0,6");
+    expect(fmtHasta(93.94, 1)).toBe("93,9");
+  });
+
+  it("el NDVI siempre con 2 decimales", () => {
+    expect(fmtNdvi(0.2)).toBe("0,20");
+    expect(fmtNdvi(0.264)).toBe("0,26");
+    expect(fmtNdvi(-0.05)).toBe("−0,05");
+  });
+});
+
+describe("resolución de una capa", () => {
+  it("no repite la resolución que ya dice la fuente ni anida paréntesis", () => {
+    expect(textoResolucion("NASA HLS L30 (Landsat 8/9) · 30 m", "30 m", "1″ (~30 m)")).toBe("grilla de 1″");
+  });
+
+  it("muestra la nativa cuando la fuente no la dice", () => {
+    expect(textoResolucion("NASADEM · NASA, vía Planetary Computer", "30 m", "1″ (~30 m)")).toBe("30 m, grilla de 1″");
+  });
+
+  it("si la grilla es más gruesa que la nativa, dice su tamaño", () => {
+    expect(textoResolucion("ESA WorldCover 2021 v200", "10 m (moda a 30 m)", "1″ (~30 m)")).toBe(
+      "10 m (moda a 30 m), grilla de 1″ (~30 m)",
+    );
+    expect(textoResolucion("NASADEM", "30 m", "2″ (~60 m)")).toBe("30 m, grilla de 2″ (~60 m)");
+  });
+
+  it("una grilla sin el tamaño aproximado va tal cual", () => {
+    expect(textoResolucion("NASADEM", "30 m", "1 segundo de arco")).toBe("30 m, grilla de 1 segundo de arco");
   });
 });
 

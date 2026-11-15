@@ -2,7 +2,7 @@
 
 import { clasesLeyenda, type DibujoNdvi, type IdCapaLote, numero } from "@/lib/capasLote";
 import type { CapaRaster, Salida } from "@/lib/contrato";
-import { MESES } from "@/lib/formato";
+import { fmtNdvi, MESES, textoResolucion } from "@/lib/formato";
 import { escalaNdvi, fechaCorta } from "@/lib/lineaTiempo";
 import css from "./LeyendaLote.module.css";
 
@@ -31,7 +31,9 @@ function fecha(f: string | null): string | null {
 
 function DeRaster({ capa }: { capa: CapaRaster }) {
   const lote = capa.resumen.valor_lote ?? capa.resumen.media;
-  const pie = [capa.fuente, fecha(capa.fecha), `${capa.resolucion_nativa} (grilla ${capa.resolucion_grilla})`].filter(Boolean).join(", ");
+  const pie = [capa.fuente, fecha(capa.fecha), textoResolucion(capa.fuente, capa.resolucion_nativa, capa.resolucion_grilla)]
+    .filter(Boolean)
+    .join(", ");
   return (
     <>
       <b className={css.titulo}>{capa.titulo}</b>
@@ -39,7 +41,7 @@ function DeRaster({ capa }: { capa: CapaRaster }) {
       <p className={css.pie}>{pie}.</p>
       {lote != null && (
         <p className={css.lote}>
-          Valor del lote: {capa.unidad === "NDVI" ? `NDVI ${numero(lote)}` : `${numero(lote)} ${capa.unidad}`}
+          Valor del lote: {capa.unidad === "NDVI" ? `NDVI ${fmtNdvi(lote)}` : `${numero(lote)} ${capa.unidad}`}
         </p>
       )}
       {capa.nota && (
@@ -99,7 +101,7 @@ export default function LeyendaLote({
           {ndvi.tipo === "nada" && ndvi.motivo}
         </p>
         <p className={css.lote}>
-          NDVI medio del lote: {visto ? `${numero(visto.ndvi_medio)} (${visto.fuente})` : "sin dato"}
+          NDVI medio del lote: {visto ? `${fmtNdvi(visto.ndvi_medio)} (${visto.fuente})` : "sin dato"}
         </p>
       </>
     );
