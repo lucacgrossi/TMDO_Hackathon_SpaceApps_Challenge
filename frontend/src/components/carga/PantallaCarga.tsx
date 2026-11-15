@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import AvisoApoyo from "@/components/comunes/AvisoApoyo";
 import { CONSULTAS, textoLote, textoTiempo } from "@/lib/carga";
 import { fotogramaPlanta } from "@/lib/planta";
 import PlantaPixel from "./PlantaPixel";
@@ -75,6 +76,9 @@ export default function PantallaCarga({ superficieHa, lugar, inicio }: Props) {
             </tbody>
           </table>
         </section>
+
+        {/* RF22: el aviso de apoyo también mientras se espera (QA H-005). */}
+        <AvisoApoyo className={estilos.aviso} />
       </div>
     </main>
   );

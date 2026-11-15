@@ -115,3 +115,10 @@
     white-space: normal;
   }
 }
+
+/* Aviso de apoyo (RF22) al pie, alineado a la izquierda como el resto del texto. */
+.centro > .aviso {
+  align-self: stretch;
+  margin-top: var(--space-6);
+  text-align: left;
+}
