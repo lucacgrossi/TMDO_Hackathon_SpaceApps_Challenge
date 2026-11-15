@@ -70,8 +70,9 @@ function pedir(foto: Entradas | null) {
     return;
   }
   if (USAR_MOCK) {
-    const { noSembrar, mediciones } = foto;
-    set({ resultado: { estado: "listo", datos: mockAnalizar({ noSembrar, ...mediciones }) }, origen: "mock", pedidoCon: foto });
+    const { poligono, noSembrar, mediciones } = foto;
+    const datos = mockAnalizar({ poligono, noSembrar, ...mediciones });
+    set({ resultado: { estado: "listo", datos }, origen: "mock", pedidoCon: foto });
     return;
   }
 

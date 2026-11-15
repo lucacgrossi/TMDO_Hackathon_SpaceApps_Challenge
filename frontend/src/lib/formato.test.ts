@@ -27,7 +27,7 @@ describe("formato es-AR", () => {
 describe("metadatos de la hoja", () => {
   it("lote, período de clima, pendiente y fecha", () => {
     expect(metadatosHoja(MOCK_BASE, new Date(2026, 10, 14))).toBe(
-      "a 17 km de Río Cuarto, Córdoba · Clima NASA POWER 1995/96–2024/25 · pendiente 0,6 % · 14/11/2026",
+      "Clima NASA POWER 1996/97 a 2025/26 · pendiente 0,6 % · 14/11/2026",
     );
   });
 
@@ -62,7 +62,7 @@ describe("calendario y meses", () => {
 
   it("acompaña cada mes con su conteo de años", () => {
     const anios = MOCK_BASE.clima_mensual.anios_con_35c;
-    expect(mesesConAnios([0, 11], anios, 30)).toBe("dic (18 de 30 años), ene (20 de 30 años)");
+    expect(mesesConAnios([0, 11], anios, 30)).toBe("dic (26 de 30 años), ene (29 de 30 años)");
     expect(mesesConAnios([], anios, 30)).toBe("");
   });
 
@@ -71,4 +71,4 @@ describe("calendario y meses", () => {
     expect(textoEfecto({ erosion: -12 })).toBe("erosión −12");
   });
 });
-
+
