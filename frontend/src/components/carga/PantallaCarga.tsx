@@ -16,11 +16,11 @@ interface Props {
 }
 
 /** Cada cuánto se actualizan la planta y el contador. */
-const MS_TICK = 250;
+const MS_TICK = 100;
 
 /**
  * S3 · Pantalla de carga mientras `/analizar` responde. Centrada sobre
- * `--rastrojo`: la planta pixel que crece (un fotograma cada 1,2 s, el último
+ * `--rastrojo`: la planta pixel que crece (un fotograma cada 0,3 s, el último
  * queda fijo), "Analizando tu lote", el lote y el tiempo transcurrido, y la
  * lista de lo que se consulta en un solo pedido.
  *

@@ -32,15 +32,15 @@ describe("FOTOGRAMAS_PLANTA", () => {
 });
 
 describe("fotogramaPlanta", () => {
-  it("avanza uno cada 1,2 s", () => {
+  it("avanza uno cada 0,3 s", () => {
     expect(fotogramaPlanta(0, false)).toBe(0);
-    expect(fotogramaPlanta(1199, false)).toBe(0);
-    expect(fotogramaPlanta(1200, false)).toBe(1);
-    expect(fotogramaPlanta(3700, false)).toBe(3);
+    expect(fotogramaPlanta(299, false)).toBe(0);
+    expect(fotogramaPlanta(300, false)).toBe(1);
+    expect(fotogramaPlanta(950, false)).toBe(3);
   });
 
-  it("el quinto queda fijo", () => {
-    expect(fotogramaPlanta(4800, false)).toBe(4);
+  it("el quinto queda fijo desde los 1,2 s", () => {
+    expect(fotogramaPlanta(1200, false)).toBe(4);
     expect(fotogramaPlanta(60_000, false)).toBe(4);
   });
 

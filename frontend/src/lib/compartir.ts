@@ -67,7 +67,7 @@ export function resumenComparacion(salida: Salida, pesos: Pesos, fecha: Date): s
   const L: string[] = [
     "AgroPixel · comparación de rotaciones",
     `Lote: ${area} · ${metadatosHoja(salida, fecha)}`,
-    `Objetivos (0 a 5): agua ${pesos.agua} · suelo ${pesos.suelo} · erosión ${pesos.erosion} · ingreso ${pesos.ingreso}`,
+    `Prioridades (1 a 5): agua ${pesos.agua} · suelo ${pesos.suelo} · erosión ${pesos.erosion} · ingreso ${pesos.ingreso}`,
     "",
   ];
 
@@ -107,7 +107,7 @@ export function resumenMail(salida: Salida, pesos: Pesos): string {
   const L: string[] = [
     "AgroPixel: comparación de rotaciones",
     `Lote: ${fmt(salida.lote.area_ha)} ha${salida.lote.localidad_aprox ? `, ${salida.lote.localidad_aprox}` : ""}`,
-    `Objetivos (0 a 5): agua ${pesos.agua}, suelo ${pesos.suelo}, erosión ${pesos.erosion}, ingreso ${pesos.ingreso}`,
+    `Prioridades (1 a 5): agua ${pesos.agua}, suelo ${pesos.suelo}, erosión ${pesos.erosion}, ingreso ${pesos.ingreso}`,
     "",
     "Cercanía % (seco / normal / húmedo):",
   ];
