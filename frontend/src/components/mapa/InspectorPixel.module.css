@@ -1,0 +1,38 @@
+.inspector {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-width: 300px;
+  background: var(--noche, #14202b);
+  color: var(--papel, #fff);
+  padding: 8px 12px;
+  box-shadow: 3px 3px 0 rgba(20, 32, 43, 0.15);
+}
+
+.valor {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  line-height: 24px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.valor i {
+  width: 12px;
+  height: 12px;
+  outline: 1px solid var(--papel, #fff);
+}
+
+.pie {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--cielo-brillo, #7fd6e6);
+}
+
+.fuente {
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--papel, #fff);
+}

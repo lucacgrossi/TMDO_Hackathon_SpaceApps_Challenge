@@ -1,0 +1,74 @@
+.barras {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  height: 120px;
+  margin: 12px 0 4px;
+}
+
+.barra {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  background: var(--normal, #a8a29e);
+}
+
+.barra[data-tipo="seco"] {
+  background: var(--seco, #c0703a);
+}
+
+.barra[data-tipo="humedo"] {
+  background: var(--humedo, #2c7fb8);
+}
+
+.barra[aria-pressed="true"] {
+  outline: 2px solid var(--noche, #14202b);
+  outline-offset: 2px;
+}
+
+.barra:focus-visible {
+  outline: 2px solid var(--cielo, #1c7c93);
+  outline-offset: 2px;
+}
+
+.barra:disabled {
+  cursor: default;
+}
+
+.letras,
+.extremos {
+  display: flex;
+  gap: 4px;
+  font-size: 10px;
+  line-height: 14px;
+  color: var(--muted, #5a6560);
+}
+
+.letras span {
+  flex: 1;
+  text-align: center;
+}
+
+.letraElegida {
+  color: var(--noche, #14202b);
+  font-weight: 600;
+}
+
+.extremos {
+  justify-content: space-between;
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.motivo {
+  margin: 8px 0 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--warn, #a86a0f);
+  background: var(--soft, #e8ece2);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--noche, #14202b);
+}

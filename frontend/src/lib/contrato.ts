@@ -280,11 +280,28 @@ export interface TiposDeAnio {
   umbral_humedo_mm: number;
 }
 
+/**
+ * Los 12 meses de una campaña (RF24, 4.5), redondeados a 0,1. Índice 0 = enero,
+ * como el resto del contrato: en la campaña 2024/25, enero es de 2025 y julio
+ * es de 2024. ET0 y balance van null si falta la ET0.
+ */
+export interface MesesCampana {
+  lluvia_mm: number[];
+  /** Mínima MÁS BAJA del mes (T2M_MIN es extremo): se compara con `clima_mensual.minima_media_c`. */
+  t_min_c: number[];
+  /** Máxima MÁS ALTA del mes (T2M_MAX es extremo): se compara con `clima_mensual.maxima_media_c`. */
+  t_max_c: number[];
+  et0_mm?: number[] | null;
+  balance_mm?: number[] | null;
+}
+
 export interface CampanaSerie {
   campana: string;
   lluvia_mm: number;
   balance_mm: number | null;
   tipo: TipoAnio;
+  /** Puede no venir: sin él, la selección de campaña queda deshabilitada. */
+  mensual?: MesesCampana | null;
 }
 
 /** RF24 (Could): describe, no proyecta. */

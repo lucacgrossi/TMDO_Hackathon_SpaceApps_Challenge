@@ -1,0 +1,34 @@
+.grafico {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.figura {
+  margin: 0;
+}
+
+.pie {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted, #5a6560);
+}
+
+.tooltip {
+  background: var(--papel, #fff);
+  border: 1px solid var(--line, #dce2d6);
+  border-radius: 2px;
+  box-shadow: 3px 3px 0 rgba(20, 32, 43, 0.15);
+  padding: 8px 12px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--noche, #14202b);
+  font-variant-numeric: tabular-nums;
+}
+
+.tooltip ul {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}

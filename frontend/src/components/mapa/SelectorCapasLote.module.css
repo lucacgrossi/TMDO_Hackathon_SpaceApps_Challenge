@@ -1,0 +1,46 @@
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  background: var(--papel, #fff);
+  padding: 4px;
+  border-radius: 2px;
+  box-shadow: 3px 3px 0 rgba(20, 32, 43, 0.15);
+}
+
+/* Chip de capa: forma de "tecla", radio 0 y borde inferior de 3 px. */
+.chip {
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 18px;
+  color: var(--noche, #14202b);
+  background: var(--papel, #fff);
+  border: 1px solid var(--line, #dce2d6);
+  border-bottom-width: 3px;
+  border-radius: 0;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+
+.chip:hover:not(:disabled):not([aria-pressed="true"]) {
+  background: var(--soft, #e8ece2);
+}
+
+.chip[aria-pressed="true"] {
+  background: var(--noche, #14202b);
+  border-color: var(--noche, #14202b);
+  color: var(--papel, #fff);
+}
+
+.chip:disabled {
+  color: var(--muted, #5a6560);
+  background: var(--soft, #e8ece2);
+  text-decoration: line-through;
+  cursor: not-allowed;
+}
+
+.chip:focus-visible {
+  outline: 2px solid var(--cielo, #1c7c93);
+  outline-offset: 2px;
+}

@@ -1,0 +1,69 @@
+.panel {
+  background: var(--papel, #fff);
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.titulo {
+  margin: 0;
+  font-family: var(--font-pixelify, "Pixelify Sans"), var(--font-plex, "IBM Plex Sans"), sans-serif;
+  font-size: 18px;
+  line-height: 24px;
+  font-weight: 500;
+  color: var(--noche, #14202b);
+}
+
+.scroll {
+  overflow-x: auto;
+  margin-top: 8px;
+}
+
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 18px;
+  font-variant-numeric: tabular-nums;
+  color: var(--noche, #14202b);
+}
+
+.tabla th,
+.tabla td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--line, #dce2d6);
+  text-align: center;
+}
+
+.tabla th {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted, #5a6560);
+}
+
+.tabla th[scope="row"] {
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* Helada frecuente: negrita y fondo (no solo color). */
+.tabla td[data-frecuente="true"] {
+  font-weight: 600;
+  background: var(--cielo-suave, #ddf3f7);
+}
+
+.pie {
+  margin: 8px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted, #5a6560);
+}
+
+.oculto {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
