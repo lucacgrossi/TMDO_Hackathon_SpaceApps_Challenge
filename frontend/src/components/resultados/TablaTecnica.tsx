@@ -83,9 +83,9 @@ function Lista({ items, vacio }: { items: readonly ReactNode[]; vacio: string })
 /*
  * Jerarquía (de lo que decide a lo que respalda):
  * 1. Cercanía a tus prioridades: la fila que se mira primero, con el número grande.
- * 2. Valores de la campaña: un número por objetivo, la diferencia con la actual y una línea de detalle.
- * 3. Clima en el calendario: heladas, calor y su probabilidad.
- * 4. Calendario: la línea de julio a junio.
+ * 2. Calendario: la línea de julio a junio, para leer los valores con el calendario a la vista.
+ * 3. Valores de la campaña: un número por objetivo, la diferencia con la actual y una línea de detalle.
+ * 4. Clima en el calendario: heladas, calor y su probabilidad.
  * La trazabilidad (resumen, por qué, reglas, evidencia y los 5 puntos) no
  * ocupa filas en pantalla: se abre en un panel desde cada columna. En el PDF
  * sí va como filas (GRUPO_TRAZABILIDAD).
@@ -148,6 +148,33 @@ const GRUPOS: Grupo[] = [
             </div>
           );
         },
+      },
+    ],
+  },
+  {
+    titulo: "Calendario",
+    extra: <LeyendaLinea />,
+    filas: [
+      {
+        id: "calendario",
+        titulo: "Julio a junio",
+        origen: () => REGLA_FIJA,
+        celda: (e, { salida }) => (
+          <>
+            <LineaCampania salida={salida} estrategia={e} />
+            {/* La línea ya muestra los tramos; el detalle en texto va solo en el PDF */}
+            <ul className={`${css.tramos} ${css.soloImpresion}`}>
+              {tramosCalendario(e.calendario).map((t) => (
+                <li key={t.desde} data-pelado={t.cultivo === "barbecho"}>
+                  <b>{NOMBRE_CULTIVO[t.cultivo]}</b> {rangoMeses(t)}
+                  <span className={css.meses}>
+                    , {t.meses} {t.meses === 1 ? "mes" : "meses"}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </>
+        ),
       },
     ],
   },
@@ -297,33 +324,6 @@ const GRUPOS: Grupo[] = [
             ))}
             vacio="Sin eventos para este calendario"
           />
-        ),
-      },
-    ],
-  },
-  {
-    titulo: "Calendario",
-    extra: <LeyendaLinea />,
-    filas: [
-      {
-        id: "calendario",
-        titulo: "Julio a junio",
-        origen: () => REGLA_FIJA,
-        celda: (e, { salida }) => (
-          <>
-            <LineaCampania salida={salida} estrategia={e} />
-            {/* La línea ya muestra los tramos; el detalle en texto va solo en el PDF */}
-            <ul className={`${css.tramos} ${css.soloImpresion}`}>
-              {tramosCalendario(e.calendario).map((t) => (
-                <li key={t.desde} data-pelado={t.cultivo === "barbecho"}>
-                  <b>{NOMBRE_CULTIVO[t.cultivo]}</b> {rangoMeses(t)}
-                  <span className={css.meses}>
-                    , {t.meses} {t.meses === 1 ? "mes" : "meses"}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </>
         ),
       },
     ],
