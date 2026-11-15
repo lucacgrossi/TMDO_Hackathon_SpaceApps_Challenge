@@ -1,6 +1,6 @@
 # CI de AgroPixel
 
-GitHub Actions corre en cada PR a `dev` y `main` y en cada push a `dev`. Nada usa secretos del repo y la CI nunca modifica código.
+GitHub Actions corre en cada PR a `dev` y `main` y en cada push a `dev`. Nada usa secretos del repo y la CI nunca modifica código. Aparte, **`deploy.yml` deploya en GCP cada push a `main`** (abajo).
 
 | Workflow | Cuándo corre | Qué revisa |
 |---|---|---|
@@ -8,6 +8,7 @@ GitHub Actions corre en cada PR a `dev` y `main` y en cada push a `dev`. Nada us
 | `frontend.yml` | siempre se dispara; el job pesado corre si cambia `frontend/**` | Node 22 · `npm ci` · `npm run lint` · `typecheck` · `npm test` (vitest) · `npm run build` |
 | `secretos.yml` | siempre | gitleaks sobre el diff del PR y sobre todo el historial (config en `.gitleaks.toml`) |
 | `checks-proyecto.yml` | siempre | las reglas propias de abajo (`.github/scripts/`) |
+| `deploy.yml` | push a `main` (o a mano: Run workflow) | no revisa: deploya en Cloud Run `field-shift-api` si cambió `backend/` y `agropixel-web` si cambió `frontend/`, y prueba que respondan. Sin claves: Workload Identity Federation (`backend/DEPLOY.md` → Deploy automático) |
 
 Cada workflow cancela la corrida anterior del mismo PR cuando llega un push nuevo.
 
