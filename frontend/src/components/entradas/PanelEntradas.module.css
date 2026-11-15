@@ -1,0 +1,117 @@
+/* S2: panel derecho de 400 px, con scroll y pie fijo */
+.panel {
+  position: fixed;
+  z-index: 1002;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 400px;
+  display: flex;
+  flex-direction: column;
+  background: var(--papel);
+  border-left: 1px solid var(--line);
+  color: var(--noche);
+}
+
+.encabezado {
+  padding: var(--space-4);
+}
+
+.titulo {
+  margin: 0 0 var(--space-3);
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+/* Ficha del lote: pares etiqueta/valor */
+.ficha {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-1) var(--space-3);
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.ficha div {
+  display: contents;
+}
+
+.ficha dt {
+  font-size: 12px;
+  line-height: 21px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.ficha dd {
+  margin: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.secciones {
+  flex: 1;
+  overflow-y: auto;
+  border-bottom: 1px solid var(--line);
+}
+
+.pie {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  background: var(--papel);
+}
+
+.nota {
+  margin: 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+/* Sobre el mapa, arriba a la izquierda: superficie y "Volver a marcar el lote" */
+.loteMapa {
+  position: fixed;
+  z-index: 1001;
+  top: var(--space-4);
+  left: var(--space-4);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
+  background: var(--papel);
+  border: 1px solid var(--line);
+  border-radius: var(--radio-panel);
+  box-shadow: var(--sombra-pixel);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.loteMapa b {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ayudaLote {
+  display: block;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+/* Celu (mismo corte que el mapa del prototipo): el panel va debajo del mapa */
+@media (max-width: 900px) {
+  .panel {
+    position: relative;
+    width: auto;
+    border-left: 0;
+  }
+
+  .secciones {
+    overflow: visible;
+  }
+}

@@ -1,0 +1,71 @@
+.leyenda {
+  width: 260px;
+  background: var(--papel, #fff);
+  border: 1px solid var(--line, #dce2d6);
+  border-radius: 6px;
+  padding: 12px;
+  color: var(--noche, #14202b);
+}
+
+@media (max-width: 1100px) {
+  .leyenda {
+    width: auto;
+  }
+}
+
+.titulo {
+  display: block;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+}
+
+.clases {
+  display: flex;
+  list-style: none;
+  margin: 8px 0 4px;
+  padding: 0;
+}
+
+.clases li {
+  flex: 1;
+  min-width: 0;
+}
+
+.clases i {
+  display: block;
+  height: 12px;
+}
+
+.clases span {
+  display: block;
+  font-size: 11px;
+  line-height: 14px;
+  color: var(--muted, #5a6560);
+  padding-right: 2px;
+}
+
+.pie,
+.lote {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted, #5a6560);
+}
+
+.lote {
+  color: var(--noche, #14202b);
+  font-weight: 600;
+}
+
+.nota {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted, #5a6560);
+}
+
+.nota summary {
+  cursor: pointer;
+  color: var(--cielo, #1c7c93);
+}

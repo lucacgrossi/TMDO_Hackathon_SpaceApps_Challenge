@@ -1,0 +1,45 @@
+/*
+ * Badge de la estrategia: esquinas escalonadas de 2 px (clip-path), Plex 600.
+ * Texto --papel sobre el color de la columna, salvo la B (--noche: el blanco
+ * no llega a 4,5:1). La A se oscurece hacia --noche para pasar 4,5:1 con blanco.
+ */
+.insignia {
+  flex: none;
+  display: inline-grid;
+  place-items: center;
+  min-width: 28px;
+  height: 24px;
+  padding: 0 var(--space-2);
+  font-family: var(--f);
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--papel);
+  clip-path: polygon(
+    2px 0, calc(100% - 2px) 0, calc(100% - 2px) 2px, 100% 2px,
+    100% calc(100% - 2px), calc(100% - 2px) calc(100% - 2px), calc(100% - 2px) 100%, 2px 100%,
+    2px calc(100% - 2px), 0 calc(100% - 2px), 0 2px, 2px 2px
+  );
+}
+
+.insignia[data-id="actual"] {
+  background: var(--s-actual);
+}
+
+.insignia[data-id="A"] {
+  background: color-mix(in srgb, var(--s-a) 85%, var(--noche));
+}
+
+.insignia[data-id="B"] {
+  background: var(--s-b);
+  color: var(--noche);
+}
+
+.insignia[data-id="C"] {
+  background: var(--s-c);
+}
+
+.insignia[data-descartada="true"] {
+  background: var(--line);
+  color: var(--muted);
+}

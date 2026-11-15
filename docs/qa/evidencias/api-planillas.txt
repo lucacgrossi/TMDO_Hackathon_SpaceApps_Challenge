@@ -1,0 +1,125 @@
+
+### 00-plantilla-tal-cual.csv -> 422
+  ok: False | gran: None | periodo: None | filas: None / None | media: None | fmt: None
+  campanas: {}
+  error: {'fila': None, 'motivo': 'Ninguna variable llega a 12 meses con dato (lluvia: 1): hacen falta al menos 12'}
+
+### 01-diaria-6anios-lluvia-temp.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2019-07', 'hasta': '2025-06'} | filas: 2192 / 2193 | media: 643.8 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 6, 't_min_c': 6, 't_max_c': 6}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm, t_min_c, t_max_c'}
+
+### 02-diaria-solo-lluvia-3anios.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2022-07', 'hasta': '2025-06'} | filas: 226 / 227 | media: 828.8 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 3}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm'}
+
+### 03-diaria-1anio.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2024-07', 'hasta': '2025-06'} | filas: 365 / 366 | media: 790.9 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 1}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm'}
+
+### 04-diaria-12anios-solo-lluvia.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2013-07', 'hasta': '2025-06'} | filas: 849 / 850 | media: 756.4 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 12}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm'}
+
+### 05-mensual-3anios.csv -> 200
+  ok: True | gran: mensual | periodo: {'desde': '2022-01', 'hasta': '2024-12'} | filas: 36 / 37 | media: 775.0 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 2, 't_min_c': 2, 't_max_c': 2}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: mes, lluvia_mm, t_min_c, t_max_c'}
+  aviso: {'fila': None, 'motivo': 'campaña 2021/22: lluvia con 6 de 12 meses: se informa, pero no se compara con NASA'}
+  aviso: {'fila': None, 'motivo': 'campaña 2024/25: lluvia con 6 de 12 meses: se informa, pero no se compara con NASA'}
+  aviso: {'fila': None, 'motivo': 'campaña 2021/22: temperatura mínima con 6 de 12 meses: se informa, pero no se compara con NASA'}
+  aviso: {'fila': None, 'motivo': 'campaña 2024/25: temperatura mínima con 6 de 12 meses: se informa, pero no se compara con NASA'}
+
+### 06-separador-coma-decimal-punto.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2022-07', 'hasta': '2025-06'} | filas: 1096 / 1097 | media: 729.8 | fmt: {'codificacion': 'utf-8', 'separador': ',', 'decimal': '.'}
+  campanas: {'lluvia_mm': 3, 't_min_c': 3, 't_max_c': 3}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm, t_min_c, t_max_c'}
+
+### 07-fechas-iso.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2022-07', 'hasta': '2025-06'} | filas: 1096 / 1097 | media: 691.5 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 3}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm'}
+
+### 08-fechas-eeuu.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2023-01', 'hasta': '2025-12'} | filas: 288 / 732 | media: 205.4 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 2}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm'}
+  aviso: {'fila': None, 'motivo': 'campaña 2022/23: lluvia con 6 de 12 meses: se informa, pero no se compara con NASA'}
+  aviso: {'fila': None, 'motivo': 'campaña 2025/26: lluvia con 6 de 12 meses: se informa, pero no se compara con NASA'}
+  aviso: {'fila': 14, 'motivo': 'la fecha `07/13/2023` no existe: fila descartada'}
+  aviso: {'fila': 15, 'motivo': 'la fecha `07/14/2023` no existe: fila descartada'}
+
+### 09-encabezado-mayusculas-otro-orden.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2022-07', 'hasta': '2025-06'} | filas: 1096 / 1097 | media: 819.9 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 3}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: FECHA, Lluvia MM'}
+
+### 10-columnas-de-mas.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2022-07', 'hasta': '2024-06'} | filas: 731 / 732 | media: 762.5 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': '.'}
+  campanas: {'lluvia_mm': 2}
+  aviso: {'fila': 1, 'motivo': 'columna `humedad_suelo` ignorada: no se usa en esta versión'}
+  aviso: {'fila': 1, 'motivo': 'columna `napa` ignorada: no se usa en esta versión'}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm'}
+
+### 11-solo-columna-fecha.csv -> 422
+  ok: False | gran: None | periodo: None | filas: None / None | media: None | fmt: None
+  campanas: {}
+  error: {'fila': 1, 'motivo': 'No se reconoció ninguna columna de medición (nombres reconocidos: lluvia: lluvia_mm, lluvia, mm, precipitacion, precipitacion_mm, pp, pp_mm; temperatura mínima: t_min_c, t_min, tmin, minima, temp_min, temperatura_minima; temperatura máxima: t_max_c, t_max, tmax, maxima, temp_max, temperatura_maxima)'}
+
+### 12-valores-invalidos.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2022-07', 'hasta': '2024-06'} | filas: 731 / 733 | media: 882.3 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 2, 't_min_c': 2, 't_max_c': 2}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm, t_min_c, t_max_c'}
+  aviso: {'fila': 22, 'motivo': 'lluvia `mucho` no es un número: se descartó'}
+  aviso: {'fila': 32, 'motivo': 'lluvia -12 mm fuera de rango (0 a 300 mm por día): se descartó'}
+  aviso: {'fila': 42, 'motivo': 'temperatura mínima (25 °C) mayor que la máxima (10 °C): se descartaron las dos'}
+  aviso: {'fila': 52, 'motivo': 'temperatura máxima 80 °C fuera de rango (-10 a 50 °C por día): se descartó'}
+
+### 13-mensual-mes-repetido.csv -> 422
+  ok: False | gran: None | periodo: None | filas: None / None | media: None | fmt: None
+  campanas: {}
+  error: {'fila': 14, 'motivo': 'el mes 2023-05 está repetido (filas 6 y 14): no se suma porque no se sabe cuál vale'}
+
+### 14-meses-faltantes.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2022-07', 'hasta': '2024-06'} | filas: 640 / 641 | media: 793.4 | fmt: {'codificacion': 'utf-8', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 2, 't_min_c': 1, 't_max_c': 1}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm, t_min_c, t_max_c'}
+  aviso: {'fila': None, 'motivo': '3 meses sin registros de lluvia dentro del período: se tomaron como 0 mm (en invierno es normal)'}
+  aviso: {'fila': None, 'motivo': 'campaña 2022/23: temperatura mínima con 9 de 12 meses: se informa, pero no se compara con NASA'}
+  aviso: {'fila': None, 'motivo': 'campaña 2022/23: temperatura máxima con 9 de 12 meses: se informa, pero no se compara con NASA'}
+
+### 15-vacio.csv -> 422
+  ok: False | gran: None | periodo: None | filas: None / None | media: None | fmt: None
+  campanas: {}
+  error: {'fila': None, 'motivo': 'El archivo está vacío'}
+
+### 16-solo-encabezado.csv -> 422
+  ok: False | gran: None | periodo: None | filas: None / None | media: None | fmt: None
+  campanas: {}
+  error: {'fila': None, 'motivo': 'La planilla solo tiene el encabezado: no hay filas con datos'}
+
+### 17-latin1.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2023-07', 'hasta': '2025-06'} | filas: 731 / 732 | media: 717.7 | fmt: {'codificacion': 'windows-1252', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 2}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: Fecha, Precipitación'}
+
+### 18-utf8-bom.csv -> 200
+  ok: True | gran: diaria | periodo: {'desde': '2023-07', 'hasta': '2025-06'} | filas: 731 / 732 | media: 688.2 | fmt: {'codificacion': 'utf-8 con BOM', 'separador': ';', 'decimal': ','}
+  campanas: {'lluvia_mm': 2}
+  aviso: {'fila': 1, 'motivo': 'Encabezado reconocido: fecha, lluvia_mm'}
+
+### 19-png-renombrado.csv -> 422
+  ok: False | gran: None | periodo: None | filas: None / None | media: None | fmt: None
+  campanas: {}
+  error: {'fila': 1, 'motivo': 'No se encontró la columna de fecha (nombres reconocidos: fecha, dia, mes, periodo)'}
+
+### 20-enorme-55mil-filas.csv -> 413
+  mensaje: La planilla supera 1 MB
+
+### 21-diaria-y-mensual-mezclado.csv -> 422
+  ok: False | gran: None | periodo: None | filas: None / None | media: None | fmt: None
+  campanas: {}
+  error: {'fila': 368, 'motivo': 'El archivo mezcla fechas diarias y mensuales: empieza diaria y esta fila tiene una fecha mensual (`2024-07`). Tiene que ser un solo formato'}

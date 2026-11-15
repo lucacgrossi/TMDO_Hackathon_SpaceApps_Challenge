@@ -1,0 +1,21 @@
+.region:empty {
+  display: none;
+}
+
+/* Banda --warn: el texto dice qué pasa; el color acompaña. */
+.banda {
+  margin: 0 0 var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  border-left: 3px solid var(--warn);
+  border-radius: 2px;
+  background: var(--papel);
+  color: var(--noche);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.etiqueta {
+  margin-right: var(--space-1);
+  color: var(--warn);
+  font-weight: 600;
+}

@@ -1,0 +1,19 @@
+/*
+ * Colores por grupo de cultivo para el calendario de la rotación (F6).
+ *
+ * Por qué un archivo aparte: el prototipo pinta todos los tramos con un
+ * solo color (--cover). En el panel queremos distinguir verano, invierno,
+ * cobertura y barbecho con los tokens del diseño, sin tocar globals.css
+ * (que es el CSS del prototipo tal cual y lo comparten todos).
+ * La estructura (.tl, .mx, .row2, .seg) sí es la del prototipo.
+ */
+.cal-rot{margin-top:12px}
+.cal-rot .seg.verano{background:var(--verano);color:#fff}
+/* El amarillo de invierno y el barbecho claro necesitan tinta oscura para llegar a contraste AA. */
+.cal-rot .seg.invierno{background:var(--invierno);color:#2b2208}
+.cal-rot .seg.cobertura{background:var(--cobertura);color:#fff}
+/* Barbecho con patrón de puntos --suelo: el color no es la única señal (DESIGN.md) */
+.cal-rot .seg.barbecho{background-color:var(--barbecho);background-image:radial-gradient(var(--suelo) 1px,transparent 1.2px);background-size:5px 5px;color:var(--noche)}
+.cal-rot .cap{font-size:11px;color:var(--muted);margin-top:2px}
+
+.cal-rot .seg{border-radius:var(--radio-dato)}
