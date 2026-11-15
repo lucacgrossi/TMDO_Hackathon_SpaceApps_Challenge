@@ -2,6 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from "react";
 import { createPortal } from "react-dom";
+import Boton from "@/components/comunes/Boton";
 import { destinoTab, SELECTOR_ENFOCABLES } from "@/lib/focoAtrapado";
 import { URL_PLANTILLA } from "@/lib/planilla";
 import estilos from "./ModalFormatoPlanilla.module.css";
@@ -78,9 +79,9 @@ export default function ModalFormatoPlanilla({ abierto, onCerrar }: Props) {
           <h2 id={idTitulo} className={estilos.titulo}>
             Formato de la planilla
           </h2>
-          <button type="button" className={estilos.cerrar} onClick={onCerrar}>
+          <Boton variante="fantasma" onClick={onCerrar}>
             Cerrar
-          </button>
+          </Boton>
         </header>
 
         <div className={estilos.cuerpo}>
