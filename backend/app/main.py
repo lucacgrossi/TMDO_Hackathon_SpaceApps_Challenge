@@ -8,8 +8,9 @@ Documentación interactiva: http://localhost:8000/docs
 Variables de entorno:
     CORS_ORIGINS       orígenes permitidos separados por coma
                        (por defecto http://localhost:3000 para el front local)
-    CORS_ORIGIN_REGEX  opcional: expresión regular de orígenes permitidos, para las URL de
-                       Vercel que cambian en cada deploy (ej. https://.*\\.vercel\\.app)
+    CORS_ORIGIN_REGEX  opcional: expresión regular de orígenes permitidos. El deploy ya no la
+                       usa (desde el 15/11 todos los orígenes van en CORS_ORIGINS); queda para
+                       pruebas con URL que cambian en cada deploy
 """
 
 import logging
