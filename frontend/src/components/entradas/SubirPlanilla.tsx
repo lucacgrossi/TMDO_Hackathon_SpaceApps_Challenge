@@ -2,7 +2,9 @@
 
 import { useRef, useState } from "react";
 import { leerPlanilla, resumenPlanilla, URL_PLANTILLA } from "@/lib/planilla";
+import Boton from "@/components/comunes/Boton";
 import { useEntradas } from "@/lib/store";
+import estilos from "./SubirPlanilla.module.css";
 
 /**
  * RF26 · "Subir planilla (CSV)" dentro de Mediciones propias, con la vista
@@ -18,11 +20,18 @@ import { useEntradas } from "@/lib/store";
  * devuelve una respuesta de ejemplo y la vista previa avisa en grande que NO es
  * el contenido del archivo.
  */
-export default function SubirPlanilla() {
+interface Props {
+  /** Abre el modal "Formato de la planilla" (S2b). Sin esto, el botón no se muestra. */
+  alVerFormato?: () => void;
+}
+
+/** Zona de planilla CSV (Figma: Vacía · Cargada): soltar el archivo o elegirlo. */
+export default function SubirPlanilla({ alVerFormato }: Props) {
   const planilla = useEntradas((s) => s.mediciones.planilla);
   const cambiar = useEntradas((s) => s.cambiar);
   const input = useRef<HTMLInputElement>(null);
   const [leyendo, setLeyendo] = useState(false);
+  const [encima, setEncima] = useState(false);
 
   const guardar = (p: typeof planilla) => {
     // Leer lo último del store para no pisar los otros campos de mediciones.
@@ -46,15 +55,39 @@ export default function SubirPlanilla() {
   const r = planilla?.resultado;
 
   return (
-    <div className="planilla">
-      <div className="planilla-acc">
-        <button type="button" className="sm" onClick={() => input.current?.click()} disabled={leyendo}>
-          {leyendo ? "Leyendo…" : planilla ? "Cambiar planilla (CSV)" : "Subir planilla (CSV)"}
-        </button>
-        {/* download: el navegador la baja en vez de abrirla. */}
-        <a className="planilla-link" href={URL_PLANTILLA} download="plantilla-mediciones.csv">
-          Descargar plantilla
-        </a>
+    <div className={estilos.planilla}>
+      <div
+        className={estilos.zona}
+        data-encima={encima}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setEncima(true);
+        }}
+        onDragLeave={() => setEncima(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setEncima(false);
+          elegir(e.dataTransfer.files?.[0]);
+        }}
+      >
+        <p className={estilos.titulo}>{planilla ? "Soltá otra planilla para cambiarla" : "Soltá acá tu planilla CSV"}</p>
+        <p className={estilos.texto}>
+          Tu registro diario o mensual de lluvia y, si tenés estación, de temperaturas mínima y máxima. Hasta 1 MB.
+        </p>
+        <div className={estilos.acciones}>
+          <Boton variante="secundario" onClick={() => input.current?.click()} disabled={leyendo}>
+            {leyendo ? "Leyendo…" : planilla ? "Elegir otro archivo" : "Elegir archivo"}
+          </Boton>
+          {alVerFormato && (
+            <Boton variante="fantasma" onClick={alVerFormato}>
+              Ver formato del archivo
+            </Boton>
+          )}
+          {/* download: el navegador la baja en vez de abrirla. */}
+          <a className={estilos.link} href={URL_PLANTILLA} download="plantilla-mediciones.csv">
+            Descargar plantilla
+          </a>
+        </div>
         <input
           ref={input}
           type="file"
@@ -64,17 +97,13 @@ export default function SubirPlanilla() {
           aria-label="Planilla CSV con tu registro de lluvia y temperaturas"
         />
       </div>
-      <small className="wsrc">
-        Tu registro diario o mensual de lluvia y, si tenés estación, de temperaturas mínima y máxima. Excel y Google
-        Sheets lo exportan como CSV.
-      </small>
 
       {planilla && r && (
-        <div className="planilla-prev" role="status">
+        <div className={estilos.vista} role="status">
           {r.ejemplo && (
             // Nada inventado: con el mock (sin backend), la vista
             // previa es un EJEMPLO y no lo que trae el archivo.
-            <p className="planilla-ej">
+            <p className={estilos.ejemplo}>
               Vista previa de ejemplo: la app está con datos de prueba, sin backend, y no leyó el archivo. Estos
               números no son de tu planilla.
             </p>
@@ -88,7 +117,7 @@ export default function SubirPlanilla() {
                 ))}
               </ul>
               {r.serie.avisos.length > 0 && (
-                <details>
+                <details className={estilos.avisos}>
                   <summary>Ver avisos ({r.serie.avisos.length})</summary>
                   <ul>
                     {r.serie.avisos.map((a, i) => (
@@ -100,7 +129,7 @@ export default function SubirPlanilla() {
             </>
           ) : (
             <>
-              <p className="planilla-err">No se pudo usar la planilla. Podés corregirla o seguir con la carga a mano.</p>
+              <p className={estilos.error}>No se pudo usar la planilla. Podés corregirla o seguir con la carga a mano.</p>
               <ul>
                 {r.errores.map((a, i) => (
                   <li key={i}>{a.fila != null ? `Fila ${a.fila}: ${a.motivo}` : a.motivo}</li>
@@ -108,9 +137,9 @@ export default function SubirPlanilla() {
               </ul>
             </>
           )}
-          <button type="button" className="sm" onClick={() => guardar(null)}>
+          <Boton variante="fantasma" onClick={() => guardar(null)}>
             Quitar planilla
-          </button>
+          </Boton>
         </div>
       )}
     </div>
