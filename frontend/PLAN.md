@@ -1,5 +1,7 @@
 # Plan del front · rediseño AgroPixel (domingo 15/11)
 
+**Estado (15/11):** los pasos de este plan (base común, pantallas de persona 4, dashboard y Rotaciones de persona 5, Mapa y Clima histórico) están en `dev`. Queda lo de "al final": borrar el CSS del prototipo sin uso y los componentes viejos del mapa que ya nadie importa (`SelectorCapas`, `LineaTiempo`, `Leyenda`).
+
 **Código congelado a las 18:00.** Diseño: `DESIGN.md`, el Figma [AgroPixel · Rediseño del front](https://www.figma.com/design/uQbWWU8RVCaWDeVma4Padn) (S1 a S3b y componentes) y el mockup `../docs/prototipo/agropixel-dashboard-mockup.html` (S4 a S6b). Reglas: `CLAUDE.md` de esta carpeta. Producto: `../docs/mvp-alcance.md` (4.5).
 
 ## Antes de empezar (todos)
@@ -8,7 +10,7 @@
    - **Persona 4:** §4.1 (entrada de `/analizar`: qué se manda desde el panel), §4.2 (errores 422 y 503, para S3b) y §5 (`/mediciones/planilla`: vista previa, avisos y errores, para S2 y el modal).
    - **Persona 5:** §4.3 (convenciones: índice 0 = enero, textos tal cual, `null` = sin dato), §4.5 (`estrategias`, las 4 columnas), §4.6 (recalcular la cercanía) y §4.11 (`choque`).
    - **Luca:** §4.7 (clima y `mensual`), §4.8 (`visto_por_satelite`) y §4.9 (`capas`, `CapaRaster`, valor de un píxel).
-3. Los meses: índice 0 = enero en toda la API; para mostrar de julio a junio, usar el helper de `src/lib/` (llega en el PR de Luca, etapa 1), no rotar a mano.
+3. Los meses: índice 0 = enero en toda la API; para mostrar de julio a junio, usar `ORDEN_CAMPANIA` de `src/lib/contrato.ts` (o los helpers de `calendario.ts`), no rotar a mano.
 
 Tres personas en el front. Cada una es dueña de sus carpetas y no toca las de las otras sin avisar. Todo con mock primero (`NEXT_PUBLIC_USAR_MOCK=true`); la API real se prueba en la integración.
 
@@ -22,7 +24,7 @@ Tres personas en el front. Cada una es dueña de sus carpetas y no toca las de l
 Un solo PR chico que desbloquea a los demás. Se mergea antes de que nadie toque `page.tsx` o `globals.css`.
 - `src/lib/app.ts`: store `useApp` con `etapa: 'marcar' | 'configurar' | 'cargando' | 'dashboard'`, `seccion: 'mapa' | 'clima' | 'rotaciones'` y las acciones (`irA`, `analizar`, `volverAEditar`). Tests de las transiciones en `app.test.ts`.
 - `src/app/page.tsx`: elige la pantalla según `etapa`; en `dashboard`, monta `<Dashboard />` (de persona 5) con un placeholder por sección hasta que lleguen.
-- `src/app/layout.tsx`: Pixelify Sans + IBM Plex Sans por `next/font/google`, título "AgroPixel". Se saca Inter.
+- `src/app/layout.tsx`: Pixelify Sans + IBM Plex Sans por `next/font/local` (los `woff2` en `src/app/fuentes/`; con `next/font/google` el build fallaba al bajarlas), título "AgroPixel". Se saca Inter.
 - `src/app/globals.css`: tokens de `DESIGN.md` en `:root` (un solo tema, sin `prefers-color-scheme`) y `tailwind.config.ts` apuntando a esos tokens. El CSS del prototipo **queda** hasta que cada dueño migre su pantalla; al final del día se borra lo que nadie use.
 - `src/components/comunes/`: `Boton` (Primario, Secundario, Fantasma), `IconoPixel` (los 6 SVG de 16 × 16 del Figma, página 01) y `AvisoApoyo` con el estilo nuevo.
 - Se retiran `ClaseBody` y el manejo de `body.onb`.
@@ -45,9 +47,9 @@ Carpetas: `components/dashboard/`, `components/resultados/`.
 ## Luca · Mapa, Clima histórico y revisión
 Carpetas: `components/mapa/` (solo la sección del dashboard: `SeccionMapa`, `InspectorPixel`, `FichaLote`, y los cambios en `SelectorCapas`, `LineaTiempo`, `Leyenda`) y `components/clima/`. El mapa de dibujo de S1 y S2 es de persona 4: si hay que tocar `Mapa.tsx` o `CapaDibujo.tsx`, se avisa.
 1. **S4 Mapa**: capas del back como `ImageOverlay` pixelado (NDVI ×12, pendiente, cultivo, erosión) y la celda de POWER; selector de capas con Cultivo y Erosión; línea de tiempo jul→jun con la barrita del NDVI medio de cada mes; leyenda desde `capa.escala`; `InspectorPixel` leyendo `valores[fila][columna]` (`capaRaster.ts`); `FichaLote` con 6 filas y su confianza.
-2. **S5 Clima histórico**: `SelectorCampanias` (30 barras por tercio, con letra), `GraficoCampania` con recharts (lluvia contra la media, T mín y T máx), ficha de la campaña, `HeladasCalor` (frecuencias de `clima_mensual`) y `ContrasteMediciones`. Los meses de cada campaña vienen en `serie_anual.campanas[i].mensual` (Back 1, PR #86, ya en `dev`): sumar `MesesCampana` a `src/lib/contrato.ts` y al mock. Sus `t_min_c`/`t_max_c` son extremos del mes y se comparan con `minima_media_c`/`maxima_media_c`. Si `mensual` viene `null`, media de 30 años y selector deshabilitado.
+2. **S5 Clima histórico**: `SelectorCampanias` (30 barras por tercio, con letra), `GraficoCampania` con recharts (lluvia contra la media, T mín y T máx), ficha de la campaña, `HeladasCalor` (frecuencias de `clima_mensual`) y `ContrasteMediciones`. Los meses de cada campaña vienen en `serie_anual.campanas[i].mensual` (Back 1, PR #86, ya en `dev`): sumar `MesesCampana` a `src/lib/contrato.ts` y al mock (hecho). Sus `t_min_c`/`t_max_c` son extremos del mes y se comparan con `minima_media_c`/`maxima_media_c`. Si `mensual` viene `null`, media de 30 años y selector deshabilitado.
 3. **Revisión de todos los PRs del front** antes de mergear a `dev` (checklist abajo).
-4. Al final: cambiar "Field Shift" por "AgroPixel" en `compartir.ts` y su test, y borrar el CSS del prototipo que quede sin uso.
+4. Al final: cambiar "Field Shift" por "AgroPixel" en `compartir.ts` y su test (hecho) y borrar el CSS del prototipo que quede sin uso (pendiente).
 
 ### Punto de montaje de Mapa y Clima histórico (para el `Dashboard` de persona 5)
 Las dos secciones ya están en `dev` (Mapa en el PR #88, Clima histórico en el #89) y son autocontenidas: reciben la respuesta de `/analizar` por props y no tocan `page.tsx`, `globals.css` ni `layout.tsx`. El `Dashboard` las monta así:
@@ -68,7 +70,7 @@ const salida = useSalidaDashboard(); // null mientras carga o con error
 - El mes es `useVista().mes` (0 = enero) y arranca en julio. La capa del mapa es `useMapaLote` (`src/lib/mapaLote.ts`). Ninguna sección necesita props además de `salida`.
 - Leaflet se carga solo en el navegador (`SeccionMapa` hace el `dynamic` adentro). `layout.tsx` tiene que seguir importando `leaflet/dist/leaflet.css`.
 - Mientras no esté la base (paso 0), los CSS modules usan `var(--token, valor de DESIGN.md)`. Las fuentes de los títulos usan `var(--font-pixelify)` y `var(--font-plex)`: si `layout.tsx` les pone otro nombre, avisar.
-- Cuando `page.tsx` y `Mapa.tsx` (persona 4) dejen de usarlos, se borran `SelectorCapas`, `LineaTiempo`, `Leyenda`, `CapaNdvi`, `CapaPendiente`, `CapaClima` y `EncuadreCapa`: el dashboard usa `SelectorCapasLote`, `LineaTiempoLote`, `LeyendaLote` y `MapaLote`.
+- `SelectorCapas`, `LineaTiempo` y `Leyenda` ya no los importa nadie y se pueden borrar. `CapaNdvi`, `CapaPendiente`, `CapaClima` y `EncuadreCapa` se borran cuando `Mapa.tsx` (persona 4) deje de usarlos: el dashboard usa `SelectorCapasLote`, `LineaTiempoLote`, `LeyendaLote` y `MapaLote`.
 
 ## Horarios
 | Hora | Hito |

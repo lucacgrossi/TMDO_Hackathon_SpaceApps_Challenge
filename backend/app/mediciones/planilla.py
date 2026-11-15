@@ -4,7 +4,8 @@
 Nunca lanza: los problemas van a `errores` (archivo rechazado) o a `serie.avisos` (se descartó algo y el resto
 sigue). Sin red ni disco: los bytes (y la fecha de hoy, para descartar fechas futuras) determinan el resultado.
 
-Las mediciones del productor se muestran al lado de NASA y no cambian ningún puntaje.
+Las mediciones del productor se muestran al lado de NASA (`clima/correccion.py`) y, además, el motor las
+mezcla con NASA en los puntajes según los años de registro (`motor/mezcla.py`).
 
 Uso suelto, desde backend/:  py -m app.mediciones.planilla <archivo.csv>
 """

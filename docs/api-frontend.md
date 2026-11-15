@@ -50,7 +50,7 @@ Header `Content-Type: application/json`. **Tarda hasta ~25 s** (llama a NASA POW
 | Campo | Tipo | Obligatorio | Por defecto | Notas |
 |---|---|---|---|---|
 | `lote.tipo` | `"ejemplo"` \| `"dibujado"` | sí | — | `"ejemplo"` = lote de Río Cuarto; habilita la respuesta precalculada si NASA cae |
-| `lote.poligono` | GeoJSON `Polygon` | sí | — | `{"type": "Polygon", "coordinates": [[[lon, lat], …]]}`. **Orden `[lon, lat]`**, mínimo 3 puntos y cerrado (el último = el primero, o sea ≥ 4 pares) |
+| `lote.poligono` | GeoJSON `Polygon` | sí | — | `{"type": "Polygon", "coordinates": [[[lon, lat], …]]}`. **Orden `[lon, lat]`**, al menos 4 pares (3 puntos + el cierre). Mandarlo cerrado (el último = el primero); si no lo está, el back lo cierra solo |
 | `lote.centro` | `[lat, lon]` | sí | — | **Ojo: acá el orden es `[lat, lon]`** (como Leaflet) |
 | `lote.area_ha` | número | sí | — | Entre 1 y 20 000 |
 | `lat`, `lon` | número | sí | — | Iguales a `lote.centro[0]` y `lote.centro[1]` (compatibilidad) |
@@ -60,7 +60,7 @@ Header `Content-Type: application/json`. **Tarda hasta ~25 s** (llama a NASA POW
 | `calendario` | 12 × `CultivoMes` | no | `null` | Pisa el calendario automático. **Índice 0 = enero.** `CultivoMes` = los anteriores + `soja2` |
 | `prioridades` | `{agua, suelo, ingreso, erosion}` | no | todas en 3 | Enteros **de 1 a 5** (no hay 0) |
 | `restricciones` | lista de `sin_riego` `sin_hacienda` `maquinaria_limitada` | no | `["sin_riego"]` | |
-| `no_sembrar` | lista de `vicia` `centeno` `trigo` `cebada` `sorgo` `girasol` | no | `[]` | Las alternativas que los usan salen en gris con motivo |
+| `no_sembrar` | lista de `vicia` `centeno` `trigo` `cebada` `sorgo` `girasol` | no | `[]` | Cada alternativa usa la primera especie permitida (sin trigo, B usa cebada); sale en gris con motivo solo si se excluyen todas sus opciones |
 | `anegable` | `si` `a_veces` `no` `no_se` | no | `no_se` | |
 | `textura_suelo` | `arenoso` `franco` `arcilloso` `no_se` | no | `no_se` | |
 | `mediciones_propias` | objeto | no | vacío | Ver abajo |
@@ -69,7 +69,7 @@ Header `Content-Type: application/json`. **Tarda hasta ~25 s** (llama a NASA POW
 
 | Campo | Tipo | Notas |
 |---|---|---|
-| `lluvia_anual_mm` | número > 0 y ≤ 4000 | Carga a mano: lluvia anual del pluviómetro |
+| `lluvia_anual_mm` | número > 0 y ≤ 4000 | Lluvia anual del pluviómetro. La API la acepta, pero la app no la ofrece (solo planilla) |
 | `anios_registro` | entero de 1 a 100 | Años de registro del pluviómetro (define cuánto pesa frente a NASA: 1–2 años 40 %, 3–4 50 %, 5–9 60 %, 10+ 75 %) |
 | `materia_organica_pct` | 0–100 | Se muestra como "dato del productor"; no puntúa |
 | `serie_mensual` | lista de `MedicionMes` (hasta 480) | **Mandar tal cual `serie.meses` de `/mediciones/planilla`.** Si trae lluvia, manda sobre `lluvia_anual_mm` |
@@ -85,16 +85,16 @@ Header `Content-Type: application/json`. **Tarda hasta ~25 s** (llama a NASA POW
     "poligono": {
       "type": "Polygon",
       "coordinates": [[
-        [-64.2365, -33.2447], [-64.2285, -33.2447],
-        [-64.2285, -33.2507], [-64.2365, -33.2507],
-        [-64.2365, -33.2447]
+        [-64.2381, -33.2436], [-64.2268, -33.2436],
+        [-64.2268, -33.2517], [-64.2381, -33.2517],
+        [-64.2381, -33.2436]
       ]]
     },
-    "centro": [-33.2477, -64.2325],
-    "area_ha": 50
+    "centro": [-33.24765, -64.23245],
+    "area_ha": 95
   },
-  "lat": -33.2477,
-  "lon": -64.2325,
+  "lat": -33.24765,
+  "lon": -64.23245,
   "cultivo_verano": "soja",
   "invierno": "barbecho",
   "campana_pasada": "soja",
@@ -164,7 +164,7 @@ Si un campo no cumple el esquema (ej. prioridad 0, coordenadas fuera de rango, m
 
 - `confianza`: `alta` \| `media` \| `baja` \| `sin_dato`. Con `sin_dato`, `valor` es `null` y `motivo` dice por qué.
 - Claves actuales de `indicadores`: `lluvia_anual`, `meses_helada_frecuente`, `et0_anual`, `balance_anual`, `et_real_anual`, `meses_cobertura_baja`, `riesgo_erosion`. Puede faltar alguna (ej. `riesgo_erosion` si no hubo pendiente): iterar sobre las que vengan.
-- `riesgo_erosion` trae además `pendiente_pct`, `meses_cobertura_baja` y `meses_bajos` (extras de Back 2).
+- `riesgo_erosion` es un `Indicador` como los demás. El detalle (`pendiente_pct`, `meses_cobertura_baja`, `meses_bajos`) viene en `capas.erosion`.
 
 `lote` usa el mismo `Indicador` en `pendiente_pct`, `pendiente_maxima_pct` (puede ser `null`) y `cobertura_agricola_pct`.
 
@@ -187,7 +187,7 @@ Siempre 4, en orden `actual`, `A`, `B`, `C`. Campos:
 | `sensible_clima` | `true` → marcar "sensible al clima" |
 | `probabilidades` | Lista de `Probabilidad`: `{evento: "helada"\|"siembra_seca"\|"calor", mes, cultivo, anios, de, pct, texto, fuente, contraste}`. **Mostrar siempre el conteo** (`texto` ya lo trae: "14 de 30 años (47 %)") y, si hay, `contraste` debajo |
 | `por_que`, `evidencia`, `beneficios`, `vacios`, `riesgos` | **Los 5 puntos de cada columna**: por qué, evidencia, beneficios, información que falta y a revisar con el agrónomo |
-| `que_le_falta`, `reglas_aplicadas` | Trazabilidad (`reglas_aplicadas`: `{regla, efecto, dato}`) |
+| `que_le_falta`, `reglas_aplicadas` | Trazabilidad (`reglas_aplicadas`: `{regla, efecto, dato}`). `que_le_falta` existe en el contrato, pero `servicio.py` todavía no lo llena: hoy llega siempre `[]` |
 
 ### 4.6 Recalcular la cercanía sin llamar a la API
 
@@ -216,7 +216,7 @@ Las columnas con `disponible: false` no tienen `puntos` y no se recalculan. Lo q
 ### 4.8 `visto_por_satelite`
 
 - `meses`: 12 × (`MesSatelite` \| `null`), índice 0 = enero. `MesSatelite` = `{mes, fecha, ndvi_medio, nubes_escena, coleccion, item, pixeles, fuente}`.
-- `campana`, `fuente`, `meses_ndvi_bajo`, `meses_con_dato`, `umbral` (0,3), `confianza`, `motivo`.
+- `campana`, `fuente` (`"NASA HLS 30 m"` o `"NASA HLS 30 m + MODIS 250 m (respaldo en N de 12 meses)"`), `meses_ndvi_bajo`, `meses_con_dato`, `umbral` (0,3), `confianza`, `motivo`, `orden_meses` (texto que explica el orden de los meses, o `null`).
 - `faltantes`: `[{mes: "AAAA-MM", motivo}]` → a "Información que falta".
 
 ### 4.9 `capas` (mapa)
@@ -228,7 +228,7 @@ El back calcula, el front solo dibuja (`docs/plan-armonizacion-capas.md`).
 | `grilla` | `{bounds, ancho, alto, paso}` común a todas las capas raster, o `null` |
 | `pendiente_mapa`, `cultivo_mapa`, `erosion_mapa` | `CapaRaster` o `null` |
 | `ndvi_mensual` | 12 × (`{coleccion, item, fecha, mapa: CapaRaster \| null}` \| `null`), 0 = enero |
-| `erosion` | Mismo objeto que `indicadores.riesgo_erosion`, o `null` |
+| `erosion` | El índice de erosión del lote con su detalle (`pendiente_pct`, `meses_cobertura_baja`, `meses_bajos`), o `null`. `indicadores.riesgo_erosion` es el mismo valor sin el detalle |
 | `agua_regional_mensual`, `heladas_regional_mensual` | 12 valores regionales, o `null` |
 | `no_disponibles` | Nombres de capas que no se pudieron calcular (mostrarlas deshabilitadas) |
 
@@ -261,6 +261,7 @@ function valorEn(capa: CapaRaster, lat: number, lon: number): number | null {
 Vacío si no se mandaron mediciones. Cada ítem:
 
 - `indicador`, `valor_productor`, `valor_nasa` (`null` = "dato del productor", ej. materia orgánica), `unidad`, `diferencia_pct`, `confianza_resultante` (`alta` \| `baja` \| `null`), `texto` (la línea para mostrar).
+- `corregido_al_lado`: `{umbral_seco_mm, nota}` o `null`. Es informativo ("corregido con tu pluviómetro", por ejemplo el umbral de año seco) y no cambia nada.
 - Con planilla: `campanas_comparadas` y `detalle_campanas` = `[{campana, productor, nasa, diferencia}]` para la mini tabla.
 - En filas de helada y calor, `mes` (0 = enero).
 
@@ -285,7 +286,7 @@ const r = await fetch(`${API_URL}/mediciones/planilla`, { method: "POST", body: 
 const datos = await r.json(); // ResultadoPlanilla (200/422) o {mensaje} (413)
 ```
 
-**Formato del CSV** (detalle en [plan-planilla-lluvia.md](plan-planilla-lluvia.md)): encabezado `fecha;lluvia_mm;t_min_c;t_max_c` (columnas de medición opcionales, al menos una), separador `;` `,` o tabulación, decimal con coma o punto, fechas diarias `dd/mm/aaaa` o mensuales. Columnas extra se ignoran con aviso.
+**Formato del CSV** (detalle en [plan-planilla-lluvia.md](plan-planilla-lluvia.md)): encabezado `fecha;lluvia_mm;t_min_c;t_max_c` (columnas de medición opcionales, al menos una), separador `;` `,` o tabulación, decimal con coma o punto, fechas diarias (`dd/mm/aaaa` o `aaaa-mm-dd`) o mensuales (`aaaa-mm` o `mm/aaaa`). Si las fechas parecen mes/día (`07/13/2023`), la planilla se rechaza con 422 ("Las fechas parecen estar en formato mes/día; usá día/mes"). Columnas extra se ignoran con aviso.
 
 **Respuestas:**
 
