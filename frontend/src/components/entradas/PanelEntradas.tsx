@@ -2,6 +2,7 @@
 
 import AvisoApoyo from "@/components/comunes/AvisoApoyo";
 import Boton from "@/components/comunes/Boton";
+import { analizarLote } from "@/lib/analisis";
 import { useApp } from "@/lib/app";
 import { centro } from "@/lib/geo";
 import {
@@ -33,7 +34,6 @@ import SeccionRotacion from "./SeccionRotacion";
  */
 export default function PanelEntradas() {
   const entradas = useEntradas();
-  const analizar = useApp((s) => s.analizar);
   const hayResultado = useApp((s) => s.hayResultado);
   const volverAMarcar = useApp((s) => s.volverAMarcar);
   const irA = useApp((s) => s.irA);
@@ -91,8 +91,8 @@ export default function PanelEntradas() {
         </div>
 
         <footer className={estilos.pie}>
-          {/* El error de /analizar (S3b) y la conexión con la API los suma el PR de la conexión. */}
-          <Boton variante="primario" ancho="completo" onClick={analizar}>
+          {/* Pasa a `cargando` y pide /analizar; el error (S3b) lo muestra page.tsx sobre el mapa. */}
+          <Boton variante="primario" ancho="completo" onClick={analizarLote}>
             Analizar lote
           </Boton>
           <p className={estilos.nota}>
