@@ -1,0 +1,87 @@
+/* Encabezado del dashboard (DESIGN.md, "Encabezado del dashboard"). */
+
+.encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: var(--space-6);
+  padding: 20px var(--space-8) var(--space-4);
+}
+
+.texto {
+  min-width: 0;
+}
+
+/* Título/H1: Pixelify Sans 600, 32/40. */
+.titulo {
+  margin: 0;
+  font-family: var(--f-titulo);
+  font-size: 32px;
+  line-height: 40px;
+  font-weight: 600;
+  color: var(--noche);
+}
+
+.ficha {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-8);
+  margin: var(--space-2) 0 0;
+}
+
+.par {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Texto/Etiqueta: 12/16, 600, en frase normal. */
+.etiqueta {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+/* Texto/Cuerpo fuerte. */
+.valor {
+  margin: 0;
+  font-size: 14px;
+  line-height: 21px;
+  font-weight: 600;
+  color: var(--noche);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Fuente caída o lote de ejemplo: la demo nunca se marca como real. */
+.precalculado {
+  display: inline-block;
+  margin: var(--space-3) 0 0;
+  padding: var(--space-1) var(--space-2);
+  border-left: 3px solid var(--suelo);
+  border-radius: 2px;
+  background: var(--suelo-suave);
+  color: var(--noche);
+  font-size: 12px;
+  line-height: 16px;
+}
+
+.accion {
+  flex: none;
+}
+
+@media (max-width: 767px) {
+  .encabezado {
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .titulo {
+    font-size: 24px;
+    line-height: 32px;
+  }
+
+  .ficha {
+    gap: var(--space-2) var(--space-6);
+  }
+}

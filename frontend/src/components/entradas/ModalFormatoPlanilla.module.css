@@ -1,0 +1,255 @@
+/* S2b · Modal "Formato de la planilla". Tokens de DESIGN.md (globals.css). */
+
+.fondo {
+  position: fixed;
+  inset: 0;
+  z-index: 2000; /* por encima de los controles de Leaflet (1000) */
+  display: grid;
+  place-items: center;
+  padding: var(--space-6);
+  background: rgba(20, 32, 43, 0.45); /* --noche al 45 % */
+}
+
+.caja {
+  display: flex;
+  flex-direction: column;
+  width: min(680px, 100%);
+  max-height: min(86vh, 820px);
+  background: var(--papel);
+  color: var(--noche);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font-family: var(--f);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+.caja:focus {
+  outline: none;
+}
+
+.caja:focus-visible {
+  outline: 2px solid var(--cielo);
+  outline-offset: 2px;
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4) var(--space-6);
+  border-bottom: 1px solid var(--line);
+}
+
+.titulo {
+  margin: 0;
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 24px;
+  line-height: 32px;
+}
+
+.cuerpo {
+  overflow-y: auto;
+  padding: var(--space-4) var(--space-6) var(--space-6);
+}
+
+.intro {
+  margin: 0 0 var(--space-4);
+  max-width: 80ch;
+}
+
+/* Pestañas: chips de capa (forma de tecla, radio 0, borde inferior de 3 px) */
+.pestanas {
+  display: flex;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+.chip {
+  border: 1px solid var(--line);
+  border-bottom-width: 3px;
+  border-radius: 0;
+  background: var(--soft);
+  color: var(--noche);
+  padding: var(--space-1) var(--space-4);
+  font-family: var(--f);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 21px;
+  cursor: pointer;
+}
+
+.chip:hover {
+  border-color: var(--hoja);
+}
+
+/* Activo: además del color, el borde inferior de la tecla pasa a --hoja y el
+   texto a negrita marcada; aria-pressed lo anuncia. */
+.chip[aria-pressed="true"] {
+  background: var(--hoja-suave);
+  border-color: var(--hoja);
+  color: var(--hoja);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.chip:focus-visible,
+.descargar:focus-visible {
+  outline: 2px solid var(--cielo);
+  outline-offset: 2px;
+}
+
+/* Tablas: ejemplo y valores válidos */
+.tabla {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.tabla th,
+.tabla td {
+  text-align: left;
+  padding: 6px var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.tabla thead th {
+  font-size: 12px;
+  line-height: 16px;
+  font-weight: 600;
+  color: var(--muted);
+  background: var(--soft);
+}
+
+.tabla tbody th {
+  font-weight: 400;
+}
+
+.tabla code,
+.pie code,
+.pares code {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 12px;
+}
+
+.leyenda {
+  caption-side: top;
+  text-align: left;
+  padding-bottom: var(--space-2);
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.vacio {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.notas {
+  margin: var(--space-3) 0 0;
+  padding-left: 18px;
+}
+
+.notas li + li {
+  margin-top: var(--space-1);
+}
+
+.bloque {
+  margin-top: var(--space-6);
+}
+
+.subtitulo {
+  margin: 0 0 var(--space-2);
+  font-family: var(--f);
+  font-weight: 600;
+  font-size: 14px;
+  line-height: 21px;
+}
+
+/* Pares etiqueta / valor */
+.pares {
+  margin: 0;
+}
+
+.par {
+  display: grid;
+  grid-template-columns: 132px 1fr;
+  gap: var(--space-3);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.par dt {
+  font-weight: 600;
+  font-size: 12px;
+  line-height: 21px;
+  color: var(--muted);
+}
+
+.par dd {
+  margin: 0;
+}
+
+.pie {
+  margin: var(--space-2) 0 0;
+  font-size: 12px;
+  line-height: 16px;
+  color: var(--muted);
+}
+
+.pieModal {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-6);
+  border-top: 1px solid var(--line);
+}
+
+.pieModal .pie {
+  margin: 0;
+}
+
+/* "Descargar plantilla" es un link (atributo download), no un botón: copia el
+   estilo Secundario de components/comunes/Boton. */
+.descargar {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-2) var(--space-4);
+  background: var(--papel);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  color: var(--noche);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.descargar:hover {
+  border-color: var(--hoja);
+  color: var(--hoja);
+}
+
+
+@media (max-width: 560px) {
+  .fondo {
+    padding: var(--space-2);
+  }
+
+  .par {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .pieModal {
+    flex-wrap: wrap;
+  }
+}

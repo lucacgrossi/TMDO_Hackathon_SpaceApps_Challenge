@@ -1,0 +1,22 @@
+.pendiente {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 480px;
+  border: 1px dashed var(--line);
+  border-radius: 6px;
+  background: var(--papel);
+}
+
+.texto {
+  margin: 0;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 21px;
+}
+
+@media (max-width: 767px) {
+  .pendiente {
+    min-height: 240px;
+  }
+}

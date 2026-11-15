@@ -8,6 +8,7 @@ import Toast from "@/components/comunes/Toast";
 // Persona 5: la hoja de resultados del prototipo. Se va cuando llegue el dashboard.
 import HojaComparacion from "@/components/resultados/HojaComparacion";
 import PanelEntradas from "@/components/entradas/PanelEntradas";
+import PantallaMarcar from "@/components/marcar/PantallaMarcar";
 import BarraDibujo from "@/components/mapa/BarraDibujo";
 import BuscadorMapa from "@/components/mapa/BuscadorMapa";
 import Leyenda from "@/components/mapa/Leyenda";
@@ -35,7 +36,10 @@ export default function Inicio() {
       {etapa === "cargando" && <Carga />}
       {/* Dashboard (persona 5): acá va <Dashboard /> cuando llegue a dev */}
       {etapa === "dashboard" && <PantallaPendiente etapa="dashboard" />}
-      {(etapa === "marcar" || etapa === "configurar") && <PantallaPrototipo />}
+      {/* El mapa es uno solo para S1 y S2: así no se recarga al pasar de una a otra. */}
+      {(etapa === "marcar" || etapa === "configurar") && <MapaDinamico />}
+      {etapa === "marcar" && <PantallaMarcar />}
+      {etapa === "configurar" && <PantallaPrototipo />}
       {etapa === "configurar" && <ErrorDelAnalisis />}
       <Toast />
     </>
@@ -43,13 +47,12 @@ export default function Inicio() {
 }
 
 /**
- * Las pantallas del prototipo, mientras llegan S1 (PantallaMarcar) y S2
- * (PanelEntradas nuevo): el mapa, el panel y la hoja de resultados.
+ * El panel y las herramientas del prototipo sobre el mapa, mientras llega S2
+ * (PanelEntradas nuevo), y la hoja de resultados.
  */
 function PantallaPrototipo() {
   return (
     <>
-      <MapaDinamico />
       <PanelEntradas />
       {/* `.tools`: herramientas flotantes del mapa: buscador, línea de tiempo y capas. */}
       <div className="tools">

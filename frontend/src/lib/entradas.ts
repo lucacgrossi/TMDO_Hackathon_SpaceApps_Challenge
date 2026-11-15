@@ -27,7 +27,11 @@ export type Objetivo = "agua" | "suelo" | "erosion" | "ingreso";
 export type Anegable = "no" | "a_veces" | "si" | "no_se";
 export type Textura = "franco" | "arenoso" | "arcilloso" | "no_se";
 
-/** Paso del flujo: "inicio" = paso 1 (formulario centrado), "mapa" = paso 2. */
+/**
+ * Paso del prototipo: "inicio" = paso 1 (formulario centrado), "mapa" = paso 2.
+ * Ya no decide la pantalla (eso es `etapa` de `lib/app.ts`): queda siempre en
+ * "mapa" hasta que se retire del todo.
+ */
 export type Paso = "inicio" | "mapa";
 
 /** "demo" = lote de ejemplo de Río Cuarto · "dibujo" = el productor marca el suyo. */
@@ -88,7 +92,7 @@ export const CIUDAD_REFERENCIA: { nombre: string; punto: LatLng } = {
 };
 
 export const ENTRADAS_INICIALES: Entradas = {
-  paso: "inicio",
+  paso: "mapa",
   modoLote: "demo",
   poligono: LOTE_DEMO.map((p) => [...p] as LatLng),
   ubicacion: null,
