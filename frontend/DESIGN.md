@@ -6,7 +6,7 @@
 **Cada píxel es un dato.** El logo es pixel art, y la app dibuja sobre el lote píxeles reales de 30 m (HLS, NASADEM). El estilo une las dos cosas: el pixel art no es decoración retro, es el mismo píxel que medimos.
 
 - **La audacia se gasta en un solo lugar: el mapa del lote.** El raster se ve nítido (`image-rendering: pixelated`) y, al pasar el mouse, el **inspector de píxel** muestra el dato de ese píxel con su fuente. Todo lo demás (panel, tablas, gráficos) es sobrio y técnico.
-- **Un único momento animado:** la planta pixel que crece en la pantalla de carga y, al entrar al dashboard, el lote que se "pixela" en el raster de NDVI. No hay más animaciones de entrada.
+- **Pocos momentos animados, todos ligados al dato:** la órbita al abrir el mapa, el lote que se "pixela" al cerrarlo, la planta pixel que crece en la pantalla de carga y el raster de NDVI que llena el lote al entrar al dashboard (ver "Movimiento"). No hay otras animaciones de entrada.
 
 ## Principios
 1. **Técnico y sereno.** Usuario experto: densidad de datos alta, jerarquía clara, nada decorativo.
@@ -40,7 +40,7 @@ Variables CSS en `:root` de `src/app/globals.css`; Tailwind las toma con `theme.
 
 **Escalas de las capas (NDVI, pendiente, erosión, cultivo): no son tokens del front.** Colores, cortes y etiquetas vienen en `capa.escala` desde el back (`backend/app/satelite/escalas.py`). La leyenda los lee de ahí.
 
-**Sombra pixel:** `3px 3px 0 rgba(20, 32, 43, .15)` (sin desenfoque). Solo en el CTA, la card de estrategia activa, el inspector de píxel y los controles que flotan sobre el mapa.
+**Sombra pixel:** `3px 3px 0 rgba(20, 32, 43, .15)` (sin desenfoque). Solo en el CTA, el panel de entradas, el panel de trazabilidad, el menú de compartir, el inspector de píxel, el tooltip del gráfico de clima y los controles que flotan sobre el mapa (barra de dibujo, línea de tiempo).
 
 ## Tipografía
 Dos familias, guardadas en el repo (`src/app/fuentes/`, `next/font/local`):
@@ -72,14 +72,14 @@ El flujo pasa por cuatro etapas (`etapa` en el estado): **marcar → configurar 
 1. **Marcar lote (S1).** Solo el mapa (Esri) a pantalla completa. Arriba a la izquierda, una caja con la marca, "Marcá tu lote", el buscador (lugar, coordenadas o link de Google Maps), "Usar mi ubicación" y, al pie, el aviso de apoyo. No hay lote de ejemplo: el productor siempre marca el suyo, y el mapa arranca en la región pampeana sin ningún lote. Abajo al centro, la barra de dibujo: ayuda + Deshacer · Cancelar · Listo. Las esquinas marcadas son cuadrados de 10 px (pixel), el tramo hacia el cursor va punteado.
 2. **Lote marcado + panel de entradas (S2).** El mapa queda a la izquierda con el lote cerrado ("Lote de 94,9 ha") y "Volver a marcar el lote". Las esquinas del lote se pueden arrastrar para ajustar el borde; al soltar se valida igual que el dibujo y, si no cumple, vuelve atrás con el motivo. A la derecha, un panel de 400 px con scroll y **pie fijo**:
    - Encabezado "Tu lote" con superficie y centro.
-   - Secciones plegables, cada una con el resumen de lo cargado cuando está cerrada: Rotación actual · Prioridades (4 sliders 1–5 en bloques) · Restricciones y "No sembrar" · Datos del lote · Mediciones propias.
+   - Secciones plegables, cada una con el resumen de lo cargado cuando está cerrada: Rotación actual · Prioridades (4 sliders 1–5 en bloques) · Restricciones y no sembrar · Datos del lote · Mediciones propias.
    - En Mediciones propias: solo la planilla, con la zona para soltar el CSV y "Ver formato del archivo" (abre el modal). No hay carga a mano.
    - Pie fijo: botón principal **"Analizar lote"** y "Consulta NASA POWER, HLS, NASADEM y ESA WorldCover. Suele tardar hasta 30 s."
 3. **Modal "Formato de la planilla" (S2b).** Pestañas Diaria / Mensual con una tabla de ejemplo, qué acepta (codificación, separadores, decimales, fechas, encabezado), valores válidos por variable, límites y "Descargar plantilla" (`public/plantillas/mediciones.csv`). El contenido sale de `../docs/plan-planilla-lluvia.md` §2–3.
 4. **Carga (S3).** Ver "Pantalla de carga".
 5. **Dashboard.** Barra lateral `--noche` de 232 px (logo, Mapa, Clima histórico, Rotaciones, "Editar lote y entradas", aviso de apoyo) + encabezado con el título de la sección y la ficha del lote como pares etiqueta/valor (Superficie, Campaña satelital, Clima, Tus mediciones). Las tres secciones:
-   - **Mapa (S4).** El mapa ocupa el centro; a la derecha, la **ficha técnica del lote** (filas, no tarjetas): pendiente general y máxima, cobertura agrícola, meses con NDVI bajo, riesgo de erosión y ET real regional, cada una con valor, confianza, fuente y resolución. Sobre el mapa: selector de capas (Satélite · NDVI · Pendiente · Cultivo · Erosión · Celda NASA POWER), **línea de tiempo** de julio a junio con ▶ y una barrita por mes con el NDVI medio del lote (el mes con MODIS lleva asterisco y nota de confianza baja), leyenda con la escala del back, y el inspector de píxel.
-   - **Clima histórico (S5).** Arriba, el **selector de las 30 campañas**: una barra por campaña con su lluvia, pintada por tercil y con su letra. Debajo, el gráfico de la campaña elegida, de julio a junio: lluvia en barras contra la media de 30 años, T mín y T máx en líneas, balance de agua aparte. Al costado, la ficha de la campaña (lluvia, ET0, balance, meses con helada). Abajo, heladas y calor por mes como frecuencia ("26 de 30 años con helada en julio") y el contraste con las mediciones del productor.
+   - **Mapa (S4).** El mapa ocupa el centro; a la derecha, la **ficha técnica del lote** (filas, no tarjetas): pendiente general y máxima, cobertura agrícola, meses con NDVI bajo, riesgo de erosión y ET real anual (contexto regional), cada una con valor, confianza, fuente y resolución. Sobre el mapa: selector de capas (Satélite · NDVI · Pendiente · Cultivo · Erosión · Celda NASA POWER), **línea de tiempo** de julio a junio con ▶ y una barrita por mes con el NDVI medio del lote (el mes con MODIS lleva asterisco y nota de confianza baja), leyenda con la escala del back, y el inspector de píxel.
+   - **Clima histórico (S5).** Arriba, el **selector de las 30 campañas**: una barra por campaña con su lluvia, pintada por tercil y con su letra. Debajo, el gráfico de la campaña elegida, de julio a junio: lluvia en barras contra la media de 30 años, T mín y T máx en líneas, balance de agua aparte. Al costado, la ficha de la campaña (lluvia, ET0, balance, meses con helada). Abajo, heladas y calor por mes como frecuencia ("26 de 30 años con mínima bajo 0 °C en julio") y el contraste con las mediciones del productor.
    - **Rotaciones (S6).** Banda de choque de objetivos (si `choque.hay`); las 4 prioridades en línea (recalculan la cercanía en el cliente, RF13); las **4 cards** (Actual, A, B, C) y, al bajar, la **tabla comparativa** de 4 columnas con "Exportar PDF" en el encabezado. La tabla va de lo que decide a lo que respalda: Cercanía a tus prioridades (número grande y por tipo de año), Valores de la campaña, Clima en el calendario y Calendario. En el calendario de la tabla cada mes es un cuadrado con la letra del cultivo (P pelado, S soja, S2 soja de 2ª, Sg sorgo, T trigo, V vicia…) del color de su grupo; la leyenda del grupo dice qué es cada letra, solo para los cultivos que aparecen. La fuente de cada fila va una sola vez, debajo de su título. La trazabilidad (resumen, por qué, reglas aplicadas y los 5 puntos) no ocupa filas: cada columna tiene "Ver trazabilidad", que abre un panel lateral con pestañas Hoy/A/B/C. En el PDF va completa como filas.
 
 **Datos de Clima histórico.** La campaña elegida sale de `serie_anual.campanas[i].mensual` (índice 0 = enero; se dibuja de julio a junio rotando `[6..11, 0..5]`). Sus temperaturas son **extremos del mes** (mínima más baja y máxima más alta): las líneas se rotulan así y se comparan con `clima_mensual.minima_media_c` y `maxima_media_c`, nunca con `t_media_c`. Si `mensual` viene `null`, el gráfico muestra la media de 30 años y el selector queda deshabilitado con el motivo. Detalle en `../docs/api-frontend.md` §4.7.
@@ -93,12 +93,12 @@ Una por columna, siempre las 4, en el orden y color de la tabla.
 - "Sensible al clima" en `--warn` si corresponde.
 - Una probabilidad climatológica con el conteo de años ("3 de 30 años (10 %)").
 - **Los 5 puntos plegables:** Por qué · Evidencia · Beneficios · Información que falta · A revisar con el agrónomo.
-- **Descartada:** borde y badge en gris, sin datos, con el motivo ("Descartada por tu restricción: no sembrar sorgo. Se muestra para mantener las 4 columnas.").
+- **Descartada:** borde y badge en gris, sin datos, con el motivo que manda el back y la nota fija ("Descartada. No sembrar sorgo ni girasol. Se muestra para mantener las 4 columnas.").
 
 ## Pantalla de carga
 - Fondo `--rastrojo`, todo centrado: planta pixel (16 × 16 a ×12), "Analizando tu lote", "Lote de 94,9 ha cerca de Río Cuarto. Suele tardar hasta 30 s; van 12 s." y la lista **"Qué se consulta, en un solo pedido"** (Clima, Vegetación, Relieve, Uso del suelo, Comparación), con la fuente y la resolución de cada una. Al pie, el aviso de apoyo.
 - **Sin barra ni porcentaje, y sin tildes de "listo" por fuente:** la API no informa progreso, así que mostrar avance sería inventar. El único indicador es la planta y el tiempo transcurrido.
-- **Animación:** 5 fotogramas (semilla → brote → 2 hojas → 4 hojas → con vainas), uno cada 0,3 s (la planta entera en 1,2 s, porque muchas respuestas llegan en 2 o 3 s); en bucle: el 5 queda 0,6 s y vuelve a la semilla, hasta la respuesta. Con `prefers-reduced-motion` se muestra solo el 4.
+- **Animación:** 5 fotogramas (semilla → brote → 2 hojas → 4 hojas → con vainas), uno cada 0,3 s (la planta entera en 1,2 s, porque muchas respuestas llegan en 2 o 3 s); en bucle: el 5 queda 0,9 s (su 0,3 s más una pausa de 0,6 s) y vuelve a la semilla, hasta la respuesta. Con `prefers-reduced-motion` se muestra solo el 4.
 - **Errores (S3b):** card con borde superior `--bad`, la semilla pixel, qué pasó y cómo seguir. Sin el código HTTP a la vista. Textos en `lib/carga.ts` (`textosError`):
   - 422: "Este polígono no parece un lote agrícola" + Marcar otro lote.
   - 503: "El sistema de NASA (NASA POWER) no responde" + Probar de nuevo. No hay lote de ejemplo al que pasar.
@@ -110,7 +110,7 @@ Una por columna, siempre las 4, en el orden y color de la tabla.
 
 ## Movimiento
 - **De la órbita al lote** (al abrir S1, una vez): el mapa nace con Sudamérica vista desde lejos (zoom 3,5), un satélite pixel como los del logo cruza el mapa de punta a punta a velocidad constante (~420 px/s, entre 2,6 y 4,6 s según el ancho) y se apaga en el último 20 % mientras sale, y la cámara baja a la región pampeana (zoom 7) en 3,2 s con aceleración y frenado suaves (ease-in-out). Antes de despegar se bajan las teselas de todo el recorrido (espera de 0,5 a 1,4 s), para que al cambiar de nivel no haya huecos ni teselas que aparecen de golpe. El vuelo es propio (un cuadro por `requestAnimationFrame`), no `flyTo`: el de Leaflet arranca a toda velocidad. Cualquier toque, rueda o tecla en el mapa corta el vuelo y devuelve el control; el satélite igual termina de salir. Si se corta más lejos que el zoom mínimo (5), el mínimo vuelve a 5 cuando el productor se acerca hasta ahí, sin saltos (`IntroOrbita`).
-- **El lote se pixela** (al cerrar el lote): la grilla de 1″ (~30 m, la de las capas) llena el lote en una ola de 10 saltos desde la primera esquina y se apaga a los 2 s (`PixelarLote`).
+- **El lote se pixela** (al cerrar el lote): la grilla de 1″ (~30 m, la de las capas) llena el lote en una ola de 10 saltos desde la primera esquina y se apaga a los 2,2 s (`PixelarLote`).
 - **Franjas climáticas** (Clima histórico): las 30 campañas como franjas pegadas, más intensas cuanto más se aparta su balance de agua de la mediana (marrón seco, azul húmedo), con la letra del tercio debajo.
 - Carga: los fotogramas de la planta. Entrada al dashboard: el contorno del lote se llena con el raster de NDVI en 0,6 s (de a filas, de arriba abajo).
 - Respuesta a acciones: mover una prioridad pasa los números al valor nuevo en 0,38 s; cambiar de mes reemplaza la capa con un fundido de 0,2 s; abrir un plegable, 0,2 s.
@@ -131,7 +131,7 @@ Una por columna, siempre las 4, en el orden y color de la tabla.
 - El inspector de píxel también se abre con el teclado (flechas sobre el mapa con foco).
 
 ## Lenguaje de la interfaz
-Español técnico, con voseo. Los verbos describen la acción y se repiten en todo el flujo: "Analizar lote" → "Analizando tu lote" → "Análisis listo"; "Exportar PDF" → "PDF listo para guardar".
+Español técnico, con voseo. Los verbos describen la acción y se repiten en todo el flujo: "Analizar lote" → "Analizando tu lote"; "Exportar PDF" abre la hoja de impresión.
 - Válidos: "5 meses más de cobertura", "balance de agua 60 mm menor en años secos", "helada en 26 de 30 años".
 - Inválidos: "te recomendamos", "la mejor opción", "deberías sembrar".
 - Errores: qué pasó y cómo seguir, sin disculpas. Vacíos: con la acción para salir ("Hacé clic en el mapa para marcar la primera esquina").

@@ -101,8 +101,8 @@ Captured from [agropixel.earth](https://agropixel.earth) on 15 November 2026, wi
 - **Current rotation:** summer crop, winter crop or fallow, and last season's crop.
 - **Priorities** from 1 to 5: water, soil health, erosion and income.
 - **Constraints:** rainfed (no irrigation), no livestock, limited machinery, excluded crops.
-- **Field data:** soil texture, prone to waterlogging, soil organic matter.
-- **Grower records (optional):** annual rainfall from the farm's rain gauge, typed in, or a CSV file with daily or monthly rainfall and, if the farm has a weather station, minimum and maximum temperature.
+- **Field data:** soil texture and whether the field is prone to waterlogging.
+- **Grower records (optional):** a CSV file with daily or monthly rainfall from the farm's rain gauge and, if the farm has a weather station, minimum and maximum temperature. There is no manual entry in the app.
 
 ### The dashboard
 - **Map:** satellite layers clipped to the field: monthly NDVI with a 12-month timeline, slope, cropland and per-pixel erosion risk, plus the NASA POWER grid cell. Hovering over a pixel shows its value and source. Every layer is drawn at the real resolution of its data.
@@ -143,18 +143,18 @@ flowchart LR
 Everything is computed over the field polygon, not a single point:
 - **HLS NDVI (30 m)**, month by month for the latest season, gives the **months of low ground cover** the field actually had (NDVI < 0.3). **MODIS** is the fallback when a month has no clear HLS scene. If that observed bare-soil pattern does not match the rotation the user declared, the app flags it for review.
 - **NASADEM slope**, combined pixel by pixel with the bare-soil months, gives an **erosion-risk** layer.
-- **ESA WorldCover** checks that the polygon is cropland before running the analysis.
+- **ESA WorldCover** checks that the polygon is cropland before the result is built.
 - **MODIS evapotranspiration** cross-checks the ET₀ estimate.
-- All layers are resampled to a **common 1 arc-second (~30 m) grid**, so each field-level number in the table is the summary of a layer the user can see on the map.
+- All layers are resampled to a **common 1 arc-second (~30 m) grid** (2 arc-seconds or more for very large fields, to stay under 250,000 pixels per layer), so each field-level number in the table is the summary of a layer the user can see on the map.
 
 ### Rule engine
 Fixed, documented agronomic rules ([`backend/app/motor`](backend/app/motor)) score each rotation on:
 - **Water:** crop water use (crop coefficient × ET₀) against rainfall, in dry, normal and wet years.
 - **Soil health:** nitrogen contribution (biological N fixation by legumes), crop residue, months of ground cover, and a penalty for repeating last season's crop.
-- **Erosion:** months of bare soil weighted by slope.
+- **Erosion:** months of bare soil weighted by slope, by the rainfall in those months and by soil texture (sandy soils score worse).
 - **Income:** a relative index between crops (no market prices).
 
-A **goal fit score** combines the four criteria, weighting each by the **square** of the user's priority: `Σ p²·v / Σ p²`. Constraints and excluded crops choose the species (for example, hairy vetch or cereal rye) or exclude an alternative, with the reason shown.
+A **goal fit score** combines the four criteria, weighting each by the **square** of the user's priority: `Σ p²·v / Σ p²`. Excluded crops choose the species (for example, barley instead of wheat) and grey out an alternative, with the reason shown, only when all its options are excluded. The other constraints do not remove columns: limited machinery adds a review note to B and C.
 
 ### Climatological probability
 For each rotation's calendar, AgroPixel counts how often key events occurred in the 30 seasons:
@@ -293,7 +293,7 @@ curl -X POST http://localhost:8000/analizar \
 Environment variable: `CORS_ORIGINS`, the allowed origins separated by commas (default `http://localhost:3000`). No API keys are needed: every data source is open.
 
 ### Frontend
-Requires Node.js 22.
+Requires Node.js 20 or newer (CI runs on 22, production on 24).
 
 ```bash
 cd frontend
@@ -333,7 +333,7 @@ pytest --disable-socket
 - **Web:** [agropixel.earth](https://agropixel.earth), served by Google Cloud Run (`agropixel-web`) behind an HTTPS load balancer.
 - **API:** Google Cloud Run (`field-shift-api`, `southamerica-east1`).
 - Every push to `main` deploys whatever changed through [`deploy.yml`](.github/workflows/deploy.yml), with keyless authentication (Workload Identity Federation), and then checks that both services respond.
-- **Fallback:** if NASA POWER does not respond and the field is the reference field near Río Cuarto, the API serves a precomputed response ([`backend/app/demo/rio_cuarto.json`](backend/app/demo/rio_cuarto.json)), clearly labelled as such.
+- **Fallback:** if NASA POWER does not respond and the request is marked as the example field (`lote.tipo = "ejemplo"`), the API serves the precomputed response for the reference field near Río Cuarto ([`backend/app/demo/rio_cuarto.json`](backend/app/demo/rio_cuarto.json)), clearly labelled as such.
 
 Details: [`backend/DEPLOY.md`](backend/DEPLOY.md).
 
@@ -343,7 +343,7 @@ Details: [`backend/DEPLOY.md`](backend/DEPLOY.md).
 - **Monthly data.** NASA POWER monthly minimum and maximum temperatures are monthly extremes. Frost and heat are reported as "years with at least one event in that month", not as daily counts.
 - **One season of satellite cover.** Ground cover comes from the latest season's NDVI. Cloudy months with no clear scene are reported as missing.
 - **Erosion and income are relative indices**, not tonnes of soil or currency. They compare options with each other on the same field.
-- **Calibrated for the Argentine Pampas.** Crop coefficients, calendars and evidence texts come from Argentine agronomic practice and INTA trials. The app runs anywhere, but its rules have not been validated outside this region.
+- **Calibrated for the Argentine Pampas.** Crop coefficients, calendars and evidence texts come from Argentine agronomic practice and INTA trials. The app accepts any field in the Southern Hemisphere (northern-hemisphere fields are rejected, because the calendars, the July–June season and the terciles are southern), but its rules have not been validated outside this region.
 - **Rules are not yet field-validated** by an independent agronomic panel.
 
 ## Roadmap
