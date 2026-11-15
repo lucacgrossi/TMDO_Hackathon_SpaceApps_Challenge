@@ -10,7 +10,7 @@ Describe datos y compara; no indica qué hacer ni elige ganador (lo controla
 from __future__ import annotations
 
 from app.motor import reglas
-from app.motor.cultivos import BARBECHO, C, MESES, dec, meses_texto, nombre, pct, siembra
+from app.motor.cultivos import BARBECHO, C, MESES, cuenta, dec, meses_texto, nombre, pct, siembra
 
 NOMBRE_OBJETIVO = {"agua": "Agua", "suelo": "Salud del suelo", "erosion": "Erosión", "ingreso": "Ingreso"}
 DIFERENCIA_RESUMEN = 10   # puntos frente a la actual para nombrarlo en el resumen
@@ -64,6 +64,11 @@ def _inta(s: dict) -> tuple[list[str], list[str]]:
 
 
 ANEGABLE_TEXTO = {"si": "sí", "a_veces": "a veces"}
+RESTRICCION_TEXTO = {
+    "sin_riego": "sin riego (el agua de cada columna sale solo de la lluvia)",
+    "sin_hacienda": "sin hacienda (las coberturas no se pastorean y no suman ingreso)",
+    "maquinaria_limitada": "maquinaria limitada (B y C suman un cultivo que requiere maquinaria)",
+}
 
 
 def _y(cosas: list[str]) -> str:
@@ -102,7 +107,7 @@ def _de_segunda(s: dict) -> str:
 
 def _resumen(s: dict, actual: dict) -> str:
     if s["id"] == "actual":
-        return (f"Tu rotación: {s['especies'].lower()}. {s['meses_pelados']} meses con el lote pelado; "
+        return (f"Tu rotación: {s['especies'].lower()}. {cuenta(s['meses_pelados'], 'mes', 'meses')} con el lote pelado; "
                 f"cercanía {s['cercania']} % con tus prioridades.")
     va, vs = reglas.valores(actual), reglas.valores(s)
     suben = [f"{NOMBRE_OBJETIVO[o].lower()} {_signo(vs[o] - va[o])}" for o in reglas.OBJETIVOS
@@ -119,20 +124,37 @@ def _resumen(s: dict, actual: dict) -> str:
     return f"{texto} frente a lo que hacés hoy. Balance de agua en años secos: {_signo(seco)} mm."
 
 
+def _restricciones(entradas: dict) -> str:
+    """Las restricciones que cargó el productor y qué hacen en el motor ("" si no cargó ninguna).
+
+    `restricciones` (sin_riego, sin_hacienda, maquinaria_limitada) llega de `servicio.py`; si todavía no
+    llega, se usa `maquinaria_limitada`, que sí llega suelta.
+    """
+    cargadas = set(entradas.get("restricciones") or [])
+    if entradas.get("maquinaria_limitada"):
+        cargadas.add("maquinaria_limitada")
+    partes = [texto for clave, texto in RESTRICCION_TEXTO.items() if clave in cargadas]
+    no = entradas.get("no_sembrar") or []
+    if no:
+        partes.append("no sembrar " + " ni ".join(nombre(x).lower() for x in no))
+    return "Restricciones que cargaste: " + "; ".join(partes) if partes else ""
+
+
 def _por_que(s: dict, actual: dict, entradas: dict) -> list[str]:
     cult = _cultivos(s)
     p = entradas["pesos"]
     lineas = []
     if s["id"] == "actual":
         pelados = [m for m, x in enumerate(s["calendario"]) if x == BARBECHO]
-        lineas.append(f"{len(pelados)} meses con el lote pelado ({meses_texto(pelados)})")
+        lineas.append(f"{cuenta(len(pelados), 'mes', 'meses')} con el lote pelado ({meses_texto(pelados)})")
         if _de_segunda(s):
             lineas.append(_de_segunda(s))
     else:
         if s.get("eleccion"):
             lineas.append(f"Elegida por tus prioridades y el clima del lote: {s['eleccion']}")
         if s["meses_pelados"] < actual["meses_pelados"]:
-            lineas.append(f"Cubre el suelo {12 - s['meses_pelados']} meses (hoy {12 - actual['meses_pelados']})")
+            lineas.append(f"Cubre el suelo {cuenta(12 - s['meses_pelados'], 'mes', 'meses')} "
+                          f"(hoy {12 - actual['meses_pelados']})")
         if "vicia" in cult:
             lineas.append("La vicia fija nitrógeno")
         if s["id"] == "B":
@@ -147,6 +169,16 @@ def _por_que(s: dict, actual: dict, entradas: dict) -> list[str]:
             nuevo = next(x for x in cult if C[x]["grupo"] == "verano")
             extra = " y tolera sequía y calor" if nuevo == "sorgo" else ""
             lineas.append(f"{nombre(nuevo)} corta el ciclo de plagas de {nombre(entradas['verano']).lower()}{extra}")
+    no = [x for x in (entradas.get("no_sembrar") or []) if x in cult]
+    if no and s["id"] == "actual":
+        lineas.append(f"Tu rotación actual tiene {_y([nombre(x).lower() for x in no])}, que marcaste en no sembrar: "
+                      f"esta columna muestra la rotación tal como la cargaste")
+    elif no:
+        lineas.append(f"Mantiene {_y([nombre(x).lower() for x in no])} de tu rotación actual, que marcaste en "
+                      f"no sembrar")
+    restricciones = _restricciones(entradas)
+    if restricciones:
+        lineas.append(restricciones)
     lineas.append(f"Tus prioridades: agua {p['agua']}, suelo {p['suelo']}, erosión {p['erosion']}, "
                   f"ingreso {p['ingreso']} (pesan al cuadrado en la cercanía)")
     return lineas
@@ -178,7 +210,7 @@ def _beneficios(s: dict, lista: list[dict]) -> list[str]:
               for o in reglas.OBJETIVOS if vs[o] - va[o] >= DIFERENCIA_BENEFICIO]
     extra = actual["meses_pelados"] - s["meses_pelados"]
     if extra > 0:
-        lineas.append(f"{extra} meses más con el suelo cubierto")
+        lineas.append(f"{cuenta(extra, 'mes más', 'meses más')} con el suelo cubierto")
     seco = s["agua_mm"]["seco"]["balance"] - actual["agua_mm"]["seco"]["balance"]
     if seco >= 5:
         lineas.append(f"{_signo(seco)} mm de balance de agua en años secos")
@@ -219,8 +251,9 @@ def _revisar(s: dict, entradas: dict, ind: dict, clima: dict) -> list[str]:
     if s["id"] == "actual" and visto and (visto.get("meses_con_dato") or 0) >= MIN_MESES_SATELITE \
             and visto.get("meses_pelados") is not None \
             and abs(visto["meses_pelados"] - s["meses_pelados"]) >= MESES_RF14:
-        lineas.append(f"Lo que vio el satélite no coincide con la rotación cargada: {visto['meses_pelados']} meses "
-                      f"con el lote pelado en {visto.get('campania')}, contra {s['meses_pelados']} según el calendario")
+        lineas.append(f"Lo que vio el satélite no coincide con la rotación cargada: "
+                      f"{cuenta(visto['meses_pelados'], 'mes', 'meses')} con el lote pelado en {visto.get('campania')}, "
+                      f"contra {s['meses_pelados']} según el calendario")
     for clave, texto in (("lluvia", "lluvia"), ("helada", "temperatura mínima"), ("calor", "temperatura máxima")):
         anios = clima["anios"][clave]
         if 0 < anios < 3:
@@ -263,7 +296,7 @@ def armar(resultado: dict, entradas: dict, ind: dict) -> dict:
     falta = _falta(resultado, entradas, clima)
     for s in lista:
         if not s["on"]:
-            s.update(resumen=f"Descartada: {s['motivo']}.", por_que=[], evidencia=[], beneficios=[],
+            s.update(resumen=f"Descartada: {s['motivo'][:1].lower()}{s['motivo'][1:]}.", por_que=[], evidencia=[], beneficios=[],
                      revisar=[], falta=[])
             continue
         inta_evidencia, inta_revisar = _inta(s)

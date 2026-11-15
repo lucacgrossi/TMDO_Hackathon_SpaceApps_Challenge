@@ -93,6 +93,11 @@ def meses_texto(indices: list[int]) -> str:
     return ", ".join(MESES[m] for m in indices) or "ninguno"
 
 
+def cuenta(n: int, singular: str, plural: str) -> str:
+    """"1 mes pelado" / "3 meses pelados": singular cuando el valor es 1."""
+    return f"{n} {singular if n == 1 else plural}"
+
+
 def dec(x: float, d: int = 1) -> str:
     """Número con coma decimal, como se escribe en la app (0,75)."""
     return f"{x:.{d}f}".replace(".", ",")
