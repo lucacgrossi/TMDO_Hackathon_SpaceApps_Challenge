@@ -1,20 +1,28 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Sans, Pixelify_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import "leaflet/dist/leaflet.css"; // antes que globals.css, así los estilos de la app lo pisan
 import "./globals.css";
 
+/*
+ * Las fuentes van en el repo (`./fuentes/`, licencia OFL) y no se bajan de
+ * Google Fonts en cada build: el build de Vercel fallaba seguido al pedirlas
+ * (`next/font/google`, "Cannot read properties of null"). Son las versiones
+ * variables del subconjunto latino (incluye tildes y ñ), las mismas que servía
+ * Google.
+ */
+
 /** Títulos (DESIGN.md, "Tipografía"): nunca en números, párrafos ni tablas. */
-const pixelify = Pixelify_Sans({
-  subsets: ["latin"],
-  weight: ["500", "600"],
+const pixelify = localFont({
+  src: "./fuentes/PixelifySans-variable-latin.woff2",
+  weight: "400 700",
   variable: "--font-pixelify",
   display: "swap",
 });
 
 /** Todo lo demás. Los números comparables llevan `tabular-nums`. */
-const plex = IBM_Plex_Sans({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
+const plex = localFont({
+  src: "./fuentes/IBMPlexSans-variable-latin.woff2",
+  weight: "100 700",
   variable: "--font-plex",
   display: "swap",
 });
