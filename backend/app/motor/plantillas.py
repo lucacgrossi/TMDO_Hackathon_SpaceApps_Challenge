@@ -10,7 +10,7 @@ Describe datos y compara; no indica qué hacer ni elige ganador (lo controla
 from __future__ import annotations
 
 from app.motor import reglas
-from app.motor.cultivos import BARBECHO, C, dec, meses_texto, nombre, pct
+from app.motor.cultivos import BARBECHO, C, MESES, dec, meses_texto, nombre, pct, siembra
 
 NOMBRE_OBJETIVO = {"agua": "Agua", "suelo": "Salud del suelo", "erosion": "Erosión", "ingreso": "Ingreso"}
 DIFERENCIA_RESUMEN = 10   # puntos frente a la actual para nombrarlo en el resumen
@@ -36,9 +36,11 @@ INTA = {
                   "cultivo siguiente · INTA Río Cuarto (Boccolini et al., 2024)"),
     "malezas": ("Con cultivos de cobertura, el uso de herbicidas en 6 años de soja y maíz bajó de 31 a 13 kg/ha de "
                 "principio activo · INTA Marcos Juárez"),
-    "soja2": ("Soja de 2ª: efecto secante del trigo antecesor; en el centro-oeste y sur de Córdoba depende de las "
+    "soja2": ("Soja de 2ª: efecto secante {antecesor}; en el centro-oeste y sur de Córdoba depende de las "
               "lluvias de diciembre a febrero · INTA Manfredi"),
 }
+# "del trigo antecesor" / "de la cebada antecesora": el texto de la soja de 2ª nombra el invierno real.
+ANTECESOR = {"trigo": "del trigo antecesor", "cebada": "de la cebada antecesora"}
 
 
 def _inta(s: dict) -> tuple[list[str], list[str]]:
@@ -56,7 +58,8 @@ def _inta(s: dict) -> tuple[list[str], list[str]]:
     if any(C[x]["grupo"] == "cobertura" for x in cult):
         evidencia.append(INTA["malezas"])
     if "soja2" in cult:
-        revisar.append(INTA["soja2"])
+        inv = next((x for x in cult if x in ANTECESOR), None)
+        revisar.append(INTA["soja2"].format(antecesor=ANTECESOR.get(inv, "del cultivo de invierno antecesor")))
     return evidencia, revisar
 
 
@@ -66,6 +69,27 @@ def _signo(x: float) -> str:
 
 def _cultivos(s: dict) -> list[str]:
     return [x for x in dict.fromkeys(s["calendario"]) if x != BARBECHO]
+
+
+def _tramo(x: str, cal: list[str]) -> str:
+    """"junio a noviembre": del mes de siembra al último mes seguido con ese cultivo."""
+    ini = siembra(x, cal)
+    fin = ini
+    while cal[(fin + 1) % 12] == x and (fin + 1) % 12 != ini:
+        fin = (fin + 1) % 12
+    return f"{MESES[ini]} a {MESES[fin]}"
+
+
+def _de_segunda(s: dict) -> str:
+    """Si hay trigo o cebada, cómo quedó el verano: de 2ª, sembrado después de la cosecha (estrategias.calendario)."""
+    cal, cult = s["calendario"], _cultivos(s)
+    inv = next((x for x in cult if x in ANTECESOR), None)
+    ver = next((x for x in cult if C[x]["grupo"] == "verano"), None)
+    if not inv or not ver:
+        return ""
+    ver_2 = nombre(ver).lower() if ver == "soja2" else f"{nombre(ver).lower()} de 2ª"
+    return (f"{nombre(inv)} con su ciclo completo ({_tramo(inv, cal)}) y {ver_2} de {_tramo(ver, cal)}, "
+            f"con siembra después de la cosecha")
 
 
 def _resumen(s: dict, actual: dict) -> str:
@@ -94,6 +118,8 @@ def _por_que(s: dict, actual: dict, entradas: dict) -> list[str]:
     if s["id"] == "actual":
         pelados = [m for m, x in enumerate(s["calendario"]) if x == BARBECHO]
         lineas.append(f"{len(pelados)} meses con el lote pelado ({meses_texto(pelados)})")
+        if _de_segunda(s):
+            lineas.append(_de_segunda(s))
     else:
         if s.get("eleccion"):
             lineas.append(f"Elegida por tus prioridades y el clima del lote: {s['eleccion']}")
@@ -104,6 +130,11 @@ def _por_que(s: dict, actual: dict, entradas: dict) -> list[str]:
         if s["id"] == "B":
             inv = next(x for x in cult if C[x]["grupo"] == "invierno")
             lineas.append(f"Suma un cultivo que se vende en invierno ({nombre(inv).lower()})")
+            if entradas["verano"] != "soja":
+                lineas.append(f"La soja de 2ª ocupa el lugar del {nombre(entradas['verano']).lower()} de tu rotación "
+                              f"actual")
+        if _de_segunda(s):
+            lineas.append(_de_segunda(s))
         if s["id"] == "C":
             nuevo = next(x for x in cult if C[x]["grupo"] == "verano")
             extra = " y tolera sequía y calor" if nuevo == "sorgo" else ""
@@ -156,8 +187,12 @@ def _revisar(s: dict, entradas: dict, ind: dict, clima: dict) -> list[str]:
         lineas.append("Repite el cultivo de la campaña pasada")
     if "vicia" in cult and entradas.get("anegable") in ("si", "a_veces"):
         lineas.append("Lote que se encharca: riesgo de mala implantación de la vicia")
-    if any(C[x]["grupo"] == "cobertura" for x in cult):
-        lineas.append("Secado de la cobertura ~30 días antes de la siembra de verano")
+    cob = next((x for x in cult if C[x]["grupo"] == "cobertura"), None)
+    ver = next((x for x in cult if C[x]["grupo"] == "verano"), None)
+    if cob and ver:
+        sv = siembra(ver, s["calendario"])
+        lineas.append(f"Secado de la cobertura ({nombre(cob).lower()}) en {MESES[(sv - 1) % 12]}, ~30 días antes "
+                      f"de la siembra de {nombre(ver).lower()} en {MESES[sv]}")
     if entradas.get("maquinaria_limitada") and s["id"] in ("B", "C"):
         lineas.append("Requiere maquinaria para un cultivo nuevo")
     if s["helada_conflicto"]:

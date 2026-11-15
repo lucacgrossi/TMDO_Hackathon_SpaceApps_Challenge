@@ -67,6 +67,26 @@ def nombre(clave: str | None) -> str:
     return C[clave]["nombre"] if clave in C else str(clave)
 
 
+def siembra(clave: str, cal: list[str]) -> int | None:
+    """Mes de siembra de `clave` en un calendario de 12 meses: el primero tras un mes sin ese cultivo."""
+    meses = [m for m in range(12) if cal[m] == clave and cal[(m - 1) % 12] != clave]
+    return meses[0] if meses else None
+
+
+def floracion(clave: str, cal: list[str]) -> list[int]:
+    """Meses de floración de `clave` en este calendario.
+
+    Si el calendario corrió la siembra (verano de 2ª después de trigo o cebada, `estrategias.calendario`),
+    la floración se corre lo mismo: maíz sembrado en diciembre en vez de octubre florece en febrero y
+    marzo en vez de diciembre y enero.
+    """
+    s = siembra(clave, cal)
+    if s is None or clave not in C or not C[clave]["meses"]:
+        return []
+    corrimiento = (s - C[clave]["meses"][0]) % 12
+    return [(m + corrimiento) % 12 for m in C[clave]["floracion"] if cal[(m + corrimiento) % 12] == clave]
+
+
 def meses_texto(indices: list[int]) -> str:
     return ", ".join(MESES[m] for m in indices) or "ninguno"
 

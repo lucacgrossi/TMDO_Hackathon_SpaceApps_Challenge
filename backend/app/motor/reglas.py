@@ -21,7 +21,7 @@ Principios:
 from __future__ import annotations
 
 from app.motor import estrategias as _estrategias
-from app.motor.cultivos import BARBECHO, C, MESES, PLURAL_TIPO, dec, meses_texto, nombre, pct
+from app.motor.cultivos import BARBECHO, C, MESES, PLURAL_TIPO, dec, floracion, meses_texto, nombre, pct
 from app.motor.mezcla import mezclar
 
 TIPOS = ("seco", "normal", "humedo")
@@ -169,8 +169,8 @@ def regla_ingreso(cal: list[str], clima: dict) -> list[dict]:
                                "Helada con cultivo sensible: " + ", ".join(
                                    f"{MESES[m]} {pct(clima['helada'][m])} de los años" for m in meses_h) + f" · {fuente}"))
     fuente = "tu estación y NASA" if clima["pesos"]["calor"] else "NASA POWER"
-    meses_c = [m for x in comerciales if C[x]["sensible_calor"] for m in C[x]["floracion"]
-               if cal[m] == x and clima["calor"][m] > 0]
+    meses_c = [m for x in comerciales if C[x]["sensible_calor"] for m in floracion(x, cal)
+               if clima["calor"][m] > 0]
     if meses_c:
         castigo = min(CALOR_TOPE, sum(clima["calor"][m] for m in meses_c) * CALOR_CASTIGO)
         aportes.append(_aporte("riesgo_calor", "ingreso", -castigo,
