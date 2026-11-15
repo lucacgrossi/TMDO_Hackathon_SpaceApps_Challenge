@@ -4,8 +4,11 @@ Este módulo arma el contraste que se muestra **al lado** de NASA y ajusta la co
 indicadores de agua. No puntúa: el peso de las mediciones en los puntajes lo pone el motor de
 reglas (`app/motor/mezcla.py`, persona 3), que las mezcla con NASA según los años de registro.
 
-- Lluvia del pluviómetro contra la lluvia media por campaña julio–junio de NASA POWER
-  (`indicadores["lluvia_anual"]`):
+- Lluvia anual del pluviómetro (solo por API): contra NASA POWER **del mismo período que la mezcla del
+  motor** (`app/motor/mezcla.py`, H-006), para que el contraste y la evidencia digan la misma diferencia:
+  - con `anios_registro`: la media de las últimas `anios_registro` campañas julio–junio de NASA;
+  - sin `anios_registro` (no se sabe qué período cubre): el promedio de las 30 campañas
+    (`indicadores["lluvia_anual"]`), y el texto lo dice.
       diferencia_pct = round((productor − NASA) / NASA · 100)
   |diferencia| > 15 % → confianza "baja" en agua, una nota en la fila y un punto para
   "A revisar con el agrónomo". Si no, "alta" (coinciden).
@@ -46,6 +49,8 @@ INDICADORES_AGUA = ("lluvia_anual", "balance_anual")
 INDICADORES_HELADA = ("meses_helada_frecuente",)
 
 ConfianzaAgua = Literal["alta", "baja"]
+# Lluvia anual sin años de registro: no se sabe qué período cubre (el mismo texto que la mezcla del motor).
+SIN_ANIOS = "sin años de registro"
 
 
 @dataclass
@@ -151,6 +156,24 @@ def _lluvia(mm: float, anios: int | None, clima: ResultadoClima, salida: Resulta
         )
         return
 
+    # El mismo período que la mezcla del motor (H-006): las últimas `anios` campañas, o las 30 sin años.
+    comparadas = _ultimas_campanas(clima, anios)
+    if comparadas:
+        nasa = sum(c.lluvia_total_mm for c in comparadas) / len(comparadas)
+        etiquetas = [c.etiqueta for c in comparadas]
+        n = len(etiquetas)
+        donde = 'la última campaña' if n == 1 else f'las últimas {n} campañas'
+        periodo = f"{donde} ({_rango(etiquetas)})"
+        quien = f"Tu pluviómetro ({anios} {'año' if anios == 1 else 'años'} de registro)"
+        texto_nasa = f"NASA en {periodo}: {_mm(nasa)} mm"
+        contra = f" en {donde} {_rango(etiquetas)}"
+    else:
+        etiquetas = None
+        quien = "Tu pluviómetro"
+        texto_nasa = (f"NASA: {_mm(nasa)} mm" if anios
+                      else f"NASA, promedio de las 30 campañas ({SIN_ANIOS}): {_mm(nasa)} mm")
+        contra = ""
+
     d = round((mm - nasa) / nasa * 100)
     difieren = abs(d) > UMBRAL_DIFERENCIA_PCT
     salida.confianza_agua = "baja" if difieren else "alta"
@@ -163,23 +186,32 @@ def _lluvia(mm: float, anios: int | None, clima: ResultadoClima, salida: Resulta
         ContrasteMedicion(
             indicador="lluvia_anual",
             valor_productor=mm,
-            valor_nasa=nasa,
+            valor_nasa=round(nasa, 1),
             unidad="mm/año",
             diferencia_pct=d,
             confianza_resultante="baja" if difieren or pocos_anios else "alta",
             corregido_al_lado=_corregido(clima, mm / nasa),
-            texto=f"Tu pluviómetro: {_mm(mm)} mm/año · NASA: {_mm(nasa)} mm ({_pct(d)}) · {estado}{nota_anios}",
+            texto=f"{quien}: {_mm(mm)} mm/año · {texto_nasa} ({_pct(d)}) · {estado}{nota_anios}",
+            campanas_comparadas=etiquetas,
         )
     )
     if difieren:
         salida.motivo_agua = (
-            f"Tu pluviómetro difiere {abs(d)} % de NASA POWER ({_mm(mm)} contra {_mm(nasa)} "
+            f"Tu pluviómetro difiere {abs(d)} % de NASA POWER{contra} ({_mm(mm)} contra {_mm(nasa)} "
             "mm/año): confianza baja en agua"
         )
         salida.riesgos.append(
-            f"Tu pluviómetro difiere {abs(d)} % de NASA POWER ({_mm(mm)} contra {_mm(nasa)} mm/año): "
+            f"Tu pluviómetro difiere {abs(d)} % de NASA POWER{contra} ({_mm(mm)} contra {_mm(nasa)} mm/año): "
             "el dato de agua tiene confianza baja"
         )
+
+
+def _ultimas_campanas(clima: ResultadoClima, anios: int | None) -> list:
+    """Las últimas `anios` campañas de NASA (las mismas que usa la mezcla del motor). Vacío sin años."""
+    if not anios or anios < 1 or not clima.campanas:
+        return []
+    ultimas = sorted(clima.campanas, key=lambda c: c.etiqueta)[-anios:]
+    return ultimas if sum(c.lluvia_total_mm for c in ultimas) > 0 else []
 
 
 # --- Lluvia de la planilla (serie mensual) -----------------------------------
