@@ -1,10 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
   conSigno,
+  ETIQUETA_TRAMO,
   fmt,
   listaMeses,
   mesesConAnios,
   metadatosHoja,
+  NOMBRE_CULTIVO,
   rangoMeses,
   textoEfecto,
   tramosCalendario,
@@ -71,4 +73,22 @@ describe("calendario y meses", () => {
     expect(textoEfecto({ erosion: -12 })).toBe("erosión −12");
   });
 });
-
+
+describe("etiquetas de los tramos del calendario", () => {
+  it("tres largos fijos por cultivo: completa, abreviatura de hasta 4 letras e inicial", () => {
+    for (const [cultivo, et] of Object.entries(ETIQUETA_TRAMO)) {
+      expect(et.corta.length, cultivo).toBeLessThanOrEqual(4);
+      expect(et.inicial).toHaveLength(1);
+      expect(et.completa.startsWith(et.inicial), cultivo).toBe(true);
+    }
+  });
+
+  it("el nombre completo es el mismo que en el title, salvo el barbecho, que se lee Pelado", () => {
+    for (const c of Object.keys(ETIQUETA_TRAMO) as (keyof typeof ETIQUETA_TRAMO)[]) {
+      if (c === "barbecho") continue;
+      expect(ETIQUETA_TRAMO[c].completa).toBe(NOMBRE_CULTIVO[c]);
+    }
+    expect(ETIQUETA_TRAMO.barbecho).toEqual({ completa: "Pelado", corta: "Pel.", inicial: "P" });
+    expect(NOMBRE_CULTIVO.barbecho).toBe("Barbecho (pelado)");
+  });
+});

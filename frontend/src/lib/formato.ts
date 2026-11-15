@@ -26,6 +26,27 @@ export const NOMBRE_CULTIVO: Record<CultivoMes, string> = {
   barbecho: "Barbecho (pelado)",
 };
 
+/**
+ * Lo que se lee dentro de un tramo del calendario, en tres largos fijos según
+ * el lugar que haya (siempre los mismos para el mismo cultivo, en las 4
+ * columnas): el nombre completo, una abreviatura de hasta 4 letras y la
+ * inicial. El nombre completo va siempre en el `title` y en el texto para
+ * lectores de pantalla.
+ */
+export const ETIQUETA_TRAMO: Record<CultivoMes, { completa: string; corta: string; inicial: string }> = {
+  soja: { completa: "Soja", corta: "Soja", inicial: "S" },
+  soja2: { completa: "Soja 2ª", corta: "S2ª", inicial: "S" },
+  maiz: { completa: "Maíz", corta: "Maíz", inicial: "M" },
+  girasol: { completa: "Girasol", corta: "Gir.", inicial: "G" },
+  sorgo: { completa: "Sorgo", corta: "Sor.", inicial: "S" },
+  mani: { completa: "Maní", corta: "Maní", inicial: "M" },
+  trigo: { completa: "Trigo", corta: "Tri.", inicial: "T" },
+  cebada: { completa: "Cebada", corta: "Ceb.", inicial: "C" },
+  vicia: { completa: "Vicia", corta: "Vic.", inicial: "V" },
+  centeno: { completa: "Centeno", corta: "Cen.", inicial: "C" },
+  barbecho: { completa: "Pelado", corta: "Pel.", inicial: "P" },
+};
+
 export interface Tramo {
   cultivo: CultivoMes;
   /** Primer y último mes del tramo (0 = enero). */
