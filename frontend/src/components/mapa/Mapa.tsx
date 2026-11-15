@@ -11,7 +11,7 @@ import CapaNdvi from "./CapaNdvi";
 import CapaPendiente from "./CapaPendiente";
 import Encuadre from "./Encuadre";
 import EsquinasLote from "./EsquinasLote";
-import IntroOrbita from "./IntroOrbita";
+import IntroOrbita, { hayIntro, VISTA_ORBITA } from "./IntroOrbita";
 import EncuadreCapa from "./EncuadreCapa";
 import MarcaUbicacion from "./MarcaUbicacion";
 import PixelarLote from "./PixelarLote";
@@ -68,6 +68,14 @@ export default function Mapa() {
   const teselasOk = useRef(0);
   const teselasConError = useRef(0);
   const [sinConexion, setSinConexion] = useState(false);
+  // Con la intro "De la órbita al lote", el mapa nace ya en la órbita: si
+  // naciera en la región y saltara a Sudamérica, se vería un cuadro de más y
+  // se pedirían teselas que se tiran enseguida.
+  const [vista] = useState(() =>
+    hayIntro()
+      ? { centro: VISTA_ORBITA.centro, zoom: VISTA_ORBITA.zoom, zoomMinimo: VISTA_ORBITA.zoomMinimo }
+      : { centro: CENTRO_INICIAL, zoom: ZOOM_INICIAL, zoomMinimo: 5 },
+  );
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -82,9 +90,9 @@ export default function Mapa() {
           MapContainer no deja poner aria-label, por eso va en este envoltorio. */}
       <div id="map" aria-label="Mapa satelital">
         <MapContainer
-          center={CENTRO_INICIAL}
-          zoom={ZOOM_INICIAL}
-          minZoom={5}
+          center={vista.centro}
+          zoom={vista.zoom}
+          minZoom={vista.zoomMinimo}
           maxZoom={ZOOM_MAX}
           // Zoom en cuartos y rueda más suave: permite encuadrar el lote justo,
           // sin saltos de a un nivel entero (el doble de escala).

@@ -1,4 +1,6 @@
-/* El satélite cruza el mapa de izquierda a derecha, en línea (movimiento constante: linear). */
+/* El satélite cruza el mapa de izquierda a derecha, en línea y a velocidad
+   constante (linear), y se apaga en el último 20 % mientras sale. El recorrido
+   usa el ancho del mapa (--ancho) y la duración sale de ese ancho (--duracion). */
 .orbita {
   position: absolute;
   inset: 0;
@@ -14,14 +16,22 @@
   width: 114px; /* 19 × 6: cada píxel del satélite mide 6 px */
   height: 42px;
   filter: drop-shadow(0 6px 0 rgba(20, 32, 43, 0.25));
-  animation: cruzar 3s linear forwards;
+  will-change: transform, opacity;
+  animation: cruzar var(--duracion, 3s) linear forwards;
 }
 
+/* transform solo está en 0 % y 100 %: se interpola de punta a punta sin
+   cambiar de ritmo; opacity tiene su propio tramo final. */
 @keyframes cruzar {
-  from {
+  0% {
     transform: translate(-140px, 40px) rotate(-6deg);
+    opacity: 1;
   }
-  to {
-    transform: translate(calc(100vw + 40px), -60px) rotate(-6deg);
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(calc(var(--ancho, 100vw) + 40px), -60px) rotate(-6deg);
+    opacity: 0;
   }
 }
