@@ -1,23 +1,19 @@
 "use client";
 
+import { useShallow } from "zustand/react/shallow";
 import ErrorAnalisis from "@/components/carga/ErrorAnalisis";
 import PantallaCarga from "@/components/carga/PantallaCarga";
 import AtajoEtapa from "@/components/comunes/AtajoEtapa";
-import PantallaPendiente from "@/components/comunes/PantallaPendiente";
 import Toast from "@/components/comunes/Toast";
-// Persona 5: la hoja de resultados del prototipo. Se va cuando llegue el dashboard.
-import HojaComparacion from "@/components/resultados/HojaComparacion";
+import Dashboard from "@/components/dashboard/Dashboard";
 import PanelEntradas from "@/components/entradas/PanelEntradas";
 import PantallaMarcar from "@/components/marcar/PantallaMarcar";
-import BarraDibujo from "@/components/mapa/BarraDibujo";
-import BuscadorMapa from "@/components/mapa/BuscadorMapa";
-import Leyenda from "@/components/mapa/Leyenda";
-import LineaTiempo from "@/components/mapa/LineaTiempo";
 import MapaDinamico from "@/components/mapa/MapaDinamico";
-import SelectorCapas from "@/components/mapa/SelectorCapas";
 import { analizarLote, analizarLoteEjemplo, lugarDelLote } from "@/lib/analisis";
 import { useApp } from "@/lib/app";
+import { cambiosDesdeLaComparacion, useComparacion } from "@/lib/comparacion";
 import { areaHa } from "@/lib/geo";
+import { useSalidaDashboard } from "@/lib/salidaDashboard";
 import { useEntradas } from "@/lib/store";
 import estilos from "./page.module.css";
 
@@ -34,35 +30,13 @@ export default function Inicio() {
     <>
       <AtajoEtapa />
       {etapa === "cargando" && <Carga />}
-      {/* Dashboard (persona 5): acá va <Dashboard /> cuando llegue a dev */}
-      {etapa === "dashboard" && <PantallaPendiente etapa="dashboard" />}
+      {etapa === "dashboard" && <DashboardDelAnalisis />}
       {/* El mapa es uno solo para S1 y S2: así no se recarga al pasar de una a otra. */}
       {(etapa === "marcar" || etapa === "configurar") && <MapaDinamico />}
       {etapa === "marcar" && <PantallaMarcar />}
-      {etapa === "configurar" && <PantallaPrototipo />}
+      {etapa === "configurar" && <PanelEntradas />}
       {etapa === "configurar" && <ErrorDelAnalisis />}
       <Toast />
-    </>
-  );
-}
-
-/**
- * El panel y las herramientas del prototipo sobre el mapa, mientras llega S2
- * (PanelEntradas nuevo), y la hoja de resultados.
- */
-function PantallaPrototipo() {
-  return (
-    <>
-      <PanelEntradas />
-      {/* `.tools`: herramientas flotantes del mapa: buscador, línea de tiempo y capas. */}
-      <div className="tools">
-        <BuscadorMapa />
-        <LineaTiempo />
-        <SelectorCapas />
-      </div>
-      <Leyenda />
-      <BarraDibujo />
-      <HojaComparacion />
     </>
   );
 }
@@ -74,6 +48,30 @@ function Carga() {
   const ubicacion = useEntradas((s) => s.ubicacion);
   const superficie = poligono.length >= 3 ? areaHa(poligono) : null;
   return <PantallaCarga superficieHa={superficie} lugar={lugarDelLote({ modoLote, poligono, ubicacion })} />;
+}
+
+/**
+ * Dashboard con la última respuesta de /analizar. `desactualizado`: las
+ * entradas cambiaron desde la foto del análisis (los objetivos no cuentan:
+ * la cercanía se recalcula sola, RF13).
+ */
+function DashboardDelAnalisis() {
+  const seccion = useApp((s) => s.seccion);
+  const irA = useApp((s) => s.irA);
+  const volverAEditar = useApp((s) => s.volverAEditar);
+  const salida = useSalidaDashboard();
+  const foto = useComparacion((s) => s.foto);
+  const cambios = useEntradas(useShallow((s) => (foto ? cambiosDesdeLaComparacion(foto, s) : [])));
+  if (!salida) return null;
+  return (
+    <Dashboard
+      seccion={seccion}
+      onCambiarSeccion={irA}
+      onEditar={volverAEditar}
+      salida={salida}
+      desactualizado={cambios.length > 0}
+    />
+  );
 }
 
 /** S3b · Error de /analizar sobre el mapa, al lado del panel, hasta que se cierre o se elija cómo seguir. */

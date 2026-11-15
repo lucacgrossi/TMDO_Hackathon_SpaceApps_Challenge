@@ -51,9 +51,10 @@ describe("textosError", () => {
     expect(t.acciones).toEqual(["reintentar", "ejemplo"]);
   });
 
-  it("otro código: probar de nuevo", () => {
-    expect(textosError(500).acciones).toEqual(["reintentar", "ejemplo"]);
-    expect(textosError(0).acciones[0]).toBe("reintentar");
+  it("otro código o sin respuesta: solo probar de nuevo, sin el lote de ejemplo", () => {
+    expect(textosError(500).acciones).toEqual(["reintentar"]);
+    expect(textosError(0).acciones).toEqual(["reintentar"]);
+    expect(textosError(500).comoSeguir).not.toMatch(/ejemplo/i);
   });
 
   it("los textos no recomiendan", () => {

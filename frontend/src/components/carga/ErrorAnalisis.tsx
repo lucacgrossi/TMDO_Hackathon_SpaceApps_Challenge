@@ -15,7 +15,7 @@ interface Props {
   onMarcarOtro: () => void;
   /** "Probar de nuevo" (503 y otros): repite `/analizar` con las mismas entradas. */
   onReintentar: () => void;
-  /** "Probar con el lote de ejemplo": Río Cuarto, con respaldo precalculado. */
+  /** "Probar con el lote de ejemplo" (422 y 503): Río Cuarto, con el respaldo precalculado del back. */
   onEjemplo: () => void;
   /** El back rechazó el pedido por el esquema (422 con `{detail}`): error de la app, no del lote. */
   deLaApp?: boolean;

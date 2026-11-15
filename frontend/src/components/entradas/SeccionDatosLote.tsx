@@ -12,6 +12,7 @@
  */
 import { useEntradas } from "@/lib/store";
 import type { Anegable, Textura } from "@/lib/entradas";
+import estilos from "./Campos.module.css";
 
 const ANEGABLE: { v: Anegable; n: string }[] = [
   { v: "no", n: "No" },
@@ -33,12 +34,11 @@ export default function SeccionDatosLote() {
   const cambiar = useEntradas((s) => s.cambiar);
 
   return (
-    <details data-a="dl">
-      <summary>Datos del lote</summary>
-      <div className="sel3">
-        <label>
+    <div className={estilos.grilla}>
+        <label className={estilos.campo}>
           ¿Se encharca?
           <select
+            className={estilos.control}
             id="anegable"
             value={anegable}
             onChange={(e) => cambiar({ anegable: e.target.value as Anegable })}
@@ -50,9 +50,10 @@ export default function SeccionDatosLote() {
             ))}
           </select>
         </label>
-        <label>
+        <label className={estilos.campo}>
           Textura
           <select
+            className={estilos.control}
             id="textura"
             value={textura}
             onChange={(e) => cambiar({ textura: e.target.value as Textura })}
@@ -64,7 +65,6 @@ export default function SeccionDatosLote() {
             ))}
           </select>
         </label>
-      </div>
-    </details>
+    </div>
   );
 }
