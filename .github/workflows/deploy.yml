@@ -1,0 +1,89 @@
+name: Deploy
+
+# Deploya en GCP (Cloud Run) cada push a main: el back (field-shift-api) si cambió backend/ y el front
+# (agropixel-web, detrás del balanceador de agropixel.earth) si cambió frontend/. Para forzar los dos,
+# correrlo a mano desde Actions → Deploy → Run workflow (sobre main).
+#
+# Se autentica con Workload Identity Federation: no hay claves guardadas en GitHub. El pool, el
+# proveedor y los roles de la cuenta de servicio se configuran una vez (backend/DEPLOY.md →
+# "Deploy automático"). El proveedor solo acepta tokens de este repo y de refs/heads/main.
+#
+# El deploy no toca variables de entorno, instancias mínimas ni permisos: Cloud Run conserva los de
+# la revisión anterior. Para cambiarlos, usar gcloud a mano (backend/DEPLOY.md).
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+env:
+  PROYECTO: nasa-space-app-fieldchange
+  REGION: southamerica-east1
+  PROVEEDOR_WIF: projects/757348191517/locations/global/workloadIdentityPools/github/providers/github
+  CUENTA_DEPLOY: github-deploy@nasa-space-app-fieldchange.iam.gserviceaccount.com
+
+jobs:
+  cambios:
+    name: ¿Qué cambió?
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    outputs:
+      back: ${{ github.event_name == 'workflow_dispatch' && 'true' || steps.back.outputs.corre }}
+      front: ${{ github.event_name == 'workflow_dispatch' && 'true' || steps.front.outputs.corre }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - id: back
+        env:
+          BASE_SHA: ${{ github.event.before }}
+        run: python3 .github/scripts/cambios.py '^backend/' '^\.github/workflows/deploy\.yml$'
+      - id: front
+        env:
+          BASE_SHA: ${{ github.event.before }}
+        run: python3 .github/scripts/cambios.py '^frontend/' '^\.github/workflows/deploy\.yml$'
+
+  back:
+    name: Deploy del back (field-shift-api)
+    needs: cambios
+    if: needs.cambios.outputs.back == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.PROVEEDOR_WIF }}
+          service_account: ${{ env.CUENTA_DEPLOY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Deploy
+        run: gcloud run deploy field-shift-api --source backend --project "$PROYECTO" --region "$REGION" --quiet
+      - name: Probar /salud
+        run: |
+          URL=$(gcloud run services describe field-shift-api --project "$PROYECTO" --region "$REGION" --format 'value(status.url)')
+          curl -sf --retry 5 --retry-delay 10 --retry-all-errors "$URL/salud"
+
+  front:
+    name: Deploy del front (agropixel-web)
+    needs: cambios
+    if: needs.cambios.outputs.front == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ env.PROVEEDOR_WIF }}
+          service_account: ${{ env.CUENTA_DEPLOY }}
+      - uses: google-github-actions/setup-gcloud@v2
+      - name: Deploy
+        run: gcloud run deploy agropixel-web --source frontend --project "$PROYECTO" --region "$REGION" --quiet
+      - name: Probar agropixel.earth
+        run: curl -sf -o /dev/null --retry 5 --retry-delay 10 --retry-all-errors https://agropixel.earth/

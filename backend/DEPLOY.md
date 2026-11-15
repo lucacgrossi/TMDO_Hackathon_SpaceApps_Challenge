@@ -9,19 +9,52 @@ Dueño: Back 2. Servicio `field-shift-api`, región `southamerica-east1` (São P
 | `.python-version` | `3.13`: el builder `google-24` de Cloud Run no tiene 3.12 (va de 3.13 a 3.15). La CI sigue en 3.12 |
 | `.gcloudignore` | Deja afuera tests, cachés, `.venv`, scripts, datos pesados y `.env`. **Sí** sube `app/demo/` y `app/api/mock_rio_cuarto.json` |
 
-Todos los comandos van en Git Bash, **desde `backend/`**. Se deploya desde `main` después de probar en `dev`; desde otra branch, solo una prueba sin tráfico (paso 4).
-
-> **Demo del 15/11: se deploya desde `dev`.** `main` no tiene el back de la demo (está 200 commits atrás) y no hay tiempo de mergearlo antes de presentar. Excepción decidida por Back 1 y Back 2; después de la demo, la persona 3 mergea `dev` → `main` y se vuelve a deployar desde `main`. Los pasos están en [Deploy de la demo](#deploy-de-la-demo-desde-dev).
+**Se deploya solo, desde `main`.** Cada push a `main` corre `.github/workflows/deploy.yml`: deploya `field-shift-api` si cambió `backend/` y `agropixel-web` (el front) si cambió `frontend/`, y prueba que respondan. Para forzar los dos: Actions → Deploy → Run workflow. La configuración, una sola vez, está en [Deploy automático](#deploy-automático-desde-main). Los comandos de abajo quedan para cambiar variables, instancias o permisos, o para una prueba sin tráfico desde otra branch (paso 4). Van en Git Bash, **desde `backend/`**.
 
 ```bash
 SERVICIO=field-shift-api
 REGION=southamerica-east1
 ```
 
-## Deploy de la demo (desde `dev`)
+## Deploy automático (desde `main`)
+El workflow se autentica en GCP con **Workload Identity Federation**: GitHub le da un token al job, GCP lo cambia por la cuenta de servicio `github-deploy` y no hay claves guardadas en ningún lado. El proveedor solo acepta tokens de `lucacgrossi/TMDO_Hackathon_SpaceApps_Challenge` en `refs/heads/main`.
+
+El deploy no cambia variables de entorno, instancias mínimas ni `--allow-unauthenticated`: Cloud Run conserva los de la revisión anterior.
+
+**Configuración (una vez, la corre un Owner del proyecto).** La cuenta `github-deploy` ya existe (15/11). Falta el pool, el proveedor y los roles:
+```bash
+PROYECTO=nasa-space-app-fieldchange
+NUM=757348191517
+SA=github-deploy@$PROYECTO.iam.gserviceaccount.com
+REPO=lucacgrossi/TMDO_Hackathon_SpaceApps_Challenge
+
+gcloud iam workload-identity-pools create github --project=$PROYECTO --location=global \
+  --display-name="GitHub Actions"
+gcloud iam workload-identity-pools providers create-oidc github --project=$PROYECTO --location=global \
+  --workload-identity-pool=github --display-name="GitHub (main)" \
+  --issuer-uri="https://token.actions.githubusercontent.com" \
+  --attribute-mapping="google.subject=assertion.sub,attribute.repository=assertion.repository,attribute.ref=assertion.ref" \
+  --attribute-condition="assertion.repository=='$REPO' && assertion.ref=='refs/heads/main'"
+
+# El repo de GitHub puede usar la cuenta de servicio
+gcloud iam service-accounts add-iam-policy-binding $SA --project=$PROYECTO \
+  --role=roles/iam.workloadIdentityUser \
+  --member="principalSet://iam.googleapis.com/projects/$NUM/locations/global/workloadIdentityPools/github/attribute.repository/$REPO"
+
+# Lo que necesita `gcloud run deploy --source`
+for ROL in roles/run.sourceDeveloper roles/serviceusage.serviceUsageConsumer roles/logging.viewer; do
+  gcloud projects add-iam-policy-binding $PROYECTO --member="serviceAccount:$SA" --role=$ROL --condition=None
+done
+# Deploya las revisiones con la cuenta de servicio de Compute (la que usan los dos servicios)
+gcloud iam service-accounts add-iam-policy-binding $NUM-compute@developer.gserviceaccount.com \
+  --project=$PROYECTO --role=roles/iam.serviceAccountUser --member="serviceAccount:$SA"
+```
+Probar: Actions → Deploy → Run workflow sobre `main`. Los dos jobs tienen que terminar en verde. Si falla en `auth`, revisar el pool y el proveedor; si falla en `Deploy` con un error de permisos, el rol que nombra el error.
+
+## Deploy manual (cambiar variables, instancias o permisos)
 La cuenta que deploya necesita, en el proyecto `nasa-space-app-fieldchange`, los roles **Editor** y **Administrador de Cloud Run** (este último por `--allow-unauthenticated`).
 ```bash
-git checkout dev && git pull origin dev
+git checkout main && git pull origin main
 cd backend
 gcloud config set project nasa-space-app-fieldchange
 gcloud run deploy $SERVICIO \
@@ -33,7 +66,7 @@ gcloud run deploy $SERVICIO \
   --min-instances 1 \
   --set-env-vars "^@^CORS_ORIGINS=https://agropixel.earth,https://www.agropixel.earth,http://localhost:3000,https://agropixel-web-757348191517.southamerica-east1.run.app,https://agropixel-web-wqtvuhfh7a-rj.a.run.app@CORS_ORIGIN_REGEX=https://.*\.vercel\.app"
 ```
-- El front de producción es https://agropixel.earth, servido desde el 15/11 por Cloud Run (`agropixel-web`, detrás de un balanceador; ver `frontend/CLAUDE.md` → Deploy). Las dos URL `run.app` de `agropixel-web` también están en `CORS_ORIGINS`: son el respaldo si falla el dominio. `--set-env-vars` reemplaza todas las variables: si se cambia el dominio o se recrea `agropixel-web`, actualizarlo acá. `CORS_ORIGIN_REGEX` queda para las URL de Vercel, que siguen siendo el plan B del front.
+- El front de producción es https://agropixel.earth, servido desde el 15/11 por Cloud Run (`agropixel-web`, detrás de un balanceador; ver `frontend/CLAUDE.md` → Deploy). Las dos URL `run.app` de `agropixel-web` también están en `CORS_ORIGINS`: son el respaldo si falla el dominio. `--set-env-vars` reemplaza todas las variables: si se cambia el dominio o se recrea `agropixel-web`, actualizarlo acá. `CORS_ORIGIN_REGEX` (URL de Vercel) quedó de cuando el front estaba en Vercel; ya no se usa y se puede sacar.
 - `--min-instances 1`: sin arranque en frío durante la demo. Después, volver a 0 (paso 6).
 - Probar con el paso 5. Además, para confirmar que subió la versión nueva:
   ```bash
@@ -115,7 +148,7 @@ Antes de presentar, pedir `/analizar` una vez para calentar. Después de la demo
 gcloud run revisions list --service $SERVICIO --region $REGION
 gcloud run services update-traffic $SERVICIO --region $REGION --to-revisions <REVISION_ANTERIOR>=100
 ```
-No hace build: pasa el tráfico a una revisión que ya andaba. Se corrige en `dev`, se deploya de nuevo desde `main` (para la demo, desde `dev`) y se vuelve con `--to-latest`.
+No hace build: pasa el tráfico a una revisión que ya andaba. Se corrige en `dev`, se lleva a `main` (eso deploya solo) y se vuelve con `--to-latest`.
 
 ## Reglas
 - Secretos solo como variables de entorno de Cloud Run, nunca en el repo.
